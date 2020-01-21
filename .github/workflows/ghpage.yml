@@ -1,0 +1,30 @@
+name: github pages
+
+on:
+  push:
+    branches:
+    - draft
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v1
+      # with:
+      #   submodules: true
+
+    - name: Hugo setup
+      uses: peaceiris/actions-hugo@v2.3.2
+      with:
+        hugo-version: 'latest'
+        extended: true
+
+    - name: Build
+      run: hugo -D
+
+    - name: Deploy
+      uses: peaceiris/actions-gh-pages@v2
+      env:
+        ACTIONS_DEPLOY_KEY: ${{ secrets.ap }}
+        PUBLISH_BRANCH: gh-pages
+        PUBLISH_DIR: ./public
