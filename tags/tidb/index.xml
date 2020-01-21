@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>TiDB on TiDB AirPlan - A biger solution</title>
+    <link>https://ap.tidb.cc/tags/tidb/</link>
+    <description>Recent content in TiDB on TiDB AirPlan - A biger solution</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright>TiDB - AirPlan</copyright>
+    <lastBuildDate>Wed, 08 Jan 2020 00:00:00 +0800</lastBuildDate>
+    
+	<atom:link href="https://ap.tidb.cc/tags/tidb/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>TiDB &amp; Haproxy / show processlist View real IP</title>
+      <link>https://ap.tidb.cc/post/20200108-tidb-haproxy-real-ip/</link>
+      <pubDate>Wed, 08 Jan 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20200108-tidb-haproxy-real-ip/</guid>
+      <description>0x00 - 背景 高可用性（英语：high availability，缩写为 HA）测试 failpoint 场景，需要在服务前面添加 load balance 组件；比如 F5、LVS、Haprox</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Categories on TiDB AirPlan - A biger solution</title>
+    <link>https://ap.tidb.cc/categories/</link>
+    <description>Recent content in Categories on TiDB AirPlan - A biger solution</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright>TiDB - AirPlan</copyright>
+    <lastBuildDate>Wed, 08 Jan 2020 00:00:00 +0800</lastBuildDate>
+    
+	<atom:link href="https://ap.tidb.cc/categories/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Software</title>
+      <link>https://ap.tidb.cc/categories/software/</link>
+      <pubDate>Wed, 08 Jan 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/categories/software/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>TiDB</title>
+      <link>https://ap.tidb.cc/categories/tidb/</link>
+      <pubDate>Wed, 08 Jan 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/categories/tidb/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>
