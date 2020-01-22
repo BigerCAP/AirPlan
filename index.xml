@@ -13,12 +13,12 @@
     
     
     <item>
-      <title>About | TiDB AirPlan</title>
+      <title>About</title>
       <link>https://ap.tidb.cc/about/</link>
       <pubDate>Sun, 20 Aug 2017 21:38:52 +0800</pubDate>
       
       <guid>https://ap.tidb.cc/about/</guid>
-      <description>TiDB AirPlan 望而知之谓之神，闻而知之谓之圣 问而知之谓之工，切脉而知之谓之巧 Link TiDB-AirPlan PD TiDB TiKV</description>
+      <description>About | TiDB AirPlan 望而知之谓之神，闻而知之谓之圣 问而知之谓之工，切脉而知之谓之巧 Link TiDB-AirPlan PD TiDB TiKV</description>
     </item>
     
     <item>
@@ -28,6 +28,15 @@
       
       <guid>https://ap.tidb.cc/post/20200108-tidb-haproxy-real-ip/</guid>
       <description>0x00 - 背景 高可用性（英语：high availability，缩写为 HA）测试 failpoint 场景，需要在服务前面添加 load balance 组件；比如 F5、LVS、Haprox</description>
+    </item>
+    
+    <item>
+      <title>测试在线修改 TiDB Cluster 组件 IP 地址</title>
+      <link>https://ap.tidb.cc/post/20180327-change-tidb-ip/</link>
+      <pubDate>Tue, 27 Mar 2018 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20180327-change-tidb-ip/</guid>
+      <description>0x00 背景 物理网络在实际生产环境会存在 vlan、IP 集群部署可能横跨多台机器甚至横跨机房，在有离线或在线业务情况下应该怎么操作变更 IP 地址信息，配</description>
     </item>
     
   </channel>

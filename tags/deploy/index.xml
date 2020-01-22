@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Deploy on TiDB AirPlan - A biger solution</title>
+    <link>https://ap.tidb.cc/tags/deploy/</link>
+    <description>Recent content in Deploy on TiDB AirPlan - A biger solution</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright>TiDB - AirPlan</copyright>
+    <lastBuildDate>Tue, 27 Mar 2018 00:00:00 +0800</lastBuildDate>
+    
+	<atom:link href="https://ap.tidb.cc/tags/deploy/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>测试在线修改 TiDB Cluster 组件 IP 地址</title>
+      <link>https://ap.tidb.cc/post/20180327-change-tidb-ip/</link>
+      <pubDate>Tue, 27 Mar 2018 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20180327-change-tidb-ip/</guid>
+      <description>0x00 背景 物理网络在实际生产环境会存在 vlan、IP 集群部署可能横跨多台机器甚至横跨机房，在有离线或在线业务情况下应该怎么操作变更 IP 地址信息，配</description>
+    </item>
+    
+  </channel>
+</rss>

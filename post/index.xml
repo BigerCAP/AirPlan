@@ -21,5 +21,14 @@
       <description>0x00 - 背景 高可用性（英语：high availability，缩写为 HA）测试 failpoint 场景，需要在服务前面添加 load balance 组件；比如 F5、LVS、Haprox</description>
     </item>
     
+    <item>
+      <title>测试在线修改 TiDB Cluster 组件 IP 地址</title>
+      <link>https://ap.tidb.cc/post/20180327-change-tidb-ip/</link>
+      <pubDate>Tue, 27 Mar 2018 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20180327-change-tidb-ip/</guid>
+      <description>0x00 背景 物理网络在实际生产环境会存在 vlan、IP 集群部署可能横跨多台机器甚至横跨机房，在有离线或在线业务情况下应该怎么操作变更 IP 地址信息，配</description>
+    </item>
+    
   </channel>
 </rss>
