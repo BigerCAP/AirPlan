@@ -21,5 +21,14 @@
       <description>0x00 - 背景 高可用性（英语：high availability，缩写为 HA）测试 failpoint 场景，需要在服务前面添加 load balance 组件；比如 F5、LVS、Haprox</description>
     </item>
     
+    <item>
+      <title>负载均衡 - HAProxy &amp; TiDB 配合食用</title>
+      <link>https://ap.tidb.cc/post/20170610-haproxy/</link>
+      <pubDate>Sat, 10 Jun 2017 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20170610-haproxy/</guid>
+      <description>0x01 介绍 官网 百家饭内容，将测试环境的最终结果整理了下 0x02 功能 负载均衡：L4(TCP) 和 L7(HTTP/HTTPS) 两种模式，支持 RR(roundrobin) / 静态 RR / LC / IP Hash/ URI Hash/ URL_PARAM Hash/ HTTP_HEADER Hash 等丰富的负</description>
+    </item>
+    
   </channel>
 </rss>

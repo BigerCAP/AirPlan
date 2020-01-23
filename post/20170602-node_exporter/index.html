@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>监控架构 - Node_exporter 系统监控组件 - TiDB AirPlan - A biger solution</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Jeff" /><meta name="description" content="0x00 起源 学习 node export 存的 0x01 Collector 通过 http://IP:9100/metrics 查看当前主机监控信息 Node export 通过Collector代码块收集系统性能指标 以下内容引用 Prometeus/Node_export README 每个操作系统上的 Collectors 都有不同的" /><meta name="keywords" content="TiDB, AirPlan, TiDB OPS, tidb-operator, 2pc, raft, databases, mysql, htap" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.62.2 with theme even" />
+
+
+<link rel="canonical" href="https://ap.tidb.cc/post/20170602-node_exporter/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<link href="/dist/even.04bd84cd.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="监控架构 - Node_exporter 系统监控组件" />
+<meta property="og:description" content="0x00 起源 学习 node export 存的 0x01 Collector 通过 http://IP:9100/metrics 查看当前主机监控信息 Node export 通过Collector代码块收集系统性能指标 以下内容引用 Prometeus/Node_export README 每个操作系统上的 Collectors 都有不同的" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://ap.tidb.cc/post/20170602-node_exporter/" />
+<meta property="article:published_time" content="2017-06-02T00:00:00+08:00" />
+<meta property="article:modified_time" content="2020-01-20T00:00:00+08:00" />
+<meta itemprop="name" content="监控架构 - Node_exporter 系统监控组件">
+<meta itemprop="description" content="0x00 起源 学习 node export 存的 0x01 Collector 通过 http://IP:9100/metrics 查看当前主机监控信息 Node export 通过Collector代码块收集系统性能指标 以下内容引用 Prometeus/Node_export README 每个操作系统上的 Collectors 都有不同的">
+<meta itemprop="datePublished" content="2017-06-02T00:00:00&#43;08:00" />
+<meta itemprop="dateModified" content="2020-01-20T00:00:00&#43;08:00" />
+<meta itemprop="wordCount" content="2774">
+
+
+
+<meta itemprop="keywords" content="Node_exporter,Prometheus," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="监控架构 - Node_exporter 系统监控组件"/>
+<meta name="twitter:description" content="0x00 起源 学习 node export 存的 0x01 Collector 通过 http://IP:9100/metrics 查看当前主机监控信息 Node export 通过Collector代码块收集系统性能指标 以下内容引用 Prometeus/Node_export README 每个操作系统上的 Collectors 都有不同的"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">TiDB AirPlan</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">About</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">TiDB AirPlan</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/about/">About</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">监控架构 - Node_exporter 系统监控组件</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2017-06-02 </span>
+        <div class="post-category">
+            <a href="/categories/monitoring/"> Monitoring </a>
+            </div>
+          <span class="more-meta"> 2774 words </span>
+          <span class="more-meta"> 6 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#0x00-起源">0x00 起源</a></li>
+    <li><a href="#0x01-collector">0x01 Collector</a>
+      <ul>
+        <li><a href="#默认开启的监控类型">默认开启的监控类型</a></li>
+        <li><a href="#默认关闭的监控类型">默认关闭的监控类型</a></li>
+        <li><a href="#命令行参数">命令行参数</a></li>
+        <li><a href="#关闭指定-collector-模块">关闭指定 collector 模块</a></li>
+      </ul>
+    </li>
+    <li><a href="#0x02-采集分析主机指标">0x02 采集分析主机指标</a>
+      <ul>
+        <li><a href="#文本格式">文本格式</a></li>
+        <li><a href="#注释">注释</a></li>
+        <li><a href="#采样数据">采样数据</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h2 id="0x00-起源">0x00 起源</h2>
+<blockquote>
+<p>学习 node export 存的</p>
+</blockquote>
+<h2 id="0x01-collector">0x01 Collector</h2>
+<ul>
+<li>通过 <code>http://IP:9100/metrics</code> 查看当前主机监控信息</li>
+<li>Node export 通过<a href="https://github.com/prometheus/node_exporter/tree/master/collector">Collector</a>代码块收集系统性能指标</li>
+</ul>
+<blockquote>
+<p>以下内容引用 Prometeus/Node_export <a href="https://github.com/prometheus/node_exporter/blob/master/README.md">README</a>
+每个操作系统上的 Collectors 都有不同的支持。下表列出了所有现有 Collectors 和支持的系统。</p>
+</blockquote>
+<p>通过 <code>--collector.&lt;name&gt;</code> 参数启用相应的 Collectors<br>
+通过 <code>--no-collector.&lt;name&gt;</code> 参数禁用默认已经启动的 Collectors</p>
+<h3 id="默认开启的监控类型">默认开启的监控类型</h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>OS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>arp</td>
+<td>Exposes ARP statistics from <code>/proc/net/arp</code>.</td>
+<td>Linux</td>
+</tr>
+<tr>
+<td>bcache</td>
+<td>Exposes bcache statistics from <code>/sys/fs/bcache/</code>.</td>
+<td>Linux</td>
+</tr>
+<tr>
+<td>bonding</td>
+<td>Exposes the number of configured and active slaves of Linux bonding interfaces.</td>
+<td>Linux</td>
+</tr>
+<tr>
+<td>conntrack</td>
+<td>Shows conntrack statistics (does nothing if no <code>/proc/sys/net/netfilter/</code> present).</td>
+<td>Linux</td>
+</tr>
+<tr>
+<td>cpu</td>
+<td>Exposes CPU statistics</td>
+<td>Darwin, Dragonfly, FreeBSD, Linux</td>
+</tr>
+<tr>
+<td>diskstats</td>
+<td>Exposes disk I/O statistics.</td>
+<td>Darwin, Linux</td>
+</tr>
+<tr>
+<td>edac</td>
+<td>Exposes error detection and correction statistics.</td>
+<td>Linux</td>
+</tr>
+<tr>
+<td>entropy</td>
+<td>Exposes available entropy.</td>
+<td>Linux</td>
+</tr>
+<tr>
+<td>exec</td>
+<td>Exposes execution statistics.</td>
+<td>Dragonfly, FreeBSD</td>
+</tr>
+<tr>
+<td>filefd</td>
+<td>Exposes file descriptor statistics from <code>/proc/sys/fs/file-nr</code>.</td>
+<td>Linux</td>
+</tr>
+<tr>
+<td>filesystem</td>
+<td>Exposes filesystem statistics, such as disk space used.</td>
+<td>Darwin, Dragonfly, FreeBSD, Linux, OpenBSD</td>
+</tr>
+<tr>
+<td>hwmon</td>
+<td>Expose hardware monitoring and sensor data from <code>/sys/class/hwmon/</code>.</td>
+<td>Linux</td>
+</tr>
+<tr>
+<td>infiniband</td>
+<td>Exposes network statistics specific to InfiniBand and Intel OmniPath configurations.</td>
+<td>Linux</td>
+</tr>
+<tr>
+<td>ipvs</td>
+<td>Exposes IPVS status from <code>/proc/net/ip_vs</code> and stats from <code>/proc/net/ip_vs_stats</code>.</td>
+<td>Linux</td>
+</tr>
+<tr>
+<td>loadavg</td>
+<td>Exposes load average.</td>
+<td>Darwin, Dragonfly, FreeBSD, Linux, NetBSD, OpenBSD, Solaris</td>
+</tr>
+<tr>
+<td>mdadm</td>
+<td>Exposes statistics about devices in <code>/proc/mdstat</code> (does nothing if no <code>/proc/mdstat</code> present).</td>
+<td>Linux</td>
+</tr>
+<tr>
+<td>meminfo</td>
+<td>Exposes memory statistics.</td>
+<td>Darwin, Dragonfly, FreeBSD, Linux, OpenBSD</td>
+</tr>
+<tr>
+<td>netdev</td>
+<td>Exposes network interface statistics such as bytes transferred.</td>
+<td>Darwin, Dragonfly, FreeBSD, Linux, OpenBSD</td>
+</tr>
+<tr>
+<td>netstat</td>
+<td>Exposes network statistics from <code>/proc/net/netstat</code>. This is the same information as <code>netstat -s</code>.</td>
+<td>Linux</td>
+</tr>
+<tr>
+<td>nfs</td>
+<td>Exposes NFS client statistics from <code>/proc/net/rpc/nfs</code>. This is the same information as <code>nfsstat -c</code>.</td>
+<td>Linux</td>
+</tr>
+<tr>
+<td>nfsd</td>
+<td>Exposes NFS kernel server statistics from <code>/proc/net/rpc/nfsd</code>. This is the same information as <code>nfsstat -s</code>.</td>
+<td>Linux</td>
+</tr>
+<tr>
+<td>sockstat</td>
+<td>Exposes various statistics from <code>/proc/net/sockstat</code>.</td>
+<td>Linux</td>
+</tr>
+<tr>
+<td>stat</td>
+<td>Exposes various statistics from <code>/proc/stat</code>. This includes boot time, forks and interrupts.</td>
+<td>Linux</td>
+</tr>
+<tr>
+<td>textfile</td>
+<td>Exposes statistics read from local disk. The <code>--collector.textfile.directory</code> flag must be set.</td>
+<td><em>any</em></td>
+</tr>
+<tr>
+<td>time</td>
+<td>Exposes the current system time.</td>
+<td><em>any</em></td>
+</tr>
+<tr>
+<td>timex</td>
+<td>Exposes selected adjtimex(2) system call stats.</td>
+<td>Linux</td>
+</tr>
+<tr>
+<td>uname</td>
+<td>Exposes system information as provided by the uname system call.</td>
+<td>Linux</td>
+</tr>
+<tr>
+<td>vmstat</td>
+<td>Exposes statistics from <code>/proc/vmstat</code>.</td>
+<td>Linux</td>
+</tr>
+<tr>
+<td>wifi</td>
+<td>Exposes WiFi device and station statistics.</td>
+<td>Linux</td>
+</tr>
+<tr>
+<td>xfs</td>
+<td>Exposes XFS runtime statistics.</td>
+<td>Linux (kernel 4.4+)</td>
+</tr>
+<tr>
+<td>zfs</td>
+<td>Exposes <a href="http://open-zfs.org/">ZFS</a> performance statistics.</td>
+<td><a href="http://zfsonlinux.org/">Linux</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="默认关闭的监控类型">默认关闭的监控类型</h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>OS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>buddyinfo</td>
+<td>Exposes statistics of memory fragments as reported by /proc/buddyinfo.</td>
+<td>Linux</td>
+</tr>
+<tr>
+<td>devstat</td>
+<td>Exposes device statistics</td>
+<td>Dragonfly, FreeBSD</td>
+</tr>
+<tr>
+<td>drbd</td>
+<td>Exposes Distributed Replicated Block Device statistics (to version 8.4)</td>
+<td>Linux</td>
+</tr>
+<tr>
+<td>interrupts</td>
+<td>Exposes detailed interrupts statistics.</td>
+<td>Linux, OpenBSD</td>
+</tr>
+<tr>
+<td>ksmd</td>
+<td>Exposes kernel and system statistics from <code>/sys/kernel/mm/ksm</code>.</td>
+<td>Linux</td>
+</tr>
+<tr>
+<td>logind</td>
+<td>Exposes session counts from <a href="http://www.freedesktop.org/wiki/Software/systemd/logind/">logind</a>.</td>
+<td>Linux</td>
+</tr>
+<tr>
+<td>meminfo_numa</td>
+<td>Exposes memory statistics from <code>/proc/meminfo_numa</code>.</td>
+<td>Linux</td>
+</tr>
+<tr>
+<td>mountstats</td>
+<td>Exposes filesystem statistics from <code>/proc/self/mountstats</code>. Exposes detailed NFS client statistics.</td>
+<td>Linux</td>
+</tr>
+<tr>
+<td>ntp</td>
+<td>Exposes local NTP daemon health to check <a href="./docs/TIME.md">time</a></td>
+<td><em>any</em></td>
+</tr>
+<tr>
+<td>qdisc</td>
+<td>Exposes <a href="https://en.wikipedia.org/wiki/Network_scheduler#Linux_kernel">queuing discipline</a> statistics</td>
+<td>Linux</td>
+</tr>
+<tr>
+<td>runit</td>
+<td>Exposes service status from <a href="http://smarden.org/runit/">runit</a>.</td>
+<td><em>any</em></td>
+</tr>
+<tr>
+<td>supervisord</td>
+<td>Exposes service status from <a href="http://supervisord.org/">supervisord</a>.</td>
+<td><em>any</em></td>
+</tr>
+<tr>
+<td>systemd</td>
+<td>Exposes service and system status from <a href="http://www.freedesktop.org/wiki/Software/systemd/">systemd</a>.</td>
+<td>Linux</td>
+</tr>
+<tr>
+<td>tcpstat</td>
+<td>Exposes TCP connection status information from <code>/proc/net/tcp</code> and <code>/proc/net/tcp6</code>. (Warning: the current version has potential performance issues in high load situations.)</td>
+<td>Linux</td>
+</tr>
+</tbody>
+</table>
+<h3 id="命令行参数">命令行参数</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span><span class="lnt">80
+</span><span class="lnt">81
+</span><span class="lnt">82
+</span><span class="lnt">83
+</span><span class="lnt">84
+</span><span class="lnt">85
+</span><span class="lnt">86
+</span><span class="lnt">87
+</span><span class="lnt">88
+</span><span class="lnt">89
+</span><span class="lnt">90
+</span><span class="lnt">91
+</span><span class="lnt">92
+</span><span class="lnt">93
+</span><span class="lnt">94
+</span><span class="lnt">95
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash">usage: node_exporter <span class="o">[</span>&lt;flags&gt;<span class="o">]</span>
+
+Flags:
+  -h, --help                    Show context-sensitive <span class="nb">help</span> <span class="o">(</span>also try --help-long and --help-man<span class="o">)</span>.
+      --collector.diskstats.ignored-devices<span class="o">=</span><span class="s2">&#34;</span><span class="s2">^(ram|loop|fd|(h|s|v|xv)d[a-z]|nvme\\d+n\\d+p)\\d+</span>$<span class="s2">&#34;</span>
+                                Regexp of devices to ignore <span class="k">for</span> diskstats.
+      --collector.filesystem.ignored-mount-points<span class="o">=</span><span class="s2">&#34;</span><span class="s2">^/(sys|proc|dev)(</span>$<span class="s2">|/)</span><span class="s2">&#34;</span>
+                                Regexp of mount points to ignore <span class="k">for</span> filesystem collector.
+      --collector.filesystem.ignored-fs-types<span class="o">=</span><span class="s2">&#34;</span><span class="s2">^(sys|proc|auto)fs</span>$<span class="s2">&#34;</span>
+                                Regexp of filesystem types to ignore <span class="k">for</span> filesystem collector.
+      --collector.megacli.command<span class="o">=</span><span class="s2">&#34;megacli&#34;</span>
+                                Command to run megacli.
+      --collector.netdev.ignored-devices<span class="o">=</span><span class="s2">&#34;</span><span class="s2">^</span>$<span class="s2">&#34;</span>
+                                Regexp of net devices to ignore <span class="k">for</span> netdev collector.
+      --collector.ntp.server<span class="o">=</span><span class="s2">&#34;127.0.0.1&#34;</span>
+                                NTP server to use <span class="k">for</span> ntp collector
+      --collector.ntp.protocol-version<span class="o">=</span><span class="m">4</span>
+                                NTP protocol version
+      --collector.ntp.server-is-local
+                                Certify that collector.ntp.server address is the same <span class="nb">local</span> host as this collector.
+      --collector.ntp.ip-ttl<span class="o">=</span><span class="m">1</span>  IP TTL to use <span class="k">while</span> sending NTP query
+      --collector.ntp.max-distance<span class="o">=</span>3.46608s
+                                Max accumulated distance to the root
+      --collector.ntp.local-offset-tolerance<span class="o">=</span>1ms
+                                Offset between <span class="nb">local</span> clock and <span class="nb">local</span> ntpd <span class="nb">time</span> to tolerate
+      --path.procfs<span class="o">=</span><span class="s2">&#34;/proc&#34;</span>     procfs mountpoint.
+      --path.sysfs<span class="o">=</span><span class="s2">&#34;/sys&#34;</span>       sysfs mountpoint.
+      --collector.qdisc.fixtures<span class="o">=</span><span class="s2">&#34;&#34;</span>
+                                <span class="nb">test</span> fixtures to use <span class="k">for</span> qdisc collector end-to-end testing
+      --collector.runit.servicedir<span class="o">=</span><span class="s2">&#34;/etc/service&#34;</span>
+                                Path to runit service directory.
+      --collector.supervisord.url<span class="o">=</span><span class="s2">&#34;http://localhost:9001/RPC2&#34;</span>
+                                XML RPC endpoint.
+      --collector.systemd.unit-whitelist<span class="o">=</span><span class="s2">&#34;.+&#34;</span>
+                                Regexp of systemd units to whitelist. Units must both match whitelist and not match blacklist to be included.
+      --collector.systemd.unit-blacklist<span class="o">=</span><span class="s2">&#34;.+\\.scope&#34;</span>
+                                Regexp of systemd units to blacklist. Units must both match whitelist and not match blacklist to be included.
+      --collector.systemd.private
+                                Establish a private, direct connection to systemd without dbus.
+      --collector.textfile.directory<span class="o">=</span><span class="s2">&#34;&#34;</span>
+                                Directory to <span class="nb">read</span> text files with metrics from.
+      --collector.wifi.fixtures<span class="o">=</span><span class="s2">&#34;&#34;</span>
+                                <span class="nb">test</span> fixtures to use <span class="k">for</span> wifi collector metrics
+      --collector.arp           Enable the arp collector <span class="o">(</span>default: enabled<span class="o">)</span>.
+      --collector.bcache        Enable the bcache collector <span class="o">(</span>default: enabled<span class="o">)</span>.
+      --collector.bonding       Enable the bonding collector <span class="o">(</span>default: disabled<span class="o">)</span>.
+      --collector.buddyinfo     Enable the buddyinfo collector <span class="o">(</span>default: disabled<span class="o">)</span>.
+      --collector.conntrack     Enable the conntrack collector <span class="o">(</span>default: enabled<span class="o">)</span>.
+      --collector.cpu           Enable the cpu collector <span class="o">(</span>default: enabled<span class="o">)</span>.
+      --collector.diskstats     Enable the diskstats collector <span class="o">(</span>default: enabled<span class="o">)</span>.
+      --collector.drbd          Enable the drbd collector <span class="o">(</span>default: disabled<span class="o">)</span>.
+      --collector.edac          Enable the edac collector <span class="o">(</span>default: enabled<span class="o">)</span>.
+      --collector.entropy       Enable the entropy collector <span class="o">(</span>default: enabled<span class="o">)</span>.
+      --collector.filefd        Enable the filefd collector <span class="o">(</span>default: enabled<span class="o">)</span>.
+      --collector.filesystem    Enable the filesystem collector <span class="o">(</span>default: enabled<span class="o">)</span>.
+      --collector.gmond         Enable the gmond collector <span class="o">(</span>default: disabled<span class="o">)</span>.
+      --collector.hwmon         Enable the hwmon collector <span class="o">(</span>default: enabled<span class="o">)</span>.
+      --collector.infiniband    Enable the infiniband collector <span class="o">(</span>default: enabled<span class="o">)</span>.
+      --collector.interrupts    Enable the interrupts collector <span class="o">(</span>default: disabled<span class="o">)</span>.
+      --collector.ipvs          Enable the ipvs collector <span class="o">(</span>default: enabled<span class="o">)</span>.
+      --collector.ksmd          Enable the ksmd collector <span class="o">(</span>default: disabled<span class="o">)</span>.
+      --collector.loadavg       Enable the loadavg collector <span class="o">(</span>default: enabled<span class="o">)</span>.
+      --collector.logind        Enable the logind collector <span class="o">(</span>default: disabled<span class="o">)</span>.
+      --collector.mdadm         Enable the mdadm collector <span class="o">(</span>default: enabled<span class="o">)</span>.
+      --collector.megacli       Enable the megacli collector <span class="o">(</span>default: disabled<span class="o">)</span>.
+      --collector.meminfo       Enable the meminfo collector <span class="o">(</span>default: enabled<span class="o">)</span>.
+      --collector.meminfo_numa  Enable the meminfo_numa collector <span class="o">(</span>default: disabled<span class="o">)</span>.
+      --collector.mountstats    Enable the mountstats collector <span class="o">(</span>default: disabled<span class="o">)</span>.
+      --collector.netdev        Enable the netdev collector <span class="o">(</span>default: enabled<span class="o">)</span>.
+      --collector.netstat       Enable the netstat collector <span class="o">(</span>default: enabled<span class="o">)</span>.
+      --collector.nfs           Enable the nfs collector <span class="o">(</span>default: disabled<span class="o">)</span>.
+      --collector.ntp           Enable the ntp collector <span class="o">(</span>default: disabled<span class="o">)</span>.
+      --collector.qdisc         Enable the qdisc collector <span class="o">(</span>default: disabled<span class="o">)</span>.
+      --collector.runit         Enable the runit collector <span class="o">(</span>default: disabled<span class="o">)</span>.
+      --collector.sockstat      Enable the sockstat collector <span class="o">(</span>default: enabled<span class="o">)</span>.
+      --collector.stat          Enable the stat collector <span class="o">(</span>default: enabled<span class="o">)</span>.
+      --collector.supervisord   Enable the supervisord collector <span class="o">(</span>default: disabled<span class="o">)</span>.
+      --collector.systemd       Enable the systemd collector <span class="o">(</span>default: disabled<span class="o">)</span>.
+      --collector.tcpstat       Enable the tcpstat collector <span class="o">(</span>default: disabled<span class="o">)</span>.
+      --collector.textfile      Enable the textfile collector <span class="o">(</span>default: enabled<span class="o">)</span>.
+      --collector.time          Enable the <span class="nb">time</span> collector <span class="o">(</span>default: enabled<span class="o">)</span>.
+      --collector.uname         Enable the uname collector <span class="o">(</span>default: enabled<span class="o">)</span>.
+      --collector.vmstat        Enable the vmstat collector <span class="o">(</span>default: enabled<span class="o">)</span>.
+      --collector.wifi          Enable the wifi collector <span class="o">(</span>default: enabled<span class="o">)</span>.
+      --collector.xfs           Enable the xfs collector <span class="o">(</span>default: enabled<span class="o">)</span>.
+      --collector.zfs           Enable the zfs collector <span class="o">(</span>default: enabled<span class="o">)</span>.
+      --collector.timex         Enable the timex collector <span class="o">(</span>default: enabled<span class="o">)</span>.
+      --web.listen-address<span class="o">=</span><span class="s2">&#34;:9100&#34;</span>
+                                Address on which to expose metrics and web interface.
+      --web.telemetry-path<span class="o">=</span><span class="s2">&#34;/metrics&#34;</span>
+                                Path under which to expose metrics.
+      --log.level<span class="o">=</span><span class="s2">&#34;info&#34;</span>        Only log messages with the given severity or above. Valid levels: <span class="o">[</span>debug, info, warn, error, fatal<span class="o">]</span>
+      --log.format<span class="o">=</span><span class="s2">&#34;logger:stderr&#34;</span>
+                                Set the log target and format. Example: <span class="s2">&#34;logger:syslog?appname=bob&amp;local=7&#34;</span> or <span class="s2">&#34;logger:stdout?json=true&#34;</span>
+      --version                 Show application version.
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="关闭指定-collector-模块">关闭指定 collector 模块</h3>
+<ul>
+<li>使用 <a href="https://github.com/prometheus/node_exporter/blob/master/node_exporter.go#L46">prometheus.NewRegistry</a> 判断并注册相关模块
+<ul>
+<li>引用 <a href="https://github.com/prometheus/node_exporter/blob/cf3edadcbbd7064a7671e2c1467de90298faef66/end-to-end-test.sh#L92">&ndash;no-collector</a> 参数</li>
+</ul>
+</li>
+</ul>
+<h4 id="关闭指定模块启动">关闭指定模块启动</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash"><span class="o">[</span>root@jeff bin<span class="o">]</span>$ ./node_exporter --no-collector.arp --no-collector.bcache --no-collector.conntrack --no-collector.cpu --no-collector.diskstats --no-collector.edac --no-collector.entropy --no-collector.filefd --no-collector.filesystem  --no-collector.hwmon  --no-collector.infiniband  --no-collector.ipvs  --no-collector.loadavg --no-collector.mdadm  --no-collector.meminfo --no-collector.netdev --no-collector.netstat  --no-collector.sockstat  --no-collector.stat  --no-collector.textfile  --no-collector.time  --no-collector.timex  --no-collector.uname  --no-collector.vmstat  --no-collector.wifi  --no-collector.xfs  --no-collector.zfs
+INFO<span class="o">[</span>0000<span class="o">]</span> Starting node_exporter <span class="o">(</span><span class="nv">version</span><span class="o">=</span>0.15.2, <span class="nv">branch</span><span class="o">=</span>HEAD, <span class="nv">revision</span><span class="o">=</span>98bc64930d34878b84a0f87dfe6e1a6da61e532d<span class="o">)</span>  <span class="nv">source</span><span class="o">=</span><span class="s2">&#34;node_exporter.go:43&#34;</span>
+INFO<span class="o">[</span>0000<span class="o">]</span> Build context <span class="o">(</span><span class="nv">go</span><span class="o">=</span>go1.9.2, <span class="nv">user</span><span class="o">=</span>root@d5c4792c921f, <span class="nv">date</span><span class="o">=</span>20171205-14:50:53<span class="o">)</span>  <span class="nv">source</span><span class="o">=</span><span class="s2">&#34;node_exporter.go:44&#34;</span>
+INFO<span class="o">[</span>0000<span class="o">]</span> Enabled collectors:                           <span class="nv">source</span><span class="o">=</span><span class="s2">&#34;node_exporter.go:50&#34;</span>
+INFO<span class="o">[</span>0000<span class="o">]</span> Listening on :9100                            <span class="nv">source</span><span class="o">=</span><span class="s2">&#34;node_exporter.go:76&#34;</span>
+</code></pre></td></tr></table>
+</div>
+</div><h4 id="默认启动组件">默认启动组件</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash"><span class="o">[</span>root@jeff bin<span class="o">]</span>$ ./node_exporter
+INFO<span class="o">[</span>0000<span class="o">]</span> Starting node_exporter <span class="o">(</span><span class="nv">version</span><span class="o">=</span>0.15.2, <span class="nv">branch</span><span class="o">=</span>HEAD, <span class="nv">revision</span><span class="o">=</span>98bc64930d34878b84a0f87dfe6e1a6da61e532d<span class="o">)</span>  <span class="nv">source</span><span class="o">=</span><span class="s2">&#34;node_exporter.go:43&#34;</span>
+INFO<span class="o">[</span>0000<span class="o">]</span> Build context <span class="o">(</span><span class="nv">go</span><span class="o">=</span>go1.9.2, <span class="nv">user</span><span class="o">=</span>root@d5c4792c921f, <span class="nv">date</span><span class="o">=</span>20171205-14:50:53<span class="o">)</span>  <span class="nv">source</span><span class="o">=</span><span class="s2">&#34;node_exporter.go:44&#34;</span>
+INFO<span class="o">[</span>0000<span class="o">]</span> No directory specified, see --collector.textfile.directory  <span class="nv">source</span><span class="o">=</span><span class="s2">&#34;textfile.go:57&#34;</span>
+INFO<span class="o">[</span>0000<span class="o">]</span> Enabled collectors:                           <span class="nv">source</span><span class="o">=</span><span class="s2">&#34;node_exporter.go:50&#34;</span>
+INFO<span class="o">[</span>0000<span class="o">]</span>  - hwmon                                      <span class="nv">source</span><span class="o">=</span><span class="s2">&#34;node_exporter.go:52&#34;</span>
+INFO<span class="o">[</span>0000<span class="o">]</span>  - diskstats                                  <span class="nv">source</span><span class="o">=</span><span class="s2">&#34;node_exporter.go:52&#34;</span>
+INFO<span class="o">[</span>0000<span class="o">]</span>  - infiniband                                 <span class="nv">source</span><span class="o">=</span><span class="s2">&#34;node_exporter.go:52&#34;</span>
+INFO<span class="o">[</span>0000<span class="o">]</span>  - <span class="nb">time</span>                                       <span class="nv">source</span><span class="o">=</span><span class="s2">&#34;node_exporter.go:52&#34;</span>
+INFO<span class="o">[</span>0000<span class="o">]</span>  - mdadm                                      <span class="nv">source</span><span class="o">=</span><span class="s2">&#34;node_exporter.go:52&#34;</span>
+INFO<span class="o">[</span>0000<span class="o">]</span>  - netdev                                     <span class="nv">source</span><span class="o">=</span><span class="s2">&#34;node_exporter.go:52&#34;</span>
+INFO<span class="o">[</span>0000<span class="o">]</span>  - stat                                       <span class="nv">source</span><span class="o">=</span><span class="s2">&#34;node_exporter.go:52&#34;</span>
+INFO<span class="o">[</span>0000<span class="o">]</span>  - arp                                        <span class="nv">source</span><span class="o">=</span><span class="s2">&#34;node_exporter.go:52&#34;</span>
+INFO<span class="o">[</span>0000<span class="o">]</span>  - vmstat                                     <span class="nv">source</span><span class="o">=</span><span class="s2">&#34;node_exporter.go:52&#34;</span>
+INFO<span class="o">[</span>0000<span class="o">]</span>  - meminfo                                    <span class="nv">source</span><span class="o">=</span><span class="s2">&#34;node_exporter.go:52&#34;</span>
+INFO<span class="o">[</span>0000<span class="o">]</span>  - xfs                                        <span class="nv">source</span><span class="o">=</span><span class="s2">&#34;node_exporter.go:52&#34;</span>
+INFO<span class="o">[</span>0000<span class="o">]</span>  - conntrack                                  <span class="nv">source</span><span class="o">=</span><span class="s2">&#34;node_exporter.go:52&#34;</span>
+INFO<span class="o">[</span>0000<span class="o">]</span>  - bcache                                     <span class="nv">source</span><span class="o">=</span><span class="s2">&#34;node_exporter.go:52&#34;</span>
+INFO<span class="o">[</span>0000<span class="o">]</span>  - loadavg                                    <span class="nv">source</span><span class="o">=</span><span class="s2">&#34;node_exporter.go:52&#34;</span>
+INFO<span class="o">[</span>0000<span class="o">]</span>  - textfile                                   <span class="nv">source</span><span class="o">=</span><span class="s2">&#34;node_exporter.go:52&#34;</span>
+INFO<span class="o">[</span>0000<span class="o">]</span>  - sockstat                                   <span class="nv">source</span><span class="o">=</span><span class="s2">&#34;node_exporter.go:52&#34;</span>
+INFO<span class="o">[</span>0000<span class="o">]</span>  - wifi                                       <span class="nv">source</span><span class="o">=</span><span class="s2">&#34;node_exporter.go:52&#34;</span>
+INFO<span class="o">[</span>0000<span class="o">]</span>  - uname                                      <span class="nv">source</span><span class="o">=</span><span class="s2">&#34;node_exporter.go:52&#34;</span>
+INFO<span class="o">[</span>0000<span class="o">]</span>  - zfs                                        <span class="nv">source</span><span class="o">=</span><span class="s2">&#34;node_exporter.go:52&#34;</span>
+INFO<span class="o">[</span>0000<span class="o">]</span>  - ipvs                                       <span class="nv">source</span><span class="o">=</span><span class="s2">&#34;node_exporter.go:52&#34;</span>
+INFO<span class="o">[</span>0000<span class="o">]</span>  - entropy                                    <span class="nv">source</span><span class="o">=</span><span class="s2">&#34;node_exporter.go:52&#34;</span>
+INFO<span class="o">[</span>0000<span class="o">]</span>  - netstat                                    <span class="nv">source</span><span class="o">=</span><span class="s2">&#34;node_exporter.go:52&#34;</span>
+INFO<span class="o">[</span>0000<span class="o">]</span>  - filesystem                                 <span class="nv">source</span><span class="o">=</span><span class="s2">&#34;node_exporter.go:52&#34;</span>
+INFO<span class="o">[</span>0000<span class="o">]</span>  - filefd                                     <span class="nv">source</span><span class="o">=</span><span class="s2">&#34;node_exporter.go:52&#34;</span>
+INFO<span class="o">[</span>0000<span class="o">]</span>  - edac                                       <span class="nv">source</span><span class="o">=</span><span class="s2">&#34;node_exporter.go:52&#34;</span>
+INFO<span class="o">[</span>0000<span class="o">]</span>  - timex                                      <span class="nv">source</span><span class="o">=</span><span class="s2">&#34;node_exporter.go:52&#34;</span>
+INFO<span class="o">[</span>0000<span class="o">]</span>  - cpu                                        <span class="nv">source</span><span class="o">=</span><span class="s2">&#34;node_exporter.go:52&#34;</span>
+INFO<span class="o">[</span>0000<span class="o">]</span> Listening on :9100                            <span class="nv">source</span><span class="o">=</span><span class="s2">&#34;node_exporter.go:76&#34;</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="0x02-采集分析主机指标">0x02 采集分析主机指标</h2>
+<ul>
+<li>以下部分内容引用 <a href="https://my.oschina.net/neverforget/blog/1613272">GPE 监控预警系统-node_exporter</a></li>
+</ul>
+<h3 id="文本格式">文本格式</h3>
+<p>在讨论 Exporter 之前，有必要先介绍一下 Prometheus 文本数据格式，因为一个 Exporter 本质上就是将收集的数据，转化为对应的文本格式，并提供 http 请求。</p>
+<p>Exporter 收集的数据转化的文本内容以行 (\n) 为单位，空行将被忽略, 文本内容最后一行为空行。</p>
+<h3 id="注释">注释</h3>
+<p>文本内容，如果以 # 开头通常表示注释</p>
+<p>以 # HELP 开头表示 metric 帮助说明<br>
+以 # TYPE 开头表示定义 metric 类型，包含 counter, gauge, histogram, summary, 和 untyped 类型<br>
+其他表示一般注释，供阅读使用，将被 Prometheus 忽略</p>
+<h3 id="采样数据">采样数据</h3>
+<p>内容如果不以 # 开头，表示采样数据。它通常紧挨着类型定义行，满足以下格式(<a href="https://github.com/prometheus/prometheus/blob/master/promql/parse.go">primaryExpr parses a primary expression.</a>)：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-go" data-lang="go"><span class="nx">metric_name</span> <span class="p">[</span>
+  <span class="s">&#34;{&#34;</span> <span class="nx">label_name</span> <span class="s">&#34;=&#34;</span> <span class="s">`</span><span class="s">&#34;</span><span class="s">`</span> <span class="nx">label_value</span> <span class="s">`</span><span class="s">&#34;</span><span class="s">`</span> <span class="p">{</span> <span class="s">&#34;,&#34;</span> <span class="nx">label_name</span> <span class="s">&#34;=&#34;</span> <span class="s">`</span><span class="s">&#34;</span><span class="s">`</span> <span class="nx">label_value</span> <span class="s">`</span><span class="s">&#34;</span><span class="s">`</span> <span class="p">}</span> <span class="p">[</span> <span class="s">&#34;,&#34;</span> <span class="p">]</span> <span class="s">&#34;}&#34;</span>
+<span class="p">]</span> <span class="nx">value</span> <span class="p">[</span> <span class="nx">timestamp</span> <span class="p">]</span>
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>使用 <code>curl http://127.0.0.1:9100/metrics</code> 获取信息如下(部分数据)：
+<ul>
+<li>需要特别注意的是，假设采样数据 metric 叫做 x, 如果 x 是 histogram 或 summary 类型必需满足以下条件：
+<ul>
+<li>采样数据的总和应表示为 x_sum</li>
+<li>采样数据的总量应表示为 x_count</li>
+<li>summary 类型的采样数据的 quantile 应表示为 x{quantile=&quot;y&rdquo;}</li>
+<li>histogram 类型的采样分区统计数据将表示为 x_bucket{le=&quot;y&rdquo;}</li>
+<li>histogram 类型的采样必须包含 x_bucket{le=&quot;+Inf&rdquo;}, 它的值等于 x_count 的值</li>
+<li>summary 和 historam 中 quantile 和 le 必需按从小到大顺序排列</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span><span class="lnt">113
+</span><span class="lnt">114
+</span><span class="lnt">115
+</span><span class="lnt">116
+</span><span class="lnt">117
+</span><span class="lnt">118
+</span><span class="lnt">119
+</span><span class="lnt">120
+</span><span class="lnt">121
+</span><span class="lnt">122
+</span><span class="lnt">123
+</span><span class="lnt">124
+</span><span class="lnt">125
+</span><span class="lnt">126
+</span><span class="lnt">127
+</span><span class="lnt">128
+</span><span class="lnt">129
+</span><span class="lnt">130
+</span><span class="lnt">131
+</span><span class="lnt">132
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># HELP go_gc_duration_seconds A summary of the GC invocation durations.</span>
+<span class="c1"># TYPE go_gc_duration_seconds summary</span>
+go_gc_duration_seconds<span class="o">{</span><span class="nv">quantile</span><span class="o">=</span><span class="s2">&#34;0&#34;</span><span class="o">}</span> <span class="m">0</span>
+go_gc_duration_seconds<span class="o">{</span><span class="nv">quantile</span><span class="o">=</span><span class="s2">&#34;0.25&#34;</span><span class="o">}</span> <span class="m">0</span>
+go_gc_duration_seconds<span class="o">{</span><span class="nv">quantile</span><span class="o">=</span><span class="s2">&#34;0.5&#34;</span><span class="o">}</span> <span class="m">0</span>
+go_gc_duration_seconds<span class="o">{</span><span class="nv">quantile</span><span class="o">=</span><span class="s2">&#34;0.75&#34;</span><span class="o">}</span> <span class="m">0</span>
+go_gc_duration_seconds<span class="o">{</span><span class="nv">quantile</span><span class="o">=</span><span class="s2">&#34;1&#34;</span><span class="o">}</span> <span class="m">0</span>
+go_gc_duration_seconds_sum <span class="m">0</span>
+go_gc_duration_seconds_count <span class="m">0</span>
+<span class="c1"># HELP go_goroutines Number of goroutines that currently exist.</span>
+<span class="c1"># TYPE go_goroutines gauge</span>
+go_goroutines <span class="m">8</span>
+<span class="c1"># HELP go_info Information about the Go environment.</span>
+<span class="c1"># TYPE go_info gauge</span>
+go_info<span class="o">{</span><span class="nv">version</span><span class="o">=</span><span class="s2">&#34;go1.9.2&#34;</span><span class="o">}</span> <span class="m">1</span>
+<span class="c1"># HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.</span>
+<span class="c1"># TYPE go_memstats_alloc_bytes gauge</span>
+go_memstats_alloc_bytes 1.229584e+06
+<span class="c1"># HELP go_memstats_alloc_bytes_total Total number of bytes allocated, even if freed.</span>
+<span class="c1"># TYPE go_memstats_alloc_bytes_total counter</span>
+go_memstats_alloc_bytes_total 1.229584e+06
+<span class="c1"># HELP go_memstats_buck_hash_sys_bytes Number of bytes used by the profiling bucket hash table.</span>
+<span class="c1"># TYPE go_memstats_buck_hash_sys_bytes gauge</span>
+go_memstats_buck_hash_sys_bytes 1.443396e+06
+<span class="c1"># HELP go_memstats_frees_total Total number of frees.</span>
+<span class="c1"># TYPE go_memstats_frees_total counter</span>
+go_memstats_frees_total <span class="m">455</span>
+<span class="c1"># HELP go_memstats_gc_cpu_fraction The fraction of this program&#39;s available CPU time used by the GC since the program started.</span>
+<span class="c1"># TYPE go_memstats_gc_cpu_fraction gauge</span>
+go_memstats_gc_cpu_fraction <span class="m">0</span>
+<span class="c1"># HELP go_memstats_gc_sys_bytes Number of bytes used for garbage collection system metadata.</span>
+<span class="c1"># TYPE go_memstats_gc_sys_bytes gauge</span>
+go_memstats_gc_sys_bytes <span class="m">169984</span>
+<span class="c1"># HELP go_memstats_heap_alloc_bytes Number of heap bytes allocated and still in use.</span>
+<span class="c1"># TYPE go_memstats_heap_alloc_bytes gauge</span>
+go_memstats_heap_alloc_bytes 1.229584e+06
+<span class="c1"># HELP go_memstats_heap_idle_bytes Number of heap bytes waiting to be used.</span>
+<span class="c1"># TYPE go_memstats_heap_idle_bytes gauge</span>
+go_memstats_heap_idle_bytes <span class="m">622592</span>
+<span class="c1"># HELP go_memstats_heap_inuse_bytes Number of heap bytes that are in use.</span>
+<span class="c1"># TYPE go_memstats_heap_inuse_bytes gauge</span>
+go_memstats_heap_inuse_bytes 2.12992e+06
+<span class="c1"># HELP go_memstats_heap_objects Number of allocated objects.</span>
+<span class="c1"># TYPE go_memstats_heap_objects gauge</span>
+go_memstats_heap_objects <span class="m">8912</span>
+<span class="c1"># HELP go_memstats_heap_released_bytes Number of heap bytes released to OS.</span>
+<span class="c1"># TYPE go_memstats_heap_released_bytes gauge</span>
+go_memstats_heap_released_bytes <span class="m">0</span>
+<span class="c1"># HELP go_memstats_heap_sys_bytes Number of heap bytes obtained from system.</span>
+<span class="c1"># TYPE go_memstats_heap_sys_bytes gauge</span>
+go_memstats_heap_sys_bytes 2.752512e+06
+<span class="c1"># HELP go_memstats_last_gc_time_seconds Number of seconds since 1970 of last garbage collection.</span>
+<span class="c1"># TYPE go_memstats_last_gc_time_seconds gauge</span>
+go_memstats_last_gc_time_seconds <span class="m">0</span>
+<span class="c1"># HELP go_memstats_lookups_total Total number of pointer lookups.</span>
+<span class="c1"># TYPE go_memstats_lookups_total counter</span>
+go_memstats_lookups_total <span class="m">17</span>
+<span class="c1"># HELP go_memstats_mallocs_total Total number of mallocs.</span>
+<span class="c1"># TYPE go_memstats_mallocs_total counter</span>
+go_memstats_mallocs_total <span class="m">9367</span>
+<span class="c1"># HELP go_memstats_mcache_inuse_bytes Number of bytes in use by mcache structures.</span>
+<span class="c1"># TYPE go_memstats_mcache_inuse_bytes gauge</span>
+go_memstats_mcache_inuse_bytes <span class="m">6944</span>
+<span class="c1"># HELP go_memstats_mcache_sys_bytes Number of bytes used for mcache structures obtained from system.</span>
+<span class="c1"># TYPE go_memstats_mcache_sys_bytes gauge</span>
+go_memstats_mcache_sys_bytes <span class="m">16384</span>
+<span class="c1"># HELP go_memstats_mspan_inuse_bytes Number of bytes in use by mspan structures.</span>
+<span class="c1"># TYPE go_memstats_mspan_inuse_bytes gauge</span>
+go_memstats_mspan_inuse_bytes <span class="m">31616</span>
+<span class="c1"># HELP go_memstats_mspan_sys_bytes Number of bytes used for mspan structures obtained from system.</span>
+<span class="c1"># TYPE go_memstats_mspan_sys_bytes gauge</span>
+go_memstats_mspan_sys_bytes <span class="m">32768</span>
+<span class="c1"># HELP go_memstats_next_gc_bytes Number of heap bytes when next garbage collection will take place.</span>
+<span class="c1"># TYPE go_memstats_next_gc_bytes gauge</span>
+go_memstats_next_gc_bytes 4.473924e+06
+<span class="c1"># HELP go_memstats_other_sys_bytes Number of bytes used for other system allocations.</span>
+<span class="c1"># TYPE go_memstats_other_sys_bytes gauge</span>
+go_memstats_other_sys_bytes <span class="m">797364</span>
+<span class="c1"># HELP go_memstats_stack_inuse_bytes Number of bytes in use by the stack allocator.</span>
+<span class="c1"># TYPE go_memstats_stack_inuse_bytes gauge</span>
+go_memstats_stack_inuse_bytes <span class="m">393216</span>
+<span class="c1"># HELP go_memstats_stack_sys_bytes Number of bytes obtained from system for stack allocator.</span>
+<span class="c1"># TYPE go_memstats_stack_sys_bytes gauge</span>
+go_memstats_stack_sys_bytes <span class="m">393216</span>
+<span class="c1"># HELP go_memstats_sys_bytes Number of bytes obtained from system.</span>
+<span class="c1"># TYPE go_memstats_sys_bytes gauge</span>
+go_memstats_sys_bytes 5.605624e+06
+<span class="c1"># HELP go_threads Number of OS threads created.</span>
+<span class="c1"># TYPE go_threads gauge</span>
+go_threads <span class="m">7</span>
+<span class="c1"># HELP http_request_duration_microseconds The HTTP request latencies in microseconds.</span>
+<span class="c1"># TYPE http_request_duration_microseconds summary</span>
+http_request_duration_microseconds<span class="o">{</span><span class="nv">handler</span><span class="o">=</span><span class="s2">&#34;prometheus&#34;</span>,quantile<span class="o">=</span><span class="s2">&#34;0.5&#34;</span><span class="o">}</span> NaN
+http_request_duration_microseconds<span class="o">{</span><span class="nv">handler</span><span class="o">=</span><span class="s2">&#34;prometheus&#34;</span>,quantile<span class="o">=</span><span class="s2">&#34;0.9&#34;</span><span class="o">}</span> NaN
+http_request_duration_microseconds<span class="o">{</span><span class="nv">handler</span><span class="o">=</span><span class="s2">&#34;prometheus&#34;</span>,quantile<span class="o">=</span><span class="s2">&#34;0.99&#34;</span><span class="o">}</span> NaN
+http_request_duration_microseconds_sum<span class="o">{</span><span class="nv">handler</span><span class="o">=</span><span class="s2">&#34;prometheus&#34;</span><span class="o">}</span> <span class="m">0</span>
+http_request_duration_microseconds_count<span class="o">{</span><span class="nv">handler</span><span class="o">=</span><span class="s2">&#34;prometheus&#34;</span><span class="o">}</span> <span class="m">0</span>
+<span class="c1"># HELP http_request_size_bytes The HTTP request sizes in bytes.</span>
+<span class="c1"># TYPE http_request_size_bytes summary</span>
+http_request_size_bytes<span class="o">{</span><span class="nv">handler</span><span class="o">=</span><span class="s2">&#34;prometheus&#34;</span>,quantile<span class="o">=</span><span class="s2">&#34;0.5&#34;</span><span class="o">}</span> NaN
+http_request_size_bytes<span class="o">{</span><span class="nv">handler</span><span class="o">=</span><span class="s2">&#34;prometheus&#34;</span>,quantile<span class="o">=</span><span class="s2">&#34;0.9&#34;</span><span class="o">}</span> NaN
+http_request_size_bytes<span class="o">{</span><span class="nv">handler</span><span class="o">=</span><span class="s2">&#34;prometheus&#34;</span>,quantile<span class="o">=</span><span class="s2">&#34;0.99&#34;</span><span class="o">}</span> NaN
+http_request_size_bytes_sum<span class="o">{</span><span class="nv">handler</span><span class="o">=</span><span class="s2">&#34;prometheus&#34;</span><span class="o">}</span> <span class="m">0</span>
+http_request_size_bytes_count<span class="o">{</span><span class="nv">handler</span><span class="o">=</span><span class="s2">&#34;prometheus&#34;</span><span class="o">}</span> <span class="m">0</span>
+<span class="c1"># HELP http_response_size_bytes The HTTP response sizes in bytes.</span>
+<span class="c1"># TYPE http_response_size_bytes summary</span>
+http_response_size_bytes<span class="o">{</span><span class="nv">handler</span><span class="o">=</span><span class="s2">&#34;prometheus&#34;</span>,quantile<span class="o">=</span><span class="s2">&#34;0.5&#34;</span><span class="o">}</span> NaN
+http_response_size_bytes<span class="o">{</span><span class="nv">handler</span><span class="o">=</span><span class="s2">&#34;prometheus&#34;</span>,quantile<span class="o">=</span><span class="s2">&#34;0.9&#34;</span><span class="o">}</span> NaN
+http_response_size_bytes<span class="o">{</span><span class="nv">handler</span><span class="o">=</span><span class="s2">&#34;prometheus&#34;</span>,quantile<span class="o">=</span><span class="s2">&#34;0.99&#34;</span><span class="o">}</span> NaN
+http_response_size_bytes_sum<span class="o">{</span><span class="nv">handler</span><span class="o">=</span><span class="s2">&#34;prometheus&#34;</span><span class="o">}</span> <span class="m">0</span>
+http_response_size_bytes_count<span class="o">{</span><span class="nv">handler</span><span class="o">=</span><span class="s2">&#34;prometheus&#34;</span><span class="o">}</span> <span class="m">0</span>
+<span class="c1"># HELP node_exporter_build_info A metric with a constant &#39;1&#39; value labeled by version, revision, branch, and goversion from which node_exporter was built.</span>
+<span class="c1"># TYPE node_exporter_build_info gauge</span>
+node_exporter_build_info<span class="o">{</span><span class="nv">branch</span><span class="o">=</span><span class="s2">&#34;HEAD&#34;</span>,goversion<span class="o">=</span><span class="s2">&#34;go1.9.2&#34;</span>,revision<span class="o">=</span><span class="s2">&#34;98bc64930d34878b84a0f87dfe6e1a6da61e532d&#34;</span>,version<span class="o">=</span><span class="s2">&#34;0.15.2&#34;</span><span class="o">}</span> <span class="m">1</span>
+<span class="c1"># HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.</span>
+<span class="c1"># TYPE process_cpu_seconds_total counter</span>
+process_cpu_seconds_total 0.01
+<span class="c1"># HELP process_max_fds Maximum number of open file descriptors.</span>
+<span class="c1"># TYPE process_max_fds gauge</span>
+process_max_fds 1e+06
+<span class="c1"># HELP process_open_fds Number of open file descriptors.</span>
+<span class="c1"># TYPE process_open_fds gauge</span>
+process_open_fds <span class="m">7</span>
+<span class="c1"># HELP process_resident_memory_bytes Resident memory size in bytes.</span>
+<span class="c1"># TYPE process_resident_memory_bytes gauge</span>
+process_resident_memory_bytes 6.127616e+06
+<span class="c1"># HELP process_start_time_seconds Start time of the process since unix epoch in seconds.</span>
+<span class="c1"># TYPE process_start_time_seconds gauge</span>
+process_start_time_seconds 1.52403869128e+09
+<span class="c1"># HELP process_virtual_memory_bytes Virtual memory size in bytes.</span>
+<span class="c1"># TYPE process_virtual_memory_bytes gauge</span>
+process_virtual_memory_bytes 2.0353024e+08
+</code></pre></td></tr></table>
+</div>
+</div>
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Jeff</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2020-01-20
+        
+    </span>
+  </p>
+  
+  <p class="copyright-item">
+    <span class="item-title">License</span>
+    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a></span>
+  </p>
+</div>
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/node_exporter/">Node_exporter</a>
+          <a href="/tags/prometheus/">Prometheus</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/20170603-blackbox_exporter/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">监控架构 - Blackbox_exporter 主动探测端口服务状态</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/20090102-tmux/">
+            <span class="next-text nav-default">Linux - Tmux 多窗口敏捷工具</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="https://github.com/BigerCAP/TiDB-AirPlan/issues" class="iconfont icon-github" title="github"></a>
+  <a href="https://ap.tidb.cc/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2020
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">TiDB - AirPlan</span>
+  </span>
+</div>
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

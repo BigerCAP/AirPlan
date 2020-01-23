@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Tmux on TiDB AirPlan - A biger solution</title>
+    <link>https://ap.tidb.cc/tags/tmux/</link>
+    <description>Recent content in Tmux on TiDB AirPlan - A biger solution</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright>TiDB - AirPlan</copyright>
+    <lastBuildDate>Fri, 02 Jan 2009 00:00:00 +0800</lastBuildDate>
+    
+	<atom:link href="https://ap.tidb.cc/tags/tmux/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Linux - Tmux 多窗口敏捷工具</title>
+      <link>https://ap.tidb.cc/post/20090102-tmux/</link>
+      <pubDate>Fri, 02 Jan 2009 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20090102-tmux/</guid>
+      <description>0x00 起源 screen 热键激活用的 ctrl + a，该热键同时是跳转到行首的快捷键； 试图寻找第二款类似 screen 的工具；找到了 tmux 这种 linux 平台办公利器，尤其是在没有扩展屏情况下</description>
+    </item>
+    
+  </channel>
+</rss>

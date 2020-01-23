@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>TiKV 磁盘空间回收步骤记录 - TiDB AirPlan - A biger solution</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Jeff" /><meta name="description" content="0x00 前景介绍 该版本文档内容适用于 TiKV 3.0 之前版本；不包含使用 TiKV Titan engine 架构的内容 TiKV 节点磁盘占用主要为以下三个目录 {{deploy_dir}}/log TiKV 日志目录，目前日志 GC 需要单独脚本操" /><meta name="keywords" content="TiDB, AirPlan, TiDB OPS, tidb-operator, 2pc, raft, databases, mysql, htap" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.62.2 with theme even" />
+
+
+<link rel="canonical" href="https://ap.tidb.cc/post/20180503-disk-space-recovery/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<link href="/dist/even.04bd84cd.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="TiKV 磁盘空间回收步骤记录" />
+<meta property="og:description" content="0x00 前景介绍 该版本文档内容适用于 TiKV 3.0 之前版本；不包含使用 TiKV Titan engine 架构的内容 TiKV 节点磁盘占用主要为以下三个目录 {{deploy_dir}}/log TiKV 日志目录，目前日志 GC 需要单独脚本操" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://ap.tidb.cc/post/20180503-disk-space-recovery/" />
+<meta property="article:published_time" content="2018-05-03T00:00:00+08:00" />
+<meta property="article:modified_time" content="2020-01-20T00:00:00+08:00" />
+<meta itemprop="name" content="TiKV 磁盘空间回收步骤记录">
+<meta itemprop="description" content="0x00 前景介绍 该版本文档内容适用于 TiKV 3.0 之前版本；不包含使用 TiKV Titan engine 架构的内容 TiKV 节点磁盘占用主要为以下三个目录 {{deploy_dir}}/log TiKV 日志目录，目前日志 GC 需要单独脚本操">
+<meta itemprop="datePublished" content="2018-05-03T00:00:00&#43;08:00" />
+<meta itemprop="dateModified" content="2020-01-20T00:00:00&#43;08:00" />
+<meta itemprop="wordCount" content="1475">
+
+
+
+<meta itemprop="keywords" content="TiKV,Disk," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="TiKV 磁盘空间回收步骤记录"/>
+<meta name="twitter:description" content="0x00 前景介绍 该版本文档内容适用于 TiKV 3.0 之前版本；不包含使用 TiKV Titan engine 架构的内容 TiKV 节点磁盘占用主要为以下三个目录 {{deploy_dir}}/log TiKV 日志目录，目前日志 GC 需要单独脚本操"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">TiDB AirPlan</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">About</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">TiDB AirPlan</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/about/">About</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">TiKV 磁盘空间回收步骤记录</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2018-05-03 </span>
+        <div class="post-category">
+            <a href="/categories/troubleshooting/"> Troubleshooting </a>
+            </div>
+          <span class="more-meta"> 1475 words </span>
+          <span class="more-meta"> 3 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#0x00-前景介绍">0x00 前景介绍</a>
+      <ul>
+        <li><a href="#场景">场景</a></li>
+      </ul>
+    </li>
+    <li><a href="#0x01---操作">0x01 - 操作</a>
+      <ul>
+        <li><a href="#调整-store-权重">调整 store 权重</a></li>
+        <li><a href="#添加-store-调度">添加 store 调度</a></li>
+        <li><a href="#下线-store">下线 Store</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h2 id="0x00-前景介绍">0x00 前景介绍</h2>
+<blockquote>
+<p>该版本文档内容适用于 TiKV 3.0 之前版本；不包含使用 TiKV Titan engine 架构的内容</p>
+</blockquote>
+<ul>
+<li>TiKV 节点磁盘占用主要为以下三个目录
+<ul>
+<li><code>{{deploy_dir}}/log</code>  TiKV 日志目录，目前日志 GC 需要单独脚本操作</li>
+<li><code>{{deploy_dir}}/data</code> TiKV rocksDB 数据目录，用来存放 KV 数据</li>
+<li><code>{{deploy_dir}}/data/snap</code> TiKV snap 数据目录，region 迁移时会先生成一个 snapshot 文件，然后通过网络传输到其他节点</li>
+</ul>
+</li>
+</ul>
+<h3 id="场景">场景</h3>
+<ul>
+<li>业务：持续写入数据，仅保留最近一月数据；要求快速回收磁盘空间或磁盘空间相对均匀</li>
+<li>集群：有数十台 TiKV ，每台 TiKV 磁盘大小仅为 500G</li>
+<li>现象：仅有三十几台 TiKV 磁盘占用超过 60%，其余 TiKV 在空跑状态；个别 TiKV 持续写入达到 90%</li>
+</ul>
+<h2 id="0x01---操作">0x01 - 操作</h2>
+<ul>
+<li>调整磁盘占用比较高得 store 权重，控制磁盘 TiKV 写入量。
+<ul>
+<li>release-2.0(RC &amp; GA) 之后，通过调整 store 权重，可以降低 leader 与 region 的数量，进而控制磁盘空间的占用率</li>
+<li>release-1.0 调整 store 权重，在不涉及 null region 时，可以控制磁盘空间占用率 (如果长期持续删除大量输出会造成 null region)</li>
+</ul>
+</li>
+<li>release-1.0 之前，通过下线方式控制磁盘空间占用</li>
+<li>本文中未涉及的信息点
+<ul>
+<li>TiKV <code>dynamic-level-bytes</code> 参数（动态管理 LSM 技术，配合 LSM compactions 食用）</li>
+<li>TiKV 2.0 版本 <code>use-delete-range</code> 参数</li>
+<li>2.0 版本 <code>region-merge</code> 功能（主动合并 table 纬度内 null region 或小于阈值参数的 region）</li>
+<li>修改 TiKV LSM 每层压缩参数，如：
+<ul>
+<li>no:     kNoCompression</li>
+<li>snappy: kSnappyCompression</li>
+<li>zlib:   kZlibCompression</li>
+<li>bzip2:  kBZip2Compression</li>
+<li>lz4:    kLZ4Compression</li>
+<li>lz4hc:  kLZ4HCCompression</li>
+<li>zstd:   kZSTD</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="调整-store-权重">调整 store 权重</h3>
+<p>通过 PD http API 快速查看集群内所有 Store 权重信息</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash">curl http://10.10.10.15:2379/pd/api/v1/stores <span class="p">|</span>  egrep <span class="s1">&#39;(id|address|state_name|region_weight|available)&#39;</span> <span class="p">|</span> awk <span class="s1">&#39;{if(NR%5!=0)ORS=&#34; &#34;; else ORS=&#34;\n&#34;}1&#39;</span> <span class="p">|</span> sed <span class="s1">&#39;s/[ ][ ]*/  /g&#39;</span> <span class="p">|</span> sed <span class="s1">&#39;s/&#34;//g&#39;</span> <span class="p">|</span> sort -nrk <span class="m">8</span>
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>通过 pd-ctl 工具调整 store 权重</p>
+<ul>
+<li>优势：使用 API 调用，操作方便，不涉及 store 上下线等危险操作</li>
+<li>缺点：当磁盘空间仅剩 50G 以内，且数据依旧高歌猛进写入时，无法使用；调整权重是使用 <code>balance-region-scheduler</code> 与 <code>balance-leader-scheduler</code> 调度器，需要一定的时间调度 region ，调度 region 需要额外的空间，写入 snapshot</li>
+</ul>
+</li>
+<li>
+<p>通过 pd-ctl 工具连接 PD Cluster</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash">./pd-ctl -u http://10.10.10.15:2379
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>help store ，查看命令使用方法</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash">» <span class="nb">help</span> store
+show the store status
+
+Usage:
+  pdctl store <span class="o">[</span>delete<span class="p">|</span>label<span class="p">|</span>weight<span class="o">]</span> &lt;store_id&gt;
+  store <span class="o">[</span>command<span class="o">]</span>
+
+Available Commands:
+  delete      delete the store
+  label       <span class="nb">set</span> a store<span class="s1">&#39;s label value
+</span><span class="s1">  weight      set a store&#39;</span>s leader and region balance weight
+
+Use <span class="s2">&#34;help store [command] &#34;</span> <span class="k">for</span> more information about a command.
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>调整 store 194 节点的 leader 与 region 权重
+<ul>
+<li>权重可调范围 <code>0.000001 到 1</code> ，默认值为 1</li>
+<li>格式为： <code>store weight storeID leader权重 region权重</code></li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash">» store weight <span class="m">194</span> 0.1 0.1
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>查看调整后结果</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash">» store <span class="m">194</span>
+<span class="o">{</span>
+  <span class="s2">&#34;store&#34;</span>: <span class="o">{</span>
+    <span class="s2">&#34;id&#34;</span>: 194,
+    <span class="s2">&#34;address&#34;</span>: <span class="s2">&#34;10.10.10.13:20160&#34;</span>,
+    <span class="s2">&#34;state&#34;</span>: 0,
+    <span class="s2">&#34;state_name&#34;</span>: <span class="s2">&#34;Up&#34;</span>
+  <span class="o">}</span>,
+  <span class="s2">&#34;status&#34;</span>: <span class="o">{</span>
+    <span class="s2">&#34;capacity&#34;</span>: <span class="s2">&#34;500 GiB&#34;</span>,
+    <span class="s2">&#34;available&#34;</span>: <span class="s2">&#34;82 GiB&#34;</span>,
+    <span class="s2">&#34;leader_weight&#34;</span>: 0.1,   <span class="c1"># leader 权重</span>
+    <span class="s2">&#34;region_count&#34;</span>: 31316,
+    <span class="s2">&#34;region_weight&#34;</span>: 0.1,   <span class="c1"># region 权重</span>
+    <span class="s2">&#34;region_score&#34;</span>: 313160,
+    <span class="s2">&#34;start_ts&#34;</span>: <span class="s2">&#34;2018-04-22T08:05:13+08:00&#34;</span>,
+    <span class="s2">&#34;last_heartbeat_ts&#34;</span>: <span class="s2">&#34;2018-05-03T16:27:12.85852309+08:00&#34;</span>,
+    <span class="s2">&#34;uptime&#34;</span>: <span class="s2">&#34;272h21m59.85852309s&#34;</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="添加-store-调度">添加 store 调度</h3>
+<blockquote>
+<p>添加指定 store <code>evict scheduler</code> ，控制该 store 在集群内 region leader 数量为 0 或者接近 0 值，不能控制该 store 是否增加成员副本。</p>
+</blockquote>
+<ul>
+<li>
+<p>通过 pd-ctl 工具调整 store 权重</p>
+<ul>
+<li>优势：该节点添加调度器后，该 store 不存在 region leader ，该单节点短暂挂掉或重启不影响集群读写（该方案可与 region weight 同时使用，不过该方案更多是用于重启 tikv ，业务不受影响场景）</li>
+<li>缺点：该调度器并不能控制空间使用状态</li>
+</ul>
+</li>
+<li>
+<p>添加调度器，将 store 194 上所有 leader 自动迁移到其他节点。10000 数量 leader 仅需 5 - 10 分钟</p>
+<ul>
+<li>该调度器添加后持续生效，需要删除调度器释放 store <code>evict scheduler</code> 状态</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash">curl -X POST -d <span class="s1">&#39;{&#34;name&#34;:&#34;evict-leader-scheduler&#34;,&#34;store_id&#34;: 194}&#39;</span> <span class="s2">&#34;http://10.10.10.15:2379/pd/api/v1/schedulers&#34;</span>
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>查看当前所有调度器</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># curl http://10.13.128.205:2379/pd/api/v1/schedulers</span>
+
+<span class="o">[</span>
+  <span class="s2">&#34;evict-leader-scheduler-194&#34;</span>,   <span class="c1"># store 194 调度器</span>
+  <span class="s2">&#34;balance-region-scheduler&#34;</span>,     <span class="c1"># 默认调度器，region 均衡调度</span>
+  <span class="s2">&#34;balance-leader-scheduler&#34;</span>,     <span class="c1"># 默认调度器，leader 均衡调度</span>
+  <span class="s2">&#34;balance-hot-region-scheduler&#34;</span>  <span class="c1"># 默认调度器，热点调度</span>
+<span class="o">]</span>
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>删除迁移 leader 调度器
+<ul>
+<li>删除后，该节点参与集群内 leader 调度</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash">curl -X DELETE <span class="s2">&#34;http://10.10.10.15:2379/pd/api/v1/schedulers/evict-leader-scheduler-194&#34;</span>
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="下线-store">下线 Store</h3>
+<blockquote>
+<p>该方案可作为压轴方案 (集群内只有三台 TiKV 时，下线一台后，region 无处调度，但剩余两副本可继续维持集群使用)</p>
+</blockquote>
+<ul>
+<li>通过 pd-ctl 工具连接 PD Cluster</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash">./pd-ctl -u http://10.10.10.15:2379
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>help store ，查看命令使用方法</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash">» <span class="nb">help</span> store
+show the store status
+
+Usage:
+  pdctl store <span class="o">[</span>delete<span class="p">|</span>label<span class="p">|</span>weight<span class="o">]</span> &lt;store_id&gt;
+  store <span class="o">[</span>command<span class="o">]</span>
+
+Available Commands:
+  delete      delete the store
+  label       <span class="nb">set</span> a store<span class="s1">&#39;s label value
+</span><span class="s1">  weight      set a store&#39;</span>s leader and region balance weight
+
+Use <span class="s2">&#34;help store [command] &#34;</span> <span class="k">for</span> more information about a command.
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>通过 pd-ctl 删除 store 194 节点
+<ul>
+<li>节点会先进入 offline 状态，当该节点数据迁移完成后 (数据迁移与磁盘读写和其他 store 节点繁忙程度有关)</li>
+<li>节点进入 Tomestone 状态，此时可物理删除该节点数据 (<code>{{deploy_dir/data}}</code> 存放 rocksDB 数据)</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash">» store delete <span class="m">194</span>
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>查看调整后结果</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash">» store <span class="m">194</span>
+<span class="o">{</span>
+  <span class="s2">&#34;store&#34;</span>: <span class="o">{</span>
+    <span class="s2">&#34;id&#34;</span>: 194,
+    <span class="s2">&#34;address&#34;</span>: <span class="s2">&#34;10.10.10.13:20160&#34;</span>,
+    <span class="s2">&#34;state&#34;</span>: 0,
+    <span class="s2">&#34;state_name&#34;</span>: <span class="s2">&#34;Offline&#34;</span>  <span class="c1"># store 状态 ( UP 、Down 、Offline 、Tomestone)</span>
+  <span class="o">}</span>,
+  <span class="s2">&#34;status&#34;</span>: <span class="o">{</span>
+    <span class="s2">&#34;capacity&#34;</span>: <span class="s2">&#34;500 GiB&#34;</span>,
+    <span class="s2">&#34;available&#34;</span>: <span class="s2">&#34;82 GiB&#34;</span>,
+    <span class="s2">&#34;leader_weight&#34;</span>: 0.1,   <span class="c1"># leader 权重</span>
+    <span class="s2">&#34;region_count&#34;</span>: 31316,
+    <span class="s2">&#34;region_weight&#34;</span>: 0.1,   <span class="c1"># region 权重</span>
+    <span class="s2">&#34;region_score&#34;</span>: 313160,
+    <span class="s2">&#34;start_ts&#34;</span>: <span class="s2">&#34;2018-04-22T08:05:13+08:00&#34;</span>,
+    <span class="s2">&#34;last_heartbeat_ts&#34;</span>: <span class="s2">&#34;2018-05-03T16:27:12.85852309+08:00&#34;</span>,
+    <span class="s2">&#34;uptime&#34;</span>: <span class="s2">&#34;272h21m59.85852309s&#34;</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div>
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Jeff</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2020-01-20
+        
+    </span>
+  </p>
+  
+  <p class="copyright-item">
+    <span class="item-title">License</span>
+    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a></span>
+  </p>
+</div>
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/tikv/">TiKV</a>
+          <a href="/tags/disk/">Disk</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/20200108-tidb-haproxy-real-ip/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">TiDB &amp; Haproxy / show processlist View real IP</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/20180327-change-tidb-ip/">
+            <span class="next-text nav-default">测试在线修改 TiDB Cluster 组件 IP 地址</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="https://github.com/BigerCAP/TiDB-AirPlan/issues" class="iconfont icon-github" title="github"></a>
+  <a href="https://ap.tidb.cc/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2020
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">TiDB - AirPlan</span>
+  </span>
+</div>
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

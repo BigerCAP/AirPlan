@@ -139,6 +139,29 @@
 
     <article class="post">
   <header class="post-header">
+    <h1 class="post-title"><a class="post-link" href="/post/20180503-disk-space-recovery/">TiKV 磁盘空间回收步骤记录</a></h1>
+    <div class="post-meta">
+      <span class="post-time"> 2018-05-03 </span>
+      <div class="post-category">
+          <a href="/categories/troubleshooting/"> Troubleshooting </a>
+          </div>
+        <span class="more-meta"> 1475 words </span>
+        <span class="more-meta"> 3 mins read </span>
+    </div>
+  </header>
+  
+  <div class="post-content">
+    <div class="post-summary">
+      0x00 前景介绍 该版本文档内容适用于 TiKV 3.0 之前版本；不包含使用 TiKV Titan engine 架构的内容 TiKV 节点磁盘占用主要为以下三个目录 {{deploy_dir}}/log TiKV 日志目录，目前日志 GC 需要单独脚本操
+    </div>
+    <div class="read-more">
+      <a href="/post/20180503-disk-space-recovery/" class="read-more-link">Read more...</a>
+    </div>
+  </div>
+</article>
+
+    <article class="post">
+  <header class="post-header">
     <h1 class="post-title"><a class="post-link" href="/post/20180327-change-tidb-ip/">测试在线修改 TiDB Cluster 组件 IP 地址</a></h1>
     <div class="post-meta">
       <span class="post-time"> 2018-03-27 </span>
@@ -156,6 +179,144 @@
     </div>
     <div class="read-more">
       <a href="/post/20180327-change-tidb-ip/" class="read-more-link">Read more...</a>
+    </div>
+  </div>
+</article>
+
+    <article class="post">
+  <header class="post-header">
+    <h1 class="post-title"><a class="post-link" href="/post/20170809-transfer.sh/">Linux - Transfer.sh 一键文件服务器</a></h1>
+    <div class="post-meta">
+      <span class="post-time"> 2017-08-09 </span>
+      <div class="post-category">
+          <a href="/categories/software/"> software </a>
+          </div>
+        <span class="more-meta"> 1236 words </span>
+        <span class="more-meta"> 3 mins read </span>
+    </div>
+  </header>
+  
+  <div class="post-content">
+    <div class="post-summary">
+      0x00 起源 平常需要各种传输日志文件，TiDB 部署进程比较多，打包后可能超过 100MB（微信最大支持 100MB 附件传输），发送人和接受人不是同平台时，文件
+    </div>
+    <div class="read-more">
+      <a href="/post/20170809-transfer.sh/" class="read-more-link">Read more...</a>
+    </div>
+  </div>
+</article>
+
+    <article class="post">
+  <header class="post-header">
+    <h1 class="post-title"><a class="post-link" href="/post/20170610-haproxy/">负载均衡 - HAProxy &amp; TiDB 配合食用</a></h1>
+    <div class="post-meta">
+      <span class="post-time"> 2017-06-10 </span>
+      <div class="post-category">
+          <a href="/categories/software/"> software </a>
+          </div>
+        <span class="more-meta"> 685 words </span>
+        <span class="more-meta"> 2 mins read </span>
+    </div>
+  </header>
+  
+  <div class="post-content">
+    <div class="post-summary">
+      0x01 介绍 官网 百家饭内容，将测试环境的最终结果整理了下 0x02 功能 负载均衡：L4(TCP) 和 L7(HTTP/HTTPS) 两种模式，支持 RR(roundrobin) / 静态 RR / LC / IP Hash/ URI Hash/ URL_PARAM Hash/ HTTP_HEADER Hash 等丰富的负
+    </div>
+    <div class="read-more">
+      <a href="/post/20170610-haproxy/" class="read-more-link">Read more...</a>
+    </div>
+  </div>
+</article>
+
+    <article class="post">
+  <header class="post-header">
+    <h1 class="post-title"><a class="post-link" href="/post/20170603-blackbox_exporter/">监控架构 - Blackbox_exporter 主动探测端口服务状态</a></h1>
+    <div class="post-meta">
+      <span class="post-time"> 2017-06-03 </span>
+      <div class="post-category">
+          <a href="/categories/monitoring/"> Monitoring </a>
+          </div>
+        <span class="more-meta"> 6230 words </span>
+        <span class="more-meta"> 13 mins read </span>
+    </div>
+  </header>
+  
+  <div class="post-content">
+    <div class="post-summary">
+      0x00 找个能监控组件端口是否存在的服务，并且可以将数据发送到 Prometheus ；blackbox export 是 Prometheus 家族一员，按照配置文件内容用于向目标主动探测 0x01 Deploy blackbox_exporter 是 Prometheus 官方
+    </div>
+    <div class="read-more">
+      <a href="/post/20170603-blackbox_exporter/" class="read-more-link">Read more...</a>
+    </div>
+  </div>
+</article>
+
+    <article class="post">
+  <header class="post-header">
+    <h1 class="post-title"><a class="post-link" href="/post/20170602-node_exporter/">监控架构 - Node_exporter 系统监控组件</a></h1>
+    <div class="post-meta">
+      <span class="post-time"> 2017-06-02 </span>
+      <div class="post-category">
+          <a href="/categories/monitoring/"> Monitoring </a>
+          </div>
+        <span class="more-meta"> 2774 words </span>
+        <span class="more-meta"> 6 mins read </span>
+    </div>
+  </header>
+  
+  <div class="post-content">
+    <div class="post-summary">
+      0x00 起源 学习 node export 存的 0x01 Collector 通过 http://IP:9100/metrics 查看当前主机监控信息 Node export 通过Collector代码块收集系统性能指标 以下内容引用 Prometeus/Node_export README 每个操作系统上的 Collectors 都有不同的
+    </div>
+    <div class="read-more">
+      <a href="/post/20170602-node_exporter/" class="read-more-link">Read more...</a>
+    </div>
+  </div>
+</article>
+
+    <article class="post">
+  <header class="post-header">
+    <h1 class="post-title"><a class="post-link" href="/post/20090102-tmux/">Linux - Tmux 多窗口敏捷工具</a></h1>
+    <div class="post-meta">
+      <span class="post-time"> 2009-01-02 </span>
+      <div class="post-category">
+          <a href="/categories/software/"> software </a>
+          </div>
+        <span class="more-meta"> 2629 words </span>
+        <span class="more-meta"> 6 mins read </span>
+    </div>
+  </header>
+  
+  <div class="post-content">
+    <div class="post-summary">
+      0x00 起源 screen 热键激活用的 ctrl + a，该热键同时是跳转到行首的快捷键； 试图寻找第二款类似 screen 的工具；找到了 tmux 这种 linux 平台办公利器，尤其是在没有扩展屏情况下
+    </div>
+    <div class="read-more">
+      <a href="/post/20090102-tmux/" class="read-more-link">Read more...</a>
+    </div>
+  </div>
+</article>
+
+    <article class="post">
+  <header class="post-header">
+    <h1 class="post-title"><a class="post-link" href="/post/20090101-screen/">Linux - Screen 进程守护</a></h1>
+    <div class="post-meta">
+      <span class="post-time"> 2009-01-01 </span>
+      <div class="post-category">
+          <a href="/categories/software/"> software </a>
+          </div>
+        <span class="more-meta"> 865 words </span>
+        <span class="more-meta"> 2 mins read </span>
+    </div>
+  </header>
+  
+  <div class="post-content">
+    <div class="post-summary">
+      0x00 起源 百家饭内容：常用参数速查 主要用于 Linux 运行常驻命令守护，screen 创建窗口后运行程序，相比 nohub 命令使用上心安理得一些。 如果作为办公多窗口使
+    </div>
+    <div class="read-more">
+      <a href="/post/20090101-screen/" class="read-more-link">Read more...</a>
     </div>
   </div>
 </article>

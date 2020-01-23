@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Blackbox on TiDB AirPlan - A biger solution</title>
+    <link>https://ap.tidb.cc/tags/blackbox/</link>
+    <description>Recent content in Blackbox on TiDB AirPlan - A biger solution</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright>TiDB - AirPlan</copyright>
+    <lastBuildDate>Sat, 03 Jun 2017 00:00:00 +0800</lastBuildDate>
+    
+	<atom:link href="https://ap.tidb.cc/tags/blackbox/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>监控架构 - Blackbox_exporter 主动探测端口服务状态</title>
+      <link>https://ap.tidb.cc/post/20170603-blackbox_exporter/</link>
+      <pubDate>Sat, 03 Jun 2017 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20170603-blackbox_exporter/</guid>
+      <description>0x00 找个能监控组件端口是否存在的服务，并且可以将数据发送到 Prometheus ；blackbox export 是 Prometheus 家族一员，按照配置文件内容用于向目标主动探测 0x01 Deploy blackbox_exporter 是 Prometheus 官方</description>
+    </item>
+    
+  </channel>
+</rss>

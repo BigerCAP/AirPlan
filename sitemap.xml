@@ -10,14 +10,14 @@
   
   <url>
     <loc>https://ap.tidb.cc/categories/</loc>
-    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
+    <lastmod>2020-01-21T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://ap.tidb.cc/tags/haproxy/</loc>
-    <lastmod>2020-01-10T00:00:00+08:00</lastmod>
+    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -31,7 +31,7 @@
   
   <url>
     <loc>https://ap.tidb.cc/post/</loc>
-    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
+    <lastmod>2020-01-21T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -45,21 +45,21 @@
   
   <url>
     <loc>https://ap.tidb.cc/categories/software/</loc>
-    <lastmod>2020-01-10T00:00:00+08:00</lastmod>
+    <lastmod>2020-01-21T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://ap.tidb.cc/tags/</loc>
-    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
+    <lastmod>2020-01-21T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://ap.tidb.cc/tags/tidb/</loc>
-    <lastmod>2020-01-10T00:00:00+08:00</lastmod>
+    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -80,6 +80,34 @@
   
   <url>
     <loc>https://ap.tidb.cc/</loc>
+    <lastmod>2020-01-21T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/disk/</loc>
+    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/tikv/</loc>
+    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/post/20180503-disk-space-recovery/</loc>
+    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/categories/troubleshooting/</loc>
     <lastmod>2020-01-20T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -94,6 +122,125 @@
   
   <url>
     <loc>https://ap.tidb.cc/post/20180327-change-tidb-ip/</loc>
+    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/airplan/</loc>
+    <lastmod>2020-01-21T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/linux/</loc>
+    <lastmod>2020-01-21T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/post/20170809-transfer.sh/</loc>
+    <lastmod>2020-01-21T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/transfer/</loc>
+    <lastmod>2020-01-21T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/post/20170610-haproxy/</loc>
+    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/alertmanager/</loc>
+    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/blackbox/</loc>
+    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/categories/monitoring/</loc>
+    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/proemtheus/</loc>
+    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/post/20170603-blackbox_exporter/</loc>
+    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/node_exporter/</loc>
+    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/prometheus/</loc>
+    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/post/20170602-node_exporter/</loc>
+    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/post/20090102-tmux/</loc>
+    <lastmod>2020-01-21T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/tmux/</loc>
+    <lastmod>2020-01-21T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/post/20090101-screen/</loc>
+    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/screen/</loc>
     <lastmod>2020-01-20T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Disk on TiDB AirPlan - A biger solution</title>
+    <link>https://ap.tidb.cc/tags/disk/</link>
+    <description>Recent content in Disk on TiDB AirPlan - A biger solution</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright>TiDB - AirPlan</copyright>
+    <lastBuildDate>Thu, 03 May 2018 00:00:00 +0800</lastBuildDate>
+    
+	<atom:link href="https://ap.tidb.cc/tags/disk/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>TiKV 磁盘空间回收步骤记录</title>
+      <link>https://ap.tidb.cc/post/20180503-disk-space-recovery/</link>
+      <pubDate>Thu, 03 May 2018 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20180503-disk-space-recovery/</guid>
+      <description>0x00 前景介绍 该版本文档内容适用于 TiKV 3.0 之前版本；不包含使用 TiKV Titan engine 架构的内容 TiKV 节点磁盘占用主要为以下三个目录 {{deploy_dir}}/log TiKV 日志目录，目前日志 GC 需要单独脚本操</description>
+    </item>
+    
+  </channel>
+</rss>
