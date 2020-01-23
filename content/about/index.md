@@ -19,3 +19,7 @@ weight: 50
 * [PD](https://github.com/pingcap/pd)
 * [TiDB](https://github.com/pingcap/tidb)
 * [TiKV](https://github.com/tikv/tikv)
+
+### Oops
+
+![2017 TiDB Logo](about-logo.png "2017 TiDB Logo")
