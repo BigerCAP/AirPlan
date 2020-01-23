@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>测试域名代替 IP 部署 TiDB - TiDB AirPlan - A biger solution</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Jeff" /><meta name="description" content="0x00 假设 新建机房网络频繁变更或公司内部要求禁止使用 IP 做为服务启动监听（大公司规划时喜欢使用 hostname/server name &#43; domain 做为服务监听信息，配合公司内网 DNS 做跨地域运维" /><meta name="keywords" content="TiDB, AirPlan, TiDB OPS, tidb-operator, 2pc, raft, databases, mysql, htap" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.62.2 with theme even" />
+
+
+<link rel="canonical" href="https://ap.tidb.cc/post/20180406-tidb-domain/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<link href="/dist/even.04bd84cd.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="测试域名代替 IP 部署 TiDB" />
+<meta property="og:description" content="0x00 假设 新建机房网络频繁变更或公司内部要求禁止使用 IP 做为服务启动监听（大公司规划时喜欢使用 hostname/server name &#43; domain 做为服务监听信息，配合公司内网 DNS 做跨地域运维" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://ap.tidb.cc/post/20180406-tidb-domain/" />
+<meta property="article:published_time" content="2018-04-06T00:00:00+08:00" />
+<meta property="article:modified_time" content="2020-01-20T00:00:00+08:00" />
+<meta itemprop="name" content="测试域名代替 IP 部署 TiDB">
+<meta itemprop="description" content="0x00 假设 新建机房网络频繁变更或公司内部要求禁止使用 IP 做为服务启动监听（大公司规划时喜欢使用 hostname/server name &#43; domain 做为服务监听信息，配合公司内网 DNS 做跨地域运维">
+<meta itemprop="datePublished" content="2018-04-06T00:00:00&#43;08:00" />
+<meta itemprop="dateModified" content="2020-01-20T00:00:00&#43;08:00" />
+<meta itemprop="wordCount" content="1477">
+
+
+
+<meta itemprop="keywords" content="Deploy,Domain," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="测试域名代替 IP 部署 TiDB"/>
+<meta name="twitter:description" content="0x00 假设 新建机房网络频繁变更或公司内部要求禁止使用 IP 做为服务启动监听（大公司规划时喜欢使用 hostname/server name &#43; domain 做为服务监听信息，配合公司内网 DNS 做跨地域运维"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">TiDB AirPlan</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">About</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">TiDB AirPlan</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/about/">About</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">测试域名代替 IP 部署 TiDB</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2018-04-06 </span>
+        <div class="post-category">
+            <a href="/categories/tidb/"> TiDB </a>
+            </div>
+          <span class="more-meta"> 1477 words </span>
+          <span class="more-meta"> 3 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#0x00-假设">0x00 假设</a></li>
+    <li><a href="#0x01-场景问题">0x01 场景&问题</a>
+      <ul>
+        <li><a href="#部署架构">部署架构</a></li>
+        <li><a href="#pd-启动参数调整">PD 启动参数调整</a></li>
+        <li><a href="#tikv-参数启动示例">TiKV 参数启动示例</a></li>
+      </ul>
+    </li>
+    <li><a href="#0x02-测试结果">0x02 测试结果</a>
+      <ul>
+        <li><a href="#测试修改-ip">测试修改 IP</a></li>
+        <li><a href="#etcdctl-工具">Etcdctl 工具</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h2 id="0x00-假设">0x00 假设</h2>
+<blockquote>
+<p>新建机房网络频繁变更或公司内部要求禁止使用 IP 做为服务启动监听（大公司规划时喜欢使用 hostname/server name + domain 做为服务监听信息，配合公司内网 DNS 做跨地域运维管理），所以尝试下 TiDB 使用域名方式是否可以在线更换 IP 以及服务是否可以运行。
+测试时未搭建 DNS 服务，使用 HOSTNAME 本地解析
+测试版本 1.0</p>
+</blockquote>
+<h2 id="0x01-场景问题">0x01 场景&amp;问题</h2>
+<ul>
+<li>
+<p>部署场景</p>
+<ul>
+<li>使用 tidb-ansible 部署 binary 方式，启动使用 supervise</li>
+<li>inventory.ini 文件中直接填写域名</li>
+<li>测试场景域名未经过 DNS 解析，直接使用 <code>/etc/hosts</code> 文件解析
+<ul>
+<li>线上场景可以使用内网 DNS 或者批量修改 <code>/etc/hosts</code> 方式对 <code>hostname | domain</code> 映射管理</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>测试场景</p>
+<ul>
+<li>域名部署未影响实际功能，因此只测试个组件之间网络延迟与通讯是否正常</li>
+<li>PD 更换 IP 地址映射，用于修改主机 IP 或者迁移时场景</li>
+<li>TiDB 到 PD 之间通讯</li>
+<li>TiKV 到 PD 之间通讯</li>
+<li>PD 与 PD 之间通讯</li>
+</ul>
+</li>
+<li>
+<p>问题</p>
+<ul>
+<li>PD 启动时，<code>client-urls</code> 与 <code>peer-urls</code> 参数不能使用域名格式，只能使用 IP 或者 <code>0.0.0.0</code>
+<ul>
+<li>参考 <a href="https://coreos.com/etcd/docs/latest/v2/configuration.html">invalid example: &ldquo;http://example.com:2379&rdquo; (domain name is invalid for binding)</a></li>
+<li>参考 <a href="https://coreos.com/etcd/docs/latest/faq.html">Configuration</a></li>
+</ul>
+</li>
+<li>TiKV 启动时，<code>--addr</code> 参数不能使用域名格式，只能使用 IP 或者 <code>0.0.0.0</code>
+<ul>
+<li><code>--advertise-addr &quot;tikv.p.cc:20160&quot;</code> 无需添加 <code>http://</code></li>
+</ul>
+</li>
+<li>测试 TiDB 域名与 IP 行为一致，无特殊影响</li>
+</ul>
+</li>
+</ul>
+<h3 id="部署架构">部署架构</h3>
+<table>
+<thead>
+<tr>
+<th>域名</th>
+<th>服务</th>
+<th>初始IP</th>
+<th>修改后</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>pd.p.cc</td>
+<td>PD</td>
+<td>127.0.0.1</td>
+<td>172.16.10.64</td>
+</tr>
+<tr>
+<td>kv.p.cc</td>
+<td>PD</td>
+<td>127.0.0.1</td>
+<td>172.16.10.64</td>
+</tr>
+<tr>
+<td>db.p.cc</td>
+<td>PD</td>
+<td>127.0.0.1</td>
+<td>172.16.10.64</td>
+</tr>
+</tbody>
+</table>
+<h3 id="pd-启动参数调整">PD 启动参数调整</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash"><span class="nb">exec</span> bin/pd-server <span class="se">\
+</span><span class="se"></span>    --name<span class="o">=</span><span class="s2">&#34;pd1&#34;</span> <span class="se">\
+</span><span class="se"></span>    --client-urls<span class="o">=</span><span class="s2">&#34;http://0.0.0.0:2379&#34;</span> <span class="se">\
+</span><span class="se"></span>    --advertise-client-urls<span class="o">=</span><span class="s2">&#34;http://pd.p.cc:2379&#34;</span> <span class="se">\
+</span><span class="se"></span>    --peer-urls<span class="o">=</span><span class="s2">&#34;http://0.0.0.0:2380&#34;</span> <span class="se">\
+</span><span class="se"></span>    --advertise-peer-urls<span class="o">=</span><span class="s2">&#34;http://pd.p.cc:2380&#34;</span> <span class="se">\
+</span><span class="se"></span>    --data-dir<span class="o">=</span><span class="s2">&#34;/data1/domain/data.pd&#34;</span> <span class="se">\
+</span><span class="se"></span>    --initial-cluster<span class="o">=</span><span class="s2">&#34;pd1=http://pd.p.cc:2380&#34;</span> <span class="se">\
+</span><span class="se"></span>    --config<span class="o">=</span>conf/pd.toml <span class="se">\
+</span><span class="se"></span>    --log-file<span class="o">=</span><span class="s2">&#34;/data1/domain/log/pd.log&#34;</span> 2&gt; <span class="s2">&#34;/data1/domain/log/pd_stderr.log&#34;</span>
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="tikv-参数启动示例">TiKV 参数启动示例</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash"><span class="nb">exec</span> bin/tikv-server <span class="se">\
+</span><span class="se"></span>    --addr <span class="s2">&#34;0.0.0.0:20160&#34;</span> <span class="se">\
+</span><span class="se"></span>    --advertise-addr <span class="s2">&#34;tikv.p.cc:20160&#34;</span> <span class="se">\
+</span><span class="se"></span>    --pd <span class="s2">&#34;http://pd.p.cc:2379&#34;</span> <span class="se">\
+</span><span class="se"></span>    --data-dir <span class="s2">&#34;/data1/domain/data&#34;</span> <span class="se">\
+</span><span class="se"></span>    --config conf/tikv.toml <span class="se">\
+</span><span class="se"></span>    --log-file <span class="s2">&#34;/data1/domain/log/tikv.log&#34;</span> 2&gt; <span class="s2">&#34;/data1/domain/log/tikv_stderr.log&#34;</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="0x02-测试结果">0x02 测试结果</h2>
+<ul>
+<li>TiDB 到 PD 之间网络通信
+<ul>
+<li>PD 使用域名启动，如果经过 DNS 解析，TiDB 获取 TSO 会慢 200us 上下</li>
+<li>PD cluster 置于 haproxy 后面，实际通讯时 tidb &ndash; haproxy &ndash; 某个 etcd(etcd proxy) &ndash; pd leader ，会比直接连接 PD 慢 600us - 1ms 左右</li>
+</ul>
+</li>
+<li>PD 到 PD
+<ul>
+<li>部署单节点，未达到测试目的</li>
+</ul>
+</li>
+<li>TiKV 到 PD
+<ul>
+<li>部署单节点，未参与 PD 切换 leader 时对 TiKV 的影响</li>
+</ul>
+</li>
+<li>TiKV 到 TiKV
+<ul>
+<li>多实例部署未受到影响</li>
+<li>域名造成通讯延迟</li>
+</ul>
+</li>
+</ul>
+<h3 id="测试修改-ip">测试修改 IP</h3>
+<ul>
+<li>
+<p>修改 PD</p>
+<ul>
+<li>正常启动</li>
+</ul>
+</li>
+<li>
+<p>修改 TiDB</p>
+<ul>
+<li>TiDB 无状态，正常使用</li>
+</ul>
+</li>
+<li>
+<p>修改 TiKV</p>
+<ul>
+<li>ok ，需要重启</li>
+<li>TiKV 是将 ip:port 注册到 pd etcd 信息中，如果重复，已有的必须是 tomestone ， 否则出现以下错误，地址被占用，无法生成新的 id</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-fallback" data-lang="fallback">2018/03/20 15:50:14.436 util.rs:315: [ERROR] fail to request: Grpc(RpcFailure(RpcStatus { status: Unknown, details: Some(&#34;duplicated store address: id:1001 address:\&#34;kv.p.cc:20160\&#34; , already registered by id:1 address:\&#34;kv.p.cc:20160\&#34; &#34;) }))
+2018/03/20 15:50:55.313 tikv-server.rs:263: [ERROR] failed to start node: Pd(Other(StringError(&#34;[src/pd/util.rs:323]: fail to request&#34;)))
+</code></pre></td></tr></table>
+</div>
+</div></li>
+</ul>
+<h3 id="etcdctl-工具">Etcdctl 工具</h3>
+<blockquote>
+<p>PD 组件数据存储在 etcd 中，etcdctl 工具是管理 ectd 存储的工具；谨慎使用该工具，该工具可重置 etcd 存储从而导致 PD 数据丢失</p>
+</blockquote>
+<ul>
+<li>获取 PD 内已注册所有字段</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash"><span class="o">[</span>root@DB etcd-v3.1.11-linux-amd64<span class="o">]</span><span class="c1"># ./etcdctl  --endpoints=0.0.0.0:2379 get --prefix --keys-only /</span>
+
+/pd/6545739204143641259/leader
+
+/pd/6545739204143641259/timestamp
+
+/pd/cluster_id
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>获取 /pd 为首的所有字段；部分信息未转码成功而乱码</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash"><span class="o">[</span>root@DB etcd-v3.1.11-linux-amd64<span class="o">]</span><span class="c1"># ./etcdctl  --endpoints=0.0.0.0:22379 get --prefix /pd</span>
+
+/pd/6545739204143641259/leader
+
+pd1ȴ¦䇃͗http://pd.p.cc:2380<span class="s2">&#34;</span><span class="s2">http://pd.p.cc:2379
+</span><span class="s2">
+</span><span class="s2">/pd/6545739204143641259/timestamp
+</span><span class="s2">&amp;»WI7
+</span><span class="s2">
+</span><span class="s2">/pd/cluster_id
+</span><span class="s2">Zգ Tr«
+</span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>当前仅 PD 启动
+<ul>
+<li>json 输出格式中，字符串通过 Base64 加密格式化</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-json" data-lang="json"><span class="p">[</span><span class="err">r</span><span class="err">o</span><span class="err">o</span><span class="err">t</span><span class="err">@</span><span class="err">D</span><span class="err">B</span> <span class="err">e</span><span class="err">t</span><span class="err">c</span><span class="err">d</span><span class="err">-</span><span class="err">v</span><span class="mf">3.1</span><span class="err">.</span><span class="mi">11</span><span class="err">-</span><span class="err">l</span><span class="err">i</span><span class="err">n</span><span class="err">u</span><span class="err">x</span><span class="err">-</span><span class="err">a</span><span class="err">m</span><span class="err">d</span><span class="mi">64</span><span class="p">]</span><span class="err">#</span> <span class="err">.</span><span class="err">/</span><span class="err">e</span><span class="err">t</span><span class="err">c</span><span class="err">d</span><span class="err">c</span><span class="err">t</span><span class="err">l</span>  <span class="err">-</span><span class="err">-</span><span class="err">e</span><span class="err">n</span><span class="err">d</span><span class="err">p</span><span class="err">o</span><span class="err">i</span><span class="err">n</span><span class="err">t</span><span class="err">s</span><span class="err">=</span><span class="mf">0.0</span><span class="err">.</span><span class="mf">0.0</span><span class="err">:</span><span class="mi">2379</span> <span class="err">g</span><span class="err">e</span><span class="err">t</span> <span class="err">-</span><span class="err">-</span><span class="err">p</span><span class="err">r</span><span class="err">e</span><span class="err">f</span><span class="err">i</span><span class="err">x</span><span class="err">=</span><span class="kc">true</span> <span class="err">/</span><span class="err">p</span><span class="err">d</span> <span class="err">-</span><span class="err">-</span><span class="err">w</span><span class="err">r</span><span class="err">i</span><span class="err">t</span><span class="err">e</span><span class="err">-</span><span class="err">o</span><span class="err">u</span><span class="err">t</span><span class="err">=</span><span class="s2">&#34;json&#34;</span>
+
+<span class="p">{</span>
+    <span class="nt">&#34;header&#34;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&#34;cluster_id&#34;</span><span class="p">:</span> <span class="mi">8216837081137490000</span><span class="p">,</span> 
+        <span class="nt">&#34;member_id&#34;</span><span class="p">:</span> <span class="mi">6313215679864995000</span><span class="p">,</span> 
+        <span class="nt">&#34;revision&#34;</span><span class="p">:</span> <span class="mi">366</span><span class="p">,</span> 
+        <span class="nt">&#34;raft_term&#34;</span><span class="p">:</span> <span class="mi">2</span>
+    <span class="p">}</span><span class="p">,</span> 
+    <span class="nt">&#34;kvs&#34;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="nt">&#34;key&#34;</span><span class="p">:</span> <span class="s2">&#34;L3BkLzY1NDU3MzkyMDQxNDM2NDEyNTkvbGVhZGVy&#34;</span><span class="p">,</span> 
+            <span class="nt">&#34;create_revision&#34;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> 
+            <span class="nt">&#34;mod_revision&#34;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> 
+            <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> 
+            <span class="nt">&#34;value&#34;</span><span class="p">:</span> <span class="s2">&#34;CgNwZDEQx/SdpuSGw85XGhRodHRwOi8vcGQucC5jYzoyMjM4MCIUaHR0cDovL3BkLnAuY2M6MjIzNzk=&#34;</span><span class="p">,</span> 
+            <span class="nt">&#34;lease&#34;</span><span class="p">:</span> <span class="mi">8811119877456664000</span>
+        <span class="p">}</span><span class="p">,</span> 
+        <span class="p">{</span>
+            <span class="nt">&#34;key&#34;</span><span class="p">:</span> <span class="s2">&#34;L3BkLzY1NDU3MzkyMDQxNDM2NDEyNTkvdGltZXN0YW1w&#34;</span><span class="p">,</span> 
+            <span class="nt">&#34;create_revision&#34;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> 
+            <span class="nt">&#34;mod_revision&#34;</span><span class="p">:</span> <span class="mi">366</span><span class="p">,</span> 
+            <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="mi">363</span><span class="p">,</span> 
+            <span class="nt">&#34;value&#34;</span><span class="p">:</span> <span class="s2">&#34;FSaDMWkxK6c=&#34;</span>
+        <span class="p">}</span><span class="p">,</span> 
+        <span class="p">{</span>
+            <span class="nt">&#34;key&#34;</span><span class="p">:</span> <span class="s2">&#34;L3BkL2NsdXN0ZXJfaWQ=&#34;</span><span class="p">,</span> 
+            <span class="nt">&#34;create_revision&#34;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> 
+            <span class="nt">&#34;mod_revision&#34;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> 
+            <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> 
+            <span class="nt">&#34;value&#34;</span><span class="p">:</span> <span class="s2">&#34;WtcjIBdUcqs=&#34;</span>
+        <span class="p">}</span>
+    <span class="p">]</span><span class="p">,</span> 
+    <span class="nt">&#34;count&#34;</span><span class="p">:</span> <span class="mi">3</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>当前启动一个 PD ；两个 TiKV ，其中一个 Down 状态，另一个 UP 状态
+<ul>
+<li>json 输出格式中，字符串通过 Base64 加密格式化</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span><span class="lnt">80
+</span><span class="lnt">81
+</span><span class="lnt">82
+</span><span class="lnt">83
+</span><span class="lnt">84
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-json" data-lang="json"><span class="p">[</span><span class="err">r</span><span class="err">o</span><span class="err">o</span><span class="err">t</span><span class="err">@</span><span class="err">D</span><span class="err">B</span> <span class="err">e</span><span class="err">t</span><span class="err">c</span><span class="err">d</span><span class="err">-</span><span class="err">v</span><span class="mf">3.1</span><span class="err">.</span><span class="mi">11</span><span class="err">-</span><span class="err">l</span><span class="err">i</span><span class="err">n</span><span class="err">u</span><span class="err">x</span><span class="err">-</span><span class="err">a</span><span class="err">m</span><span class="err">d</span><span class="mi">64</span><span class="p">]</span><span class="err">#</span> <span class="err">.</span><span class="err">/</span><span class="err">e</span><span class="err">t</span><span class="err">c</span><span class="err">d</span><span class="err">c</span><span class="err">t</span><span class="err">l</span>  <span class="err">-</span><span class="err">-</span><span class="err">e</span><span class="err">n</span><span class="err">d</span><span class="err">p</span><span class="err">o</span><span class="err">i</span><span class="err">n</span><span class="err">t</span><span class="err">s</span><span class="err">=</span><span class="mf">0.0</span><span class="err">.</span><span class="mf">0.0</span><span class="err">:</span><span class="mi">2379</span> <span class="err">g</span><span class="err">e</span><span class="err">t</span> <span class="err">-</span><span class="err">-</span><span class="err">p</span><span class="err">r</span><span class="err">e</span><span class="err">f</span><span class="err">i</span><span class="err">x</span><span class="err">=</span><span class="kc">true</span>  <span class="err">/</span><span class="err">p</span><span class="err">d</span> <span class="err">-</span><span class="err">-</span><span class="err">w</span><span class="err">r</span><span class="err">i</span><span class="err">t</span><span class="err">e</span><span class="err">-</span><span class="err">o</span><span class="err">u</span><span class="err">t</span><span class="err">=</span><span class="s2">&#34;json&#34;</span>
+
+<span class="p">{</span>
+    <span class="nt">&#34;header&#34;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&#34;cluster_id&#34;</span><span class="p">:</span> <span class="mi">8216837081137490000</span><span class="p">,</span> 
+        <span class="nt">&#34;member_id&#34;</span><span class="p">:</span> <span class="mi">6313215679864995000</span><span class="p">,</span> 
+        <span class="nt">&#34;revision&#34;</span><span class="p">:</span> <span class="mi">934</span><span class="p">,</span> 
+        <span class="nt">&#34;raft_term&#34;</span><span class="p">:</span> <span class="mi">2</span>
+    <span class="p">}</span><span class="p">,</span> 
+    <span class="nt">&#34;kvs&#34;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="nt">&#34;key&#34;</span><span class="p">:</span> <span class="s2">&#34;L3BkLzY1NDU3MzkyMDQxNDM2NDEyNTkvYWxsb2NfaWQ=&#34;</span><span class="p">,</span> 
+            <span class="nt">&#34;create_revision&#34;</span><span class="p">:</span> <span class="mi">693</span><span class="p">,</span> 
+            <span class="nt">&#34;mod_revision&#34;</span><span class="p">:</span> <span class="mi">693</span><span class="p">,</span> 
+            <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> 
+            <span class="nt">&#34;value&#34;</span><span class="p">:</span> <span class="s2">&#34;AAAAAAAAA+g=&#34;</span>
+        <span class="p">}</span><span class="p">,</span> 
+        <span class="p">{</span>
+            <span class="nt">&#34;key&#34;</span><span class="p">:</span> <span class="s2">&#34;L3BkLzY1NDU3MzkyMDQxNDM2NDEyNTkvY29uZmln&#34;</span><span class="p">,</span> 
+            <span class="nt">&#34;create_revision&#34;</span><span class="p">:</span> <span class="mi">697</span><span class="p">,</span> 
+            <span class="nt">&#34;mod_revision&#34;</span><span class="p">:</span> <span class="mi">697</span><span class="p">,</span> 
+            <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> 
+            <span class="nt">&#34;value&#34;</span><span class="p">:</span> <span class="s2">&#34;eyJjbGllbnQtdXJscyI6IiIsInBlZXItdXJscyI6IiIsImFkdmVydGlzZS1jbGllbnQtdXJscyI6IiIsImFkdmVydGlzZS1wZWVyLXVybHMiOiIiLCJuYW1lIjoiIiwiZGF0YS1kaXIiOiIiLCJpbml0aWFsLWNsdXN0ZXIiOiIiLCJpbml0aWFsLWNsdXN0ZXItc3RhdGUiOiIiLCJqb2luIjoiIiwibGVhc2UiOjAsImxvZyI6eyJsZXZlbCI6IiIsImZvcm1hdCI6IiIsImRpc2FibGUtdGltZXN0YW1wIjpmYWxzZSwiZmlsZSI6eyJmaWxlbmFtZSI6IiIsImxvZy1yb3RhdGUiOmZhbHNlLCJtYXgtc2l6ZSI6MCwibWF4LWRheXMiOjAsIm1heC1iYWNrdXBzIjowfX0sImxvZy1maWxlIjoiIiwibG9nLWxldmVsIjoiIiwidHNvLXNhdmUtaW50ZXJ2YWwiOiIwcyIsIm1ldHJpYyI6eyJqb2IiOiIiLCJhZGRyZXNzIjoiIiwiaW50ZXJ2YWwiOiIwcyJ9LCJzY2hlZHVsZSI6eyJtYXgtc25hcHNob3QtY291bnQiOjMsIm1heC1wZW5kaW5nLXBlZXItY291bnQiOjE2LCJtYXgtbWVyZ2UtcmVnaW9uLXNpemUiOjAsIm1heC1zdG9yZS1kb3duLXRpbWUiOiIxaDBtMHMiLCJsZWFkZXItc2NoZWR1bGUtbGltaXQiOjY0LCJyZWdpb24tc2NoZWR1bGUtbGltaXQiOjE2LCJyZXBsaWNhLXNjaGVkdWxlLWxpbWl0IjoyNCwibWVyZ2Utc2NoZWR1bGUtbGltaXQiOjIwLCJ0b2xlcmFudC1zaXplLXJhdGlvIjoyLjUsInNjaGVkdWxlcnMtdjIiOlt7InR5cGUiOiJiYWxhbmNlLXJlZ2lvbiIsImFyZ3MiOm51bGx9LHsidHlwZSI6ImJhbGFuY2UtbGVhZGVyIiwiYXJncyI6bnVsbH0seyJ0eXBlIjoiaG90LXJlZ2lvbiIsImFyZ3MiOm51bGx9LHsidHlwZSI6ImxhYmVsIiwiYXJncyI6bnVsbH1dfSwicmVwbGljYXRpb24iOnsibWF4LXJlcGxpY2FzIjoxLCJsb2NhdGlvbi1sYWJlbHMiOiIifSwibmFtZXNwYWNlIjp7fSwicXVvdGEtYmFja2VuZC1ieXRlcyI6IjAgQiIsImF1dG8tY29tcGFjdGlvbi1yZXRlbnRpb24iOjAsIlRpY2tJbnRlcnZhbCI6IjBzIiwiRWxlY3Rpb25JbnRlcnZhbCI6IjBzIiwic2VjdXJpdHkiOnsiY2FjZXJ0LXBhdGgiOiIiLCJjZXJ0LXBhdGgiOiIiLCJrZXktcGF0aCI6IiJ9LCJsYWJlbC1wcm9wZXJ0eSI6bnVsbCwiV2FybmluZ01zZ3MiOm51bGwsIm5hbWVzcGFjZS1jbGFzc2lmaWVyIjoiIn0=&#34;</span>
+        <span class="p">}</span><span class="p">,</span> 
+        <span class="p">{</span>
+            <span class="nt">&#34;key&#34;</span><span class="p">:</span> <span class="s2">&#34;L3BkLzY1NDU3MzkyMDQxNDM2NDEyNTkvbGVhZGVy&#34;</span><span class="p">,</span> 
+            <span class="nt">&#34;create_revision&#34;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> 
+            <span class="nt">&#34;mod_revision&#34;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> 
+            <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> 
+            <span class="nt">&#34;value&#34;</span><span class="p">:</span> <span class="s2">&#34;CgNwZDEQx/SdpuSGw85XGhRodHRwOi8vcGQucC5jYzoyMjM4MCIUaHR0cDovL3BkLnAuY2M6MjIzNzk=&#34;</span><span class="p">,</span> 
+            <span class="nt">&#34;lease&#34;</span><span class="p">:</span> <span class="mi">8811119877456664000</span>
+        <span class="p">}</span><span class="p">,</span> 
+        <span class="p">{</span>
+            <span class="nt">&#34;key&#34;</span><span class="p">:</span> <span class="s2">&#34;L3BkLzY1NDU3MzkyMDQxNDM2NDEyNTkvcmFmdA==&#34;</span><span class="p">,</span> 
+            <span class="nt">&#34;create_revision&#34;</span><span class="p">:</span> <span class="mi">694</span><span class="p">,</span> 
+            <span class="nt">&#34;mod_revision&#34;</span><span class="p">:</span> <span class="mi">694</span><span class="p">,</span> 
+            <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> 
+            <span class="nt">&#34;value&#34;</span><span class="p">:</span> <span class="s2">&#34;CKvl0bqB5MjrWhAB&#34;</span>
+        <span class="p">}</span><span class="p">,</span> 
+        <span class="p">{</span>
+            <span class="nt">&#34;key&#34;</span><span class="p">:</span> <span class="s2">&#34;L3BkLzY1NDU3MzkyMDQxNDM2NDEyNTkvcmFmdC9yLzAwMDAwMDAwMDAwMDAwMDAwMDAy&#34;</span><span class="p">,</span> 
+            <span class="nt">&#34;create_revision&#34;</span><span class="p">:</span> <span class="mi">694</span><span class="p">,</span> 
+            <span class="nt">&#34;mod_revision&#34;</span><span class="p">:</span> <span class="mi">694</span><span class="p">,</span> 
+            <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> 
+            <span class="nt">&#34;value&#34;</span><span class="p">:</span> <span class="s2">&#34;CAIiBAgBEAEqBAgDEAE=&#34;</span>
+        <span class="p">}</span><span class="p">,</span> 
+        <span class="p">{</span>
+            <span class="nt">&#34;key&#34;</span><span class="p">:</span> <span class="s2">&#34;L3BkLzY1NDU3MzkyMDQxNDM2NDEyNTkvcmFmdC9zLzAwMDAwMDAwMDAwMDAwMDAwMDAx&#34;</span><span class="p">,</span> 
+            <span class="nt">&#34;create_revision&#34;</span><span class="p">:</span> <span class="mi">694</span><span class="p">,</span> 
+            <span class="nt">&#34;mod_revision&#34;</span><span class="p">:</span> <span class="mi">695</span><span class="p">,</span> 
+            <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> 
+            <span class="nt">&#34;value&#34;</span><span class="p">:</span> <span class="s2">&#34;CAESEjE3Mi4xNi4xMC42NToyMjE2MA==&#34;</span>
+        <span class="p">}</span><span class="p">,</span> 
+        <span class="p">{</span>
+            <span class="nt">&#34;key&#34;</span><span class="p">:</span> <span class="s2">&#34;L3BkLzY1NDU3MzkyMDQxNDM2NDEyNTkvcmFmdC9zLzAwMDAwMDAwMDAwMDAwMDAwMDA0&#34;</span><span class="p">,</span> 
+            <span class="nt">&#34;create_revision&#34;</span><span class="p">:</span> <span class="mi">856</span><span class="p">,</span> 
+            <span class="nt">&#34;mod_revision&#34;</span><span class="p">:</span> <span class="mi">856</span><span class="p">,</span> 
+            <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> 
+            <span class="nt">&#34;value&#34;</span><span class="p">:</span> <span class="s2">&#34;CAQSDWt2LnAuY2M6MjIxNjA=&#34;</span>
+        <span class="p">}</span><span class="p">,</span> 
+        <span class="p">{</span>
+            <span class="nt">&#34;key&#34;</span><span class="p">:</span> <span class="s2">&#34;L3BkLzY1NDU3MzkyMDQxNDM2NDEyNTkvcmFmdC9zdGF0dXMvcmFmdF9ib290c3RyYXBfdGltZQ==&#34;</span><span class="p">,</span> 
+            <span class="nt">&#34;create_revision&#34;</span><span class="p">:</span> <span class="mi">694</span><span class="p">,</span> 
+            <span class="nt">&#34;mod_revision&#34;</span><span class="p">:</span> <span class="mi">694</span><span class="p">,</span> 
+            <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> 
+            <span class="nt">&#34;value&#34;</span><span class="p">:</span> <span class="s2">&#34;FSaEFqfEqcU=&#34;</span>
+        <span class="p">}</span><span class="p">,</span> 
+        <span class="p">{</span>
+            <span class="nt">&#34;key&#34;</span><span class="p">:</span> <span class="s2">&#34;L3BkLzY1NDU3MzkyMDQxNDM2NDEyNTkvdGltZXN0YW1w&#34;</span><span class="p">,</span> 
+            <span class="nt">&#34;create_revision&#34;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> 
+            <span class="nt">&#34;mod_revision&#34;</span><span class="p">:</span> <span class="mi">934</span><span class="p">,</span> 
+            <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="mi">926</span><span class="p">,</span> 
+            <span class="nt">&#34;value&#34;</span><span class="p">:</span> <span class="s2">&#34;FSaEvjZofRE=&#34;</span>
+        <span class="p">}</span><span class="p">,</span> 
+        <span class="p">{</span>
+            <span class="nt">&#34;key&#34;</span><span class="p">:</span> <span class="s2">&#34;L3BkL2NsdXN0ZXJfaWQ=&#34;</span><span class="p">,</span> 
+            <span class="nt">&#34;create_revision&#34;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> 
+            <span class="nt">&#34;mod_revision&#34;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> 
+            <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> 
+            <span class="nt">&#34;value&#34;</span><span class="p">:</span> <span class="s2">&#34;WtcjIBdUcqs=&#34;</span>
+        <span class="p">}</span>
+    <span class="p">]</span><span class="p">,</span> 
+    <span class="nt">&#34;count&#34;</span><span class="p">:</span> <span class="mi">10</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>获取 Store 状态
+<ul>
+<li>IP 与域名均可注册到 PD Cluster</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-json" data-lang="json"><span class="p">[</span><span class="err">r</span><span class="err">o</span><span class="err">o</span><span class="err">t</span><span class="err">@</span><span class="err">D</span><span class="err">B</span> <span class="err">e</span><span class="err">t</span><span class="err">c</span><span class="err">d</span><span class="err">-</span><span class="err">v</span><span class="mf">3.1</span><span class="err">.</span><span class="mi">11</span><span class="err">-</span><span class="err">l</span><span class="err">i</span><span class="err">n</span><span class="err">u</span><span class="err">x</span><span class="err">-</span><span class="err">a</span><span class="err">m</span><span class="err">d</span><span class="mi">64</span><span class="p">]</span><span class="err">#</span> <span class="err">c</span><span class="err">u</span><span class="err">r</span><span class="err">l</span> <span class="err">h</span><span class="err">t</span><span class="err">t</span><span class="err">p</span><span class="err">:</span><span class="err">/</span><span class="err">/</span><span class="err">p</span><span class="err">d</span><span class="err">.</span><span class="err">p</span><span class="err">.</span><span class="err">c</span><span class="err">c</span><span class="err">:</span><span class="mi">2379</span><span class="err">/</span><span class="err">p</span><span class="err">d</span><span class="err">/</span><span class="err">a</span><span class="err">p</span><span class="err">i</span><span class="err">/</span><span class="err">v</span><span class="mi">1</span><span class="err">/</span><span class="err">s</span><span class="err">t</span><span class="err">o</span><span class="err">r</span><span class="err">e</span><span class="err">s</span>
+<span class="p">{</span>
+  <span class="nt">&#34;count&#34;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+  <span class="nt">&#34;stores&#34;</span><span class="p">:</span> <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="nt">&#34;store&#34;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="nt">&#34;address&#34;</span><span class="p">:</span> <span class="s2">&#34;172.16.10.65:20160&#34;</span><span class="p">,</span> <span class="err">#</span> <span class="err">I</span><span class="err">P</span> <span class="err">注</span><span class="err">册</span>
+        <span class="nt">&#34;state_name&#34;</span><span class="p">:</span> <span class="s2">&#34;Down&#34;</span>
+      <span class="p">}</span><span class="p">,</span>
+      <span class="nt">&#34;status&#34;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&#34;leader_weight&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="nt">&#34;region_weight&#34;</span><span class="p">:</span> <span class="mi">1</span>
+      <span class="p">}</span>
+    <span class="p">}</span><span class="p">,</span>
+    <span class="p">{</span>
+      <span class="nt">&#34;store&#34;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="nt">&#34;address&#34;</span><span class="p">:</span> <span class="s2">&#34;kv.p.cc:20160&#34;</span><span class="p">,</span> <span class="err">#</span> <span class="err">域</span><span class="err">名</span><span class="err">注</span><span class="err">册</span>
+        <span class="nt">&#34;state_name&#34;</span><span class="p">:</span> <span class="s2">&#34;Up&#34;</span>
+      <span class="p">}</span><span class="p">,</span>
+      <span class="nt">&#34;status&#34;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&#34;capacity&#34;</span><span class="p">:</span> <span class="s2">&#34;118 GiB&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;available&#34;</span><span class="p">:</span> <span class="s2">&#34;23 GiB&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;leader_weight&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="nt">&#34;region_weight&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="nt">&#34;start_ts&#34;</span><span class="p">:</span> <span class="s2">&#34;2018-04-18T19:44:51+08:00&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;last_heartbeat_ts&#34;</span><span class="p">:</span> <span class="s2">&#34;2018-04-18T19:45:51.567575991+08:00&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;uptime&#34;</span><span class="p">:</span> <span class="s2">&#34;1m0.567575991s&#34;</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div>
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Jeff</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2020-01-20
+        
+    </span>
+  </p>
+  
+  <p class="copyright-item">
+    <span class="item-title">License</span>
+    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a></span>
+  </p>
+</div>
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/deploy/">Deploy</a>
+          <a href="/tags/domain/">Domain</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/20180503-disk-space-recovery/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">TiKV 磁盘空间回收步骤记录</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/20180327-change-tidb-ip/">
+            <span class="next-text nav-default">测试在线修改 TiDB Cluster 组件 IP 地址</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="https://github.com/BigerCAP/TiDB-AirPlan/issues" class="iconfont icon-github" title="github"></a>
+  <a href="https://ap.tidb.cc/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2020
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">TiDB - AirPlan</span>
+  </span>
+</div>
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js" integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js" integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin="anonymous"></script>
+  <script><!-- NOTE: timeago.js uses the language code format like "zh_CN" (underscore and case sensitive) -->
+    var languageCode = "en".replace(/-/g, '_').replace(/_(.*)/, function ($0, $1) {return $0.replace($1, $1.toUpperCase());});
+    timeago().render(document.querySelectorAll('.timeago'), languageCode);
+    timeago.cancel();  
+  </script>
+<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

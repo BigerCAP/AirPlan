@@ -49,6 +49,24 @@
     </item>
     
     <item>
+      <title>enterprise tools</title>
+      <link>https://ap.tidb.cc/tags/enterprise-tools/</link>
+      <pubDate>Tue, 05 Jun 2018 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/tags/enterprise-tools/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Syncer</title>
+      <link>https://ap.tidb.cc/tags/syncer/</link>
+      <pubDate>Tue, 05 Jun 2018 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/tags/syncer/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Disk</title>
       <link>https://ap.tidb.cc/tags/disk/</link>
       <pubDate>Thu, 03 May 2018 00:00:00 +0800</pubDate>
@@ -69,9 +87,18 @@
     <item>
       <title>Deploy</title>
       <link>https://ap.tidb.cc/tags/deploy/</link>
-      <pubDate>Tue, 27 Mar 2018 00:00:00 +0800</pubDate>
+      <pubDate>Fri, 06 Apr 2018 00:00:00 +0800</pubDate>
       
       <guid>https://ap.tidb.cc/tags/deploy/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Domain</title>
+      <link>https://ap.tidb.cc/tags/domain/</link>
+      <pubDate>Fri, 06 Apr 2018 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/tags/domain/</guid>
       <description></description>
     </item>
     
@@ -144,6 +171,24 @@
       <pubDate>Fri, 02 Jun 2017 00:00:00 +0800</pubDate>
       
       <guid>https://ap.tidb.cc/tags/prometheus/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Megacli</title>
+      <link>https://ap.tidb.cc/tags/megacli/</link>
+      <pubDate>Sat, 03 Jan 2009 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/tags/megacli/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>RAID</title>
+      <link>https://ap.tidb.cc/tags/raid/</link>
+      <pubDate>Sat, 03 Jan 2009 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/tags/raid/</guid>
       <description></description>
     </item>
     

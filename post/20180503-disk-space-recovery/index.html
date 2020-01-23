@@ -542,13 +542,13 @@ Use <span class="s2">&#34;help store [command] &#34;</span> <span class="k">for<
           <a href="/tags/disk/">Disk</a>
           </div>
       <nav class="post-nav">
-        <a class="prev" href="/post/20200108-tidb-haproxy-real-ip/">
+        <a class="prev" href="/post/20180605-syncer-mindmap/">
             <i class="iconfont icon-left"></i>
-            <span class="prev-text nav-default">TiDB &amp; Haproxy / show processlist View real IP</span>
+            <span class="prev-text nav-default">总结 - Syncer 助力思维成长</span>
             <span class="prev-text nav-mobile">Prev</span>
           </a>
-        <a class="next" href="/post/20180327-change-tidb-ip/">
-            <span class="next-text nav-default">测试在线修改 TiDB Cluster 组件 IP 地址</span>
+        <a class="next" href="/post/20180406-tidb-domain/">
+            <span class="next-text nav-default">测试域名代替 IP 部署 TiDB</span>
             <span class="next-text nav-mobile">Next</span>
             <i class="iconfont icon-right"></i>
           </a>
@@ -607,6 +607,13 @@ Use <span class="s2">&#34;help store [command] &#34;</span> <span class="k">for<
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js" integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js" integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin="anonymous"></script>
+  <script><!-- NOTE: timeago.js uses the language code format like "zh_CN" (underscore and case sensitive) -->
+    var languageCode = "en".replace(/-/g, '_').replace(/_(.*)/, function ($0, $1) {return $0.replace($1, $1.toUpperCase());});
+    timeago().render(document.querySelectorAll('.timeago'), languageCode);
+    timeago.cancel();  
+  </script>
 <script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
 
 

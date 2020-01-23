@@ -58,14 +58,14 @@
   </url>
   
   <url>
-    <loc>https://ap.tidb.cc/tags/tidb/</loc>
+    <loc>https://ap.tidb.cc/categories/tidb/</loc>
     <lastmod>2020-01-20T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
-    <loc>https://ap.tidb.cc/categories/tidb/</loc>
+    <loc>https://ap.tidb.cc/tags/tidb/</loc>
     <lastmod>2020-01-20T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -81,6 +81,34 @@
   <url>
     <loc>https://ap.tidb.cc/</loc>
     <lastmod>2020-01-21T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/enterprise-tools/</loc>
+    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/syncer/</loc>
+    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/categories/troubleshooting/</loc>
+    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/post/20180605-syncer-mindmap/</loc>
+    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -107,14 +135,21 @@
   </url>
   
   <url>
-    <loc>https://ap.tidb.cc/categories/troubleshooting/</loc>
+    <loc>https://ap.tidb.cc/tags/deploy/</loc>
     <lastmod>2020-01-20T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
-    <loc>https://ap.tidb.cc/tags/deploy/</loc>
+    <loc>https://ap.tidb.cc/tags/domain/</loc>
+    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/post/20180406-tidb-domain/</loc>
     <lastmod>2020-01-20T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -213,6 +248,27 @@
   
   <url>
     <loc>https://ap.tidb.cc/post/20170602-node_exporter/</loc>
+    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/post/20090103-megacli/</loc>
+    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/megacli/</loc>
+    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/raid/</loc>
     <lastmod>2020-01-20T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>

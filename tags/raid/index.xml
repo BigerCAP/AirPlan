@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>RAID on TiDB AirPlan - A biger solution</title>
+    <link>https://ap.tidb.cc/tags/raid/</link>
+    <description>Recent content in RAID on TiDB AirPlan - A biger solution</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright>TiDB - AirPlan</copyright>
+    <lastBuildDate>Sat, 03 Jan 2009 00:00:00 +0800</lastBuildDate>
+    
+	<atom:link href="https://ap.tidb.cc/tags/raid/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Linux - Megacli 软件配置硬 RAID</title>
+      <link>https://ap.tidb.cc/post/20090103-megacli/</link>
+      <pubDate>Sat, 03 Jan 2009 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20090103-megacli/</guid>
+      <description>0x00 启示 服务器在远程机房托管，如果更改 raid level 需要通知机房运维人员下工单重做，时间周期不确定；听朋友介绍了该软件，通过软件对 LSI Raid 卡重新配置 Raid</description>
+    </item>
+    
+  </channel>
+</rss>
