@@ -48,7 +48,7 @@
 <meta itemprop="description" content="0x00 背影 通过本篇文档学习 TiDB 集群监控架构 (默认按照 TiDB-ansible 部署为准) 本篇文档按照 2019 年中 TiDB-ansible master branch 描述；区别在于是否有 pushgateway 组件 (端口 9091) 以下文档（百家饭&#43;机器译">
 <meta itemprop="datePublished" content="2017-06-01T00:00:00&#43;08:00" />
 <meta itemprop="dateModified" content="2020-01-23T00:00:00&#43;08:00" />
-<meta itemprop="wordCount" content="2811">
+<meta itemprop="wordCount" content="2800">
 
 
 
@@ -128,7 +128,7 @@
         <div class="post-category">
             <a href="/categories/monitoring/"> Monitoring </a>
             </div>
-          <span class="more-meta"> 2811 words </span>
+          <span class="more-meta"> 2800 words </span>
           <span class="more-meta"> 6 mins read </span>
         <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
       </div>
@@ -169,14 +169,14 @@
     <div class="post-content">
       <h2 id="0x00-背影">0x00 背影</h2>
 <blockquote>
-<p>通过本篇文档学习 TiDB 集群监控架构 (默认按照 TiDB-ansible 部署为准)
-本篇文档按照 2019 年中 TiDB-ansible master branch 描述；区别在于是否有 pushgateway 组件 (端口 9091)
+<p>通过本篇文档学习 TiDB 集群监控架构 (默认按照 TiDB-ansible 部署为准)<br>
+本篇文档按照 2019 年中 TiDB-ansible master branch 描述；区别在于是否有 pushgateway 组件 (端口 9091)<br>
 以下文档（百家饭+机器译文）部分区域 ⚠️ 无法直视</p>
 </blockquote>
 <h2 id="0x01-介绍">0x01 介绍</h2>
 <blockquote>
-<p>TiDB 使用开源时序数据库 Prometheus 组件存放监控数据
-使用开源数据图形可视化工具 Grafana 做数据展示
+<p>TiDB 使用开源时序数据库 Prometheus 组件存放监控数据<br>
+使用开源数据图形可视化工具 Grafana 做数据展示<br>
 接下来让我们看下该套监控是如何运作得……</p>
 </blockquote>
 <h3 id="监控流程">监控流程</h3>
@@ -215,7 +215,8 @@
 </ul>
 <h3 id="监控组件端口">监控组件端口</h3>
 <ul>
-<li>第三方监控组件端口
+<li>第三方监控组件端口</li>
+</ul>
 <table>
 <thead>
 <tr>
@@ -262,11 +263,10 @@
 </tr>
 </tbody>
 </table>
-</li>
-</ul>
 <h3 id="tidb-组件端口">TiDB 组件端口</h3>
 <ul>
-<li>TiDB 服务监控数据端口
+<li>TiDB 服务监控数据端口</li>
+</ul>
 <table>
 <thead>
 <tr>
@@ -293,8 +293,6 @@
 </tr>
 </tbody>
 </table>
-</li>
-</ul>
 <h2 id="0x02-prometheus">0x02 Prometheus</h2>
 <blockquote>
 <p>监控架构分三大部分（TiDB、Prometheus 家族、Grafana），现在看下 Prometheus 家族流程工作</p>
@@ -376,17 +374,13 @@
 <li><a href="https://prometheus.io/docs/prometheus/latest/querying/functions/">Prometheus 查询函数</a></li>
 <li><a href="https://github.com/prometheus/prometheus/blob/master/documentation/examples/prometheus.yml">Prometheus 配置文件模板</a></li>
 <li><a href="https://prometheus.io/docs/prometheus/latest/querying/api/#tsdb-admin-apis">Prometheus admin API</a></li>
+<li><a href="https://songjiayang.gitbooks.io/prometheus/content/concepts/data-model.html">Prometheus Docs 翻译</a>  (第三方翻译)</li>
 </ul>
-</li>
-<li>
-<blockquote>
-<p><a href="https://songjiayang.gitbooks.io/prometheus/content/concepts/data-model.html">Prometheus</a> 官方技术文档翻译 (第三方翻译，注意时间线)</p>
-</blockquote>
 </li>
 </ul>
 <h2 id="0x03-grafana">0x03 Grafana</h2>
 <blockquote>
-<p>支持 Graphite、OpenTSDB、InfluxDB、Prometheus、Elasticsearch、MySQL 等服务数据接口，主要是提供度量分析和仪表板可视化工具。
+<p>支持 Graphite、OpenTSDB、InfluxDB、Prometheus、Elasticsearch、MySQL 等服务数据接口，主要是提供度量分析和仪表板可视化工具。<br>
 附带一些用户管理鉴权功能，从 4.0 版本到 5.0+ 版本体验上 <em>用户管理功能</em> 逐渐清晰</p>
 </blockquote>
 <h3 id="基础功能">基础功能</h3>
