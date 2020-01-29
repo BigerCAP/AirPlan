@@ -15,7 +15,7 @@ tags:
 
 高可用性（英语：high availability，缩写为 HA）测试 failpoint 场景，需要在服务前面添加 load balance 组件；比如 F5、LVS、Haproxy 等支持 TCP 协议的网络分发负载工具。
 
-之前有篇文档介绍 TiDB & Haproxy [HAproxy – Load Balance Service](https://docs.tidb.cc/SoftWare/HAproxy.html "docs.tidb.cc HAproxy – Load Balance Service") 使用姿势 / 但随后在运维期间遇见一些小问题；即 TiDB 部署在 Haproxy 后面无法通过 show processlist 查看 client 真实 IP 地址信息，每次 show processlist 看到的都是 Haproxy 主机信息。
+之前有篇文档介绍 TiDB & Haproxy [HAproxy – Load Balance Service](/post/20170610-HAproxy "docs.tidb.cc HAproxy – Load Balance Service https://ap.tidb.cc/post/20170610-haproxy/") 使用姿势 / 但随后在运维期间遇见一些小问题；即 TiDB 部署在 Haproxy 后面无法通过 show processlist 查看 client 真实 IP 地址信息，每次 show processlist 看到的都是 Haproxy 主机信息。
 
 > Haproxy Proxy Architecture Overview
 
@@ -29,7 +29,7 @@ tags:
 | A | 10.0.1.4 | 外网 IP 为 138.x.x.x
 | B | 42.x.x.x | 客户端所在机器
 
-通过 [HAproxy – Load Balance Service](https://docs.tidb.cc/SoftWare/HAproxy.html "docs.tidb.cc HAproxy – Load Balance Service")文档中安装 haproxy ； yum install haproxy 并使用文档中的配置文件。
+通过 [HAproxy – Load Balance Service](/post/20170610-HAproxy "docs.tidb.cc HAproxy – Load Balance Service https://ap.tidb.cc/post/20170610-haproxy/")文档中安装 haproxy ； yum install haproxy 并使用文档中的配置文件。
 
 Haproxy 配置文件栗子如下：
 
@@ -72,7 +72,6 @@ mysql> show processlist;
 +------+------+--------------+------+---------+------+-------+------------------+
 1 row in set (0.00 sec)
 ```
-
 
 在 B 机器执行 `mysql -h 138.x.x.x -u st -P 3308 -p` 执行结果如下；通过 Haproxy 负载均衡连接数据库，在数据库无法区分客户端机器 IP 地址是多少；
 
@@ -183,9 +182,9 @@ mysql> show processlist;
 
 PR 最底部还有一些关于 Proxy Protocol 的讨论
 
-> Proxy Protocol 扩展阅读
-> - 扩展阅读 [MariaDB 源码分析 Proxy Protocol](http://mysql.taobao.org/monthly/2019/01/07/ "aliyun RDS 团队文档")
-> - 扩展 issue [blacktear23/go-proxyprotocol/pull/1](https://github.com/blacktear23/go-proxyprotocol/pull/1 "该 issue 不在 PingCAP/TiDB repo 下，由该作者自行控制，可能会被删除。")
+> - Proxy Protocol 扩展阅读
+>   - 扩展阅读 [MariaDB 源码分析 Proxy Protocol](http://mysql.taobao.org/monthly/2019/01/07/ "aliyun RDS 团队文档")
+>   - 扩展 issue [blacktear23/go-proxyprotocol/pull/1](https://github.com/blacktear23/go-proxyprotocol/pull/1 "该 issue 不在 PingCAP/TiDB repo 下，由该作者自行控制，可能会被删除。")
 
 ```markdown
 1. most proxy protocol implementations such as MariaDB, Percona server, apache(via mod_remoteip), allow user to specify a list of cider blocks（`proxy-protocol-networks` for MariaDB and Percona server，`RemoteIPProxyProtocolExceptions ` for apache), IP in the list MUST use proxy protocol and IP not in the list MUST NOT use proxy protocol(but they can still connect without proxy protocol). some implementations, like nginx and TiDB, forces all IP addresses to use proxy protocol when enables proxy protocol options.
@@ -210,7 +209,7 @@ So I think its good to do this way.
     - 通过检测 IP 地址是否存在与 CIDRs 列表内，而不是尝试获取服务端返回的 hedaer 信息（proxy v1 header 是 5 字节，v2 版本是 12 字节）；同时在处理 CIDRs 列表外的 IP 时，可以省略探测服务器协议状态。
     - 允许非白名单外的 IP 连接 TiDB 后，可以对该 TiDB 做特殊处理，如：监控节点、处理 OLAP 业务、执行人工查询等
 
-### 0x03A 测试 CIDRs 场景一
+### 场景一
 
 > haproxy 使用以下配置文件
 
@@ -228,7 +227,7 @@ TiDB 使用命令启动 `./tidb-server --host 10.0.1.4 --proxy-protocol-networks
 
 使用 `mysql -h 138.X.X.X -u te -P 4000 -p` 登陆未出现异常；Proxy Protocol  CIDRs 列表外非 Proxy 协议数据可以直接连接 TiDB-server(10.0.1.4 与 138.x.x.x 在防火墙做了端口映射)。
 
-### 0x03B 测试 CIDRs 场景二
+### 场景二
 
 > haproxy 使用以下配置文件
 
@@ -250,7 +249,7 @@ TiDB 使用该模式启动 `./tidb-server --host 10.0.1.4 --proxy-protocol-netwo
 
 满足 Proxy 协议规则，CIDRs 列表内的 IP 地址必须使用 Proxy 协议链接，否则拒绝提供服务。
 
-### 0x03C 测试 CIDRs 场景三
+### 场景三
 
 > haproxy 使用以下配置文件
 
@@ -267,7 +266,7 @@ TiDB 使用该模式启动 `./tidb-server --host 10.0.1.4`
 使用命令经过 Haproxy 服务登陆 TiDB `mysql -h  127.0.0.1 -u root -P 3307`，返回错误 `ERROR 2013 (HY000): Lost connection to MySQL server at 'reading authorization packet', system error: 0`
 后端主机不允许 Haproxy 建立链接，因 CIDRs IP 范围内的主机（ only support｜ 仅支持）proxy 协议的客户端链接。
 
-### 0x03D 测试 CIDRs 场景四
+### 场景四
 
 > haproxy 使用以下配置文件
 
@@ -279,7 +278,7 @@ listen web
     server tidb1 10.0.1.4:4001 weight 1
 ```
 
-TiDB 使用该模式启动 ` ./tidb-server --proxy-protocol-networks "10.0.1.0/24" -P 4001`
+TiDB 使用该模式启动 `./tidb-server --proxy-protocol-networks "10.0.1.0/24" -P 4001`
 
 使用该命令经过 Haproxy 登陆 `mysql -h  127.0.0.1 -u root -P 3308`  TiDB 服务；返回错误  `ERROR 2013 (HY000): Lost connection to MySQL server at 'reading initial communication packet', system error: 0` ；查看 tidb.log 日志信息，发现是尝试判断 proxy 协议状态时失败；默认读取 proxy header 信息超时时间 5s
 
@@ -287,7 +286,7 @@ TiDB 使用该模式启动 ` ./tidb-server --proxy-protocol-networks "10.0.1.0/2
 [2020/01/09 22:02:59.274 +08:00] [ERROR] [server.go:321] ["PROXY protocol failed"] [error="Header read timeout"] [stack="github.com/pingcap/tidb/server.(*Server).Run\n\t/home/jenkins/workspace/build_tidb_master/go/src/github.com/pingcap/tidb/server/server.go:321\nmain.runServer\n\t/home/jenkins/workspace/build_tidb_master/go/src/github.com/pingcap/tidb/tidb-server/main.go:568\nmain.main\n\t/home/jenkins/workspace/build_tidb_master/go/src/github.com/pingcap/tidb/tidb-server/main.go:174\nruntime.main\n\t/usr/local/go/src/runtime/proc.go:200"]
 ```
 
-### 0x03E CIDRs 测试总结
+### 测试总结
 
 |场景| Haproxy | TiDB | 备注
 ----|----|----|----
@@ -302,8 +301,8 @@ TiDB 使用该模式启动 ` ./tidb-server --proxy-protocol-networks "10.0.1.0/2
 ## 0x04 赞
 
 > 点赞 [PR #3757](https://github.com/pingcap/tidb/pull/3757) 作者 [Rain Li](https://github.com/blacktear23) & [SteamedFish](https://github.com/SteamedFish)
-
+> // 人文结案
 > Proxy Protocols 功能总结：引入了 proxy protocol 来解决 client ip 透传的问题。
->   proxy 节点获取到 client ip 后，将 client ip 包装在 proxy protocol 报文中发给 real server，real server 解析到了 proxy protocol 报文，再用报文中的 IP 替换 Proxy 节点的 IP
+> proxy 节点获取到 client ip 后，将 client ip 包装在 proxy protocol 报文中发给 real server，real server 解析到了 proxy protocol 报文，再用报文中的 IP 替换 Proxy 节点的 IP
 
 ![UML Proxy Protocols / TiDB / Docs.tidb.cc](http://www.plantuml.com/plantuml/png/SoWkIImgAStDuNBEoKpDAr7GjLFmI2meog-eLB1IIFOCKB1LC3JGCz0pr3FHAKRXMXaR6vXpGHM3z8LakZXPAIIYQKh6r8Hka8c1WG4NI3V2bASTIvvDMwi0LFTinlgd4vOzdRD2mTdJ9QXOuScEjU_tz3nTEmCezAAd-UdiBK_RMXytDA4Q0D89KOFGzcHlsvCTlL3H0B2hFL8JKrAB59xiN_YiSVsJFREUh-rykg_rnRRMPzEteHduhAVpUUjogBwd6zeK8046TkBi_Szw5y723IW2qmeJ0eOafey912VKV2i5mW48Ypk4M_iNFkliVjOnuMdNV4p9pkKl5lPmEQJcfG3Z7G00 "Proxy protocols & TiDB / Docs.tidb.cc")
