@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>监控架构 - TIDB 监控运维 FAQ - TiDB AirPlan - A biger solution</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Jeff" /><meta name="description" content="0x00 唠叨 遇见了、记下了，后面或许会遇见；经历过的事件只记下了标签、这里或许是个解答题 部分问题会因使用版本或场景解决方案不一，仅供参考 如有雷同 纯" /><meta name="keywords" content="TiDB, AirPlan, TiDB OPS, tidb-operator, 2pc, raft, databases, mysql, htap" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.63.2 with theme even" />
+
+
+<link rel="canonical" href="https://ap.tidb.cc/post/20170607-prometheus-faq/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<link href="/dist/even.04bd84cd.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="监控架构 - TIDB 监控运维 FAQ" />
+<meta property="og:description" content="0x00 唠叨 遇见了、记下了，后面或许会遇见；经历过的事件只记下了标签、这里或许是个解答题 部分问题会因使用版本或场景解决方案不一，仅供参考 如有雷同 纯" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://ap.tidb.cc/post/20170607-prometheus-faq/" />
+<meta property="article:published_time" content="2017-06-07T00:00:00+08:00" />
+<meta property="article:modified_time" content="2020-01-23T00:00:00+08:00" />
+<meta itemprop="name" content="监控架构 - TIDB 监控运维 FAQ">
+<meta itemprop="description" content="0x00 唠叨 遇见了、记下了，后面或许会遇见；经历过的事件只记下了标签、这里或许是个解答题 部分问题会因使用版本或场景解决方案不一，仅供参考 如有雷同 纯">
+<meta itemprop="datePublished" content="2017-06-07T00:00:00&#43;08:00" />
+<meta itemprop="dateModified" content="2020-01-23T00:00:00&#43;08:00" />
+<meta itemprop="wordCount" content="1751">
+
+
+
+<meta itemprop="keywords" content="Prometheus,Grafana,TiDB," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="监控架构 - TIDB 监控运维 FAQ"/>
+<meta name="twitter:description" content="0x00 唠叨 遇见了、记下了，后面或许会遇见；经历过的事件只记下了标签、这里或许是个解答题 部分问题会因使用版本或场景解决方案不一，仅供参考 如有雷同 纯"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">TiDB AirPlan</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">About</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">TiDB AirPlan</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/about/">About</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">监控架构 - TIDB 监控运维 FAQ</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2017-06-07 </span>
+        <div class="post-category">
+            <a href="/categories/monitoring/"> Monitoring </a>
+            </div>
+          <span class="more-meta"> 1751 words </span>
+          <span class="more-meta"> 4 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#0x00-唠叨">0x00 唠叨</a></li>
+    <li><a href="#0x01-prometheus-问题">0x01 Prometheus 问题</a>
+      <ul>
+        <li><a href="#升级-prometheus">升级 Prometheus</a></li>
+        <li><a href="#监控数据异常">监控数据异常</a></li>
+        <li><a href="#启动速度慢">启动速度慢</a></li>
+        <li><a href="#监控数据清理">监控数据清理</a></li>
+      </ul>
+    </li>
+    <li><a href="#0x02-grafana-问题">0x02 Grafana 问题</a>
+      <ul>
+        <li><a href="#grafana-忘记密码">Grafana 忘记密码</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h2 id="0x00-唠叨">0x00 唠叨</h2>
+<blockquote>
+<p>遇见了、记下了，后面或许会遇见；经历过的事件只记下了标签、这里或许是个解答题
+部分问题会因使用版本或场景解决方案不一，仅供参考 如有雷同 纯属我剽；</p>
+</blockquote>
+<h2 id="0x01-prometheus-问题">0x01 Prometheus 问题</h2>
+<h3 id="升级-prometheus">升级 Prometheus</h3>
+<blockquote>
+<p>大致时间 2017Q3 当时 Prometheus 出了 2.0，tidb-ansible 默认部署 1.8 的版本，2.0 版本有一些我也不知道的优化（迷信新版本肯定有提升）；然后尝试在 1.8 上升级新版本</p>
+</blockquote>
+<p>Prometheus 升级方案比较简单，和 TiDB 相同都是由 golang 语言开发和静态编译的 binary，替换新的 binary 文件然后重启服务即可生效。然我没看官方文档的亏，替换后升级失败；向 GitHub repo 学习后发现 1.8 和 2.0 底层 openTSDB（官方自称，<em>资料查询是 levelDB 进化而来</em> ） 时序数据库不兼容了，也就是 2.0 版本无法读取和写入 1.8 版本生成的数据。哎…… 数据不过渡啊、更换目录后折腾发现配置文件还有部分不兼容</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-fallback" data-lang="fallback">time=&#34;2017-08-08T15:38:30+08:00&#34; level=info msg=&#34;Starting prometheus (version=1.5.2, branch=master, revision=bd1182d29f462c39544f94cc822830e1c64cf55b)&#34; source=&#34;main.go:75&#34;
+time=&#34;2017-08-08T15:38:30+08:00&#34; level=info msg=&#34;Build context (go=go1.7.5, user=root@a8af9200f95d, date=20170210-14:41:22)&#34; source=&#34;main.go:76&#34;
+time=&#34;2017-08-08T15:38:30+08:00&#34; level=info msg=&#34;Loading configuration file /tidb-data/tidb/deploy/conf/prometheus.yml&#34; source=&#34;main.go:248&#34;
+time=&#34;2017-08-08T15:38:30+08:00&#34; level=error msg=&#34;Error opening memory series storage: found existing files in storage path that do not look like storage files compatible with this version of Prometheus; please delete the files in the storage path or choose a different storage path&#34; source=&#34;main.go:182&#34;
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>TiDB ansible 部署历史版本
+<ul>
+<li>Prometheus 1.6</li>
+<li>Prometheus 1.8
+<ul>
+<li>1.8 与 2.0 数据不兼容</li>
+</ul>
+</li>
+<li>Prometheus 2.0 配置文件与 1.8 版本部分不兼容
+<ul>
+<li>新增 Prometheus <a href="https://prometheus.io/docs/prometheus/latest/querying/api/#tsdb-admin-apis">tsdb-admin-apis</a> 功能，该功能在 devops 平台中有较好的扩展性</li>
+<li>告警配置文件 alert.rule 格式该为 yml</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="监控数据异常">监控数据异常</h3>
+<p>有一套数据量比较大的 TiDB 集群，大概 80 * TiKV、10 * TiDB、3 * PD 部署在 60 台物理机上，某天巡检发现监控数据出现了些问题；不定期出现几分钟的无数据状态。查看日志发现下面日志信息：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-fallback" data-lang="fallback">time=&#34;2017-10-24T10:08:30+08:00&#34; level=warning msg=&#34;Storage has entered rushed mode.&#34; chunksToPersist=107071 maxChunksToPersist=524288 maxMemoryChunks=10485
+76 memoryChunks=1139421 source=&#34;storage.go:1660&#34; urgencyScore=0.8663654327392578
+
+time=&#34;2017-10-24T10:05:39+08:00&#34; level=info msg=&#34;Storage has left rushed mode.&#34; chunksToPersist=108398 maxChunksToPersist=524288 maxMemoryChunks=1048576 mem
+oryChunks=1121866 source=&#34;storage.go:1647&#34; urgencyScore=0.6989479064941406
+
+time=&#34;2017-10-24T10:05:45+08:00&#34; level=warning msg=&#34;Storage has entered rushed mode.&#34; chunksToPersist=112409 maxChunksToPersist=524288 maxMemoryChunks=10485
+76 memoryChunks=1268143 source=&#34;storage.go:1660&#34; urgencyScore=1
+</code></pre></td></tr></table>
+</div>
+</div><p>界面展示为数据短暂断崖式下降,日志中打印 <code>Storage has entered rushed mode.</code> 信息；通过这些信息在网上冲浪，发现 GitHub Prometheus 有一些类似的问题</p>
+<ul>
+<li>相关 Github Prometheus issue
+<ul>
+<li><a href="https://github.com/prometheus/prometheus/issues/2542">https://github.com/prometheus/prometheus/issues/2542</a></li>
+<li><a href="https://github.com/coreos/prometheus-operator/issues/304">https://github.com/coreos/prometheus-operator/issues/304</a></li>
+<li><a href="https://github.com/prometheus/prometheus/issues/2936">https://github.com/prometheus/prometheus/issues/2936</a></li>
+<li><a href="https://github.com/prometheus/prometheus/issues/2222">https://github.com/prometheus/prometheus/issues/2222</a></li>
+</ul>
+</li>
+</ul>
+<p>根据一顿胡聊聊理解，大致说从各节点上获取到的数据无法在短时间内刷写到磁盘上，然后导致临时存放在内存中的数据超时丢弃了。辣么还要研究下怎么这么个现象……</p>
+<p>继续探索 Prometheus 的 storage 相关的参数，看有什么方案</p>
+<ul>
+<li>Prometheus <a href="http://www.jianshu.com/p/36f72490a2a0">内存参数 &amp; storage 参数</a>介绍</li>
+</ul>
+<p>未完待续</p>
+<h3 id="启动速度慢">启动速度慢</h3>
+<ul>
+<li>
+<p>Prometheus 启动后，发现网页无法打开，查看日志后，发现 Prometheus 启动后一直在 GC</p>
+<ul>
+<li>Prometheus 2.0 与 1.0.8 底层存储格式不一致，这个在 2.0 后续版本上有一些优化，但数据量超过 500G 启动速度还是直线下降</li>
+<li>一般是修改参数后重启进程，官方文档提示可以使用 kill -SIGHUP PID 用来重新加载配置文件、或者使用 2.1 版本上的 admin api 功能</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash"><span class="o">[</span>tidb@Jeff scripts<span class="o">]</span>$ ./run_prometheus.sh
+<span class="nv">level</span><span class="o">=</span>info <span class="nv">ts</span><span class="o">=</span>2018-04-17T03:04:31.495865947Z <span class="nv">caller</span><span class="o">=</span>main.go:220 <span class="nv">msg</span><span class="o">=</span><span class="s2">&#34;Starting Prometheus&#34;</span> <span class="nv">version</span><span class="o">=</span><span class="s2">&#34;(version=2.2.0, branch=HEAD, revision=f63e7db4cbdb616337ca877b306b9b96f7f4e381)&#34;</span>
+<span class="nv">level</span><span class="o">=</span>info <span class="nv">ts</span><span class="o">=</span>2018-04-17T03:04:31.495932795Z <span class="nv">caller</span><span class="o">=</span>main.go:221 <span class="nv">build_context</span><span class="o">=</span><span class="s2">&#34;(go=go1.10, user=root@52af9f66ce71, date=20180308-16:40:42)&#34;</span>
+<span class="nv">level</span><span class="o">=</span>info <span class="nv">ts</span><span class="o">=</span>2018-04-17T03:04:31.495952002Z <span class="nv">caller</span><span class="o">=</span>main.go:222 <span class="nv">host_details</span><span class="o">=</span><span class="s2">&#34;(Linux 3.10.0-327.el7.x86_64 #1 SMP Thu Nov 19 22:10:57 UTC 2015 x86_64 Jeff (none))&#34;</span>
+<span class="nv">level</span><span class="o">=</span>info <span class="nv">ts</span><span class="o">=</span>2018-04-17T03:04:31.495966987Z <span class="nv">caller</span><span class="o">=</span>main.go:223 <span class="nv">fd_limits</span><span class="o">=</span><span class="s2">&#34;(soft=1000000, hard=1000000)&#34;</span>
+<span class="nv">level</span><span class="o">=</span>info <span class="nv">ts</span><span class="o">=</span>2018-04-17T03:04:31.498497082Z <span class="nv">caller</span><span class="o">=</span>main.go:504 <span class="nv">msg</span><span class="o">=</span><span class="s2">&#34;Starting TSDB ...&#34;</span>
+<span class="nv">level</span><span class="o">=</span>info <span class="nv">ts</span><span class="o">=</span>2018-04-17T03:04:31.498536225Z <span class="nv">caller</span><span class="o">=</span>web.go:382 <span class="nv">component</span><span class="o">=</span>web <span class="nv">msg</span><span class="o">=</span><span class="s2">&#34;Start listening for connections&#34;</span> <span class="nv">address</span><span class="o">=</span>:9090
+<span class="nv">level</span><span class="o">=</span>info <span class="nv">ts</span><span class="o">=</span>2018-04-17T03:05:52.153499505Z <span class="nv">caller</span><span class="o">=</span>main.go:514 <span class="nv">msg</span><span class="o">=</span><span class="s2">&#34;TSDB started&#34;</span>
+<span class="nv">level</span><span class="o">=</span>info <span class="nv">ts</span><span class="o">=</span>2018-04-17T03:05:52.153580197Z <span class="nv">caller</span><span class="o">=</span>main.go:588 <span class="nv">msg</span><span class="o">=</span><span class="s2">&#34;Loading configuration file&#34;</span> <span class="nv">filename</span><span class="o">=</span>/data1/deploy/conf/prometheus.yml
+<span class="nv">level</span><span class="o">=</span>info <span class="nv">ts</span><span class="o">=</span>2018-04-17T03:05:52.177873304Z <span class="nv">caller</span><span class="o">=</span>main.go:491 <span class="nv">msg</span><span class="o">=</span><span class="s2">&#34;Server is ready to receive web requests.&#34;</span>
+<span class="nv">level</span><span class="o">=</span>info <span class="nv">ts</span><span class="o">=</span>2018-04-17T03:05:57.320867461Z <span class="nv">caller</span><span class="o">=</span>compact.go:394 <span class="nv">component</span><span class="o">=</span>tsdb <span class="nv">msg</span><span class="o">=</span><span class="s2">&#34;compact blocks&#34;</span> <span class="nv">count</span><span class="o">=</span><span class="m">1</span> <span class="nv">mint</span><span class="o">=</span><span class="m">1523923200000</span> <span class="nv">maxt</span><span class="o">=</span><span class="m">1523930400000</span>
+<span class="nv">level</span><span class="o">=</span>info <span class="nv">ts</span><span class="o">=</span>2018-04-17T03:06:03.658563096Z <span class="nv">caller</span><span class="o">=</span>head.go:348 <span class="nv">component</span><span class="o">=</span>tsdb <span class="nv">msg</span><span class="o">=</span><span class="s2">&#34;head GC completed&#34;</span> <span class="nv">duration</span><span class="o">=</span>227.952838ms
+<span class="nv">level</span><span class="o">=</span>info <span class="nv">ts</span><span class="o">=</span>2018-04-17T03:06:06.403176186Z <span class="nv">caller</span><span class="o">=</span>head.go:357 <span class="nv">component</span><span class="o">=</span>tsdb <span class="nv">msg</span><span class="o">=</span><span class="s2">&#34;WAL truncation completed&#34;</span> <span class="nv">duration</span><span class="o">=</span>2.74453888s
+<span class="nv">level</span><span class="o">=</span>info <span class="nv">ts</span><span class="o">=</span>2018-04-17T03:06:06.666573558Z <span class="nv">caller</span><span class="o">=</span>compact.go:394 <span class="nv">component</span><span class="o">=</span>tsdb <span class="nv">msg</span><span class="o">=</span><span class="s2">&#34;compact blocks&#34;</span> <span class="nv">count</span><span class="o">=</span><span class="m">3</span> <span class="nv">mint</span><span class="o">=</span><span class="m">1523901600000</span> <span class="nv">maxt</span><span class="o">=</span><span class="m">1523923200000</span>
+</code></pre></td></tr></table>
+</div>
+</div></li>
+<li>
+<p>查看 metrics 数据目录大小</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash">du -sh *
+
+89G prometheus2.0.0.data.metrics
+</code></pre></td></tr></table>
+</div>
+</div></li>
+<li>
+<p>查看 Prometheus 具体版本信息</p>
+<ul>
+<li>查看官方 changelog 信息，在 Prometheus 2.0.2 对启动速度有优化</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash"><span class="o">[</span>tidb@Jeff deploy<span class="o">]</span>$ ./prometheus --version
+prometheus, version 2.2.0 <span class="o">(</span>branch: HEAD, revision: f63e7db4cbdb616337ca877b306b9b96f7f4e381<span class="o">)</span>
+  build user:       root@52af9f66ce71
+  build date:       20180308-16:40:42
+  go version:       go1.10
+</code></pre></td></tr></table>
+</div>
+</div></li>
+</ul>
+<h3 id="监控数据清理">监控数据清理</h3>
+<ul>
+<li>节点下线后，metric 由残留数据
+<ul>
+<li>第一种方案：
+<ul>
+<li>停止 Prometheus 与 Push Gateway 服务，然后删除 Prometheus 的所有监控数据，然后启动两个组件。</li>
+</ul>
+</li>
+<li>第二种方案：
+<ul>
+<li>人工修改 metric ，按个过滤掉所有已经被下线的节点信息</li>
+<li>histogram_quantile(0.99, sum(rate(tidb_server_handle_query_duration_seconds_bucket{instance!=&quot;6a5114505e5f_4000&rdquo;}[1m])) by (le, instance))</li>
+</ul>
+</li>
+<li>第三种方案：
+<ul>
+<li>目前只能通过 http api 删除历史数据，不能删除 instance 信息</li>
+<li>且版本必须高于 2.1.0 以上，官方文档 <code>https://prometheus.io/docs/prometheus/latest/querying/api/#tsdb-admin-apis</code>
+<ul>
+<li><code>curl -XPOST -g 'http://172.16.10.65:29090/api/v1/admin/tsdb/delete_series?match[]=tidb_server_handle_query_duration_seconds_bucket'</code></li>
+<li><code>curl -XPOST -g 'http://172.16.10.65:29090/api/v1/admin/tsdb/clean_tombstones'</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="0x02-grafana-问题">0x02 Grafana 问题</h2>
+<h3 id="grafana-忘记密码">Grafana 忘记密码</h3>
+<h4 id="重新部署">重新部署</h4>
+<blockquote>
+<p>一般情况 Grafana 公司不会重度使用监控自带的鉴权系统，所以仅做监控展示的 Grafana 的 sqllite 里并木有神马数据。重新部署一套监控然后添加 Prometheus 数据源是最简单的方式。
+比较烦人的是那些 dashboard 需要重新导入，而 tidb-ansible 会自动化导入那些默认的 dashboard、那些后期修改的就没办法了
+适合执行力度快的同学</p>
+</blockquote>
+<ul>
+<li>删除 Grafana 目录下数据，dashboard 二次自定义将会丢失</li>
+<li>执行 <code>ansible-playbook deploy.yml --tags=grafana</code> 部署</li>
+<li>执行 <code>ansible-playbook start.yml --tags=grafana</code> 启动</li>
+</ul>
+<h4 id="暴力重置-grafana-db">暴力重置 Grafana db</h4>
+<blockquote>
+<p>该方式与上述方案结果相同，会丢失 dashboard 信息</p>
+</blockquote>
+<ol>
+<li>停止 Grafana</li>
+<li>找到 <code>grafana.ini</code> 文件，并将 grafana.ini 文件中 admin_password 修改为 admin</li>
+<li>删除掉 <code>grafana.db</code> 文件；文件默认在 <code>{{deploy_dir}}/data.grafana/grafana.db</code></li>
+<li>重启 Grafana 服务</li>
+<li>可选步骤 // 通过 tidb-ansible 脚本导入 dashboard
+<ul>
+<li>只有当前 Grafana 是通过 tidb-ansible 部署时才可使用</li>
+<li>执行 <code>ansible-playbook start.yml --tags=grafana</code> 导入</li>
+</ul>
+</li>
+<li>可选步骤 // 手动导入 dashboard
+<ul>
+<li>登陆 grafana ui ，添加监控数据源，如 Prometheus</li>
+<li>登陆 grafana ui ，选择 import dashboard</li>
+</ul>
+</li>
+</ol>
+<h4 id="grafana-ctl-工具">Grafana ctl 工具</h4>
+<ul>
+<li><a href="https://grafana.com/docs/administration/cli/#reset-admin-password">官方文档</a> 链接，此方法仅适用于 4.1 以上版本</li>
+<li>首先找到 grafana db 文件</li>
+<li>直接修改 grafana db
+<ul>
+<li>grafana-cli admin reset-admin-password &hellip;</li>
+<li>grafana-cli admin reset-admin-password &ndash;homepath &ldquo;/usr/share/grafana&rdquo; newpass</li>
+</ul>
+</li>
+</ul>
+<h4 id="sqllite-修改数据库">sqllite 修改数据库</h4>
+<p>使用 sql lite 工具修改 Grafana.db ; 执行以下步骤会强制将 Grafana 管理员密码重置为 admin</p>
+<ol>
+<li>
+<p>停止 Grafana 服务</p>
+</li>
+<li>
+<p>通过 grafana.ini 配置文件找到 grafana.db 实际目录</p>
+<ul>
+<li>通过 <code>find / -name &quot;grafana.db&quot;</code> 查找，需要确保是 grafana.ini 文件中引用的</li>
+<li>ini 文件默认在 <code>{{deploy_dir}}/opt/grafana/conf/grafana.ini</code></li>
+<li>db 文件默认在 <code>{{deploy_dir}}/data.grafana/grafana.db</code></li>
+</ul>
+</li>
+<li>
+<p>通过 sqllite cliet 链接数据库修改密码</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-sql" data-lang="sql"><span class="o">#</span> <span class="n">sqlite3</span> <span class="err">{</span><span class="err">{</span><span class="n">deploy_dir</span><span class="err">}</span><span class="err">}</span><span class="o">/</span><span class="k">data</span><span class="p">.</span><span class="n">grafana</span><span class="o">/</span><span class="n">grafana</span><span class="p">.</span><span class="n">db</span>
+
+<span class="n">sqlite</span><span class="o">&gt;</span> <span class="k">select</span> <span class="n">salt</span><span class="p">,</span> <span class="n">password</span> <span class="k">from</span> <span class="k">user</span><span class="p">;</span>
+<span class="n">pyaUhfDzYg</span><span class="o">|</span><span class="mi">54</span><span class="n">c7d1ce2eeaa6000bd84407d0f8ab4663dfa575e0a326bc70dc5cab4b864f6677b21879dbf5e33427c88f9160f744b625bf</span>
+
+<span class="n">sqlite</span><span class="o">&gt;</span> <span class="k">update</span> <span class="k">user</span> <span class="k">set</span> <span class="n">password</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="s1">59acf18b94d7eb0694c61e60ce44c110c7a683ac6a8f09580d626f90f4a242000746579358d77dd9e570e83fa24faa88a8a6</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">salt</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="s1">F3FAxVm33R</span><span class="s1">&#39;</span> <span class="k">where</span> <span class="n">login</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="s1">admin</span><span class="s1">&#39;</span><span class="p">;</span>
+
+<span class="n">sqlite</span><span class="o">&gt;</span> <span class="p">.</span><span class="n">exit</span>
+</code></pre></td></tr></table>
+</div>
+</div></li>
+</ol>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Jeff</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2020-01-23
+        
+    </span>
+  </p>
+  
+  <p class="copyright-item">
+    <span class="item-title">License</span>
+    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a></span>
+  </p>
+</div>
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/prometheus/">Prometheus</a>
+          <a href="/tags/grafana/">Grafana</a>
+          <a href="/tags/tidb/">TiDB</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/20170610-haproxy/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">负载均衡 - HAProxy &amp; TiDB 配合食用</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/20170603-blackbox_exporter/">
+            <span class="next-text nav-default">监控架构 - Blackbox_exporter 主动探测端口服务状态</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="https://github.com/BigerCAP/TiDB-AirPlan/issues" class="iconfont icon-github" title="github"></a>
+  <a href="https://ap.tidb.cc/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2020
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">TiDB - AirPlan</span>
+  </span>
+</div>
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js" integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js" integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin="anonymous"></script>
+  <script><!-- NOTE: timeago.js uses the language code format like "zh_CN" (underscore and case sensitive) -->
+    var languageCode = "en".replace(/-/g, '_').replace(/_(.*)/, function ($0, $1) {return $0.replace($1, $1.toUpperCase());});
+    timeago().render(document.querySelectorAll('.timeago'), languageCode);
+    timeago.cancel();  
+  </script>
+<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

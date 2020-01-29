@@ -23,7 +23,7 @@
 
 
 
-<meta name="generator" content="Hugo 0.62.2 with theme even" />
+<meta name="generator" content="Hugo 0.63.2 with theme even" />
 
 
 <link rel="canonical" href="https://ap.tidb.cc/post/20200108-tidb-haproxy-real-ip/" />
@@ -48,7 +48,7 @@
 <meta itemprop="description" content="0x00 - 背景 高可用性（英语：high availability，缩写为 HA）测试 failpoint 场景，需要在服务前面添加 load balance 组件；比如 F5、LVS、Haprox">
 <meta itemprop="datePublished" content="2020-01-08T00:00:00&#43;08:00" />
 <meta itemprop="dateModified" content="2020-01-10T00:00:00&#43;08:00" />
-<meta itemprop="wordCount" content="3127">
+<meta itemprop="wordCount" content="3114">
 
 
 
@@ -129,7 +129,7 @@
             <a href="/categories/tidb/"> TiDB </a>
             <a href="/categories/software/"> Software </a>
             </div>
-          <span class="more-meta"> 3127 words </span>
+          <span class="more-meta"> 3114 words </span>
           <span class="more-meta"> 7 mins read </span>
         <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
       </div>
@@ -145,11 +145,11 @@
     <li><a href="#0x02---探索与优化">0x02 - 探索与优化</a></li>
     <li><a href="#0x03---没有彩蛋">0x03 - 没有彩蛋</a>
       <ul>
-        <li><a href="#0x03a-测试-cidrs-场景一">0x03A 测试 CIDRs 场景一</a></li>
-        <li><a href="#0x03b-测试-cidrs-场景二">0x03B 测试 CIDRs 场景二</a></li>
-        <li><a href="#0x03c-测试-cidrs-场景三">0x03C 测试 CIDRs 场景三</a></li>
-        <li><a href="#0x03d-测试-cidrs-场景四">0x03D 测试 CIDRs 场景四</a></li>
-        <li><a href="#0x03e-cidrs-测试总结">0x03E CIDRs 测试总结</a></li>
+        <li><a href="#场景一">场景一</a></li>
+        <li><a href="#场景二">场景二</a></li>
+        <li><a href="#场景三">场景三</a></li>
+        <li><a href="#场景四">场景四</a></li>
+        <li><a href="#测试总结">测试总结</a></li>
       </ul>
     </li>
     <li><a href="#0x04-赞">0x04 赞</a></li>
@@ -160,7 +160,7 @@
     <div class="post-content">
       <h2 id="0x00---背景">0x00 - 背景</h2>
 <p>高可用性（英语：high availability，缩写为 HA）测试 failpoint 场景，需要在服务前面添加 load balance 组件；比如 F5、LVS、Haproxy 等支持 TCP 协议的网络分发负载工具。</p>
-<p>之前有篇文档介绍 TiDB &amp; Haproxy <a href="https://docs.tidb.cc/SoftWare/HAproxy.html" title="docs.tidb.cc HAproxy – Load Balance Service">HAproxy – Load Balance Service</a> 使用姿势 / 但随后在运维期间遇见一些小问题；即 TiDB 部署在 Haproxy 后面无法通过 show processlist 查看 client 真实 IP 地址信息，每次 show processlist 看到的都是 Haproxy 主机信息。</p>
+<p>之前有篇文档介绍 TiDB &amp; Haproxy <a href="/post/20170610-HAproxy" title="docs.tidb.cc HAproxy – Load Balance Service https://ap.tidb.cc/post/20170610-haproxy/">HAproxy – Load Balance Service</a> 使用姿势 / 但随后在运维期间遇见一些小问题；即 TiDB 部署在 Haproxy 后面无法通过 show processlist 查看 client 真实 IP 地址信息，每次 show processlist 看到的都是 Haproxy 主机信息。</p>
 <blockquote>
 <p>Haproxy Proxy Architecture Overview</p>
 </blockquote>
@@ -192,7 +192,7 @@
 </tr>
 </tbody>
 </table>
-<p>通过 <a href="https://docs.tidb.cc/SoftWare/HAproxy.html" title="docs.tidb.cc HAproxy – Load Balance Service">HAproxy – Load Balance Service</a>文档中安装 haproxy ； yum install haproxy 并使用文档中的配置文件。</p>
+<p>通过 <a href="/post/20170610-HAproxy" title="docs.tidb.cc HAproxy – Load Balance Service https://ap.tidb.cc/post/20170610-haproxy/">HAproxy – Load Balance Service</a>文档中安装 haproxy ； yum install haproxy 并使用文档中的配置文件。</p>
 <p>Haproxy 配置文件栗子如下：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -443,10 +443,13 @@ For more information about PROXY protocol please refer https://www.haproxy.org/d
 <h2 id="0x03---没有彩蛋">0x03 - 没有彩蛋</h2>
 <p>PR 最底部还有一些关于 Proxy Protocol 的讨论</p>
 <blockquote>
-<p>Proxy Protocol 扩展阅读</p>
+<ul>
+<li>Proxy Protocol 扩展阅读
 <ul>
 <li>扩展阅读 <a href="http://mysql.taobao.org/monthly/2019/01/07/" title="aliyun RDS 团队文档">MariaDB 源码分析 Proxy Protocol</a></li>
 <li>扩展 issue <a href="https://github.com/blacktear23/go-proxyprotocol/pull/1" title="该 issue 不在 PingCAP/TiDB repo 下，由该作者自行控制，可能会被删除。">blacktear23/go-proxyprotocol/pull/1</a></li>
+</ul>
+</li>
 </ul>
 </blockquote>
 <div class="highlight"><div class="chroma">
@@ -496,7 +499,7 @@ So I think its good to do this way.
 </ul>
 </li>
 </ul>
-<h3 id="0x03a-测试-cidrs-场景一">0x03A 测试 CIDRs 场景一</h3>
+<h3 id="场景一">场景一</h3>
 <blockquote>
 <p>haproxy 使用以下配置文件</p>
 </blockquote>
@@ -519,7 +522,7 @@ So I think its good to do this way.
 </div><p>TiDB 使用命令启动 <code>./tidb-server --host 10.0.1.4 --proxy-protocol-networks &quot;10.0.2.0/24&quot;</code></p>
 <p>使用 <code>mysql -h 138.X -u te -P 3307 -p</code> 登陆时，提示 <code>ERROR 2013 (HY000): Lost connection to MySQL server at 'reading authorization packet', system error: 0</code> ；原因是 Haproxy real server IP 地址与 TiDB-server listen IP 地址不相等。</p>
 <p>使用 <code>mysql -h 138.X.X.X -u te -P 4000 -p</code> 登陆未出现异常；Proxy Protocol  CIDRs 列表外非 Proxy 协议数据可以直接连接 TiDB-server(10.0.1.4 与 138.x.x.x 在防火墙做了端口映射)。</p>
-<h3 id="0x03b-测试-cidrs-场景二">0x03B 测试 CIDRs 场景二</h3>
+<h3 id="场景二">场景二</h3>
 <blockquote>
 <p>haproxy 使用以下配置文件</p>
 </blockquote>
@@ -545,7 +548,7 @@ So I think its good to do this way.
 <p>使用 <code>mysql -h 10.0.1.4 -u root -P 3307</code> 可以登陆成功，Proxy protocol 已经被 Haproxy 做了包转发解析。
 使用 <code>mysql -h 138.x.x.x -u root -P 4000</code> 可以登陆成功，因为外网 IP 不在 proxy protocols 的白名单范围内。</p>
 <p>满足 Proxy 协议规则，CIDRs 列表内的 IP 地址必须使用 Proxy 协议链接，否则拒绝提供服务。</p>
-<h3 id="0x03c-测试-cidrs-场景三">0x03C 测试 CIDRs 场景三</h3>
+<h3 id="场景三">场景三</h3>
 <blockquote>
 <p>haproxy 使用以下配置文件</p>
 </blockquote>
@@ -568,7 +571,7 @@ So I think its good to do this way.
 </div><p>TiDB 使用该模式启动 <code>./tidb-server --host 10.0.1.4</code></p>
 <p>使用命令经过 Haproxy 服务登陆 TiDB <code>mysql -h  127.0.0.1 -u root -P 3307</code>，返回错误 <code>ERROR 2013 (HY000): Lost connection to MySQL server at 'reading authorization packet', system error: 0</code>
 后端主机不允许 Haproxy 建立链接，因 CIDRs IP 范围内的主机（ only support｜ 仅支持）proxy 协议的客户端链接。</p>
-<h3 id="0x03d-测试-cidrs-场景四">0x03D 测试 CIDRs 场景四</h3>
+<h3 id="场景四">场景四</h3>
 <blockquote>
 <p>haproxy 使用以下配置文件</p>
 </blockquote>
@@ -588,7 +591,7 @@ So I think its good to do this way.
     <span class="n">server</span> <span class="n">tidb1</span> <span class="mf">10.0</span><span class="mf">.1</span><span class="mf">.4</span><span class="o">:</span><span class="mi">4001</span> <span class="n">weight</span> <span class="mi">1</span>
 </code></pre></td></tr></table>
 </div>
-</div><p>TiDB 使用该模式启动 <code> ./tidb-server --proxy-protocol-networks &quot;10.0.1.0/24&quot; -P 4001</code></p>
+</div><p>TiDB 使用该模式启动 <code>./tidb-server --proxy-protocol-networks &quot;10.0.1.0/24&quot; -P 4001</code></p>
 <p>使用该命令经过 Haproxy 登陆 <code>mysql -h  127.0.0.1 -u root -P 3308</code>  TiDB 服务；返回错误  <code>ERROR 2013 (HY000): Lost connection to MySQL server at 'reading initial communication packet', system error: 0</code> ；查看 tidb.log 日志信息，发现是尝试判断 proxy 协议状态时失败；默认读取 proxy header 信息超时时间 5s</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -598,7 +601,7 @@ So I think its good to do this way.
 <pre class="chroma"><code class="language-c" data-lang="c"><span class="p">[</span><span class="mi">2020</span><span class="o">/</span><span class="mo">01</span><span class="o">/</span><span class="mi">09</span> <span class="mi">22</span><span class="o">:</span><span class="mo">02</span><span class="o">:</span><span class="mf">59.274</span> <span class="o">+</span><span class="mi">08</span><span class="o">:</span><span class="mo">00</span><span class="p">]</span> <span class="p">[</span><span class="n">ERROR</span><span class="p">]</span> <span class="p">[</span><span class="n">server</span><span class="p">.</span><span class="nl">go</span><span class="p">:</span><span class="mi">321</span><span class="p">]</span> <span class="p">[</span><span class="sa"></span><span class="s">&#34;</span><span class="s">PROXY protocol failed</span><span class="s">&#34;</span><span class="p">]</span> <span class="p">[</span><span class="n">error</span><span class="o">=</span><span class="sa"></span><span class="s">&#34;</span><span class="s">Header read timeout</span><span class="s">&#34;</span><span class="p">]</span> <span class="p">[</span><span class="n">stack</span><span class="o">=</span><span class="sa"></span><span class="s">&#34;</span><span class="s">github.com/pingcap/tidb/server.(*Server).Run</span><span class="se">\n</span><span class="se">\t</span><span class="s">/home/jenkins/workspace/build_tidb_master/go/src/github.com/pingcap/tidb/server/server.go:321</span><span class="se">\n</span><span class="s">main.runServer</span><span class="se">\n</span><span class="se">\t</span><span class="s">/home/jenkins/workspace/build_tidb_master/go/src/github.com/pingcap/tidb/tidb-server/main.go:568</span><span class="se">\n</span><span class="s">main.main</span><span class="se">\n</span><span class="se">\t</span><span class="s">/home/jenkins/workspace/build_tidb_master/go/src/github.com/pingcap/tidb/tidb-server/main.go:174</span><span class="se">\n</span><span class="s">runtime.main</span><span class="se">\n</span><span class="se">\t</span><span class="s">/usr/local/go/src/runtime/proc.go:200</span><span class="s">&#34;</span><span class="p">]</span>
 </code></pre></td></tr></table>
 </div>
-</div><h3 id="0x03e-cidrs-测试总结">0x03E CIDRs 测试总结</h3>
+</div><h3 id="测试总结">测试总结</h3>
 <table>
 <thead>
 <tr>
@@ -639,10 +642,9 @@ So I think its good to do this way.
 先判断 IP 是否在 Proxy CIDRs 中，如果存在直接按照 Proxy 方式链接；当 IP 存在 CIDRs 中但客户端不存在 Proxy Header 消息包，会出现 header read timeout ，因为建立 Proxy 链接需要 Proxy Header 信息判断 v1 或者 v2 版本，以便传递给后端初始化链接。</p>
 <h2 id="0x04-赞">0x04 赞</h2>
 <blockquote>
-<p>点赞 <a href="https://github.com/pingcap/tidb/pull/3757">PR #3757</a> 作者 <a href="https://github.com/blacktear23">Rain Li</a> &amp; <a href="https://github.com/SteamedFish">SteamedFish</a></p>
-</blockquote>
-<blockquote>
-<p>Proxy Protocols 功能总结：引入了 proxy protocol 来解决 client ip 透传的问题。
+<p>点赞 <a href="https://github.com/pingcap/tidb/pull/3757">PR #3757</a> 作者 <a href="https://github.com/blacktear23">Rain Li</a> &amp; <a href="https://github.com/SteamedFish">SteamedFish</a>
+// 人文结案
+Proxy Protocols 功能总结：引入了 proxy protocol 来解决 client ip 透传的问题。
 proxy 节点获取到 client ip 后，将 client ip 包装在 proxy protocol 报文中发给 real server，real server 解析到了 proxy protocol 报文，再用报文中的 IP 替换 Proxy 节点的 IP</p>
 </blockquote>
 <p><img src="http://www.plantuml.com/plantuml/png/SoWkIImgAStDuNBEoKpDAr7GjLFmI2meog-eLB1IIFOCKB1LC3JGCz0pr3FHAKRXMXaR6vXpGHM3z8LakZXPAIIYQKh6r8Hka8c1WG4NI3V2bASTIvvDMwi0LFTinlgd4vOzdRD2mTdJ9QXOuScEjU_tz3nTEmCezAAd-UdiBK_RMXytDA4Q0D89KOFGzcHlsvCTlL3H0B2hFL8JKrAB59xiN_YiSVsJFREUh-rykg_rnRRMPzEteHduhAVpUUjogBwd6zeK8046TkBi_Szw5y723IW2qmeJ0eOafey912VKV2i5mW48Ypk4M_iNFkliVjOnuMdNV4p9pkKl5lPmEQJcfG3Z7G00" alt="UML Proxy Protocols / TiDB / Docs.tidb.cc" title="Proxy protocols &amp; TiDB / Docs.tidb.cc"></p>
