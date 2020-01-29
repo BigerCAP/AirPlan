@@ -289,7 +289,7 @@ TiDB 使用该模式启动 `./tidb-server --proxy-protocol-networks "10.0.1.0/24
 ### 测试总结
 
 |场景| Haproxy | TiDB | 备注
-----|----|----|----
+|--|----|----|----
 | 一 | send haproxy 10.0.1.4 | proxy protocols 10.0.2.0 / 24 | 链接失败，Haproxy CIP 不符合 CIDRs IP 范围
 | 二 | send haproxy 10.0.1.4 | proxy protocols 10.0.1.0 / 24 | 正常工作，但无法使用 mysql -h 10.0.1.4 -P 4000 与 TiDB 直接建立链接
 | 三 | no send proxy 10.0.1.4 | proxy protocols 10.0.1.0 / 24 | 无法建立链接，不符合 CIDRs IP 范围，与上一条场景类似

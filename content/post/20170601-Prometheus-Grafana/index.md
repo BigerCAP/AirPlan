@@ -11,15 +11,15 @@ tags:
 ---
 ## 0x00 背影
 
-> 通过本篇文档学习 TiDB 集群监控架构 (默认按照 TiDB-ansible 部署为准)
-> 本篇文档按照 2019 年中 TiDB-ansible master branch 描述；区别在于是否有 pushgateway 组件 (端口 9091)
+> 通过本篇文档学习 TiDB 集群监控架构 (默认按照 TiDB-ansible 部署为准)  
+> 本篇文档按照 2019 年中 TiDB-ansible master branch 描述；区别在于是否有 pushgateway 组件 (端口 9091)  
 > 以下文档（百家饭+机器译文）部分区域 ⚠️ 无法直视
 
 ## 0x01 介绍
 
-> TiDB 使用开源时序数据库 Prometheus 组件存放监控数据
-> 使用开源数据图形可视化工具 Grafana 做数据展示
-> 接下来让我们看下该套监控是如何运作得……
+> TiDB 使用开源时序数据库 Prometheus 组件存放监控数据  
+> 使用开源数据图形可视化工具 Grafana 做数据展示  
+> 接下来让我们看下该套监控是如何运作得……  
 
 ### 监控流程
 
@@ -51,25 +51,25 @@ tags:
 
 - 第三方监控组件端口
 
-  服务 | 端口 | 组件介绍
-  ---|---|-----
-  Grafana           | 3000 | 监控数据展示工具
-  Prometheus        | 9090 | 支持临时性 Job 主动推送指标的中间网关
-  PushGatewagy     | 9091 | 监控数据 push 网关 / TiKV 2.1.5 版本以后支持 pull 方式
-  node_exporter     | 9100 | 主机性能收集组件
-  blackbox_exporter | 9104 | 黑盒主动探测组件
-  mysql_exporter    | 9107 | MySQL 状态监测组件
-  kafka_exporter    | 9105 | kafka 状态监测组件
+|服务 | 端口 | 组件介绍
+|---- | --- | -----
+| Grafana           | 3000 | 监控数据展示工具
+| Prometheus        | 9090 | 支持临时性 Job 主动推送指标的中间网关
+| PushGatewagy      | 9091 | 监控数据 push 网关 / TiKV 2.1.5 版本以后支持 pull 方式
+| node_exporter     | 9100 | 主机性能收集组件
+| blackbox_exporter | 9104 | 黑盒主动探测组件
+| mysql_exporter    | 9107 | MySQL 状态监测组件
+| kafka_exporter    | 9105 | kafka 状态监测组件
 
 ### TiDB 组件端口
 
 - TiDB 服务监控数据端口
 
-  服务 | 默认端口 | 组件介绍
-  ---|---|-----
-  PD | 2379 | Metrics / 不推荐单机部署多套 PD </br> 访问 http://IP:2379/metrics 可预览当前时间点监控项快照，以下类似
-  TiDB | 10080 | Metrics / 单机部署多 TiDB 时，必须指定不同 Metrics 端口 </br>（metrics 端口冲突不会导致组件启动失败，会导致无法暴露监控数据而导致集群监控数据不准确，TiKV 雷同）
-  TiKV | 20180 | Metrics / 单机部署多 TiKV 时，必须指定不同 Metrics 端口
+| 服务 | 默认端口 | 组件介绍
+| ---- | --- | -----
+| PD | 2379 | Metrics / 不推荐单机部署多套 PD </br> 访问 http://IP:2379/metrics 可预览当前时间点监控项快照，以下类似
+| TiDB | 10080 | Metrics / 单机部署多 TiDB 时，必须指定不同 Metrics 端口 </br>（metrics 端口冲突不会导致组件启动失败，会导致无法暴露监控数据而导致集群监控数据不准确，TiKV 雷同）
+| TiKV | 20180 | Metrics / 单机部署多 TiKV 时，必须指定不同 Metrics 端口
 
 ## 0x02 Prometheus
 
@@ -125,11 +125,11 @@ tags:
   - [Prometheus 查询函数](https://prometheus.io/docs/prometheus/latest/querying/functions/)
   - [Prometheus 配置文件模板](https://github.com/prometheus/prometheus/blob/master/documentation/examples/prometheus.yml)
   - [Prometheus admin API](https://prometheus.io/docs/prometheus/latest/querying/api/#tsdb-admin-apis)
-- > [Prometheus](https://songjiayang.gitbooks.io/prometheus/content/concepts/data-model.html) 官方技术文档翻译 (第三方翻译，注意时间线)
+  - [Prometheus Docs 翻译](https://songjiayang.gitbooks.io/prometheus/content/concepts/data-model.html)  (第三方翻译)
 
 ## 0x03 Grafana
 
-> 支持 Graphite、OpenTSDB、InfluxDB、Prometheus、Elasticsearch、MySQL 等服务数据接口，主要是提供度量分析和仪表板可视化工具。
+> 支持 Graphite、OpenTSDB、InfluxDB、Prometheus、Elasticsearch、MySQL 等服务数据接口，主要是提供度量分析和仪表板可视化工具。  
 > 附带一些用户管理鉴权功能，从 4.0 版本到 5.0+ 版本体验上 *用户管理功能* 逐渐清晰
 
 ### 基础功能
