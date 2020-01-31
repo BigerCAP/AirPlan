@@ -45,7 +45,7 @@
       <pubDate>Mon, 16 Apr 2018 00:00:00 +0800</pubDate>
       
       <guid>https://ap.tidb.cc/post/20180416-tispark-deploy/</guid>
-      <description>0x00 介绍 TiSpark 项目 2020 年会被姊妹家 TiFlash 升级替换 pingcap/TiSpark 项目地址，使用前阅读以下文档 TiSpark 用户指南（英文版本） 0x01 部署 TiSpark 前情提要 tidb-ansible/roles/local/templates/binary_packages.yml.j2 下载连接 此处为 tispark 下载连接，jar 包</description>
+      <description>0x00 介绍 TiSpark 项目 2020 年会被姊妹家 TiFlash 升级替换 pingcap/TiSpark 项目地址，使用前阅读以下文档 TiSpark 用户指南（英文版本） 官方 Blog TiSpark 文档 0x01 部署 TiSpark 前情提要 tidb-ansible/roles/local/templates/binary_packages.yml.j2 下载连接 此处为 tispark 下载连</description>
     </item>
     
     <item>

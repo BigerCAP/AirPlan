@@ -18,7 +18,7 @@
       <pubDate>Sun, 20 Aug 2017 21:38:52 +0800</pubDate>
       
       <guid>https://ap.tidb.cc/about/</guid>
-      <description>About | TiDB AirPlan 望而知之谓之神，闻而知之谓之圣 问而知之谓之工，切脉而知之谓之巧 Link TiDB-AirPlan PD TiDB TiKV Oops</description>
+      <description>About | TiDB AirPlan 望而知之谓之神，闻而知之谓之圣 问而知之谓之工，切脉而知之谓之巧 Link TiDB-AirPlan Github 项目 TiDB-AirPlan 大纲框架 PD TiDB TiKV Oops</description>
     </item>
     
     <item>
@@ -54,7 +54,7 @@
       <pubDate>Mon, 16 Apr 2018 00:00:00 +0800</pubDate>
       
       <guid>https://ap.tidb.cc/post/20180416-tispark-deploy/</guid>
-      <description>0x00 介绍 TiSpark 项目 2020 年会被姊妹家 TiFlash 升级替换 pingcap/TiSpark 项目地址，使用前阅读以下文档 TiSpark 用户指南（英文版本） 0x01 部署 TiSpark 前情提要 tidb-ansible/roles/local/templates/binary_packages.yml.j2 下载连接 此处为 tispark 下载连接，jar 包</description>
+      <description>0x00 介绍 TiSpark 项目 2020 年会被姊妹家 TiFlash 升级替换 pingcap/TiSpark 项目地址，使用前阅读以下文档 TiSpark 用户指南（英文版本） 官方 Blog TiSpark 文档 0x01 部署 TiSpark 前情提要 tidb-ansible/roles/local/templates/binary_packages.yml.j2 下载连接 此处为 tispark 下载连</description>
     </item>
     
     <item>
@@ -82,6 +82,15 @@
       
       <guid>https://ap.tidb.cc/post/20180323-systemd-syncer/</guid>
       <description>0x00 缘来 Syncer 数据同步，会因为网络延迟与网络丢包、上下游压力过大等原因导致断开，这些场景本身是可重启恢复的。 最初与 TiDB 使用的 supervise 小工具，这个工具有个问</description>
+    </item>
+    
+    <item>
+      <title>TiDB-AirPlan</title>
+      <link>https://ap.tidb.cc/airplan/</link>
+      <pubDate>Sun, 20 Aug 2017 21:38:52 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/airplan/</guid>
+      <description>0x00 闲来无聊 闲来无聊干点啥，买了几个域名（如有雷同 纯属巧合），比如本站的 tidb.cc TiDB-AirPlan 站名来自于某项运动的战术代号，Airplan（空中加油：先让一部分</description>
     </item>
     
     <item>

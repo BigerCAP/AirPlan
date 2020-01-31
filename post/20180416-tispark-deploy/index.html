@@ -16,7 +16,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
 
 
-<meta name="author" content="Jeff" /><meta name="description" content="0x00 介绍 TiSpark 项目 2020 年会被姊妹家 TiFlash 升级替换 pingcap/TiSpark 项目地址，使用前阅读以下文档 TiSpark 用户指南（英文版本） 0x01 部署 TiSpark 前情提要 tidb-ansible/roles/local/templates/binary_packages.yml.j2 下载连接 此处为 tispark 下载连接，jar 包" /><meta name="keywords" content="TiDB, AirPlan, TiDB OPS, tidb-operator, 2pc, raft, databases, mysql, htap" />
+<meta name="author" content="Jeff" /><meta name="description" content="0x00 介绍 TiSpark 项目 2020 年会被姊妹家 TiFlash 升级替换 pingcap/TiSpark 项目地址，使用前阅读以下文档 TiSpark 用户指南（英文版本） 官方 Blog TiSpark 文档 0x01 部署 TiSpark 前情提要 tidb-ansible/roles/local/templates/binary_packages.yml.j2 下载连接 此处为 tispark 下载连" /><meta name="keywords" content="TiDB, AirPlan, TiDB OPS, tidb-operator, 2pc, raft, databases, mysql, htap" />
 
 
 
@@ -39,22 +39,22 @@
 
 
 <meta property="og:title" content="AP - TiSpark 服务安装 部署 测试" />
-<meta property="og:description" content="0x00 介绍 TiSpark 项目 2020 年会被姊妹家 TiFlash 升级替换 pingcap/TiSpark 项目地址，使用前阅读以下文档 TiSpark 用户指南（英文版本） 0x01 部署 TiSpark 前情提要 tidb-ansible/roles/local/templates/binary_packages.yml.j2 下载连接 此处为 tispark 下载连接，jar 包" />
+<meta property="og:description" content="0x00 介绍 TiSpark 项目 2020 年会被姊妹家 TiFlash 升级替换 pingcap/TiSpark 项目地址，使用前阅读以下文档 TiSpark 用户指南（英文版本） 官方 Blog TiSpark 文档 0x01 部署 TiSpark 前情提要 tidb-ansible/roles/local/templates/binary_packages.yml.j2 下载连接 此处为 tispark 下载连" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://ap.tidb.cc/post/20180416-tispark-deploy/" />
 <meta property="article:published_time" content="2018-04-16T00:00:00+08:00" />
 <meta property="article:modified_time" content="2020-01-26T00:00:00+08:00" />
 <meta itemprop="name" content="AP - TiSpark 服务安装 部署 测试">
-<meta itemprop="description" content="0x00 介绍 TiSpark 项目 2020 年会被姊妹家 TiFlash 升级替换 pingcap/TiSpark 项目地址，使用前阅读以下文档 TiSpark 用户指南（英文版本） 0x01 部署 TiSpark 前情提要 tidb-ansible/roles/local/templates/binary_packages.yml.j2 下载连接 此处为 tispark 下载连接，jar 包">
+<meta itemprop="description" content="0x00 介绍 TiSpark 项目 2020 年会被姊妹家 TiFlash 升级替换 pingcap/TiSpark 项目地址，使用前阅读以下文档 TiSpark 用户指南（英文版本） 官方 Blog TiSpark 文档 0x01 部署 TiSpark 前情提要 tidb-ansible/roles/local/templates/binary_packages.yml.j2 下载连接 此处为 tispark 下载连">
 <meta itemprop="datePublished" content="2018-04-16T00:00:00&#43;08:00" />
 <meta itemprop="dateModified" content="2020-01-26T00:00:00&#43;08:00" />
-<meta itemprop="wordCount" content="1918">
+<meta itemprop="wordCount" content="1924">
 
 
 
 <meta itemprop="keywords" content="Deploy,Zeppelin," /><meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="AP - TiSpark 服务安装 部署 测试"/>
-<meta name="twitter:description" content="0x00 介绍 TiSpark 项目 2020 年会被姊妹家 TiFlash 升级替换 pingcap/TiSpark 项目地址，使用前阅读以下文档 TiSpark 用户指南（英文版本） 0x01 部署 TiSpark 前情提要 tidb-ansible/roles/local/templates/binary_packages.yml.j2 下载连接 此处为 tispark 下载连接，jar 包"/>
+<meta name="twitter:description" content="0x00 介绍 TiSpark 项目 2020 年会被姊妹家 TiFlash 升级替换 pingcap/TiSpark 项目地址，使用前阅读以下文档 TiSpark 用户指南（英文版本） 官方 Blog TiSpark 文档 0x01 部署 TiSpark 前情提要 tidb-ansible/roles/local/templates/binary_packages.yml.j2 下载连接 此处为 tispark 下载连"/>
 
 <!--[if lte IE 9]>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
@@ -128,7 +128,7 @@
         <div class="post-category">
             <a href="/categories/tispark/"> TiSpark </a>
             </div>
-          <span class="more-meta"> 1918 words </span>
+          <span class="more-meta"> 1924 words </span>
           <span class="more-meta"> 4 mins read </span>
         <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
       </div>
@@ -180,6 +180,7 @@
 <li><a href="https://github.com/pingcap/tispark">pingcap/TiSpark</a> 项目地址，使用前阅读以下文档
 <ul>
 <li><a href="https://github.com/pingcap/tispark/blob/master/docs/userguide.md">TiSpark 用户指南（英文版本）</a></li>
+<li>官方 Blog <a href="https://pingcap.com/blog-cn/#TiSpark">TiSpark 文档</a></li>
 </ul>
 </li>
 </ul>
