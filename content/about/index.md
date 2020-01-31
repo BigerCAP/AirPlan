@@ -13,7 +13,8 @@ weight: 50
 
 ### Link
 
-* [TiDB-AirPlan](https://github.com/BigerCAP/TiDB-AirPlan)
+* [TiDB-AirPlan](https://github.com/BigerCAP/TiDB-AirPlan) Github 项目
+* [TiDB-AirPlan](/airplan) 大纲框架
 
 
 * [PD](https://github.com/pingcap/pd)

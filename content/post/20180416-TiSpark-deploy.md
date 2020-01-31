@@ -14,6 +14,7 @@ tags:
 
 - [pingcap/TiSpark](https://github.com/pingcap/tispark) 项目地址，使用前阅读以下文档
   - [TiSpark 用户指南（英文版本）](https://github.com/pingcap/tispark/blob/master/docs/userguide.md)
+  - 官方 Blog [TiSpark 文档](https://pingcap.com/blog-cn/#TiSpark)
 
 ![spark](https://raw.githubusercontent.com/pingcap/tispark/master/docs/architecture.png "tispark 架构图 docs.tidb.cc")
 
