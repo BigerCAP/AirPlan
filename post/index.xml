@@ -40,6 +40,15 @@
     </item>
     
     <item>
+      <title>AP - TiSpark 服务安装 部署 测试</title>
+      <link>https://ap.tidb.cc/post/20180416-tispark-deploy/</link>
+      <pubDate>Mon, 16 Apr 2018 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20180416-tispark-deploy/</guid>
+      <description>0x00 介绍 TiSpark 项目 2020 年会被姊妹家 TiFlash 升级替换 pingcap/TiSpark 项目地址，使用前阅读以下文档 TiSpark 用户指南（英文版本） 0x01 部署 TiSpark 前情提要 tidb-ansible/roles/local/templates/binary_packages.yml.j2 下载连接 此处为 tispark 下载连接，jar 包</description>
+    </item>
+    
+    <item>
       <title>测试域名代替 IP 部署 TiDB</title>
       <link>https://ap.tidb.cc/post/20180406-tidb-domain/</link>
       <pubDate>Fri, 06 Apr 2018 00:00:00 +0800</pubDate>
@@ -55,6 +64,15 @@
       
       <guid>https://ap.tidb.cc/post/20180327-change-tidb-ip/</guid>
       <description>0x00 背景 物理网络在实际生产环境会存在 vlan、IP 集群部署可能横跨多台机器甚至横跨机房，在有离线或在线业务情况下应该怎么操作变更 IP 地址信息，配</description>
+    </item>
+    
+    <item>
+      <title>Linux - Systemd &amp; Syncer 相爱相杀</title>
+      <link>https://ap.tidb.cc/post/20180323-systemd-syncer/</link>
+      <pubDate>Fri, 23 Mar 2018 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20180323-systemd-syncer/</guid>
+      <description>0x00 缘来 Syncer 数据同步，会因为网络延迟与网络丢包、上下游压力过大等原因导致断开，这些场景本身是可重启恢复的。 最初与 TiDB 使用的 supervise 小工具，这个工具有个问</description>
     </item>
     
     <item>

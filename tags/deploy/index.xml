@@ -7,10 +7,19 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>TiDB - AirPlan</copyright>
-    <lastBuildDate>Fri, 06 Apr 2018 00:00:00 +0800</lastBuildDate>
+    <lastBuildDate>Mon, 16 Apr 2018 00:00:00 +0800</lastBuildDate>
     
 	<atom:link href="https://ap.tidb.cc/tags/deploy/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>AP - TiSpark 服务安装 部署 测试</title>
+      <link>https://ap.tidb.cc/post/20180416-tispark-deploy/</link>
+      <pubDate>Mon, 16 Apr 2018 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20180416-tispark-deploy/</guid>
+      <description>0x00 介绍 TiSpark 项目 2020 年会被姊妹家 TiFlash 升级替换 pingcap/TiSpark 项目地址，使用前阅读以下文档 TiSpark 用户指南（英文版本） 0x01 部署 TiSpark 前情提要 tidb-ansible/roles/local/templates/binary_packages.yml.j2 下载连接 此处为 tispark 下载连接，jar 包</description>
+    </item>
     
     <item>
       <title>测试域名代替 IP 部署 TiDB</title>
