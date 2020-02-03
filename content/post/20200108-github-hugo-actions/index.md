@@ -184,6 +184,18 @@ github repo 三个分支分别别是 master、draft、gh-pages，master 中存�
 经过一番测试发现是 actions.yml 文件所在的 branch 收到 push 操作才会去工作（嗯，肯定是我脑等级太低了）//  
 （PS：每个 barnch 都可以放 actions.yml ，并且可以是不同的内容信息，跨 branch 执行 jobs 也可以工作。每个 branch 下的 actions.yml 由当前 barnch 接受 pull、push 等操作而触发）  
 
+### 匪夷所思
+
+提交更新本篇文档，首次 hugo 编译遇见以下问题，第二次静态编译成功。没有 actions 运行日志，不知道咋回事……
+
+![open error caname](./github-open-Cname.png)
+
+### hugo version
+
+因为填错了 hugo version 信息，hugo 木有 0.62.2 版本。与上面那个问题是联动的，第一次失败时为了触发再次执行 actions，就修改了下 hugo version 排查下问题，还把版本填错了。
+
+![hugo version](./github-hugo-version-failed.png)
+
 ## 0x06 emmm
 
 > 没及时搞出来文档，貌似忘记了一部分内容咋写了、先这样了
