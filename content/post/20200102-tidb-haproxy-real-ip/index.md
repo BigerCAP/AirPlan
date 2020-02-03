@@ -1,6 +1,6 @@
 ---
 title: TiDB & Haproxy / show processlist View real IP
-date: 2020-01-08T00:00:00+08:00
+date: 2020-01-02T00:00:00+08:00
 lastmod: 2020-01-10T00:00:00+08:00
 categories:
   - TiDB
