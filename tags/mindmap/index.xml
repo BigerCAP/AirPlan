@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>mindmap on TiDB AirPlan - A biger solution</title>
+    <link>https://ap.tidb.cc/tags/mindmap/</link>
+    <description>Recent content in mindmap on TiDB AirPlan - A biger solution</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright>TiDB - AirPlan</copyright>
+    <lastBuildDate>Fri, 01 Jan 2010 00:00:00 +0800</lastBuildDate>
+    
+	<atom:link href="https://ap.tidb.cc/tags/mindmap/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>是软体啦 - 思维导图三体之 xmind</title>
+      <link>https://ap.tidb.cc/post/20100101-mindmap-xmind/</link>
+      <pubDate>Fri, 01 Jan 2010 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20100101-mindmap-xmind/</guid>
+      <description>0x00 云 业界大佬介绍一款高大上工具用于学习新的知识点 - mindmap / 思维导图。连续在各种场景用了几年，所以聊聊这玩意的看法（仅供参考） 这玩意当初查百度百科</description>
+    </item>
+    
+  </channel>
+</rss>

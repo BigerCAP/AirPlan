@@ -93,15 +93,15 @@
   </url>
   
   <url>
-    <loc>https://ap.tidb.cc/categories/tidb/</loc>
-    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
+    <loc>https://ap.tidb.cc/tags/tidb/</loc>
+    <lastmod>2020-01-23T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
-    <loc>https://ap.tidb.cc/tags/tidb/</loc>
-    <lastmod>2020-01-23T00:00:00+08:00</lastmod>
+    <loc>https://ap.tidb.cc/categories/tidb/</loc>
+    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -347,6 +347,27 @@
   <url>
     <loc>https://ap.tidb.cc/post/20170601-prometheus-grafana/</loc>
     <lastmod>2020-01-23T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/mindmap/</loc>
+    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/xmind/</loc>
+    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/post/20100101-mindmap-xmind/</loc>
+    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
