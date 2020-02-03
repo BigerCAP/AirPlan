@@ -13,21 +13,21 @@
     
     
     <item>
-      <title>TiDB &amp; Haproxy / show processlist View real IP</title>
-      <link>https://ap.tidb.cc/post/20200108-tidb-haproxy-real-ip/</link>
-      <pubDate>Wed, 08 Jan 2020 00:00:00 +0800</pubDate>
-      
-      <guid>https://ap.tidb.cc/post/20200108-tidb-haproxy-real-ip/</guid>
-      <description>0x00 - 背景 高可用性（英语：high availability，缩写为 HA）测试 failpoint 场景，需要在服务前面添加 load balance 组件；比如 F5、LVS、Haprox</description>
-    </item>
-    
-    <item>
       <title>生态围墙 - Github Actions &amp; Hugo</title>
       <link>https://ap.tidb.cc/post/20200108-github-hugo-actions/</link>
       <pubDate>Wed, 08 Jan 2020 00:00:00 +0800</pubDate>
       
       <guid>https://ap.tidb.cc/post/20200108-github-hugo-actions/</guid>
       <description>0x00 上帝说有光 目标：持续 tidb.cc 域名的运转 初衷：让更多的人了解 xxxx 产品 内核：提升自身技能以及建立良性记录 动力：装逼 助力 OKR、分享与讨论技术的真实性、</description>
+    </item>
+    
+    <item>
+      <title>TiDB &amp; Haproxy / show processlist View real IP</title>
+      <link>https://ap.tidb.cc/post/20200102-tidb-haproxy-real-ip/</link>
+      <pubDate>Thu, 02 Jan 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20200102-tidb-haproxy-real-ip/</guid>
+      <description>0x00 - 背景 高可用性（英语：high availability，缩写为 HA）测试 failpoint 场景，需要在服务前面添加 load balance 组件；比如 F5、LVS、Haprox</description>
     </item>
     
     <item>

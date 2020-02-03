@@ -31,15 +31,6 @@
     </item>
     
     <item>
-      <title>HAProxy</title>
-      <link>https://ap.tidb.cc/tags/haproxy/</link>
-      <pubDate>Wed, 08 Jan 2020 00:00:00 +0800</pubDate>
-      
-      <guid>https://ap.tidb.cc/tags/haproxy/</guid>
-      <description></description>
-    </item>
-    
-    <item>
       <title>hugo</title>
       <link>https://ap.tidb.cc/tags/hugo/</link>
       <pubDate>Wed, 08 Jan 2020 00:00:00 +0800</pubDate>
@@ -49,9 +40,18 @@
     </item>
     
     <item>
+      <title>HAProxy</title>
+      <link>https://ap.tidb.cc/tags/haproxy/</link>
+      <pubDate>Thu, 02 Jan 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/tags/haproxy/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>load balance</title>
       <link>https://ap.tidb.cc/tags/load-balance/</link>
-      <pubDate>Wed, 08 Jan 2020 00:00:00 +0800</pubDate>
+      <pubDate>Thu, 02 Jan 2020 00:00:00 +0800</pubDate>
       
       <guid>https://ap.tidb.cc/tags/load-balance/</guid>
       <description></description>
@@ -60,7 +60,7 @@
     <item>
       <title>real server ip</title>
       <link>https://ap.tidb.cc/tags/real-server-ip/</link>
-      <pubDate>Wed, 08 Jan 2020 00:00:00 +0800</pubDate>
+      <pubDate>Thu, 02 Jan 2020 00:00:00 +0800</pubDate>
       
       <guid>https://ap.tidb.cc/tags/real-server-ip/</guid>
       <description></description>
@@ -69,7 +69,7 @@
     <item>
       <title>TiDB</title>
       <link>https://ap.tidb.cc/tags/tidb/</link>
-      <pubDate>Wed, 08 Jan 2020 00:00:00 +0800</pubDate>
+      <pubDate>Thu, 02 Jan 2020 00:00:00 +0800</pubDate>
       
       <guid>https://ap.tidb.cc/tags/tidb/</guid>
       <description></description>

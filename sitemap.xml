@@ -30,13 +30,6 @@
   </url>
   
   <url>
-    <loc>https://ap.tidb.cc/tags/haproxy/</loc>
-    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
     <loc>https://ap.tidb.cc/tags/hugo/</loc>
     <lastmod>2020-02-03T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
@@ -44,22 +37,8 @@
   </url>
   
   <url>
-    <loc>https://ap.tidb.cc/tags/load-balance/</loc>
-    <lastmod>2020-01-10T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
     <loc>https://ap.tidb.cc/post/</loc>
     <lastmod>2020-02-03T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://ap.tidb.cc/tags/real-server-ip/</loc>
-    <lastmod>2020-01-10T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -79,8 +58,36 @@
   </url>
   
   <url>
-    <loc>https://ap.tidb.cc/tags/tidb/</loc>
-    <lastmod>2020-01-23T00:00:00+08:00</lastmod>
+    <loc>https://ap.tidb.cc/</loc>
+    <lastmod>2020-02-03T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/post/20200108-github-hugo-actions/</loc>
+    <lastmod>2020-02-03T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/haproxy/</loc>
+    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/load-balance/</loc>
+    <lastmod>2020-01-10T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/real-server-ip/</loc>
+    <lastmod>2020-01-10T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -93,22 +100,15 @@
   </url>
   
   <url>
-    <loc>https://ap.tidb.cc/post/20200108-tidb-haproxy-real-ip/</loc>
+    <loc>https://ap.tidb.cc/tags/tidb/</loc>
+    <lastmod>2020-01-23T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/post/20200102-tidb-haproxy-real-ip/</loc>
     <lastmod>2020-01-10T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://ap.tidb.cc/</loc>
-    <lastmod>2020-02-03T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://ap.tidb.cc/post/20200108-github-hugo-actions/</loc>
-    <lastmod>2020-02-03T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
