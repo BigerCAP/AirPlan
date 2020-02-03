@@ -165,7 +165,14 @@ actions.yml 配置完成，提交 push 记录；检查 actions 操作记录发�
 
 ![not found key](./github-actions-deploy-failed.png)
 
-前后思考很久都没理解为啥会报错，yml 配置文件也没写错。后百度发现 `ACTIONS_DEPLOY_KEY: ${{ secrets.si }}` 参数中 secrets.si 代表了 repo-setting 中 secrets 的设置信息，si 为 secrets 中添加的 ssh-key 信息（PS：就是因为没读这这段信息 github-pages-actions [personal_token](https://github.com/marketplace/actions/github-pages-action#%EF%B8%8F-personal_token)。  
+前后思考很久都没理解为啥会报错，yml 配置文件也没写错。后百度发现 `ACTIONS_DEPLOY_KEY: ${{ secrets.si }}` 参数中 secrets.si 代表了 repo-setting 中 secrets 的设置信息，si 为 secrets 中添加的 ssh-key 信息（PS：就是因为没读这这段信息 [deploy-ssh-key](https://github.com/marketplace/actions/github-pages-action#1-add-ssh-deploy-key) 与 github-pages-actions [personal_token](https://github.com/marketplace/actions/github-pages-action#%EF%B8%8F-personal_token)。  
+
+```bash
+ssh-keygen -t rsa -b 4096 -C "$(git config user.email)" -f gh-pages -N ""
+# You will get 2 files:
+#   gh-pages.pub (public key)
+#   gh-pages     (private key)
+```
 
 ### CNAME
 
@@ -177,7 +184,7 @@ actions.yml 配置完成，提交 push 记录；检查 actions 操作记录发�
 
 最后当然是在 hugo/content 目录下创建一个 CNAME 文件，该文件并不影响网站静态生成。  
 
-### 奇怪知识点
+### 自我懵逼
 
 github repo 三个分支分别别是 master、draft、gh-pages，master 中存放 actions.yml、draft 存放 hugo 程序和 markdown 文档、gh-pages 是用于发布网站的分支  
 此时不断向 draft 提交文档修改，发现 gh-pages actions 并未有任何动作  
@@ -186,7 +193,9 @@ github repo 三个分支分别别是 master、draft、gh-pages，master 中存�
 
 ### 匪夷所思
 
-提交更新本篇文档，首次 hugo 编译遇见以下问题，第二次静态编译成功。没有 actions 运行日志，不知道咋回事……
+提交更新本篇文档，首次 hugo 编译遇见以下问题，第二次静态编译成功。没有 actions 运行日志，不知道咋回事……  
+如果需要重新执行本次 issue build，可以点右上角的 re-run checks 按钮  
+（PS：再次遇见该问题，猜测是本文档图片太多了、然后 docker 处理时超时了吧）  
 
 ![open error caname](./github-open-Cname.png)
 
