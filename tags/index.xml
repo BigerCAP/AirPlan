@@ -13,11 +13,38 @@
     
     
     <item>
+      <title>CI CD</title>
+      <link>https://ap.tidb.cc/tags/ci-cd/</link>
+      <pubDate>Wed, 08 Jan 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/tags/ci-cd/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Github actions</title>
+      <link>https://ap.tidb.cc/tags/github-actions/</link>
+      <pubDate>Wed, 08 Jan 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/tags/github-actions/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>HAProxy</title>
       <link>https://ap.tidb.cc/tags/haproxy/</link>
       <pubDate>Wed, 08 Jan 2020 00:00:00 +0800</pubDate>
       
       <guid>https://ap.tidb.cc/tags/haproxy/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>hugo</title>
+      <link>https://ap.tidb.cc/tags/hugo/</link>
+      <pubDate>Wed, 08 Jan 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/tags/hugo/</guid>
       <description></description>
     </item>
     

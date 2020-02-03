@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>生态围墙 - Github Actions &amp; Hugo - TiDB AirPlan - A biger solution</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Jeff" /><meta name="description" content="0x00 上帝说有光 目标：持续 tidb.cc 域名的运转 初衷：让更多的人了解 xxxx 产品 内核：提升自身技能以及建立良性记录 动力：装逼 助力 OKR、分享与讨论技术的真实性、" /><meta name="keywords" content="TiDB, AirPlan, TiDB OPS, tidb-operator, 2pc, raft, databases, mysql, htap" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.63.2 with theme even" />
+
+
+<link rel="canonical" href="https://ap.tidb.cc/post/20200108-github-hugo-actions/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<link href="/dist/even.04bd84cd.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="生态围墙 - Github Actions &amp; Hugo" />
+<meta property="og:description" content="0x00 上帝说有光 目标：持续 tidb.cc 域名的运转 初衷：让更多的人了解 xxxx 产品 内核：提升自身技能以及建立良性记录 动力：装逼 助力 OKR、分享与讨论技术的真实性、" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://ap.tidb.cc/post/20200108-github-hugo-actions/" />
+<meta property="article:published_time" content="2020-01-08T00:00:00+08:00" />
+<meta property="article:modified_time" content="2020-02-03T00:00:00+08:00" />
+<meta itemprop="name" content="生态围墙 - Github Actions &amp; Hugo">
+<meta itemprop="description" content="0x00 上帝说有光 目标：持续 tidb.cc 域名的运转 初衷：让更多的人了解 xxxx 产品 内核：提升自身技能以及建立良性记录 动力：装逼 助力 OKR、分享与讨论技术的真实性、">
+<meta itemprop="datePublished" content="2020-01-08T00:00:00&#43;08:00" />
+<meta itemprop="dateModified" content="2020-02-03T00:00:00&#43;08:00" />
+<meta itemprop="wordCount" content="3101">
+
+
+
+<meta itemprop="keywords" content="hugo,Github actions,CI CD," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="生态围墙 - Github Actions &amp; Hugo"/>
+<meta name="twitter:description" content="0x00 上帝说有光 目标：持续 tidb.cc 域名的运转 初衷：让更多的人了解 xxxx 产品 内核：提升自身技能以及建立良性记录 动力：装逼 助力 OKR、分享与讨论技术的真实性、"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">TiDB AirPlan</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">About</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">TiDB AirPlan</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/about/">About</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">生态围墙 - Github Actions &amp; Hugo</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2020-01-08 </span>
+        <div class="post-category">
+            <a href="/categories/software/"> software </a>
+            </div>
+          <span class="more-meta"> 3101 words </span>
+          <span class="more-meta"> 7 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#0x00-上帝说有光">0x00 上帝说有光</a></li>
+    <li><a href="#0x01-挖掘-hugo">0x01 挖掘 Hugo</a></li>
+    <li><a href="#0x02-堆砌">0x02 堆砌</a></li>
+    <li><a href="#0x03-扇风-github">0x03 扇风 Github</a></li>
+    <li><a href="#0x04-点火">0x04 点火</a></li>
+    <li><a href="#0x05-faq">0x05 FAQ</a>
+      <ul>
+        <li><a href="#gcc-版本">Gcc 版本</a></li>
+        <li><a href="#yarn">yarn</a></li>
+        <li><a href="#build-failed">build failed</a></li>
+        <li><a href="#no-found-token">no found token</a></li>
+        <li><a href="#cname">CNAME</a></li>
+        <li><a href="#奇怪知识点">奇怪知识点</a></li>
+      </ul>
+    </li>
+    <li><a href="#0x06-emmm">0x06 emmm</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h2 id="0x00-上帝说有光">0x00 上帝说有光</h2>
+<p>目标：<del>持续</del> tidb.cc 域名的运转
+初衷：<del>让更多的人了解 xxxx 产品</del>
+内核：<del>提升自身技能以及建立良性记录</del>
+动力：装逼 <del>助力 OKR、分享与讨论技术的真实性、考核自身对产拼的理解能力、管控自身 GTD</del></p>
+<p>走上选型之路，从 wordpress、typecho 等 PHP 网站程序到后面静态网页生成工具 hexo、hugo 等；综合审判实力以及时间等因素，静态网页 &amp; Gitpage 更适合比较懒的我(懒是第一源动力)，依靠 Github 力量充分的免去各种劳动力与精力。<br>
+然 hugo 与 hexo 需要多个过程与步骤才能让不明观众完成阅读文档的动作，这个上帝说需要优化，否则他就不干了…… 为了节省人力与时间，不要试图锻炼和测试上帝的耐心到底有多强。</p>
+<h2 id="0x01-挖掘-hugo">0x01 挖掘 Hugo</h2>
+<p>Hugo 、Hexo &amp; Wordpress、typecho 的对比过程，此处省略 10000 个字；直接跳到 Hugo 程序介绍与测试</p>
+<p>Hugo 是一款 Go 写的静态网站生成工具，可以将标准的 markdown 文本内容结合 HTML + CSS 网页生成一套静态网站。静态的网站好处都有啥，万能的金坷垃网上自己查……<br>
+Hugo：<code>https://gohugo.io/</code> &amp; <code>https://github.com/gohugoio/hugo</code> 一切从这开始</p>
+<p>duck duck 一阵过后，查到海量关于 Github Actions 、Hugo 、Github Pages 的文档，以下开始逐步折腾：保障办公电脑环境的前提，找了一台  Linux 机器作为本次测试机，以下步骤以 Linux 机器为主</p>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>动作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>安装部署</td>
+<td><code>https://github.com/gohugoio/hugo/releases</code> 下载响应系统安装包 / hugo_extended 扩展版需要较高的 Gcc 版本支持</td>
+</tr>
+<tr>
+<td>&mdash;</td>
+<td>解压下载包，将目录内 hugo 程序复制一份到 /usr/bin 目录下，此时可在系统内直接执行 hugo 命令</td>
+</tr>
+<tr>
+<td>初始化网站</td>
+<td>hugo new site ske</td>
+</tr>
+<tr>
+<td>寻找 theme</td>
+<td>从这里下载 <code>https://themes.gohugo.io/</code> ; 将主题包解压后放置在 ske/themes 目录下</td>
+</tr>
+<tr>
+<td>&mdash;</td>
+<td>注意将主题目录下 exampleSite/config.toml 复制并替换 /opt/ske/config.toml ，并修改 config.toml 中的 baseurl 信息</td>
+</tr>
+<tr>
+<td>新建文档</td>
+<td>hugo new posts/one.md   hugo new page/about.md ； 以上动作会在 ske/content 目录下自动生成内容</td>
+</tr>
+<tr>
+<td>&mdash;</td>
+<td>注意！如果使用相对路径引用 /opt/ske 图片、视频等文件，注意查看引用后是否正常</td>
+</tr>
+<tr>
+<td>查看网站</td>
+<td>hugo -s -D ; -s 后提示查看 localhost:1313 网站，-D 可以将 “daft 草稿” 内容也生成网页；在 one.md 文档头部有 daft:true 代表是草稿文档</td>
+</tr>
+<tr>
+<td>部署 Nginx</td>
+<td>hugo -s 适合本地修改 themes 或者学习使用；如果长期运行网站需要一个 HTML 解析编译工具。如 Nginx、Apache、IIS 三大主流引擎；centos 系统默认使用 yum install nginx 安装</td>
+</tr>
+<tr>
+<td>调整 nginx.conf</td>
+<td>调整 80 端口网站目录为 /opt/ske/public （此处注意 nginx 运行用户与网站目录权限，否则网站访问 403） ； hugo 生成后的静态网页都在这里</td>
+</tr>
+<tr>
+<td>生成静态</td>
+<td>在 /opt/ske 目录下执行 hugo 命令，生成静态网站</td>
+</tr>
+<tr>
+<td>访问网站</td>
+<td>在防火墙关闭 &amp; 端口无限制的情况下，访问 IP:port 或者 IP/dir</td>
+</tr>
+</tbody>
+</table>
+<p>以上整个过程，除 hugo 新建文档步骤，Github 上有 Dockerfile 以及 docker hub 上有完整的 Docker image 镜像；可以自行搜索下</p>
+<h2 id="0x02-堆砌">0x02 堆砌</h2>
+<p>上面的步骤是如此的复杂，当上帝耗费了很大精力制造完光，限制需要将光共享给大众的时候还有那么多的流程和步骤，而这些都是重复的内容 &ndash; 因此我们需要解放上帝的劳动力。简略分析上述步骤：</p>
+<p>hugo 程序需要以下多个步骤帮助 Markdown 文档生成 Html 静态网站，然后 deploy 至目标仓库。</p>
+<ul>
+<li>命令行
+<ul>
+<li>hugo new site</li>
+<li>hugo new posts/one.md</li>
+<li>hugo -D</li>
+<li>hugo deploy</li>
+</ul>
+</li>
+</ul>
+<p>把以上步骤通过打包整合使用 Travis CI 、Jenkins 等工具或者 Github Actions 工具，整个流水线调通后就是 <strong>持续集成（Continuous integration）</strong> ；后续需要针对不同环境迭代发布各种版本交付生产线需要叠加另一套方法流 <strong>持续交付（Continuous delivery）</strong></p>
+<p>那么我们需要研究下对比下以上几款 CI 工具；对比过程省略几十上百字，背靠大树好乘凉直接无脑选择 Github Actions（主要是一人家人还是免费用，配置长度上比 jenkins、travis 要简单）</p>
+<blockquote>
+<p>引用官方 Github 对于 Actions 的部分信息 / 围观下该功能是否收费<br>
+There are some limits on GitHub Actions usage. <a href="https://help.github.com/en/actions/automating-your-workflow-with-github-actions/about-github-actions#usage-limits">Unless specified</a><br>
+GitHub Actions usage is <a href="https://help.github.com/en/github/setting-up-and-managing-billing-and-payments-on-github/about-billing-for-github-actions#about-billing-for-github-actions">free for public</a> repositories.<br>
+<img src="./github-actions.jpg" alt="Github Actions"></p>
+</blockquote>
+<h2 id="0x03-扇风-github">0x03 扇风 Github</h2>
+<blockquote>
+<p><code>https://github.com/marketplace</code> 是 Github 的一个 Github repo APP 市场，各位高能开发者针对 Github repo 做了一系列小工具整合成了一个产品平台<br>
+github actions 功能介绍直接看这篇 <strong>阮一峰 &ndash; <a href="http://www.ruanyifeng.com/blog/2019/09/getting-started-with-github-actions.html" title="外部引用 ｜ Docs.tidb.cc &amp; Github Actions Hugo">Github Actions 入门教程</a></strong><br>
+本次用到两个 Actions App ，第一个是 <a href="https://github.com/marketplace/actions/github-pages-action">github-pages-action</a>，协助我们生成；第二个是 <a href="https://github.com/marketplace/actions/hugo-setup">hugo-setup</a>，在 github-pages-action 外面打包了一层 Hugo 生成网页的步骤。</p>
+</blockquote>
+<p>结合生成以下 actions.yml 文件内容：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="k">name</span><span class="p">:</span><span class="w"> </span>github<span class="w"> </span>pages<span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">on</span><span class="p">:</span><span class="w">
+</span><span class="w"></span><span class="w">  </span><span class="k">push</span><span class="p">:</span><span class="w">
+</span><span class="w"></span><span class="w">    </span><span class="k">branches</span><span class="p">:</span><span class="w">
+</span><span class="w"></span><span class="w">    </span>- master<span class="w">  </span>//<span class="w"> </span>该位置不是用于监听<span class="w"> </span>master<span class="w"> </span>分支接收到<span class="w"> </span>push<span class="w"> </span>操作后执行以下内容。<span class="w">
+</span><span class="w">              </span>//<span class="w"> </span>而是当前分支收到<span class="w"> </span>push<span class="w"> </span>操作后，去对<span class="w"> </span>master<span class="w"> </span>分支做<span class="w"> </span>jobs<span class="w"> </span>操作<span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">jobs</span><span class="p">:</span><span class="w"> </span><span class="w"> </span>//<span class="w"> </span>actions<span class="w"> </span>在上述分支遇见<span class="w"> </span>push<span class="w"> </span>操作后，执行<span class="w"> </span>jobs<span class="w"> </span>内的动作<span class="w">
+</span><span class="w">  </span><span class="k">build-deploy</span><span class="p">:</span><span class="w">
+</span><span class="w"></span><span class="w">    </span><span class="k">runs-on</span><span class="p">:</span><span class="w"> </span>ubuntu<span class="m">-18.04</span><span class="w">
+</span><span class="w">    </span><span class="k">steps</span><span class="p">:</span><span class="w">
+</span><span class="w"></span><span class="w">    </span>- <span class="k">uses</span><span class="p">:</span><span class="w"> </span>actions/checkout@v1<span class="w">
+</span><span class="w">      </span><span class="c"># with:</span><span class="w">
+</span><span class="w">      </span><span class="c">#   submodules: true</span><span class="w">
+</span><span class="w">
+</span><span class="w">    </span>- <span class="k">name</span><span class="p">:</span><span class="w"> </span>Hugo<span class="w"> </span>setup<span class="w">
+</span><span class="w">      </span><span class="k">uses</span><span class="p">:</span><span class="w"> </span>peaceiris/actions-hugo@v2<span class="m">.3</span><span class="m">.2</span><span class="w">
+</span><span class="w">      </span><span class="k">with</span><span class="p">:</span><span class="w">
+</span><span class="w"></span><span class="w">        </span><span class="k">hugo-version</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;latest&#39;</span><span class="w">
+</span><span class="w">        </span><span class="k">extended</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span><span class="w">
+</span><span class="w">    </span>- <span class="k">name</span><span class="p">:</span><span class="w"> </span>Build<span class="w">
+</span><span class="w">      </span><span class="k">run</span><span class="p">:</span><span class="w"> </span>hugo<span class="w"> </span>-D<span class="w">  </span>//<span class="w"> </span>hugo<span class="w"> </span>命令，用于生成静态文件，<span class="w"> </span>-D<span class="w"> </span>将草稿也生成文档<span class="w">
+</span><span class="w">
+</span><span class="w">    </span>- <span class="k">name</span><span class="p">:</span><span class="w"> </span>Deploy<span class="w">  </span>//<span class="w"> </span>引用<span class="w"> </span>github-pages<span class="w"> </span>将数据推送到当前<span class="w"> </span>repo<span class="w"> </span>gh-pages<span class="w"> </span>分支<span class="w">
+</span><span class="w">      </span><span class="k">uses</span><span class="p">:</span><span class="w"> </span>peaceiris/actions-gh-pages@v2<span class="w">
+</span><span class="w">      </span><span class="k">env</span><span class="p">:</span><span class="w">
+</span><span class="w"></span><span class="w">        </span><span class="k">ACTIONS_DEPLOY_KEY</span><span class="p">:</span><span class="w"> </span>${{<span class="w"> </span>secrets.si<span class="w"> </span>}}<span class="w">  </span>//<span class="w"> </span>注意此处<span class="w"> </span>secrets.si<span class="w"> </span>声明<span class="w"> </span>ssh-key<span class="w"> </span>信息，si<span class="w"> </span>是自定义变量名，取决于在<span class="w"> </span>repo-setting-secrers<span class="w"> </span>中的配置信息<span class="w">
+</span><span class="w">        </span><span class="k">PUBLISH_BRANCH</span><span class="p">:</span><span class="w"> </span>gh-pages<span class="w">
+</span><span class="w">        </span><span class="k">PUBLISH_DIR</span><span class="p">:</span><span class="w"> </span>./public<span class="w">  </span>//推送<span class="w"> </span>hugo/public<span class="w"> </span>目录下的数据到远程<span class="w"> </span>repo<span class="w"> </span>gh-pages<span class="w"> </span>分支<span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><h2 id="0x04-点火">0x04 点火</h2>
+<p>降低 master commit 那难看的记录，使用到了三个分支，master、draft、gh-pages，分别是 master 放置不用、draft 放 hugo 程序和 content/markdown 文档、gh-pages 放静态网页内容<br>
+不断向 draft 提交文档，然后触发 gh-pages 自动更新，期间遇见的问题请向下滚动屏幕</p>
+<h2 id="0x05-faq">0x05 FAQ</h2>
+<h3 id="gcc-版本">Gcc 版本</h3>
+<p>在低版本 Linux 内核运行 hugo 会提示 gcc 版本过低</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash"><span class="o">[</span>root@Jeff-VM1 hugo<span class="o">]</span><span class="c1"># ./hugo -V</span>
+./hugo: /lib64/libstdc++.so.6: version <span class="sb">`</span>GLIBCXX_3.4.20<span class="s1">&#39; not found (required by ./hugo)
+</span><span class="s1">./hugo: /lib64/libstdc++.so.6: version `GLIBCXX_3.4.21&#39;</span> not found <span class="o">(</span>required by ./hugo<span class="o">)</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>该 Liunx 内核版本执行正常，使用的 ubuntu 18 版本</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash"><span class="o">[</span>root@fresh-frog-3 ~<span class="o">]</span><span class="c1"># uname -a</span>
+Linux fresh-frog-3.localdomain 4.18.0-80.el8.x86_64 <span class="c1">#1 SMP Tue Jun 4 09:19:46 UTC 2019 x86_64 x86_64 x86_64 GNU/Linux</span>
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="yarn">yarn</h3>
+<p>hugo 主题可能会使用比较火爆的 _scss 框架，scss 框架修改后需要通过 yarn 工具编译生成 dist 文件才能使用。辣么需要安装 yran 并编译主题包；复制粘贴安装</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-fallback" data-lang="fallback">sudo wget https://dl.yarnpkg.com/rpm/yarn.repo -O /etc/yum.repos.d/yarn.repo
+yum install yarn
+</code></pre></td></tr></table>
+</div>
+</div><p>安装成功后，进入主题目录下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash"><span class="nb">cd</span> ./themes/even/
+<span class="c1"># install dependencies</span>
+yarn install
+<span class="c1"># build</span>
+yarn build
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="build-failed">build failed</h3>
+<p>根据内容分析，是因为 branch 中没有 hugo 的数据目录；上传后 hugo 执行编译成功。<br>
+（PS：注意 hugo new site 方式，如果网站目录中已有 .git* 的目录，辣么会变成 GitHub 子项目展示）<br>
+（PPS：hugo/theme/ 目录是重灾区，常用是通过 git clone 方式下载 theme，辣么这个 theme 目录里的 .git* 一定要删除，否则会发现 Github pages 看不到任何 html、css 编译后的内容）</p>
+<p><img src="./github-actions-not-found.png" alt="github build failed"></p>
+<h3 id="no-found-token">no found token</h3>
+<p>actions.yml 配置完成，提交 push 记录；检查 actions 操作记录发现未 push ./public 数据到 gh-pages 分支下，提示 <code>not found ACTIONS_DEPLOY_KEY, PERSONAL_TOKEN, or GITHUB_TOKEN</code>。</p>
+<p><img src="./github-actions-deploy-failed.png" alt="not found key"></p>
+<p>前后思考很久都没理解为啥会报错，yml 配置文件也没写错。后百度发现 <code>ACTIONS_DEPLOY_KEY: ${{ secrets.si }}</code> 参数中 secrets.si 代表了 repo-setting 中 secrets 的设置信息，si 为 secrets 中添加的 ssh-key 信息（PS：就是因为没读这这段信息 github-pages-actions <a href="https://github.com/marketplace/actions/github-pages-action#%EF%B8%8F-personal_token">personal_token</a>。</p>
+<h3 id="cname">CNAME</h3>
+<p>整体流程都可以工作了，但是每次 draft push 提交更新后，访问自定义域名就无法打开网站（提示 404），经过查看发现是 gh-pages branch 下没有 <strong>CNAME</strong> 文件。<br>
+然后我就手动新建一个再次提交一次修改，发现网站又打不开了……<br>
+分析了 actions 发现下图，思考十分钟发现是因为 hugo/content 目录下木有 CNAME 文件，辣么 hugo 生成的网站中也没有这个文件，按照 gh-pages 先全部删掉然后在提交 PR 的逻辑就想通了。</p>
+<p><img src="./github-actions-rm-cname.png" alt="github actions rm canme"></p>
+<p>最后当然是在 hugo/content 目录下创建一个 CNAME 文件，该文件并不影响网站静态生成。</p>
+<h3 id="奇怪知识点">奇怪知识点</h3>
+<p>github repo 三个分支分别别是 master、draft、gh-pages，master 中存放 actions.yml、draft 存放 hugo 程序和 markdown 文档、gh-pages 是用于发布网站的分支<br>
+此时不断向 draft 提交文档修改，发现 gh-pages actions 并未有任何动作<br>
+经过一番测试发现是 actions.yml 文件所在的 branch 收到 push 操作才会去工作（嗯，肯定是我脑等级太低了）//<br>
+（PS：每个 barnch 都可以放 actions.yml ，并且可以是不同的内容信息，跨 branch 执行 jobs 也可以工作。每个 branch 下的 actions.yml 由当前 barnch 接受 pull、push 等操作而触发）</p>
+<h2 id="0x06-emmm">0x06 emmm</h2>
+<blockquote>
+<p>没及时搞出来文档，貌似忘记了一部分内容咋写了、先这样了
+<img src="./bottom.png" alt="懒癌晚期"></p>
+</blockquote>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Jeff</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2020-02-03
+        
+    </span>
+  </p>
+  
+  <p class="copyright-item">
+    <span class="item-title">License</span>
+    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a></span>
+  </p>
+</div>
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/hugo/">hugo</a>
+          <a href="/tags/github-actions/">Github actions</a>
+          <a href="/tags/ci-cd/">CI CD</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/20200108-tidb-haproxy-real-ip/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">TiDB &amp; Haproxy / show processlist View real IP</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/20180605-syncer-mindmap/">
+            <span class="next-text nav-default">总结 - Syncer 助力思维成长</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="https://github.com/BigerCAP/TiDB-AirPlan/issues" class="iconfont icon-github" title="github"></a>
+  <a href="https://ap.tidb.cc/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2020
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">TiDB - AirPlan</span>
+  </span>
+</div>
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js" integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js" integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin="anonymous"></script>
+  <script><!-- NOTE: timeago.js uses the language code format like "zh_CN" (underscore and case sensitive) -->
+    var languageCode = "en".replace(/-/g, '_').replace(/_(.*)/, function ($0, $1) {return $0.replace($1, $1.toUpperCase());});
+    timeago().render(document.querySelectorAll('.timeago'), languageCode);
+    timeago.cancel();  
+  </script>
+<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>
