@@ -48,7 +48,7 @@
 <meta itemprop="description" content="0x00 上帝说有光 目标：持续 tidb.cc 域名的运转 初衷：让更多的人了解 xxxx 产品 内核：提升自身技能以及建立良性记录 动力：装逼 助力 OKR、分享与讨论技术的真实性、">
 <meta itemprop="datePublished" content="2020-01-08T00:00:00&#43;08:00" />
 <meta itemprop="dateModified" content="2020-02-03T00:00:00&#43;08:00" />
-<meta itemprop="wordCount" content="3101">
+<meta itemprop="wordCount" content="3229">
 
 
 
@@ -128,7 +128,7 @@
         <div class="post-category">
             <a href="/categories/software/"> software </a>
             </div>
-          <span class="more-meta"> 3101 words </span>
+          <span class="more-meta"> 3229 words </span>
           <span class="more-meta"> 7 mins read </span>
         <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
       </div>
@@ -152,6 +152,8 @@
         <li><a href="#no-found-token">no found token</a></li>
         <li><a href="#cname">CNAME</a></li>
         <li><a href="#奇怪知识点">奇怪知识点</a></li>
+        <li><a href="#匪夷所思">匪夷所思</a></li>
+        <li><a href="#hugo-version">hugo version</a></li>
       </ul>
     </li>
     <li><a href="#0x06-emmm">0x06 emmm</a></li>
@@ -405,6 +407,12 @@ yarn build
 此时不断向 draft 提交文档修改，发现 gh-pages actions 并未有任何动作<br>
 经过一番测试发现是 actions.yml 文件所在的 branch 收到 push 操作才会去工作（嗯，肯定是我脑等级太低了）//<br>
 （PS：每个 barnch 都可以放 actions.yml ，并且可以是不同的内容信息，跨 branch 执行 jobs 也可以工作。每个 branch 下的 actions.yml 由当前 barnch 接受 pull、push 等操作而触发）</p>
+<h3 id="匪夷所思">匪夷所思</h3>
+<p>提交更新本篇文档，首次 hugo 编译遇见以下问题，第二次静态编译成功。没有 actions 运行日志，不知道咋回事……</p>
+<p><img src="./github-open-Cname.png" alt="open error caname"></p>
+<h3 id="hugo-version">hugo version</h3>
+<p>因为填错了 hugo version 信息，hugo 木有 0.62.2 版本。与上面那个问题是联动的，第一次失败时为了触发再次执行 actions，就修改了下 hugo version 排查下问题，还把版本填错了。</p>
+<p><img src="./github-hugo-version-failed.png" alt="hugo version"></p>
 <h2 id="0x06-emmm">0x06 emmm</h2>
 <blockquote>
 <p>没及时搞出来文档，貌似忘记了一部分内容咋写了、先这样了
