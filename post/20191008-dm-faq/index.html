@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>总结 - Data Migration（数据同步） - TiDB AirPlan - A biger solution</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Jeff" /><meta name="description" content="0x00 开局 本文仅记录了对 DM 的学习，处理问题经验慢慢补充（没有素材编场景） 版本使用从 RC 到 v1.0.3 ；架构整体变化不大，有着上纲上线的框架守护 本页内容没有干" /><meta name="keywords" content="TiDB, AirPlan, TiDB OPS, tidb-operator, 2pc, raft, databases, mysql, htap" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.63.2 with theme even" />
+
+
+<link rel="canonical" href="https://ap.tidb.cc/post/20191008-dm-faq/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<link href="/dist/even.04bd84cd.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="总结 - Data Migration（数据同步）" />
+<meta property="og:description" content="0x00 开局 本文仅记录了对 DM 的学习，处理问题经验慢慢补充（没有素材编场景） 版本使用从 RC 到 v1.0.3 ；架构整体变化不大，有着上纲上线的框架守护 本页内容没有干" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://ap.tidb.cc/post/20191008-dm-faq/" />
+<meta property="article:published_time" content="2020-01-22T00:00:00+08:00" />
+<meta property="article:modified_time" content="2020-02-05T00:00:00+08:00" />
+<meta itemprop="name" content="总结 - Data Migration（数据同步）">
+<meta itemprop="description" content="0x00 开局 本文仅记录了对 DM 的学习，处理问题经验慢慢补充（没有素材编场景） 版本使用从 RC 到 v1.0.3 ；架构整体变化不大，有着上纲上线的框架守护 本页内容没有干">
+<meta itemprop="datePublished" content="2020-01-22T00:00:00&#43;08:00" />
+<meta itemprop="dateModified" content="2020-02-05T00:00:00&#43;08:00" />
+<meta itemprop="wordCount" content="1791">
+
+
+
+<meta itemprop="keywords" content="DM,mindmap," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="总结 - Data Migration（数据同步）"/>
+<meta name="twitter:description" content="0x00 开局 本文仅记录了对 DM 的学习，处理问题经验慢慢补充（没有素材编场景） 版本使用从 RC 到 v1.0.3 ；架构整体变化不大，有着上纲上线的框架守护 本页内容没有干"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">TiDB AirPlan</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">About</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">TiDB AirPlan</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/about/">About</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">总结 - Data Migration（数据同步）</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2020-01-22 </span>
+        <div class="post-category">
+            <a href="/categories/troubleshooting/"> Troubleshooting </a>
+            </div>
+          <span class="more-meta"> 1791 words </span>
+          <span class="more-meta"> 4 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#0x00-开局">0x00 开局</a></li>
+    <li><a href="#0x01-一">0x01 一</a></li>
+    <li><a href="#0x02-张">0x02 张</a></li>
+    <li><a href="#0x03-图">0x03 图</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h2 id="0x00-开局">0x00 开局</h2>
+<blockquote>
+<p>本文仅记录了对 DM 的学习，处理问题经验慢慢补充（没有素材编场景）<br>
+版本使用从 RC 到 v1.0.3 ；架构整体变化不大，有着上纲上线的框架守护<br>
+<strong>本页内容没有干货</strong>、学习 DM 使用请关闭本页去 PingCAP <a href="https://pingcap.com/docs-cn/stable/reference/tools/data-migration/overview/#dm-%e6%9e%b6%e6%9e%84">官网文档</a></p>
+</blockquote>
+<h2 id="0x01-一">0x01 一</h2>
+<blockquote>
+<p>DM (Data Migration) 是一体化的数据同步任务管理平台，支持从 MySQL 或 MariaDB 到 TiDB 的全量数据迁移和增量数据同步。使用 DM 工具有利于简化错误处理流程，降低运维成本。<br>
+如有 Syncer、Loader、MyDumper 使用经验，学习速度加倍</p>
+</blockquote>
+<p>DM 设计之初是将之前常用的三组件（Syncer、Loader、MyDumper ）数据同步方式做了一个打包集合体，然后加了一些增值管理功能来维护同步任务，同时增加 <strong>sharding ddl lock、auto increment ID 重写</strong>两个刚需功能。<br>
+此处回顾一句话 <em>“如果整篇文章你只想记住一句话，那就是数据条数少于 5000w 的场景下通常用不到 TiDB，TiDB 是为大规模的数据场景设计的。如果还想记住一句话，那就是单机 MySQL 能满足的场景也用不到 TiDB（<a href="https://pingcap.com/blog-cn/how-to-use-tidb/">文字传送门</a>）”</em>。<br>
+数据群体来自于分库分表，如果不支持 sharding ddl 、auto increment ID 那么帮助客户导入数据呢？之前方案 Syncer 同步数据如果有 DDL 就主动退出，等所有分片退出后手动下游执行 DDL，跳过 DDL 后启动 Syncer 继续同步（对于不频繁操作 DDL 场景能用）。<br>
+DM 主要包括三个组件：DM-master，DM-worker 和 dmctl。其中 DM Worker 内打包了 （Syncer、Loader、MyDumper ）；DM master 管理 sharding ddl 状态和同步任务状态，DM-ctl 是运维管理入口。</p>
+<p>创造来下图这个架构流程来同步 MySQL、MariaDB 的数据到 TiDB cluster ⬇️：</p>
+<ul>
+<li>想要了解 DM 可阅读<a href="https://pingcap.com/docs-cn/stable/reference/tools/data-migration/overview/#dm-%e6%9e%b6%e6%9e%84">官网文档</a>（toc 直达车）
+<ul>
+<li>四大<a href="https://pingcap.com/docs-cn/stable/reference/tools/data-migration/features/overview/">增值功能</a></li>
+<li>使用场景：<a href="https://pingcap.com/docs-cn/stable/reference/tools/data-migration/usage-scenarios/simple-synchronization/">单库同步场景</a>
+<ul>
+<li>分库分表<a href="https://pingcap.com/docs-cn/stable/reference/tools/data-migration/usage-scenarios/best-practice-dm-shard/">最佳实践</a></li>
+</ul>
+</li>
+<li><a href="https://pingcap.com/docs-cn/stable/reference/tools/data-migration/deploy/">安装方式</a></li>
+<li>同步会话相关
+<ul>
+<li>task <a href="https://pingcap.com/docs-cn/stable/reference/tools/data-migration/configure/task-configuration-file/">配置手册</a></li>
+<li><a href="https://pingcap.com/docs-cn/stable/reference/tools/data-migration/manage-tasks/">任务管理</a></li>
+</ul>
+</li>
+<li><a href="https://pingcap.com/docs-cn/stable/reference/tools/data-migration/monitor/">监控信息</a></li>
+<li><a href="https://pingcap.com/docs-cn/stable/reference/tools/data-migration/glossary/">术语表</a></li>
+</ul>
+</li>
+</ul>
+<p><img src="./dm-architecture.png" alt="官方架构图"></p>
+<h2 id="0x02-张">0x02 张</h2>
+<p>通过这张图（下面这张图有 2MB ⬇️）复习下 DM 框架架构（图片按照顺时针的方式查看）：</p>
+<p>这张图将 DM 整体流程划分 上游、开局（框架结构）、增值（核心功能）、task.yml（任务配置）、运维（部署、监控 、日常运维）五个部分；本图不是一概而全，只是列出一些关键信息方便浏览和阅读。</p>
+<p><img src="./DM-mindmap.png" alt="DM mindmap" title="ap.tidb.cc DM 开局一张图 202200205"></p>
+<blockquote>
+<p>自我诡辩，DM 架构是在 syncer、loader 架构上做了个打包，然后使用 DM 做了几个同步数据的项目场景，然后绘制此图。改图肯定还有一些遗漏和错误，仅供参考。</p>
+</blockquote>
+<p>顺时针介绍了 DM 支持上游的 Mysql、MariaDB 版本信息，不在版本范围中的可能会遇见 Binlog 数据不兼容问题，mysql 5.5 到 5.7 横跨近十年的产品，在早起版本和最新版本上有很多数据相关的优化，特定优化需要做相关的兼容性。<br>
+第二、第三两个小节介绍 DM master、DM workder 架构与 DM worker 内部逻辑、DM 核心功能。目前 DM 还没有物理结构的高可用方案，链路上的高可用方案目前有下游到 TiDB 的心跳保持。DM master 管理同步数据任务与 sharding ddl 状态，DM worker 处理数据导出、数据导入、增量数据同步工作（DM worker 与上游 instanceDB 一一绑定工作，无法切换自身状态）。DM 的核心功能中的 route、黑白名单与之前 Syncer 上的一样，只不过此处填写 values 时全部按照上游的信息填写（syncer 在使用 route 后需要按照下游写黑白名单）。而剩下两个功能一个是自动维护的，另一个 column mapping 是人工指定的，在使用上有比较大的限制，如果业务代码中有使用 auto increment id 做业务属性关联，使用 column mapping 改写数据会导致业务失效的，新业务推荐此处修改为全局 UUID 、sequence ID、业务流水号等作为全局唯一 KEY。<br>
+第四小节 task yaml 说了下配置文件内从上到下的划分功能，全局是针对该同步任务的一些开关操作（比如 shard、检查项、断点信息、心跳信息、数据工作模式等），然后是 上下游信息，此处下游信息仅此处填写一个、上游信息支持填写多个 instance （每个 instance 对应一个 DM worker，然后通过 DM-master 配置文件映射到上游的 mysql 实例），在上游 instance 区域内可以选择使用 route、column mapping 、黑白名单等功能（类似与先声明函数然后调用执行函数块）。接下来是声明 route、黑白名单、column mapping 功能了，这部分仅仅是书写规则，在不被调用的情况下是不会开启的。最后这部分是一些特殊参数，关于 syncer、loader、mydumper 原本自身携带的特性，需要通过配置文件传递给这些组件来运行。<br>
+第五、第六两个小节是记录了下 DM 监控和 DM 文档的位置，从这些地方可以看到 DM 相关的文档信息。</p>
+<h2 id="0x03-图">0x03 图</h2>
+<blockquote>
+<p>ToDo：此处准备整理几个容易出问题的场景介绍下（预计在未来一个月时间凑够蔬菜做饭 20200315）</p>
+</blockquote>
+<ul>
+<li><input disabled="" type="checkbox">数据不一致</li>
+<li><input disabled="" type="checkbox">数据同步慢</li>
+<li><input disabled="" type="checkbox">服务启动失败</li>
+<li><input disabled="" type="checkbox">数据重新同步</li>
+</ul>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Jeff</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2020-02-05
+        
+    </span>
+  </p>
+  
+  <p class="copyright-item">
+    <span class="item-title">License</span>
+    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a></span>
+  </p>
+</div>
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/dm/">DM</a>
+          <a href="/tags/mindmap/">mindmap</a>
+          </div>
+      <nav class="post-nav">
+        
+        <a class="next" href="/post/20200108-github-hugo-actions/">
+            <span class="next-text nav-default">生态围墙 - Github Actions &amp; Hugo</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="https://github.com/BigerCAP/TiDB-AirPlan/issues" class="iconfont icon-github" title="github"></a>
+  <a href="https://ap.tidb.cc/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2020
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">TiDB - AirPlan</span>
+  </span>
+</div>
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js" integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js" integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin="anonymous"></script>
+  <script><!-- NOTE: timeago.js uses the language code format like "zh_CN" (underscore and case sensitive) -->
+    var languageCode = "en".replace(/-/g, '_').replace(/_(.*)/, function ($0, $1) {return $0.replace($1, $1.toUpperCase());});
+    timeago().render(document.querySelectorAll('.timeago'), languageCode);
+    timeago.cancel();  
+  </script>
+<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

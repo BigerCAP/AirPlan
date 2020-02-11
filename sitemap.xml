@@ -10,7 +10,56 @@
   
   <url>
     <loc>https://ap.tidb.cc/categories/</loc>
-    <lastmod>2020-02-03T00:00:00+08:00</lastmod>
+    <lastmod>2020-02-05T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/dm/</loc>
+    <lastmod>2020-02-05T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/mindmap/</loc>
+    <lastmod>2020-02-05T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/post/</loc>
+    <lastmod>2020-02-05T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/</loc>
+    <lastmod>2020-02-05T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/</loc>
+    <lastmod>2020-02-05T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/categories/troubleshooting/</loc>
+    <lastmod>2020-02-05T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/post/20191008-dm-faq/</loc>
+    <lastmod>2020-02-05T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -37,28 +86,7 @@
   </url>
   
   <url>
-    <loc>https://ap.tidb.cc/post/</loc>
-    <lastmod>2020-02-03T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
     <loc>https://ap.tidb.cc/categories/software/</loc>
-    <lastmod>2020-02-03T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://ap.tidb.cc/tags/</loc>
-    <lastmod>2020-02-03T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://ap.tidb.cc/</loc>
     <lastmod>2020-02-03T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -123,13 +151,6 @@
   <url>
     <loc>https://ap.tidb.cc/tags/syncer/</loc>
     <lastmod>2020-01-26T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://ap.tidb.cc/categories/troubleshooting/</loc>
-    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -347,13 +368,6 @@
   <url>
     <loc>https://ap.tidb.cc/post/20170601-prometheus-grafana/</loc>
     <lastmod>2020-01-23T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://ap.tidb.cc/tags/mindmap/</loc>
-    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>

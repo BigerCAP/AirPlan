@@ -7,10 +7,19 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>TiDB - AirPlan</copyright>
-    <lastBuildDate>Wed, 08 Jan 2020 00:00:00 +0800</lastBuildDate>
+    <lastBuildDate>Wed, 22 Jan 2020 00:00:00 +0800</lastBuildDate>
     
 	<atom:link href="https://ap.tidb.cc/categories/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Troubleshooting</title>
+      <link>https://ap.tidb.cc/categories/troubleshooting/</link>
+      <pubDate>Wed, 22 Jan 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/categories/troubleshooting/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>software</title>
@@ -27,15 +36,6 @@
       <pubDate>Thu, 02 Jan 2020 00:00:00 +0800</pubDate>
       
       <guid>https://ap.tidb.cc/categories/tidb/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Troubleshooting</title>
-      <link>https://ap.tidb.cc/categories/troubleshooting/</link>
-      <pubDate>Tue, 05 Jun 2018 00:00:00 +0800</pubDate>
-      
-      <guid>https://ap.tidb.cc/categories/troubleshooting/</guid>
       <description></description>
     </item>
     
