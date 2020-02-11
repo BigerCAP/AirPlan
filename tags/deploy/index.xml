@@ -40,11 +40,20 @@
     </item>
     
     <item>
-      <title>监控架构 - 专业打小报告好多年</title>
-      <link>https://ap.tidb.cc/post/20170607-alertmanager/</link>
-      <pubDate>Wed, 07 Jun 2017 00:00:00 +0800</pubDate>
+      <title>监控架构 - 那些年我们举报的神马</title>
+      <link>https://ap.tidb.cc/post/20170605-alertmanager-rules/</link>
+      <pubDate>Mon, 05 Jun 2017 00:00:00 +0800</pubDate>
       
-      <guid>https://ap.tidb.cc/post/20170607-alertmanager/</guid>
+      <guid>https://ap.tidb.cc/post/20170605-alertmanager-rules/</guid>
+      <description>创业 先帝创业未半而中道崩殂，今三分天下…… 因为没有及时收到告警导致整体垮掉而被领导责罚就是这个样子啦，所以小兵挂掉需要及时获知消息用于及时作</description>
+    </item>
+    
+    <item>
+      <title>监控架构 - 专业打小报告好多年</title>
+      <link>https://ap.tidb.cc/post/20170604-alertmanager/</link>
+      <pubDate>Sun, 04 Jun 2017 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20170604-alertmanager/</guid>
       <description>骑士 AlertManager 配置以及工具使用说明 AlertManager 配置文件模板 交叉 在 Prometheus 配置文件更新以下代码块(prometheus 2.0 +)，修改完成后重启后生效 Prometheus 配置文件地址 {{deploy_dir}}/conf/prometheus.yml 1 2</description>
     </item>
     

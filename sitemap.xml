@@ -296,13 +296,6 @@
   </url>
   
   <url>
-    <loc>https://ap.tidb.cc/tags/alertmanager/</loc>
-    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
     <loc>https://ap.tidb.cc/tags/grafana/</loc>
     <lastmod>2020-01-23T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
@@ -312,13 +305,6 @@
   <url>
     <loc>https://ap.tidb.cc/categories/monitoring/</loc>
     <lastmod>2020-01-23T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://ap.tidb.cc/tags/proemtheus/</loc>
-    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -338,7 +324,28 @@
   </url>
   
   <url>
-    <loc>https://ap.tidb.cc/post/20170607-alertmanager/</loc>
+    <loc>https://ap.tidb.cc/tags/alertmanager/</loc>
+    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/proemtheus/</loc>
+    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/post/20170605-alertmanager-rules/</loc>
+    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/post/20170604-alertmanager/</loc>
     <lastmod>2020-01-20T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>

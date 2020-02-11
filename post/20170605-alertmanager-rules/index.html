@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>监控架构 - 那些年我们举报的神马 - TiDB AirPlan - A biger solution</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Jeff" /><meta name="description" content="创业 先帝创业未半而中道崩殂，今三分天下…… 因为没有及时收到告警导致整体垮掉而被领导责罚就是这个样子啦，所以小兵挂掉需要及时获知消息用于及时作" /><meta name="keywords" content="TiDB, AirPlan, TiDB OPS, tidb-operator, 2pc, raft, databases, mysql, htap" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.63.2 with theme even" />
+
+
+<link rel="canonical" href="https://ap.tidb.cc/post/20170605-alertmanager-rules/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<link href="/dist/even.04bd84cd.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="监控架构 - 那些年我们举报的神马" />
+<meta property="og:description" content="创业 先帝创业未半而中道崩殂，今三分天下…… 因为没有及时收到告警导致整体垮掉而被领导责罚就是这个样子啦，所以小兵挂掉需要及时获知消息用于及时作" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://ap.tidb.cc/post/20170605-alertmanager-rules/" />
+<meta property="article:published_time" content="2017-06-05T00:00:00+08:00" />
+<meta property="article:modified_time" content="2020-01-20T00:00:00+08:00" />
+<meta itemprop="name" content="监控架构 - 那些年我们举报的神马">
+<meta itemprop="description" content="创业 先帝创业未半而中道崩殂，今三分天下…… 因为没有及时收到告警导致整体垮掉而被领导责罚就是这个样子啦，所以小兵挂掉需要及时获知消息用于及时作">
+<meta itemprop="datePublished" content="2017-06-05T00:00:00&#43;08:00" />
+<meta itemprop="dateModified" content="2020-01-20T00:00:00&#43;08:00" />
+<meta itemprop="wordCount" content="2929">
+
+
+
+<meta itemprop="keywords" content="Deploy,AlertManager,Proemtheus," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="监控架构 - 那些年我们举报的神马"/>
+<meta name="twitter:description" content="创业 先帝创业未半而中道崩殂，今三分天下…… 因为没有及时收到告警导致整体垮掉而被领导责罚就是这个样子啦，所以小兵挂掉需要及时获知消息用于及时作"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">TiDB AirPlan</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">About</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">TiDB AirPlan</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/about/">About</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">监控架构 - 那些年我们举报的神马</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2017-06-05 </span>
+        <div class="post-category">
+            <a href="/categories/monitoring/"> Monitoring </a>
+            </div>
+          <span class="more-meta"> 2929 words </span>
+          <span class="more-meta"> 6 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#创业">创业</a></li>
+    <li><a href="#纲常">纲常</a>
+      <ul>
+        <li><a href="#目的">目的</a></li>
+        <li><a href="#主机监测">主机监测</a></li>
+        <li><a href="#数据库监测">数据库监测</a></li>
+      </ul>
+    </li>
+    <li><a href="#信息战">信息战</a>
+      <ul>
+        <li><a href="#告警等级">告警等级</a></li>
+        <li><a href="#告警模范">告警模范</a></li>
+      </ul>
+    </li>
+    <li><a href="#to-slack-案例">to Slack 案例</a>
+      <ul>
+        <li><a href="#启动参数">启动参数</a></li>
+        <li><a href="#告警过程">告警过程</a></li>
+        <li><a href="#api-信息">API 信息</a></li>
+      </ul>
+    </li>
+    <li><a href="#致谢">致谢</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h2 id="创业">创业</h2>
+<blockquote>
+<p>先帝创业未半而中道崩殂，今三分天下……<br>
+因为没有及时收到告警导致整体垮掉而被领导责罚就是这个样子啦，所以小兵挂掉需要及时获知消息用于及时作出战略更新<br>
+选用 prometheus 家族的 alertmanager，然后自行设计告警规则定义纲常大道</p>
+</blockquote>
+<ul>
+<li>Brain-storming
+<ul>
+<li>现有监控架构</li>
+<li>现有监控数据</li>
+<li>补充监控数据</li>
+<li>SRE 制定大纲</li>
+</ul>
+</li>
+</ul>
+<h2 id="纲常">纲常</h2>
+<ul>
+<li>labels 定义
+<ul>
+<li>参考: <a href="https://prometheus.io/docs/alerting/notifications/">DATA STRUCTURES</a></li>
+<li>参考: <a href="https://prometheus.io/blog/2016/03/03/custom-alertmanager-templates/">Custom Alertmanager Templates</a></li>
+<li>参考: <a href="https://prometheus.io/docs/alerting/notification_examples/">NOTIFICATION TEMPLATE EXAMPLES</a></li>
+<li>参考: <a href="https://prometheus.io/docs/practices/naming/#labels">METRIC AND LABEL NAMING</a></li>
+</ul>
+</li>
+<li>Alert.rules 参数定义 <a href="http://dockone.io/article/2098">引用站外文章</a>
+<ul>
+<li>&ldquo;Alert&rdquo; 是报警规则的名字，名字间不能有空格，可以用下划线链接；</li>
+<li>&ldquo;IF&rdquo; 是数据的查询表达式</li>
+<li>&ldquo;FOR&rdquo; 是报警状态持续超过 1 分钟后，将报警由状态 &ldquo;PENDING&rdquo; 改为 &ldquo;FIRING&rdquo;，报警将交给 Alertmanager 处理。</li>
+<li>&ldquo;LABELS&rdquo; 为自定义数据，我们在这里指定了报警的级别和显示 &ldquo;IF&rdquo; 中表达式的值。</li>
+<li>&ldquo;ANNOTATIONS&rdquo; 为自定义数据，我们在这里提供报警的现象和原因介绍。</li>
+</ul>
+</li>
+</ul>
+<h3 id="目的">目的</h3>
+<blockquote>
+<p>根据 5W1H 攻略思考该怎么写一条告警规则</p>
+</blockquote>
+<ul>
+<li><input disabled="" type="checkbox">告警能否判断集群状态
+<ul>
+<li>告警是否能帮助解决或预防问题</li>
+<li>在 POC 的时候，是否能(非精准)提醒集群瓶颈在哪里</li>
+</ul>
+</li>
+<li><input disabled="" type="checkbox">告警能否有效的被执行
+<ul>
+<li>可以设置多条规则监控同一个服务 // 单服务挂掉有多条告警，告警监控服务的不同路线</li>
+<li>当告警条件全部成功后，再进行优化、精准告警</li>
+</ul>
+</li>
+<li><input disabled="" type="checkbox">告警误报的影响是什么
+<ul>
+<li>告警可以误报，但是不可以不告警  // 结果出现有狼来了效应，产生怠慢消极状态</li>
+<li>在整体集群垮掉的时候，告警要暂时关闭 // 过多的重复告警，影响现有问题解决</li>
+</ul>
+</li>
+<li><input disabled="" type="checkbox">我们还缺少那些告警判断</li>
+</ul>
+<h3 id="主机监测">主机监测</h3>
+<blockquote>
+<p>判断主机状态可能需要这些东东<br>
+监控数据来源于 <a href="https://raw.githubusercontent.com/BigerCAP/tidb-ops/master/Media/node.json" title="Github Grafana node_exporter.json">node_exporter.json</a></p>
+</blockquote>
+<ul>
+<li><input disabled="" type="checkbox">主机状态监测
+<ul>
+<li>主机探活机制</li>
+</ul>
+</li>
+<li><input disabled="" type="checkbox">主机资源监测
+<ul>
+<li>CPU
+<ul>
+<li>单个进程 CPU</li>
+<li>主机整体 CPU</li>
+<li>机器 load 负载</li>
+</ul>
+</li>
+<li>RAM
+<ul>
+<li>单个进程 RAM</li>
+<li>主机整体 RAM
+<ul>
+<li>SWAP 使用量 // 超过一定使用量告警</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>DISK
+<ul>
+<li>磁盘 读写延迟</li>
+<li>磁盘 Utilization</li>
+<li>磁盘容量监测</li>
+<li>磁盘读写状态</li>
+<li>文件描述符占用量</li>
+<li>磁盘 inode 使用数量</li>
+</ul>
+</li>
+<li>网络
+<ul>
+<li>流量进出</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="数据库监测">数据库监测</h3>
+<blockquote>
+<p>判断数据库状态数据来值于那些提前在 TiDB、PD、TiKV 代码中定义的代码瞄点</p>
+</blockquote>
+<ul>
+<li>数据库组件状态监测
+<ul>
+<li>组件探活</li>
+</ul>
+</li>
+<li>组件链路状态监测
+<ul>
+<li>TiDB PD TiKV 组件之间延迟</li>
+</ul>
+</li>
+<li>数据库业务
+<ul>
+<li>QPS 延迟</li>
+</ul>
+</li>
+<li>数据库组件运行状态监测
+<ul>
+<li>PD 调度</li>
+<li>TiDB SQL 处理</li>
+<li>TiKV 资源存储与调度</li>
+</ul>
+</li>
+<li>数据库资源占用监测
+<ul>
+<li>TiDB 内存使用量</li>
+<li>TiKV 存储使用量、计算资源使用量</li>
+</ul>
+</li>
+</ul>
+<h2 id="信息战">信息战</h2>
+<blockquote>
+<p>有了数据和目标，思考怎么描述一条告警规则让其将信息准确表达给观察者</p>
+</blockquote>
+<ul>
+<li>告警规则
+<ul>
+<li>监控目标</li>
+<li>监控阈值</li>
+<li>自定义 labels
+<ul>
+<li>优先级</li>
+<li>组件</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>发送告警
+<ul>
+<li>silences</li>
+<li>维护区间</li>
+<li>优先级</li>
+<li>告警链路
+<ul>
+<li>邮箱</li>
+<li>微信</li>
+<li>phone / sms</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>告警重复出现
+<ul>
+<li>是否可修复
+<ul>
+<li>产品内修复</li>
+<li>产品外修复</li>
+</ul>
+</li>
+<li>不可修复
+<ul>
+<li>产品 bug</li>
+<li>考虑告警优化</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>问题处理  // alertmanger 不涉及该功能
+<ul>
+<li>优先级</li>
+<li>问题处理</li>
+<li>问题升级</li>
+<li>问题记录</li>
+<li>工单关闭</li>
+</ul>
+</li>
+</ul>
+<h3 id="告警等级">告警等级</h3>
+<blockquote>
+<p>自定义 lables 信息，补充告警信息</p>
+</blockquote>
+<ul>
+<li>env
+<ul>
+<li>test-cluster  // 集群信息</li>
+</ul>
+</li>
+<li>channels
+<ul>
+<li>alerts  // 接受告警的 slack channel</li>
+</ul>
+</li>
+<li>level
+<ul>
+<li>emergency  0     phone
+<ul>
+<li>主要是某个组件挂掉了才会触发</li>
+</ul>
+</li>
+<li>critical   1     sms
+<ul>
+<li>某个组件出现了问题，但是可以延后处理，比如 8 个小时</li>
+</ul>
+</li>
+<li>warning    2     wechat
+<ul>
+<li>某个组件通讯或者延迟大于某个阈值，偶然现象或者频发现象，保留类告警，可以根据业务调整或取消</li>
+</ul>
+</li>
+<li>notice     3     slack
+<ul>
+<li>提示类告警，就是通知下这块延迟高或者要问题了，你应该找个时间看下集群了。这块和业务有关系，不是 tidb 的业务，是 SQL 的业务</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>service  // 告警组件
+<ul>
+<li>TiDB</li>
+<li>TiKV</li>
+<li>PD</li>
+<li>OS</li>
+</ul>
+</li>
+<li>color  // 根据不同等级可定义不同颜色，slack message 支持不同颜色
+<ul>
+<li>#2eb886</li>
+</ul>
+</li>
+</ul>
+<h3 id="告警模范">告警模范</h3>
+<ul>
+<li>
+<p>在 Prometheus 配置文件中引用相关告警规则，重启后生效</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-YAML" data-lang="YAML"><span class="k">rule_files</span><span class="p">:</span><span class="w">
+</span><span class="w"></span><span class="w">  </span>- <span class="s1">&#39;test.lablels.yml&#39;</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div></li>
+<li>
+<p>相关内容添加到 <code>test.lablels.yml</code> 文件中</p>
+</li>
+<li>
+<p>更多告警规则可以阅读 tidb-ansible <a href="https://github.com/pingcap/tidb-ansible/tree/master/roles/prometheus/files" title="TiDB alert rule">TiDB alert rule</a></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-YAML" data-lang="YAML"><span class="k">groups</span><span class="p">:</span><span class="w">
+</span><span class="w"></span>- <span class="k">name</span><span class="p">:</span><span class="w"> </span>alert.rules<span class="w">      </span>//<span class="w"> </span>文件根，一般默认声明为文件名或该分组<span class="w">
+</span><span class="w">  </span><span class="k">rules</span><span class="p">:</span><span class="w">
+</span><span class="w"></span><span class="w">  </span>- <span class="k">alert</span><span class="p">:</span><span class="w"> </span>NODE_disk_readonly<span class="w">  </span>//<span class="w"> </span>告警名称，全局唯一<span class="w">
+</span><span class="w">    </span><span class="k">expr</span><span class="p">:</span><span class="w"> </span>node_filesystem_readonly{fstype=~<span class="s2">&#34;(ext.|xfs)&#34;</span>}<span class="w">  </span>&gt;<span class="w"> </span><span class="m">1</span><span class="w">  </span>//<span class="w"> </span>监控磁盘是否为只读状态<span class="w">
+</span><span class="w">    </span><span class="k">for</span><span class="p">:</span><span class="w"> </span>1m<span class="w">
+</span><span class="w">    </span><span class="k">labels</span><span class="p">:</span><span class="w">
+</span><span class="w"></span><span class="w">      </span><span class="k">env</span><span class="p">:</span><span class="w"> </span>test-cluster<span class="w">  </span>//<span class="w"> </span>声明集群变量<span class="w">
+</span><span class="w">      </span><span class="k">level</span><span class="p">:</span><span class="w"> </span>emergency<span class="w">   </span>//<span class="w"> </span>声明告警等级<span class="w">
+</span><span class="w">      </span><span class="k">service</span><span class="p">:</span><span class="w"> </span>OS<span class="w">        </span>//<span class="w"> </span>声明服务组件<span class="w">
+</span><span class="w">      </span><span class="k">channels</span><span class="p">:</span><span class="w"> </span>alerts<span class="w">   </span>//<span class="w"> </span>声明接受告警的<span class="w"> </span>slack<span class="w"> </span>channel<span class="w">
+</span><span class="w">      </span><span class="k">expr</span><span class="p">:</span><span class="w"> </span>node_filesystem_readonly{fstype=~<span class="s2">&#34;(ext.|xfs)&#34;</span>}<span class="w">  </span>&gt;<span class="w"> </span><span class="m">1</span><span class="w">
+</span><span class="w">    </span><span class="k">annotations</span><span class="p">:</span><span class="w">
+</span><span class="w"></span><span class="w">      </span><span class="k">description</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;alert:{{ $labels.expr }} instance:
+</span><span class="s1">        {{ $labels.instance }} values: {{ $value }}&#39;</span><span class="w">  </span>//<span class="w"> </span>最终告警内容信息拼接<span class="w">
+</span><span class="w">      </span><span class="k">value</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;{{ $value }}&#39;</span><span class="w">
+</span><span class="w">      </span><span class="k">summary</span><span class="p">:</span><span class="w"> </span>disk<span class="w"> </span>readonly<span class="w">      </span>//<span class="w"> </span>根据接受者不同，此处可能是告警<span class="w"> </span>title<span class="w"> </span>或者告警描述<span class="w">
+</span><span class="w">
+</span><span class="w">  </span>- <span class="k">alert</span><span class="p">:</span><span class="w"> </span>TiDB_memery_abnormal<span class="w">
+</span><span class="w">    </span><span class="k">expr</span><span class="p">:</span><span class="w"> </span>go_memstats_heap_inuse_bytes{job=<span class="s2">&#34;tidb&#34;</span>}<span class="w"> </span>&gt;<span class="w"> </span><span class="m">1e+10</span><span class="w">
+</span><span class="w">    </span><span class="k">for</span><span class="p">:</span><span class="w"> </span>1m<span class="w">
+</span><span class="w">    </span><span class="k">labels</span><span class="p">:</span><span class="w">
+</span><span class="w"></span><span class="w">      </span><span class="k">env</span><span class="p">:</span><span class="w"> </span>test-cluster<span class="w">
+</span><span class="w">      </span><span class="k">level</span><span class="p">:</span><span class="w"> </span>warning<span class="w">
+</span><span class="w">      </span><span class="k">service</span><span class="p">:</span><span class="w"> </span>TiDB<span class="w">
+</span><span class="w">      </span><span class="k">channels</span><span class="p">:</span><span class="w"> </span>alerts<span class="w">
+</span><span class="w">      </span><span class="k">expr</span><span class="p">:</span><span class="w"> </span>go_memstats_heap_inuse_bytes{job=<span class="s2">&#34;tidb&#34;</span>}<span class="w"> </span>&gt;<span class="w"> </span><span class="m">1e+10</span><span class="w">
+</span><span class="w">    </span><span class="k">annotations</span><span class="p">:</span><span class="w">
+</span><span class="w"></span><span class="w">      </span><span class="k">description: &#39;alert</span><span class="p">:</span><span class="w"> </span>{{<span class="w"> </span><span class="k">$labels.expr }}  values</span><span class="p">:</span><span class="w"> </span>{{<span class="w"> </span>$value<span class="w"> </span>}}<span class="s1">&#39;
+</span><span class="s1">      value: &#39;</span>{{<span class="w"> </span>$value<span class="w"> </span>}}<span class="s1">&#39;
+</span><span class="s1">      summary: TiDB mem heap is over 1GiB
+</span><span class="s1">
+</span><span class="s1">  - alert: PD_etcd_write_disk_latency
+</span><span class="s1">    expr: histogram_quantile(0.99, sum(rate(etcd_disk_wal_fsync_duration_seconds_bucket[1m])) by (instance,job,le) ) &gt; 1
+</span><span class="s1">    for: 1m
+</span><span class="s1">    labels:
+</span><span class="s1">      env: test-cluster
+</span><span class="s1">      level: emergency
+</span><span class="s1">      service: PD
+</span><span class="s1">      channels: alerts
+</span><span class="s1">      expr:  histogram_quantile(0.99, sum(rate(etcd_disk_wal_fsync_duration_seconds_bucket[1m])) by (instance,job,le) ) &gt; 1
+</span><span class="s1">    annotations:
+</span><span class="s1">      description: &#39;</span><span class="k">alert</span><span class="p">:</span><span class="w"> </span>{{<span class="w"> </span><span class="k">$labels.expr }} instance</span><span class="p">:</span><span class="w"> </span>{{<span class="w"> </span>$labels.instance<span class="w"> </span>}}<span class="w">   </span>values<span class="p">:</span>{{<span class="w"> </span>$value<span class="w"> </span>}}<span class="s1">&#39;
+</span><span class="s1">      value: &#39;</span>{{<span class="w"> </span>$value<span class="w"> </span>}}<span class="s1">&#39;
+</span><span class="s1">      summary: PD_etcd_write_disk_latency
+</span><span class="s1">
+</span><span class="s1">  - alert: TiKV_server_report_failure_msg_total
+</span><span class="s1">    expr:  sum(rate(tikv_server_report_failure_msg_total{type=&#34;unreachable&#34;}[10m])) BY (store_id) &gt; 0
+</span><span class="s1">    for: 1m
+</span><span class="s1">    labels:
+</span><span class="s1">      env: test-cluster
+</span><span class="s1">      level: critical
+</span><span class="s1">      service: TiKV
+</span><span class="s1">      channels: alerts
+</span><span class="s1">      color: 2eb886
+</span><span class="s1">      expr:  sum(rate(tikv_server_report_failure_msg_total{type=&#34;unreachable&#34;}[10m])) BY (store_id) &gt; 0
+</span><span class="s1">    annotations:
+</span><span class="s1">      description: &#39;</span><span class="k">alert</span><span class="p">:</span><span class="w"> </span>{{<span class="w"> </span><span class="k">$labels.expr }} instance</span><span class="p">:</span><span class="w"> </span>{{<span class="w"> </span><span class="k">$labels.instance }} values</span><span class="p">:</span><span class="w"> </span>{{<span class="w"> </span>$value<span class="w"> </span>}}<span class="s1">&#39;
+</span><span class="s1">      value: &#39;</span>{{<span class="w"> </span>$value<span class="w"> </span>}}&#39;<span class="w">
+</span><span class="w">      </span><span class="k">summary</span><span class="p">:</span><span class="w"> </span>TiKV<span class="w"> </span>server_report_failure_msg_total<span class="w"> </span>error<span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div></li>
+</ul>
+<h2 id="to-slack-案例">to Slack 案例</h2>
+<ul>
+<li>
+<p>slack_config 配置测试</p>
+<ul>
+<li>参考：<a href="https://prometheus.io/docs/alerting/configuration/#slack_config">slack_config</a></li>
+<li>参考：<a href="https://api.slack.com/docs/message-attachments">slack_api</a></li>
+<li>参考：AlertManager config 示例 <a href="https://github.com/prometheus/alertmanager#example">Example</a></li>
+<li>alertmanger 配置文件说明阅读 <a href="/post/20170604-AlertManager" title="ap.tidb.cc tidb alertmanager">监控架构 - 专业打小报告好多年</a></li>
+</ul>
+</li>
+<li>
+<p>以下内容保存为 <code>alertmanager.yml</code> 文件，AlertManager 启动时指定该配置文件启动</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-YAML" data-lang="YAML"><span class="k">global</span><span class="p">:</span><span class="w">
+</span><span class="w"></span><span class="w">  </span><span class="k">slack_api_url</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;https://hooks.slack.com/services/T0666PYPM/B2E666BSBG/OQ7666666vMupZqTnb1234&#39;</span><span class="w">
+</span><span class="w">  </span><span class="c"># slack api 地址</span><span class="w">
+</span><span class="w"></span><span class="k">route</span><span class="p">:</span><span class="w">
+</span><span class="w"></span><span class="w">  </span><span class="k">receiver</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;alerts-test&#34;</span><span class="w">
+</span><span class="w">  </span><span class="k">group_by</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;env&#39;</span><span class="p">,</span><span class="s1">&#39;instance&#39;</span><span class="p">]</span><span class="w">
+</span><span class="w">  </span><span class="k">group_wait</span><span class="p">:</span><span class="w"> </span><span class="w">     </span>30s<span class="w">
+</span><span class="w">  </span><span class="k">group_interval</span><span class="p">:</span><span class="w"> </span><span class="w"> </span>3m<span class="w">
+</span><span class="w">  </span><span class="k">repeat_interval</span><span class="p">:</span><span class="w"> </span>3m<span class="w">
+</span><span class="w">  </span><span class="k">routes</span><span class="p">:</span><span class="w">
+</span><span class="w"></span><span class="w">  </span>- <span class="k">match</span><span class="p">:</span><span class="w">
+</span><span class="w"></span><span class="w">      </span><span class="k">env</span><span class="p">:</span><span class="w"> </span>test-cluster<span class="w">
+</span><span class="w">    </span><span class="k">receiver</span><span class="p">:</span><span class="w"> </span>alerts<span class="w">
+</span><span class="w">    </span><span class="k">continue</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span><span class="w">  </span>- <span class="k">match</span><span class="p">:</span><span class="w">
+</span><span class="w"></span><span class="w">      </span><span class="k">env: test-cluster  #同时满足 env:test-cluster、severity:critical、server: TiKV、channels: alerts 才会发送到 receiver</span><span class="p">:</span><span class="w"> </span>labels-test<span class="w">
+</span><span class="w">      </span><span class="k">severity</span><span class="p">:</span><span class="w"> </span>critical<span class="w">
+</span><span class="w">      </span><span class="k">server</span><span class="p">:</span><span class="w"> </span>TiKV<span class="w">
+</span><span class="w">      </span><span class="k">channels</span><span class="p">:</span><span class="w"> </span>alerts<span class="w">
+</span><span class="w">    </span><span class="k">receiver</span><span class="p">:</span><span class="w"> </span>labels-test<span class="w">
+</span><span class="w"></span><span class="c"># 默认 接收器</span><span class="w">
+</span><span class="w"></span><span class="k">receivers</span><span class="p">:</span><span class="w">
+</span><span class="w"></span>- <span class="k">name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;alerts-test&#39;</span><span class="w">
+</span><span class="w">  </span><span class="k">slack_configs</span><span class="p">:</span><span class="w">
+</span><span class="w"></span><span class="w">  </span>- <span class="k">channel</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;#alters-test&#39;</span><span class="w">
+</span><span class="w">    </span><span class="k">username</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;default&#39;</span><span class="w">
+</span><span class="w">    </span><span class="k">icon_emoji</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;😇&#39;</span><span class="w">
+</span><span class="w">    </span><span class="k">title</span><span class="p">:</span><span class="w"> </span><span class="w">  </span><span class="s1">&#39;{{.CommonAnnotations.summary}}&#39;</span><span class="w">
+</span><span class="w">    </span><span class="k">text</span><span class="p">:</span><span class="w"> </span><span class="w">   </span><span class="s1">&#39;in {{.CommonLabels.env}}: {{ .CommonLabels.alertname }}  {{ .CommonAnnotations.description }}&#39;</span><span class="w">
+</span><span class="w"></span><span class="c"># 普通版</span><span class="w">
+</span><span class="w"></span>- <span class="k">name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;alerts&#39;</span><span class="w">
+</span><span class="w">  </span><span class="k">slack_configs</span><span class="p">:</span><span class="w">
+</span><span class="w"></span><span class="w">  </span>- <span class="k">channel</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;#long&#39;</span><span class="w">
+</span><span class="w">    </span><span class="k">username</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;alert&#39;</span><span class="w">
+</span><span class="w">    </span><span class="k">icon_emoji</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;:TiDB:&#39;</span><span class="w">
+</span><span class="w">    </span><span class="k">title</span><span class="p">:</span><span class="w"> </span><span class="w">  </span><span class="s1">&#39;{{.CommonAnnotations.summary}} : {{ .CommonLabels.level}}&#39;</span><span class="w">
+</span><span class="w">    </span><span class="k">text</span><span class="p">:</span><span class="w"> </span><span class="w">   </span><span class="s1">&#39;in {{.CommonLabels.env}}: {{ .GroupLabels.alertstat }} : {{ .CommonAnnotations.description }}&#39;</span><span class="w">
+</span><span class="w"></span><span class="c"># labels (参考 slack_api 与 slack_config)</span><span class="w">
+</span><span class="w"></span>- <span class="k">name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;labels-test&#39;</span><span class="w">
+</span><span class="w">  </span><span class="k">slack_configs</span><span class="p">:</span><span class="w">
+</span><span class="w"></span><span class="w">  </span>- <span class="k">channel</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;#{{.CommonLabels.channels}}&#39;</span><span class="w">
+</span><span class="w">    </span><span class="k">fallback</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;{{.CommonLabels.alertname}} : {{ .CommonAnnotations.summary }}&#39;</span><span class="w">
+</span><span class="w">    </span><span class="k">username</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;Robot&#39;</span><span class="w">
+</span><span class="w">    </span><span class="k">icon_emoji</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;😂&#39;</span><span class="w">
+</span><span class="w">    </span><span class="k">icon_url</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;http://www.tidb.cc&#39;</span><span class="w">
+</span><span class="w">    </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;#{{.CommonLabels.color}}&#39;</span><span class="w"> </span><span class="c">#改变 Slack 文本框颜色</span><span class="w">
+</span><span class="w">    </span><span class="k">title</span><span class="p">:</span><span class="w"> </span><span class="w"> </span><span class="s1">&#39;{{.CommonLabels.alertname}} : {{ .CommonAnnotations.summary }} : {{ .CommonLabels.server}} : {{ .CommonLabels.level}}&#39;</span><span class="w">
+</span><span class="w">    </span><span class="k">title_link</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;http://172.16.10.65:9090/alerts&#39;</span><span class="w">
+</span><span class="w">    </span><span class="k">text</span><span class="p">:</span><span class="w"> </span><span class="w">  </span><span class="s1">&#39;in {{.CommonLabels.env}} : {{ .CommonAnnotations.description }}&#39;</span><span class="w">
+</span><span class="w">    </span><span class="k">pretext</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;http://wiki.tidb.cc/{{.CommonLabels.srv}}/{{ .CommonLabels.alertname}}&#39;</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div></li>
+</ul>
+<h3 id="启动参数">启动参数</h3>
+<ul>
+<li>alertmanager 启动参数
+<ul>
+<li><code>./alertmanager -config.file=alertmanager.yml -storage.path=./data/ -log.level=debug -web.listen-address=0.0.0.0:9093 -data.retention=1h -log.format=&quot;logger:syslog?appname=alert-rules-test&amp;local=7&quot;</code></li>
+<li>log 输出到 <code>/var/log/messages</code> , 搜索 <code>appname=alert-rules-test</code>，用于告警调试使用</li>
+</ul>
+</li>
+</ul>
+<h3 id="告警过程">告警过程</h3>
+<ul>
+<li>
+<p>告警发送经过</p>
+<ol>
+<li>Prometheus 根据 alert.rules 匹配 metric 数据，匹配成功后发送到 AlertManager</li>
+<li>AlertManager 收到后，一条告警会通过 <code>route &gt; match &gt; LABELS &gt; receivers</code> 匹配到接收器</li>
+<li>然后根据 group_by 内容匹配并聚合告警</li>
+</ol>
+</li>
+<li>
+<p>group_by: [&lsquo;env&rsquo;,&lsquo;instance&rsquo;] 参数说明</p>
+<ul>
+<li>env and instance 划分为一组，如果有多个参数，递归匹配，直到匹配不到</li>
+<li>取值范围 <code>alert.rule &gt; LABELS</code> 、<code>metrics &gt; instance、job、type</code> 等</li>
+</ul>
+</li>
+</ul>
+<h3 id="api-信息">API 信息</h3>
+<ul>
+<li><a href="https://prometheus.io/docs/querying/api/">http api 说明</a></li>
+<li>请求 Prometheus alert 告警 json 格式
+<ul>
+<li>使用前需要编码</li>
+<li><code>http://172.16.10.65:9090/api/v1/query?query=(100%20-%20(avg%20by%20(instance)%20(irate(node_cpu%7Bmode%3D%22idle%22%7D%5B5m%5D))%20*%20100))%20&amp;step=15s</code>
+<ul>
+<li>请求 cpu 使用量</li>
+</ul>
+</li>
+<li>URL 编码 <code>URL-encoded</code></li>
+</ul>
+</li>
+<li>请求 alertmanager 告警 json 格式
+<ul>
+<li><code>curl 'http://localhost:9093/api/v1/alerts'</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="致谢">致谢</h2>
+<p><img src="./monitor-scheme.png" alt="monitor"></p>
+<ul>
+<li><a href="https://github.com/grafana/grafana">Grafana</a> 监控、度量分析仪表板工具，从 Prometheus 获取数据</li>
+<li><a href="https://github.com/prometheus/prometheus">Prometheus</a> 用于存放监控数据的时序数据库</li>
+<li><a href="https://github.com/prometheus/pushgateway">push gateway</a> push acceptor for ephemeral and batch jobs</li>
+<li><a href="https://github.com/prometheus/blackbox_exporter">Black-box</a> 黑盒测试工具，支持 HTTP, HTTPS, DNS, TCP and ICMP</li>
+<li><a href="https://github.com/prometheus/node_exporter">Node-export</a> 主机资源 agent 组件</li>
+<li><a href="http://os.51cto.com/art/201603/507858.htm">告警平台设计</a></li>
+</ul>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Jeff</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2020-01-20
+        
+    </span>
+  </p>
+  
+  <p class="copyright-item">
+    <span class="item-title">License</span>
+    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span>
+  </p>
+</div>
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/deploy/">Deploy</a>
+          <a href="/tags/alertmanager/">AlertManager</a>
+          <a href="/tags/proemtheus/">Proemtheus</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/20170607-prometheus-faq/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">监控架构 - TIDB 监控运维 FAQ</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/20170604-alertmanager/">
+            <span class="next-text nav-default">监控架构 - 专业打小报告好多年</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="https://github.com/BigerCAP/TiDB-AirPlan/issues" class="iconfont icon-github" title="github"></a>
+  <a href="https://ap.tidb.cc/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2020
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">TiDB - AirPlan</span>
+  </span>
+</div>
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js" integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js" integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin="anonymous"></script>
+  <script><!-- NOTE: timeago.js uses the language code format like "zh_CN" (underscore and case sensitive) -->
+    var languageCode = "en".replace(/-/g, '_').replace(/_(.*)/, function ($0, $1) {return $0.replace($1, $1.toUpperCase());});
+    timeago().render(document.querySelectorAll('.timeago'), languageCode);
+    timeago.cancel();  
+  </script>
+<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>
