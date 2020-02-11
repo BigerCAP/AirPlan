@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>监控架构 - 专业打小报告好多年 - TiDB AirPlan - A biger solution</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Jeff" /><meta name="description" content="骑士 AlertManager 配置以及工具使用说明 AlertManager 配置文件模板 交叉 在 Prometheus 配置文件更新以下代码块(prometheus 2.0 &#43;)，修改完成后重启后生效 Prometheus 配置文件地址 {{deploy_dir}}/conf/prometheus.yml 1 2" /><meta name="keywords" content="TiDB, AirPlan, TiDB OPS, tidb-operator, 2pc, raft, databases, mysql, htap" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.63.2 with theme even" />
+
+
+<link rel="canonical" href="https://ap.tidb.cc/post/20170607-alertmanager/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<link href="/dist/even.04bd84cd.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="监控架构 - 专业打小报告好多年" />
+<meta property="og:description" content="骑士 AlertManager 配置以及工具使用说明 AlertManager 配置文件模板 交叉 在 Prometheus 配置文件更新以下代码块(prometheus 2.0 &#43;)，修改完成后重启后生效 Prometheus 配置文件地址 {{deploy_dir}}/conf/prometheus.yml 1 2" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://ap.tidb.cc/post/20170607-alertmanager/" />
+<meta property="article:published_time" content="2017-06-07T00:00:00+08:00" />
+<meta property="article:modified_time" content="2020-01-20T00:00:00+08:00" />
+<meta itemprop="name" content="监控架构 - 专业打小报告好多年">
+<meta itemprop="description" content="骑士 AlertManager 配置以及工具使用说明 AlertManager 配置文件模板 交叉 在 Prometheus 配置文件更新以下代码块(prometheus 2.0 &#43;)，修改完成后重启后生效 Prometheus 配置文件地址 {{deploy_dir}}/conf/prometheus.yml 1 2">
+<meta itemprop="datePublished" content="2017-06-07T00:00:00&#43;08:00" />
+<meta itemprop="dateModified" content="2020-01-20T00:00:00&#43;08:00" />
+<meta itemprop="wordCount" content="2294">
+
+
+
+<meta itemprop="keywords" content="Deploy,AlertManager,Proemtheus," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="监控架构 - 专业打小报告好多年"/>
+<meta name="twitter:description" content="骑士 AlertManager 配置以及工具使用说明 AlertManager 配置文件模板 交叉 在 Prometheus 配置文件更新以下代码块(prometheus 2.0 &#43;)，修改完成后重启后生效 Prometheus 配置文件地址 {{deploy_dir}}/conf/prometheus.yml 1 2"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">TiDB AirPlan</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">About</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">TiDB AirPlan</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/about/">About</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">监控架构 - 专业打小报告好多年</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2017-06-07 </span>
+        <div class="post-category">
+            <a href="/categories/monitoring/"> Monitoring </a>
+            </div>
+          <span class="more-meta"> 2294 words </span>
+          <span class="more-meta"> 5 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#骑士">骑士</a></li>
+    <li><a href="#交叉">交叉</a></li>
+    <li><a href="#模范">模范</a>
+      <ul>
+        <li><a href="#管理">管理</a></li>
+        <li><a href="#维护">维护</a></li>
+      </ul>
+    </li>
+    <li><a href="#友人">友人</a>
+      <ul>
+        <li><a href="#组件部署">组件部署</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h2 id="骑士">骑士</h2>
+<ul>
+<li><a href="https://prometheus.io/docs/alerting/configuration/">AlertManager</a> 配置以及工具使用说明</li>
+<li><a href="https://github.com/pingcap/tidb-ansible/blob/master/conf/alertmanager.yml">AlertManager</a> 配置文件模板</li>
+</ul>
+<h2 id="交叉">交叉</h2>
+<ul>
+<li>
+<p>在 Prometheus 配置文件更新以下代码块(prometheus 2.0 +)，修改完成后重启后生效</p>
+<ul>
+<li>Prometheus 配置文件地址 <code>{{deploy_dir}}/conf/prometheus.yml</code></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="k">alerting</span><span class="p">:</span><span class="w">
+</span><span class="w"></span><span class="w">  </span><span class="k">alertmanagers</span><span class="p">:</span><span class="w">
+</span><span class="w"></span><span class="w">  </span>- <span class="k">static_configs</span><span class="p">:</span><span class="w">
+</span><span class="w"></span><span class="w">    </span>- <span class="k">targets</span><span class="p">:</span><span class="w">
+</span><span class="w"></span><span class="w">      </span>- <span class="s1">&#39;172.16.10.65:39093&#39;</span><span class="w"> </span><span class="c"># AlertManager 地址与端口</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div></li>
+</ul>
+<h2 id="模范">模范</h2>
+<ul>
+<li>告警发送
+<ul>
+<li>Slack：API 通过 <a href="https://api.slack.com/incoming-webhooks">Slack-API</a> 获取
+<ul>
+<li>需要 Slack 账号</li>
+</ul>
+</li>
+<li>E-mail：通过邮件方式发送告警，选用 db-alert-email 接收器
+<ul>
+<li>需要 SMTP 服务器信息</li>
+</ul>
+</li>
+<li>WebHook：通过 SMS 或者 syslog 方式发送告警选用 webhook-pulgin 接收器
+<ul>
+<li>需要提供 syslog binary 工具接收</li>
+<li>发送到 syslog binary 中的告警等级为 port ，由 route 中的 <code>level: port</code> 参数控制。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>告警场景
+<ul>
+<li>注意版本问题 / 发送次数</li>
+<li>同一个集群环境，向多方同时发送告警
+<ul>
+<li>多个 slack api + 多个邮箱地址 + SMS / 语音告警 = 告警平台 (伪)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>小问题
+<ul>
+<li>邮件模板不美观
+<ul>
+<li>邮件模板内连接不准确</li>
+</ul>
+</li>
+<li>邮件单独告警，而非一封邮件</li>
+<li>alertmanager 组件如果挂掉，那么就没办法发告警了，前面所有链路中断</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span><span class="lnt">80
+</span><span class="lnt">81
+</span><span class="lnt">82
+</span><span class="lnt">83
+</span><span class="lnt">84
+</span><span class="lnt">85
+</span><span class="lnt">86
+</span><span class="lnt">87
+</span><span class="lnt">88
+</span><span class="lnt">89
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="k">global</span><span class="p">:</span><span class="w">
+</span><span class="w"></span><span class="w">  </span><span class="c"># Slack API 信息</span><span class="w">
+</span><span class="w">  </span><span class="k">slack_api_url</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;https://hooks.slack.com/services/T04A1PYPM/B2EJ1BSBG/12313424342342344&#39;</span><span class="w">
+</span><span class="w">
+</span><span class="w">  </span><span class="c"># Email SMTP 服务器信息</span><span class="w">
+</span><span class="w">  </span><span class="k">smtp_smarthost</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;smtp.ym.126.com:25&#39;</span><span class="w">
+</span><span class="w">  </span><span class="k">smtp_from</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;jump@tidb.cc&#39;</span><span class="w">
+</span><span class="w">  </span><span class="k">smtp_auth_username</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;jump@tidb.cc&#39;</span><span class="w">
+</span><span class="w">  </span><span class="k">smtp_auth_password</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;password&#39;</span><span class="w">
+</span><span class="w">  </span><span class="k">smtp_auth_secret</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="w">
+</span><span class="w">  </span><span class="k">smtp_auth_identity</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;&#34;</span><span class="w">
+</span><span class="w">  </span><span class="k">smtp_require_tls</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="c"># 邮箱服务是否开启 TLS</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">route</span><span class="p">:</span><span class="w"> </span><span class="w">                         </span><span class="c"># 声明 根路由节点</span><span class="w">
+</span><span class="w">  </span><span class="k">receiver</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;alert-default&#34;</span><span class="w">     </span><span class="c"># 如果没有接收器规则匹配到这条告警，默认发送到 `alert-default`，该 alert-default 必须存在，否则报错退出</span><span class="w">
+</span><span class="w">  </span><span class="k">group_by</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;env&#39;</span><span class="p">,</span><span class="s1">&#39;instance&#39;</span><span class="p">,</span><span class="s1">&#39;type&#39;</span><span class="p">,</span><span class="s1">&#39;group&#39;</span><span class="p">,</span><span class="s1">&#39;job&#39;</span><span class="p">]</span><span class="w">   </span><span class="c"># 按照该 labels 分组用于分组压缩短时间内产生的大量告警</span><span class="w">
+</span><span class="w">  </span><span class="k">group_wait</span><span class="p">:</span><span class="w"> </span><span class="w">     </span>30s<span class="w">
+</span><span class="w">  </span><span class="k">group_interval</span><span class="p">:</span><span class="w"> </span><span class="w"> </span>3m<span class="w">
+</span><span class="w">  </span><span class="k">repeat_interval</span><span class="p">:</span><span class="w"> </span>3m<span class="w">
+</span><span class="w">  </span><span class="k">routes</span><span class="p">:</span><span class="w"> </span><span class="w">                     </span><span class="c"># 声明 子路由</span><span class="w">
+</span><span class="w">  </span>- <span class="k">match</span><span class="p">:</span><span class="w"> </span><span class="w">                    </span><span class="c"># 规则匹配</span><span class="w">
+</span><span class="w">    </span><span class="k">env</span><span class="p">:</span><span class="w"> </span>test-cluster<span class="w">          </span><span class="c"># 集群环境名字，路由接收到后分配给接收器，接收器读取规则后发送至 slack_config</span><span class="w">
+</span><span class="w">    </span><span class="k">level: waring              # 匹配 alert.rule 中 level</span><span class="p">:</span><span class="w"> </span>waring<span class="w"> </span>labels<span class="w"> </span>属性，匹配成功后发送到相应接收器<span class="w">
+</span><span class="w">  </span><span class="k">receiver</span><span class="p">:</span><span class="w"> </span>alert-slack<span class="w">        </span><span class="c"># receiver 关键词，全局唯一，不能重复</span><span class="w">
+</span><span class="w">  </span><span class="k">continue</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">               </span><span class="c"># 默认告警匹配成功第一个 receivers 会退出匹配，开启 continue 参数后会继续匹配 receivers 列表，直到再无 receivers 时或者下一个 receivers 中 continue fasle 的时候才会退出 (continue default false)</span><span class="w">
+</span><span class="w">  </span>- <span class="k">match_re</span><span class="p">:</span><span class="w"> </span><span class="w">                 </span><span class="c"># 支持正则匹配</span><span class="w">
+</span><span class="w">    </span><span class="k">env</span><span class="p">:</span><span class="w"> </span>test-cluster<span class="w">          </span><span class="c"># 客户集群环境名字，路由接收到后分配给接收器，接收器读取规则后发送至 slack_config</span><span class="w">
+</span><span class="w">  </span><span class="k">receiver</span><span class="p">:</span><span class="w"> </span>alert-email-global<span class="w"> </span><span class="c"># 指定接收器唯一名字</span><span class="w">
+</span><span class="w">  </span><span class="k">continue</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span><span class="w">  </span>- <span class="k">match_re</span><span class="p">:</span><span class="w"> </span><span class="w">                 </span><span class="c"># 支持正则匹配</span><span class="w">
+</span><span class="w">    </span><span class="k">level: emergency           # 匹配 alert.rule 中 level</span><span class="p">:</span><span class="w"> </span>emergency<span class="w"> </span>labels<span class="w"> </span>属性，匹配成功后发送到相应接收器<span class="w">
+</span><span class="w">    </span><span class="k">env</span><span class="p">:</span><span class="w"> </span>test-cluster<span class="w">          </span><span class="c"># 客户集群环境名字，路由接收到后分配给接收器，接收器读取规则后发送至 slack_config</span><span class="w">
+</span><span class="w">    </span><span class="k">severity</span><span class="p">:</span><span class="w"> </span>^(<span class="p">[</span>a-zA-Z0<span class="m">-9</span><span class="p">]</span><span class="cp">*)$</span><span class="w"> </span><span class="c"># 正则匹配</span><span class="w">
+</span><span class="w">  </span><span class="k">receiver</span><span class="p">:</span><span class="w"> </span>alert-webhook<span class="w">      </span><span class="c"># 指定接收器唯一名字</span><span class="w">
+</span><span class="w">  </span><span class="k">continue</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">receivers</span><span class="p">:</span><span class="w"> </span><span class="w">                       </span><span class="c"># 接收器根</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="c"># Slack template</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span>- <span class="k">name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;alert-default&#39;</span><span class="w">           </span><span class="c"># 接收器唯一名字，如有重复，告警停用。与 `route` 节点规则关联使用。</span><span class="w">
+</span><span class="w">  </span><span class="k">slack_configs</span><span class="p">:</span><span class="w">
+</span><span class="w"></span><span class="w">  </span>- <span class="k">channel</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;#alerts-for-test&#39;</span><span class="w">   </span><span class="c"># 指定发送至 slack channel</span><span class="w">
+</span><span class="w">    </span><span class="k">username</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;office-alert&#39;</span><span class="w">        </span><span class="c"># 指定发送者 username</span><span class="w">
+</span><span class="w">    </span><span class="k">icon_emoji</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;:pingcap:&#39;</span><span class="w">         </span><span class="c"># 指定发送者头像, 可在 slack 表情包获取 emoji 信息</span><span class="w">
+</span><span class="w">    </span><span class="k">title</span><span class="p">:</span><span class="w"> </span><span class="w">  </span><span class="s1">&#39;{{.CommonLabels.alertname}}&#39;</span><span class="w">
+</span><span class="w">    </span><span class="k">text</span><span class="p">:</span><span class="w"> </span><span class="w">   </span><span class="s1">&#39;in {{.CommonLabels.env}}:   {{ .GroupLabels.alertname }}  {{ .CommonAnnotations.description }}    http://office.tidb.cc/alerts&#39;</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span>- <span class="k">name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;alert-slack-user&#39;</span><span class="w">                  </span><span class="c"># 接收器唯一名字，如有重复，告警停用。与 `route` 节点规则关联使用。</span><span class="w">
+</span><span class="w">  </span><span class="k">slack_configs</span><span class="p">:</span><span class="w">
+</span><span class="w"></span><span class="w">  </span>- <span class="k">api_url</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;https://hooks.slack.com/services/T04AQPYPM/B2EJ1BSBG/zczczczczcdsadafsvdvsf&#39;</span><span class="w">
+</span><span class="w">    </span><span class="k">channel</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;@user&#39;</span><span class="w">                          </span><span class="c"># 指定发送至 slack 用户</span><span class="w">
+</span><span class="w">    </span><span class="k">username</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;{{.CommonLabels.env}}-alert&#39;</span><span class="w">   </span><span class="c"># 指定发送者 username (昵称) , 此处格式为 ` 集群名称 - alert`</span><span class="w">
+</span><span class="w">    </span><span class="k">icon_emoji</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;:{{.CommonLabels.env}}:&#39;</span><span class="w">     </span><span class="c"># 指定发送者头像, 此处格式为 `: 集群名称:`, 提前在 slack 定义该图片</span><span class="w">
+</span><span class="w">    </span><span class="k">title</span><span class="p">:</span><span class="w"> </span><span class="w">  </span><span class="s1">&#39;{{.CommonLabels.alertname}}&#39;</span><span class="w">
+</span><span class="w">    </span><span class="k">text</span><span class="p">:</span><span class="w"> </span><span class="w">   </span><span class="s1">&#39;in {{.CommonLabels.env}}:   {{ .GroupLabels.alertname }}  {{ .CommonAnnotations.description }}    http://office.tidb.cc/alerts&#39;</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="c"># Email template</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span>- <span class="k">name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;alert-email-global&#39;</span><span class="w">
+</span><span class="w">  </span><span class="k">email_configs</span><span class="p">:</span><span class="w">
+</span><span class="w"></span><span class="w">  </span>- <span class="k">send_resolved</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">         </span><span class="c"># 告警回执，监控下由 Alert 返回为 OK 状态时，会发送一条 OK 状态的回执</span><span class="w">
+</span><span class="w">    </span><span class="k">to</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;alert-global@tidb.cc&#39;</span><span class="w">  </span><span class="c"># 接收邮箱地址</span><span class="w">
+</span><span class="w">    </span><span class="k">from</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;jump@tidb.cc&#39;</span><span class="w">        </span><span class="c"># 发送邮箱地址</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span>- <span class="k">name</span><span class="p">:</span><span class="w"> </span>alert-email-user<span class="w">
+</span><span class="w">  </span><span class="k">email_configs</span><span class="p">:</span><span class="w">
+</span><span class="w"></span><span class="w">  </span>- <span class="k">send_resolved</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span><span class="w">    </span><span class="k">to</span><span class="p">:</span><span class="w"> </span>alert-user@tidb.cc<span class="w">
+</span><span class="w">    </span><span class="k">from</span><span class="p">:</span><span class="w"> </span>jump@tidb.cc<span class="w">
+</span><span class="w">    </span><span class="k">smarthost</span><span class="p">:</span><span class="w"> </span>smtp.ym<span class="m">.126</span>.com<span class="p">:</span><span class="m">25</span><span class="w">   </span><span class="c"># 单独设置 smtp 信息</span><span class="w">
+</span><span class="w">    </span><span class="k">auth_username</span><span class="p">:</span><span class="w"> </span>jump@tidb.cc<span class="w">
+</span><span class="w">    </span><span class="k">auth_password</span><span class="p">:</span><span class="w"> </span>&lt;secret<span class="sd">&gt;
+</span><span class="sd">   </span><span class="sd"> </span><span class="sd">auth_secret: null</span><span class="w">
+</span><span class="w">    </span><span class="k">auth_identity</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;&#34;</span><span class="w">
+</span><span class="w">    </span><span class="k">headers</span><span class="p">:</span><span class="w">
+</span><span class="w"></span><span class="w">      </span><span class="k">From</span><span class="p">:</span><span class="w"> </span>jump@tidb.cc<span class="w">
+</span><span class="w">      </span><span class="k">Subject</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;{{template&#34;email.default.subject&#34;.}}&#39;</span><span class="w">
+</span><span class="w">      </span><span class="k">To</span><span class="p">:</span><span class="w"> </span>alert-user@tidb.cc<span class="w">
+</span><span class="w">    </span><span class="k">html</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;{{template&#34;email.default.html&#34;.}}&#39;</span><span class="w">
+</span><span class="w">    </span><span class="k">require_tls</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">         </span><span class="c"># 默认开启 TLS 协议</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="c"># webhook-pulgin</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span>- <span class="k">name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;webhook-pulgin&#39;</span><span class="w">
+</span><span class="w">  </span><span class="k">webhook_configs</span><span class="p">:</span><span class="w">
+</span><span class="w"></span><span class="w">  </span>- <span class="k">send_resolved</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span><span class="w">    </span><span class="k">url</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;http://172.16.10.65:28082/v1/alertmanager&#39;</span><span class="w">  </span><span class="c"># 该 URL 是一个小工具，用来解析 alertmanager json 告警数据，然后发往目的地</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><h3 id="管理">管理</h3>
+<ul>
+<li>通过 <code>http://IP:9093/</code> 打开网页，可通过网页管理告警
+<ul>
+<li>通过页面可以 silence 一条正在持续发送的告警</li>
+</ul>
+</li>
+</ul>
+<h3 id="维护">维护</h3>
+<ul>
+<li>告警测试
+<ul>
+<li><code>curl -H &quot;Content-Type: application/json&quot; -d ‘[{&quot;labels&quot;:{&quot;alertname&quot;:&quot;TestAlert1&quot;}}]’ http://180.76.154.185:9093/api/v1/alerts</code></li>
+</ul>
+</li>
+<li>启动 停止管理
+<ul>
+<li>自动化部署的 AlertManager，启动停止脚本位于 <code>{{deploy_dir}}/scripts</code> 目录中</li>
+<li>手动部署的，参考 <a href="../Docs/180323-Systemd-Syncer">通过 systemd 守护 syncer 进程启动</a> 文档</li>
+</ul>
+</li>
+</ul>
+<h2 id="友人">友人</h2>
+<h3 id="组件部署">组件部署</h3>
+<ul>
+<li>使用 2018 年 3 月 22 日以后的 <a href="https://github.com/pingcap/tidb-ansible/blob/master/deploy.yml">TiDB-Ansible</a> 可以自动部署 AlertManager 组件</li>
+<li>也可按照参考 <a href="/post/20180323-Systemd-Syncer/" title="ap.tidb.cc syncer systemd">通过 systemd 守护 syncer 进程启动</a> 方案手动部署 AlertManager 组件
+<ul>
+<li>AlertManager 下载 <a href="https://prometheus.io/download/">传送门</a> ，AlertManager 项目库 <a href="https://github.com/prometheus/alertmanager">传送门</a></li>
+</ul>
+</li>
+</ul>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Jeff</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2020-01-20
+        
+    </span>
+  </p>
+  
+  <p class="copyright-item">
+    <span class="item-title">License</span>
+    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span>
+  </p>
+</div>
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/deploy/">Deploy</a>
+          <a href="/tags/alertmanager/">AlertManager</a>
+          <a href="/tags/proemtheus/">Proemtheus</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/20170607-prometheus-faq/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">监控架构 - TIDB 监控运维 FAQ</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/20170603-blackbox_exporter/">
+            <span class="next-text nav-default">监控架构 - Blackbox_exporter 主动探测端口服务状态</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="https://github.com/BigerCAP/TiDB-AirPlan/issues" class="iconfont icon-github" title="github"></a>
+  <a href="https://ap.tidb.cc/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2020
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">TiDB - AirPlan</span>
+  </span>
+</div>
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js" integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js" integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin="anonymous"></script>
+  <script><!-- NOTE: timeago.js uses the language code format like "zh_CN" (underscore and case sensitive) -->
+    var languageCode = "en".replace(/-/g, '_').replace(/_(.*)/, function ($0, $1) {return $0.replace($1, $1.toUpperCase());});
+    timeago().render(document.querySelectorAll('.timeago'), languageCode);
+    timeago.cancel();  
+  </script>
+<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>
