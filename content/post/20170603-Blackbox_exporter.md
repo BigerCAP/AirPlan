@@ -7,7 +7,7 @@ categories:
 tags:
   - Deploy
   - AlertManager
-  - Proemtheus
+  - Prometheus
   - Blackbox
 ---
 ## 0x00

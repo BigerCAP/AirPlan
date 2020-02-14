@@ -7,7 +7,7 @@ categories:
 tags:
   - Deploy
   - AlertManager
-  - Proemtheus
+  - Prometheus
 ---
 ## 骑士
 
