@@ -56,10 +56,10 @@ Prometheus 升级方案比较简单，和 TiDB 相同都是由 golang 语言开�
 界面展示为数据短暂断崖式下降,日志中打印 `Storage has entered rushed mode.` 信息；通过这些信息在网上冲浪，发现 GitHub Prometheus 有一些类似的问题
 
 - 相关 Github Prometheus issue
-  - https://github.com/prometheus/prometheus/issues/2542
-  - https://github.com/coreos/prometheus-operator/issues/304
-  - https://github.com/prometheus/prometheus/issues/2936
-  - https://github.com/prometheus/prometheus/issues/2222
+  - [Prometheus issue #2542](https://github.com/prometheus/prometheus/issues/2542)
+  - [Prometheus-operator issue #304](https://github.com/coreos/prometheus-operator/issues/304)
+  - [Prometheus issue #2936](https://github.com/prometheus/prometheus/issues/2936)
+  - [Prometheus issue #2222](https://github.com/prometheus/prometheus/issues/2222)
 
 根据一顿胡聊聊理解，大致说从各节点上获取到的数据无法在短时间内刷写到磁盘上，然后导致临时存放在内存中的数据超时丢弃了。辣么还要研究下怎么这么个现象……
 
@@ -120,10 +120,14 @@ Prometheus 升级方案比较简单，和 TiDB 相同都是由 golang 语言开�
     - 人工修改 metric ，按个过滤掉所有已经被下线的节点信息
     - histogram_quantile(0.99, sum(rate(tidb_server_handle_query_duration_seconds_bucket{instance!="6a5114505e5f_4000"}[1m])) by (le, instance))
   - 第三种方案：
-    - 目前只能通过 http api 删除历史数据，不能删除 instance 信息
-    - 且版本必须高于 2.1.0 以上，官方文档 `https://prometheus.io/docs/prometheus/latest/querying/api/#tsdb-admin-apis`
-      - `curl -XPOST -g 'http://172.16.10.65:29090/api/v1/admin/tsdb/delete_series?match[]=tidb_server_handle_query_duration_seconds_bucket'`
-      - `curl -XPOST -g 'http://172.16.10.65:29090/api/v1/admin/tsdb/clean_tombstones'`
+    - Prometheus > 2.1 版本以上，使用 Prometheus [admin-api](https://prometheus.io/docs/prometheus/latest/querying/api/#tsdb-admin-apis "ap.tidb.cc prometheus 删除无效数据") 功能，删除指定 instance 或指定 series 信息
+    - 此处 instance 等于一个 TiDB-server 进程，series 等于 TiDB-server 某一个监控项
+      - 删除指定 series & instance & job 信息，如不指定 instance & job ，会删除所有 instance 的 tidb_server_handle_query_duration_seconds_bucket series。
+        - `curl -XPOST -g 'http://172.16.10.65:9090/api/v1/admin/tsdb/delete_series?match[]=tidb_server_handle_query_duration_seconds_bucket{instance="10.0.1.4:20181",job="tikv"}'`
+      - 删除指定 instance 下所有的 series 信息
+        - `curl -X POST -g 'http://172.16.10.65:9090/api/v1/admin/tsdb/delete_series?match[]={instance="10.0.1.4:20184",job="tikv"}'`
+      - 按照官方手册，删除 series 可选手动清理存储空间
+        - `curl -XPOST -g 'http://172.16.10.65:9090/api/v1/admin/tsdb/clean_tombstones'`
 
 ## 0x02 Grafana 问题
 
