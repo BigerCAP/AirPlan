@@ -7,10 +7,28 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>TiDB - AirPlan</copyright>
-    <lastBuildDate>Wed, 08 Jan 2020 00:00:00 +0800</lastBuildDate>
+    <lastBuildDate>Mon, 23 Mar 2020 12:40:52 +0000</lastBuildDate>
     
 	<atom:link href="https://ap.tidb.cc/categories/software/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>使用软件时强制升级的设计</title>
+      <link>https://ap.tidb.cc/post/20200323-teamview-update/</link>
+      <pubDate>Mon, 23 Mar 2020 12:40:52 +0000</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20200323-teamview-update/</guid>
+      <description>0x00 看到 工作需要经常用到 teamviewer 远程桌面工具处理问题，曾也用过向日葵、QQ 远程等类似工具，但都不如该工具的流畅性和稳定性。 最近两年使用该工具有两个不</description>
+    </item>
+    
+    <item>
+      <title>Linux - 可大可小的 LVM</title>
+      <link>https://ap.tidb.cc/post/20200321-12-lvm/</link>
+      <pubDate>Sat, 21 Mar 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20200321-12-lvm/</guid>
+      <description>0x00 理由 接触了个客户环境，物理机磁盘使用的 LVM 方式划分。0202 年了还有公司大量使用该方式规划存储，被迫只能拿起来再复习下这项技术的使用姿势、追</description>
+    </item>
     
     <item>
       <title>生态围墙 - Github Actions &amp; Hugo</title>

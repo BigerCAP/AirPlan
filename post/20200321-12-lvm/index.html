@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Linux - 可大可小的 LVM - TiDB AirPlan - A biger solution</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Jeff" /><meta name="description" content="0x00 理由 接触了个客户环境，物理机磁盘使用的 LVM 方式划分。0202 年了还有公司大量使用该方式规划存储，被迫只能拿起来再复习下这项技术的使用姿势、追" /><meta name="keywords" content="TiDB, AirPlan, TiDB OPS, tidb-operator, 2pc, raft, databases, mysql, htap" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.63.2 with theme even" />
+
+
+<link rel="canonical" href="https://ap.tidb.cc/post/20200321-12-lvm/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<link href="/dist/even.04bd84cd.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="Linux - 可大可小的 LVM" />
+<meta property="og:description" content="0x00 理由 接触了个客户环境，物理机磁盘使用的 LVM 方式划分。0202 年了还有公司大量使用该方式规划存储，被迫只能拿起来再复习下这项技术的使用姿势、追" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://ap.tidb.cc/post/20200321-12-lvm/" />
+<meta property="article:published_time" content="2020-03-21T00:00:00+08:00" />
+<meta property="article:modified_time" content="2020-03-22T00:00:00+08:00" />
+<meta itemprop="name" content="Linux - 可大可小的 LVM">
+<meta itemprop="description" content="0x00 理由 接触了个客户环境，物理机磁盘使用的 LVM 方式划分。0202 年了还有公司大量使用该方式规划存储，被迫只能拿起来再复习下这项技术的使用姿势、追">
+<meta itemprop="datePublished" content="2020-03-21T00:00:00&#43;08:00" />
+<meta itemprop="dateModified" content="2020-03-22T00:00:00&#43;08:00" />
+<meta itemprop="wordCount" content="1088">
+
+
+
+<meta itemprop="keywords" content="Linux,LVM," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Linux - 可大可小的 LVM"/>
+<meta name="twitter:description" content="0x00 理由 接触了个客户环境，物理机磁盘使用的 LVM 方式划分。0202 年了还有公司大量使用该方式规划存储，被迫只能拿起来再复习下这项技术的使用姿势、追"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">TiDB AirPlan</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">About</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">TiDB AirPlan</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/about/">About</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">Linux - 可大可小的 LVM</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2020-03-21 </span>
+        <div class="post-category">
+            <a href="/categories/software/"> software </a>
+            </div>
+          <span class="more-meta"> 1088 words </span>
+          <span class="more-meta"> 3 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#0x00-理由">0x00 理由</a></li>
+    <li><a href="#0x01-lvm">0x01 LVM</a>
+      <ul>
+        <li><a href="#组件">组件</a></li>
+        <li><a href="#lvm-命令">LVM 命令</a></li>
+        <li><a href="#create-lvm">create lvm</a></li>
+      </ul>
+    </li>
+    <li><a href="#0x02-extend">0x02 extend</a>
+      <ul>
+        <li><a href="#actions-lv">actions-lv</a></li>
+      </ul>
+    </li>
+    <li><a href="#0x03-高级功能">0x03 高级功能</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h2 id="0x00-理由">0x00 理由</h2>
+<blockquote>
+<p>接触了个客户环境，物理机磁盘使用的 LVM 方式划分。0202 年了还有公司大量使用该方式规划存储，被迫只能拿起来再复习下这项技术的使用姿势、追踪下最近几年是否有更新。</p>
+</blockquote>
+<p>LVM 是 Logical Volume Manager（逻辑卷管理），内核 3.0 以后的版本默认自身携带。出生在“千禧年”附近，当时受限磁盘比较小，如果需要做大存储或者多用户磁盘划分时，会用到该技术。当时虽然也有 raid 技术，但是 LVM 不花钱啊。<br>
+LVM 通过 4 层设计将多个物理设备逻辑映射（貌似按虚拟化理解也行）到系统的单一设备上，然后由系统管理员使用 LVM 扩所容命令操作分区大小。可以做到在线动态调整～</p>
+<h2 id="0x01-lvm">0x01 LVM</h2>
+<blockquote>
+<p>以下内容部分来自百度，眼熟的可以发函了；部分内容来自 <a href="https://wiki.archlinux.org/index.php/LVM">archlinux wiki</a></p>
+</blockquote>
+<p><img src="./LVM.png" alt="LVM 数据流程图"></p>
+<h3 id="组件">组件</h3>
+<blockquote>
+<p>Physical volume (PV)
+Unix block device node, usable for storage by LVM. Examples: a hard disk, an MBR or GPT partition, a loopback file, a device mapper device (e.g. dm-crypt). It hosts an LVM header.</p>
+</blockquote>
+<blockquote>
+<p>Volume group (VG)
+Group of PVs that serves as a container for LVs. PEs are allocated from a VG for a LV.</p>
+</blockquote>
+<blockquote>
+<p>Logical volume (LV)
+&ldquo;Virtual/logical partition&rdquo; that resides in a VG and is composed of PEs. LVs are Unix block devices analogous to physical partitions, e.g. they can be directly formatted with a file system.</p>
+</blockquote>
+<blockquote>
+<p>Physical extent (PE)
+The smallest contiguous extent (default 4 MiB) in the PV that can be assigned to a LV. Think of PEs as parts of PVs that can be allocated to any LV.</p>
+</blockquote>
+<h3 id="lvm-命令">LVM 命令</h3>
+<table>
+<thead>
+<tr>
+<th>LVM</th>
+<th>扫描</th>
+<th>创建</th>
+<th>查看</th>
+<th>删除</th>
+<th>扩容</th>
+<th>缩容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PV</td>
+<td>pvscan</td>
+<td>pvcreate</td>
+<td>pvdisplay / pvs</td>
+<td>pvremove</td>
+<td>&mdash;</td>
+<td>&mdash;</td>
+</tr>
+<tr>
+<td>VG</td>
+<td>vgscan</td>
+<td>vgcreate</td>
+<td>vgdisplay / vgs</td>
+<td>vgremove</td>
+<td>vgextend</td>
+<td>vgreduce</td>
+</tr>
+<tr>
+<td>LV</td>
+<td>lvscan</td>
+<td>lvcreate</td>
+<td>lvdisplay / lvs</td>
+<td>lvremove</td>
+<td>lvextend</td>
+<td>lvreduce</td>
+</tr>
+</tbody>
+</table>
+<h3 id="create-lvm">create lvm</h3>
+<blockquote>
+<p>此处省略 800 字
+<a href="https://wiki.archlinux.org/index.php/LVM">archlinux wiki</a> 内容十分详细</p>
+</blockquote>
+<h2 id="0x02-extend">0x02 extend</h2>
+<blockquote>
+<p>在机器上实操了下扩容，由于操作不熟练把机器系统搞成了 read only，所以扩容时谨慎操作</p>
+</blockquote>
+<p>有个 1.5T 的磁盘分区已经划分了 LVM，通过 <code>fdisk -l</code> 命令可以看到分区。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># fdisk -l 查看磁盘分区</span>
+   Device Boot      Start         End      Blocks   Id  System
+/dev/sda1   *        <span class="m">2048</span>     <span class="m">1050623</span>      <span class="m">524288</span>   <span class="m">83</span>  Linux
+/dev/sda2         <span class="m">1050624</span>  <span class="m">3124494335</span>  <span class="m">1561721856</span>   8e  Linux LVM
+</code></pre></td></tr></table>
+</div>
+</div><p>随后使用 pvs 命令查看 PV 信息，看到该磁盘被划分到一个 PV</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># pvs</span>
+  PV         VG     Fmt  Attr PSize PFree
+  /dev/sda2  vg_sto lvm2 a--  1.45t 925.68g
+</code></pre></td></tr></table>
+</div>
+</div><p>查看 VG 信息，VG 是个虚拟的接口，对磁盘不会作出格式化或者修改磁盘元信息的动作。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-shell" data-lang="shell">
+<span class="c1"># vgs 查看信息</span>
+  VG     <span class="c1">#PV #LV #SN Attr   VSize VFree</span>
+  vg_sto   <span class="m">1</span>   <span class="m">7</span>   <span class="m">0</span> wz--n- 1.45t 925.68g
+
+<span class="c1">#  vgdisplay 查看信息</span>
+  --- Volume group ---
+  VG Name               vg_sto
+  System ID
+  Format                lvm2
+  Metadata Areas        <span class="m">1</span>
+  Metadata Sequence No  <span class="m">9</span>
+  VG Access             read/write
+  VG Status             resizable
+  MAX LV                <span class="m">0</span>
+  Cur LV                <span class="m">7</span>
+  Open LV               <span class="m">6</span>
+  Max PV                <span class="m">0</span>
+  Cur PV                <span class="m">1</span>
+  Act PV                <span class="m">1</span>
+  VG Size               1.45 TiB
+  PE Size               4.00 MiB
+  Total PE              <span class="m">381279</span>
+  Alloc PE / Size       <span class="m">144304</span> / &lt;563.69 GiB
+  Free  PE / Size       <span class="m">236975</span> / 925.68 GiB
+  VG UUID               yAZ3SK-fZjo-VnrK-7777-v3sA-TCfr-888888
+</code></pre></td></tr></table>
+</div>
+</div><p>查看 LV 信息</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-shell" data-lang="shell">
+<span class="c1"># lvs</span>
+  LV      VG     Attr       LSize    Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+  lv_home vg_sto -wi-ao----   &lt;9.77g
+  lv_opt  vg_sto -wi-ao----    5.00g
+  lv_root vg_sto -wi-ao----   &lt;9.77g
+
+<span class="c1"># lvdisplay</span>
+  --- Logical volume ---
+  LV Path                /dev/vg_sto/lv_home
+  LV Name                lv_home
+  VG Name                vg_sto
+  LV UUID                oafYvb-oFAG-LR1q-7777-pZNq-A6Wk-888888
+  LV Write Access        read/write
+  LV Creation host, <span class="nb">time</span> localhost, 2020-03-19 20:23:25 +0800
+  LV Status              available
+  <span class="c1"># open                 1</span>
+  LV Size                &lt;9.77 GiB
+  Current LE             <span class="m">2500</span>
+  Segments               <span class="m">2</span>
+  Allocation             inherit
+  Read ahead sectors     auto
+  - currently <span class="nb">set</span> to     <span class="m">8192</span>
+  Block device           253:4
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="actions-lv">actions-lv</h3>
+<ul>
+<li>执行 lvextend 命令扩容该逻辑卷
+<ul>
+<li><code>lvextend -L +500G /dev/mapper/vg_sto-lv_home</code></li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>扩容后 <code>df -h</code> 查看空间大小未刷新，此时需要使用另一个命令刷新下元数据信息<br>
+执行前先看下该<strong>逻辑卷格式化</strong>方式是 ext4 还是 xfs ，比如通过 <code>/etc/fstab</code> 查看</p>
+</blockquote>
+<ul>
+<li>
+<p>如果是 xfs 执行这条命令</p>
+<ul>
+<li><code>xfs_growfs  /dev/mapper/vg_sto-lv_home</code></li>
+</ul>
+</li>
+<li>
+<p>如果是 ext4 执行这条命令</p>
+<ul>
+<li><code>resize2fs -f  /dev/mapper/vg_sto-lv_home</code></li>
+</ul>
+</li>
+<li>
+<p>否则可能会看见以下错误</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-shell" data-lang="shell">resize2fs 1.42.9 <span class="o">(</span>28-Dec-2013<span class="o">)</span>
+resize2fs: Bad magic number in super-block <span class="k">while</span> trying to open /dev/mapper/vg_sys-lv_home
+Couldn<span class="err">&#39;</span>t find valid filesystem superblock.
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>再次查看 lvs 信息</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># lvs</span>
+  LV      VG     Attr       LSize    Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+  lv_home vg_sto -wi-ao---- &lt;509.77g
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="0x03-高级功能">0x03 高级功能</h2>
+<blockquote>
+<p>我没用过，待我做个测试之后研究下
+开坑补坑 # 20200321</p>
+</blockquote>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Jeff</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2020-03-22
+        
+    </span>
+  </p>
+  
+  <p class="copyright-item">
+    <span class="item-title">License</span>
+    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span>
+  </p>
+</div>
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/linux/">Linux</a>
+          <a href="/tags/lvm/">LVM</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/20200323-teamview-update/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">使用软件时强制升级的设计</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/20191008-dm-faq/">
+            <span class="next-text nav-default">总结 - Data Migration（数据同步）</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="https://github.com/BigerCAP/TiDB-AirPlan/issues" class="iconfont icon-github" title="github"></a>
+  <a href="https://ap.tidb.cc/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2020
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">TiDB - AirPlan</span>
+  </span>
+</div>
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js" integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js" integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin="anonymous"></script>
+  <script><!-- NOTE: timeago.js uses the language code format like "zh_CN" (underscore and case sensitive) -->
+    var languageCode = "en".replace(/-/g, '_').replace(/_(.*)/, function ($0, $1) {return $0.replace($1, $1.toUpperCase());});
+    timeago().render(document.querySelectorAll('.timeago'), languageCode);
+    timeago.cancel();  
+  </script>
+<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>
