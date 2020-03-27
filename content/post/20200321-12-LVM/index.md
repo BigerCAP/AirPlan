@@ -23,16 +23,16 @@ LVM 通过 4 层设计将多个物理设备逻辑映射（貌似按虚拟化理�
 
 ### 组件
 
-> Physical volume (PV)
+> Physical volume (PV)  
 > Unix block device node, usable for storage by LVM. Examples: a hard disk, an MBR or GPT partition, a loopback file, a device mapper device (e.g. dm-crypt). It hosts an LVM header.
 
-> Volume group (VG)
+> Volume group (VG)  
 > Group of PVs that serves as a container for LVs. PEs are allocated from a VG for a LV.
 
-> Logical volume (LV)
+> Logical volume (LV)  
 > "Virtual/logical partition" that resides in a VG and is composed of PEs. LVs are Unix block devices analogous to physical partitions, e.g. they can be directly formatted with a file system.
 
-> Physical extent (PE)
+> Physical extent (PE)  
 > The smallest contiguous extent (default 4 MiB) in the PV that can be assigned to a LV. Think of PEs as parts of PVs that can be allocated to any LV.
 
 ### LVM 命令
