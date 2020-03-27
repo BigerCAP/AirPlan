@@ -171,19 +171,19 @@ LVM 通过 4 层设计将多个物理设备逻辑映射（貌似按虚拟化理�
 <p><img src="./LVM.png" alt="LVM 数据流程图"></p>
 <h3 id="组件">组件</h3>
 <blockquote>
-<p>Physical volume (PV)
+<p>Physical volume (PV)<br>
 Unix block device node, usable for storage by LVM. Examples: a hard disk, an MBR or GPT partition, a loopback file, a device mapper device (e.g. dm-crypt). It hosts an LVM header.</p>
 </blockquote>
 <blockquote>
-<p>Volume group (VG)
+<p>Volume group (VG)<br>
 Group of PVs that serves as a container for LVs. PEs are allocated from a VG for a LV.</p>
 </blockquote>
 <blockquote>
-<p>Logical volume (LV)
+<p>Logical volume (LV)<br>
 &ldquo;Virtual/logical partition&rdquo; that resides in a VG and is composed of PEs. LVs are Unix block devices analogous to physical partitions, e.g. they can be directly formatted with a file system.</p>
 </blockquote>
 <blockquote>
-<p>Physical extent (PE)
+<p>Physical extent (PE)<br>
 The smallest contiguous extent (default 4 MiB) in the PV that can be assigned to a LV. Think of PEs as parts of PVs that can be allocated to any LV.</p>
 </blockquote>
 <h3 id="lvm-命令">LVM 命令</h3>
@@ -468,7 +468,7 @@ Couldn<span class="err">&#39;</span>t find valid filesystem superblock.
           <a href="/tags/lvm/">LVM</a>
           </div>
       <nav class="post-nav">
-        <a class="prev" href="/post/20200323-teamview-update/">
+        <a class="prev" href="/post/20200323-13-teamview/">
             <i class="iconfont icon-left"></i>
             <span class="prev-text nav-default">使用软件时强制升级的设计</span>
             <span class="prev-text nav-mobile">Prev</span>
