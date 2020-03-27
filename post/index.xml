@@ -31,6 +31,15 @@
     </item>
     
     <item>
+      <title>纸上谈兵 - TiDB 性能调优</title>
+      <link>https://ap.tidb.cc/post/20200311-11-performance-map/</link>
+      <pubDate>Wed, 11 Mar 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20200311-11-performance-map/</guid>
+      <description>0x00 缘 妙不可言 开局一张图，其他全靠编。本文内容中 performance map 基于 TiDB 2.1 &amp;amp; TiDB 3.0 构建；部分内容与新版本不适配，具体以官方解释为准（e.g: TiDB 4.0 Titan engine 读写与本文</description>
+    </item>
+    
+    <item>
       <title>总结 - Data Migration（数据同步）</title>
       <link>https://ap.tidb.cc/post/20191008-dm-faq/</link>
       <pubDate>Wed, 22 Jan 2020 00:00:00 +0800</pubDate>

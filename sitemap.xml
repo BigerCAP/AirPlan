@@ -79,6 +79,34 @@
   </url>
   
   <url>
+    <loc>https://ap.tidb.cc/tags/performance/</loc>
+    <lastmod>2020-03-12T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/tidb/</loc>
+    <lastmod>2020-03-12T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/categories/tidb/</loc>
+    <lastmod>2020-03-12T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/post/20200311-11-performance-map/</loc>
+    <lastmod>2020-03-12T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
     <loc>https://ap.tidb.cc/tags/dm/</loc>
     <lastmod>2020-02-05T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
@@ -151,20 +179,6 @@
   <url>
     <loc>https://ap.tidb.cc/tags/real-server-ip/</loc>
     <lastmod>2020-01-10T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://ap.tidb.cc/tags/tidb/</loc>
-    <lastmod>2020-01-23T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://ap.tidb.cc/categories/tidb/</loc>
-    <lastmod>2020-01-20T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>

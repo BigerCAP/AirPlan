@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>纸上谈兵 - TiDB 性能调优 - TiDB AirPlan - A biger solution</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Jeff" /><meta name="description" content="0x00 缘 妙不可言 开局一张图，其他全靠编。本文内容中 performance map 基于 TiDB 2.1 &amp;amp; TiDB 3.0 构建；部分内容与新版本不适配，具体以官方解释为准（e.g: TiDB 4.0 Titan engine 读写与本文" /><meta name="keywords" content="TiDB, AirPlan, TiDB OPS, tidb-operator, 2pc, raft, databases, mysql, htap" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.63.2 with theme even" />
+
+
+<link rel="canonical" href="https://ap.tidb.cc/post/20200311-11-performance-map/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<link href="/dist/even.04bd84cd.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="纸上谈兵 - TiDB 性能调优" />
+<meta property="og:description" content="0x00 缘 妙不可言 开局一张图，其他全靠编。本文内容中 performance map 基于 TiDB 2.1 &amp; TiDB 3.0 构建；部分内容与新版本不适配，具体以官方解释为准（e.g: TiDB 4.0 Titan engine 读写与本文" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://ap.tidb.cc/post/20200311-11-performance-map/" />
+<meta property="article:published_time" content="2020-03-11T00:00:00+08:00" />
+<meta property="article:modified_time" content="2020-03-12T00:00:00+08:00" />
+<meta itemprop="name" content="纸上谈兵 - TiDB 性能调优">
+<meta itemprop="description" content="0x00 缘 妙不可言 开局一张图，其他全靠编。本文内容中 performance map 基于 TiDB 2.1 &amp; TiDB 3.0 构建；部分内容与新版本不适配，具体以官方解释为准（e.g: TiDB 4.0 Titan engine 读写与本文">
+<meta itemprop="datePublished" content="2020-03-11T00:00:00&#43;08:00" />
+<meta itemprop="dateModified" content="2020-03-12T00:00:00&#43;08:00" />
+<meta itemprop="wordCount" content="1128">
+
+
+
+<meta itemprop="keywords" content="TiDB,performance," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="纸上谈兵 - TiDB 性能调优"/>
+<meta name="twitter:description" content="0x00 缘 妙不可言 开局一张图，其他全靠编。本文内容中 performance map 基于 TiDB 2.1 &amp; TiDB 3.0 构建；部分内容与新版本不适配，具体以官方解释为准（e.g: TiDB 4.0 Titan engine 读写与本文"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">TiDB AirPlan</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">About</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">TiDB AirPlan</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/about/">About</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">纸上谈兵 - TiDB 性能调优</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2020-03-11 </span>
+        <div class="post-category">
+            <a href="/categories/tidb/"> TiDB </a>
+            </div>
+          <span class="more-meta"> 1128 words </span>
+          <span class="more-meta"> 3 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#0x00-缘-妙不可言">0x00 缘 妙不可言</a></li>
+    <li><a href="#0x01-开局">0x01 开局</a>
+      <ul>
+        <li><a href="#txn">TXN</a></li>
+        <li><a href="#sql">SQL</a></li>
+        <li><a href="#tikv-server">TiKV server</a></li>
+        <li><a href="#tikv-coprocessor">TiKV coprocessor</a></li>
+        <li><a href="#tikv-schedule">TiKV schedule</a></li>
+      </ul>
+    </li>
+    <li><a href="#0x02-awsl">0x02 awsl</a></li>
+    <li><a href="#0x03-坑">0x03 坑</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h2 id="0x00-缘-妙不可言">0x00 缘 妙不可言</h2>
+<blockquote>
+<p>开局一张图，其他全靠编。本文内容中 performance map 基于 TiDB 2.1 &amp; TiDB 3.0 构建；部分内容与新版本不适配，具体以官方解释为准（e.g: TiDB 4.0 Titan engine 读写与本文流程会有区别 ）<br>
+本页内容中 performance map 来自 <a href="https://github.com/pingcap/tidb-map/">PingCAP/TiDB-map</a> 项目，最终所有权&amp;解释权归 PingCAP 所有。</p>
+<ul>
+<li>阅读本文前请先围观以下文档（本文内容来自以下文档的<del>复制、黏贴、串改、汇总</del>）：
+<ul>
+<li><a href="https://pingcap.com/blog-cn/tidb-source-code-reading-3/">SQL 的一生</a> ✨</li>
+<li><a href="https://pingcap.com/blog-cn/#TiDB-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB">TiDB 源码阅读</a></li>
+<li><a href="https://pingcap.com/blog-cn/#TiKV-%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90">TiKV 源码阅读</a></li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<h2 id="0x01-开局">0x01 开局</h2>
+<blockquote>
+<p>首先了解下 TiDB 整体的架构</p>
+</blockquote>
+<ul>
+<li>TiDB（产品）三大金刚组件：PD、TiDB、TiKV
+<ul>
+<li>TiDB-server 负责 session 链接管理、SQL 解析 &amp; 执行、使用 SQL 语言读写 TiKV 中的 KV 数据</li>
+<li>PD 负责 region 调度 &amp; region 信息统计、TiKV 状态管理、TSO 分发（类似 SCN / GTID 的东东）</li>
+<li>TiKV 负责存储数据以及部分<strong>下推 SQL</strong> 的计算（数据格式为 Key-value）
+<ul>
+<li>三副本强一致概念实现 <a href="https://pingcap.com/blog-cn/tikv-source-code-reading-2/">raft-rs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>合体后的姿势是这样的（暂时忽略掉 tispark，本文不涉及这部分）：</p>
+<p><img src="tidb-architecture.png" alt="TiDB 架构图"></p>
+<h3 id="txn">TXN</h3>
+<p>如果链接到 TiDB，执行一条 insert 语句差不多是这么一个流程（图片中好像少了一部分，让我们继续往后看）</p>
+<blockquote>
+<p>该图来自于 <a href="https://pingcap.com/blog-cn/tikv-source-code-reading-12/">分布式事物</a></p>
+</blockquote>
+<p><img src="./tikv-txn.png" alt="事物流程"></p>
+<h3 id="sql">SQL</h3>
+<p>而事物在 TiDB 经历了什么呢？</p>
+<blockquote>
+<p>该图来自于 TiDB <a href="https://pingcap.com/blog-cn/tidb-source-code-reading-3/">SQL 的一生</a></p>
+</blockquote>
+<p><img src="./tidb-sql.png" alt="TiDB SQL 的一生"></p>
+<p>从图片中可以看到 TiDB 通过 conn.go 建立 session 链接，随后接收 SQL text 内容交由 session.go 来处理。<br>
+session.go 收到 SQL text 后将数据发送给 parser 验证 SQL text 格式、内容是否有效；验证成功后发送给 plan 两兄弟（plan.preprocess &amp; plan optimize），兄弟两个一个是用来思考怎么帮助用户规划路径，另一个兄弟是思考如何才能最快的去执行任务拿到数据。<br>
+兄弟两个合拍之后出了报告发送给 executor.build 大佬，大佬专业押镖数十年，由该大佬去 TiKV 存储层获取目标数据。</p>
+<blockquote>
+<p>辣么 <a href="https://pingcap.com/blog-cn/tidb-source-code-reading-5/">parser 是怎么检测 sql text</a> 的呢？ <a href="https://pingcap.com/blog-cn/tidb-source-code-reading-23/">executor 是怎么拿到数据的</a>？plan 两兄弟又出的什么主意呢（<a href="https://pingcap.com/blog-cn/tidb-source-code-reading-7/">基于规则的优化</a>&amp; <a href="https://pingcap.com/blog-cn/tidb-source-code-reading-8/">基于代价的优化</a>）？<br>
+《走进科学》专业人士与你慢慢细谈</p>
+</blockquote>
+<h3 id="tikv-server">TiKV server</h3>
+<p>TiDB 接收到了 SQL ，怎么送到的 TiKV 、TiKV 又是怎么回复的？或许这是未来 <em>TiDB 十万个为什么</em> 必备题吧<br>
+这里没找到图，暂时也没作图，先挖个坑吧，或者看文章也是可以的，比如 <a href="https://pingcap.com/blog-cn/tidb-source-code-reading-18/">TiKV client in TiDB 上</a> &amp; <a href="https://pingcap.com/blog-cn/tidb-source-code-reading-19/">TiKV client in TiDB 下</a></p>
+<ul>
+<li>本部分信息挖坑
+<ul>
+<li>grpc 线程池</li>
+<li>raftstore</li>
+<li>apply sync</li>
+<li>mvcc</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>改图来自于 <a href="https://pingcap.com/blog-cn/tikv-source-code-reading-9/">TiKV-server</a></p>
+</blockquote>
+<p><img src="./tikv-server.png" alt="TiKV server "></p>
+<h3 id="tikv-coprocessor">TiKV coprocessor</h3>
+<blockquote>
+<p>改图来自于 <a href="https://pingcap.com/blog-cn/tikv-source-code-reading-14/">TiKV coprocess 概览</a><br>
+storage readpool 与 coprocessor 负责处理不同场景的 <strong>读</strong>，负责读的还有另一兄弟 kv_get</p>
+</blockquote>
+<p><img src="./tikv-select.png" alt="tikv coprocessor 读流程"></p>
+<h3 id="tikv-schedule">TiKV schedule</h3>
+<blockquote>
+<p>此处暂无内容</p>
+</blockquote>
+<h2 id="0x02-awsl">0x02 awsl</h2>
+<blockquote>
+<p>看完上面内容迷路了么？如果迷路了这里有份 <em><a href="https://github.com/pingcap/tidb-map/blob/master/maps/performance-map.png">鸟瞰图</a></em> 可以拿去看看<br>
+齿轮部分是可以用与调优的地方，需要区分读写两个流程哟（读写各有不同的调优参数）<br>
+rocksDB 内的参数谨慎调试、调了需要一定时间才有反应（非即时反馈）</p>
+</blockquote>
+<ul>
+<li>参数调证
+<ul>
+<li>TiDB 调整 <a href="https://pingcap.com/docs-cn/stable/reference/configuration/tidb-server/configuration-file/">tidb.toml</a>&amp; <a href="https://pingcap.com/docs-cn/stable/reference/configuration/tidb-server/tidb-specific-variables/#tidb-%E4%B8%93%E7%94%A8%E7%B3%BB%E7%BB%9F%E5%8F%98%E9%87%8F%E5%92%8C%E8%AF%AD%E6%B3%95">TiDB session variable</a>，如果想了解 session variable 的调整，还需要先阅读这篇文档 <a href="https://pingcap.com/blog-cn/tidb-source-code-reading-10/">Chunk 和执行框架简介</a></li>
+<li>TiKV 调整 <a href="https://pingcap.com/docs-cn/stable/reference/configuration/tikv-server/configuration-file/">tikv.toml</a>
+<ul>
+<li><a href="https://pingcap.com/blog-cn/tikv-source-code-reading-7/">Grpc 线程池</a> 介绍</li>
+</ul>
+</li>
+<li>可能还需要 PD 配合，比如 <a href="https://pingcap.com/docs-cn/stable/reference/tools/pd-control/">PD-ctl</a>，而不是 pd.toml 文件</li>
+</ul>
+</li>
+<li>是不是懵逼，即时知道了调那些参数，也不知道该调多少数值？因为少了一部分知识体系：《监控-资源使用》</li>
+</ul>
+<p><img src="./performance-map.png" alt="TiDB performance map"></p>
+<h2 id="0x03-坑">0x03 坑</h2>
+<blockquote>
+<p>本文坑有些多，先记录下能想到的坑 #顺着网线过来打我也没用</p>
+</blockquote>
+<ul>
+<li><input disabled="" type="checkbox">coprocessor &amp; schedule 描述</li>
+<li><input disabled="" type="checkbox">各组件 client</li>
+<li><input disabled="" type="checkbox">性能监控</li>
+<li><input disabled="" type="checkbox">tikv server</li>
+</ul>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Jeff</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2020-03-12
+        
+    </span>
+  </p>
+  
+  <p class="copyright-item">
+    <span class="item-title">License</span>
+    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span>
+  </p>
+</div>
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/tidb/">TiDB</a>
+          <a href="/tags/performance/">performance</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/20200321-12-lvm/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">Linux - 可大可小的 LVM</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/20191008-dm-faq/">
+            <span class="next-text nav-default">总结 - Data Migration（数据同步）</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="https://github.com/BigerCAP/TiDB-AirPlan/issues" class="iconfont icon-github" title="github"></a>
+  <a href="https://ap.tidb.cc/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2020
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">TiDB - AirPlan</span>
+  </span>
+</div>
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js" integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js" integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin="anonymous"></script>
+  <script><!-- NOTE: timeago.js uses the language code format like "zh_CN" (underscore and case sensitive) -->
+    var languageCode = "en".replace(/-/g, '_').replace(/_(.*)/, function ($0, $1) {return $0.replace($1, $1.toUpperCase());});
+    timeago().render(document.querySelectorAll('.timeago'), languageCode);
+    timeago.cancel();  
+  </script>
+<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>
