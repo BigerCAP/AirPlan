@@ -1,6 +1,6 @@
 ---
 title: 总结 - Data Migration（数据同步）
-date: 2020-01-22T00:00:00+08:00
+date: 2019-10-08T00:00:00+08:00
 lastmod: 2020-02-05T00:00:00+08:00
 categories:
   - Troubleshooting
