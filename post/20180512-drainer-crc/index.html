@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Drainer &amp; Binlog crc mismatch - TiDB AirPlan - A biger solution</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Jeff" /><meta name="description" content="0x00 借口 该问题出现时间为 2018 年 5 月 12 日，影响版本范围在 1.0.x &amp;amp; 2.0 附近；基本上算运维事故，一定要配置告警啊，就算系统不重要 现象总结 出现 crc mismatch 可能是 pump binlog 数" /><meta name="keywords" content="TiDB, AirPlan, TiDB OPS, tidb-operator, 2pc, raft, databases, mysql, htap" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.63.2 with theme even" />
+
+
+<link rel="canonical" href="https://ap.tidb.cc/post/20180512-drainer-crc/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<link href="/dist/even.04bd84cd.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="Drainer &amp; Binlog crc mismatch" />
+<meta property="og:description" content="0x00 借口 该问题出现时间为 2018 年 5 月 12 日，影响版本范围在 1.0.x &amp; 2.0 附近；基本上算运维事故，一定要配置告警啊，就算系统不重要 现象总结 出现 crc mismatch 可能是 pump binlog 数" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://ap.tidb.cc/post/20180512-drainer-crc/" />
+<meta property="article:published_time" content="2018-05-12T00:00:00+08:00" />
+<meta property="article:modified_time" content="2018-05-22T00:00:00+08:00" />
+<meta itemprop="name" content="Drainer &amp; Binlog crc mismatch">
+<meta itemprop="description" content="0x00 借口 该问题出现时间为 2018 年 5 月 12 日，影响版本范围在 1.0.x &amp; 2.0 附近；基本上算运维事故，一定要配置告警啊，就算系统不重要 现象总结 出现 crc mismatch 可能是 pump binlog 数">
+<meta itemprop="datePublished" content="2018-05-12T00:00:00&#43;08:00" />
+<meta itemprop="dateModified" content="2018-05-22T00:00:00&#43;08:00" />
+<meta itemprop="wordCount" content="1915">
+
+
+
+<meta itemprop="keywords" content="Binlog,Drainer,PUMP," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Drainer &amp; Binlog crc mismatch"/>
+<meta name="twitter:description" content="0x00 借口 该问题出现时间为 2018 年 5 月 12 日，影响版本范围在 1.0.x &amp; 2.0 附近；基本上算运维事故，一定要配置告警啊，就算系统不重要 现象总结 出现 crc mismatch 可能是 pump binlog 数"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">TiDB AirPlan</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">About</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">TiDB AirPlan</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/about/">About</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">Drainer &amp; Binlog crc mismatch</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2018-05-12 </span>
+        <div class="post-category">
+            <a href="/categories/troubleshooting/"> Troubleshooting </a>
+            </div>
+          <span class="more-meta"> 1915 words </span>
+          <span class="more-meta"> 4 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#0x00-借口">0x00 借口</a>
+      <ul>
+        <li><a href="#drainer-log">Drainer Log</a></li>
+        <li><a href="#pump-log">PUMP Log</a></li>
+        <li><a href="#修复">修复</a></li>
+      </ul>
+    </li>
+    <li><a href="#0x01-买一送一">0x01 买一送一</a></li>
+    <li><a href="#0x02-再送一条存货">0x02 再送一条存货</a>
+      <ul>
+        <li><a href="#drainer-log2">Drainer log2</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+  <div class="post-outdated">
+    <div class="warn">
+      <p>[NOTE] Updated <span class="timeago" datetime="2018-05-22T00:00:00" title="May 22, 2018">May 22, 2018</span>. This article may have outdated content or subject matter.</p>
+    </div>
+  </div>
+    <div class="post-content">
+      <h2 id="0x00-借口">0x00 借口</h2>
+<blockquote>
+<p>该问题出现时间为 2018 年 5 月 12 日，影响版本范围在 1.0.x &amp; 2.0 附近；基本上算运维事故，一定要配置告警啊，就算系统不重要</p>
+</blockquote>
+<ul>
+<li>现象总结
+<ul>
+<li>出现 crc mismatch 可能是 pump binlog 数据损坏，drainer 对 binlog 内容校验失败</li>
+<li>tidb 进程存在，业务端口不可用, 当 pump 不可用后，tidb 自动丢掉业务端口
+<ul>
+<li><code>listener stopped, waiting for manual kill</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>触发原因可能是
+<ul>
+<li>服务器重启</li>
+<li>kill -9</li>
+<li>磁盘写满</li>
+</ul>
+</li>
+</ul>
+<h3 id="drainer-log">Drainer Log</h3>
+<blockquote>
+<p>Drainer 服务日志持续刷以下日志<br>
+Drainer 需要去每个 PUMP 节点收集 Binlog 数据，汇总时按照时许排序并做一致性校验，根据提示看时数据校验未通过</p>
+</blockquote>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-fallback" data-lang="fallback">2018/01/08 15:44:59 pump.go:386: [warning] [stream] node ip-10-0-70-42:8250, pos {Suffix:351 Offset:520960160}, error rpc error: code = Unknown desc = binlogger: crc mismatch
+2018/01/08 15:45:00 pump.go:386: [warning] [stream] node ip-10-0-70-40:8250, pos {Suffix:354 Offset:182450922}, error rpc error: code = Unknown desc = binlogger: crc mismatch
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="pump-log">PUMP Log</h3>
+<blockquote>
+<p>在 drainer 出现问题集群中发现一个 PUMP 磁盘写满的现象，猜测可能是这里先出现写满然后导致部分数据未写入成功</p>
+</blockquote>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-fallback" data-lang="fallback">2018/01/05 11:54:28 server.go:364: ^[[0;31m[error] generate forward binlog, write binlog err write /data1/deploy/data.pump/clusters/6485556578803970722/binlog-0000000000000354: no space left on device^[[0m
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="修复">修复</h3>
+<p>根据官方指导，这种情况只能通过重新搭建 Binlog 架构进行修复。重新开始做以下流程：</p>
+<ol>
+<li>Binlog 重新搭建，根据数据情况调整 PUMP 节点 GC 参数，默认 7 天开始 GC Binlog</li>
+<li>获取上游主库的 tso 时间点，也就是断点信息</li>
+<li>数据的全量导出：使用 mydumper 工具导出，数据导出时间视数据量、并发数、磁盘读写速度、网络速度而定</li>
+<li>全量导入：使用的官方 loader 工具，没办法使用 myloader 或者 mysqlload 工具，因为事物大小问题无法提交</li>
+<li>开启 Drainer 服务：使用第二步获取的 tso 断点信息，如果遇见重复数据，drainer 开启时有个 5 分钟的 safe mode 模式可以强制刷写下游数据
+<ul>
+<li>其实就是开启了 sql 转换，比如 insert 转 replace、update 转 delete + replace</li>
+</ul>
+</li>
+<li>注意观察监控，比如 binlog 上下游延迟、binlog tps 消费速度、磁盘空间大小，最后设置下告警</li>
+</ol>
+<h2 id="0x01-买一送一">0x01 买一送一</h2>
+<blockquote>
+<p>Drainer 同步下游是个 mysql 数据库，Drainer 同步采用的是高并发提交事物模式写入数据，偶遇一个死锁错误<br>
+这种错误只能靠人工清理了，备库无业务流量，选择了直接重启处理 死锁 deadlock</p>
+</blockquote>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-fallback" data-lang="fallback">2018/01/08 20:09:23 syncer.go:517: [fatal] Error 1213: Deadlock found when trying to get lock; try restarting transaction
+/home/pingcap/go/src/github.com/pingcap/tidb-binlog/drainer/executor/util.go:72:
+/home/pingcap/go/src/github.com/pingcap/tidb-binlog/drainer/executor/util.go:52:
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="0x02-再送一条存货">0x02 再送一条存货</h2>
+<blockquote>
+<p>Drainer 数据同步下游慢，PUMP GC Binlog 的惨案</p>
+</blockquote>
+<p>早起刚做 Binlog 同步时，上游是 <code>TiDB * 4、PD * 3、TiKV * 9</code> 规模的集群，下游使用 8U 16G 虚拟机外加 2T sas 磁盘安装了一个 mysql 服务做数据同步。当初没有考虑同步性能，刚开始数据量比较小，虽然有些延迟但是能忍。<br>
+逐渐逐渐发现越来越慢，终于有一天业务提示下游备库查不到数据了（刚开始也没有配置同步链路告警，被踢了一觉）。<br>
+然后开始排查 Drainer &amp; PUMP 日志，看见 PUMP 日志中提示 <code>commitTs(396914383516074000) of binlog exceeds the lower boundary of window 396981384481603586, may miss processing, ITEM(&amp;{0xc50ebf8980 {75 0} tidb-online-tidb-2:8250 &lt;nil&gt;})ESC[0m</code> 信息，看的我一脸懵逼。咨询官方后说是 PUMP 已经 GC binlog 了，Drainer 拿不到数据所以同步就断了。<br>
+详细的解释就是下面这样：</p>
+<ol>
+<li>a b c 三个 pump 共存储了 100 条数据，每个 pump 隔三差五的存了一些数据</li>
+<li>Drainer 同步到了 77 ，想要 78 的时候发现是在 a pump 节点</li>
+<li>a pump gc 时间到了，在早些时间已经把 78 数据删除了</li>
+<li>Drainer 拿不到数据啊，就炸火了</li>
+<li>优化方案两种，第一个是调整 PUMP GC 时间、第二个是改善下游机器配置
+<ul>
+<li>因为 xx 原因，先把 PUMP GC 时间调大了…… ，然后就出现上面的惨案，磁盘写满</li>
+</ul>
+</li>
+</ol>
+<h3 id="drainer-log2">Drainer log2</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-fallback" data-lang="fallback">2017/12/27 07:40:06 pump.go:386: ESC[0;33m[warning] [stream] node tidb-online-tidb-1:8250, pos {Suffix:80 Offset:495074285}, error rpc error: code = Unknown desc = unexpected EOFESC[0m
+2017/12/27 08:14:25 pump.go:386: ESC[0;33m[warning] [stream] node ip-10-10-8-6:8250, pos {Suffix:76 Offset:392531590}, error rpc error: code = Unknown desc = unexpected EOFESC[0m
+2017/12/27 09:59:30 pump.go:386: ESC[0;33m[warning] [stream] node ip-10-10-8-7:8250, pos {Suffix:80 Offset:39373906}, error rpc error: code = Unknown desc = unexpected EOFESC[0m
+2017/12/27 12:14:59 pump.go:386: ESC[0;33m[warning] [stream] node ip-10-10-8-6:8250, pos {Suffix:76 Offset:472984304}, error rpc error: code = Unknown desc = unexpected EOFESC[0m
+2017/12/27 15:12:19 pump.go:386: ESC[0;33m[warning] [stream] node tidb-online-tidb-1:8250, pos {Suffix:81 Offset:111758786}, error rpc error: code = Unknown desc = unexpected EOFESC[0m
+2017/12/27 16:36:42 pump.go:386: ESC[0;33m[warning] [stream] node tidb-online-tidb-2:8250, pos {Suffix:77 Offset:26308812}, error rpc error: code = Internal desc = transport is closingESC[0m
+2017/12/27 16:36:42 pump.go:386: ESC[0;33m[warning] [stream] node ip-10-10-8-6:8250, pos {Suffix:77 Offset:26308812}, error rpc error: code = Internal desc = transport is closingESC[0m
+2017/12/27 16:36:45 collector.go:184: ESC[0;37m[info] node(tidb-online-tidb-2:8250) of cluster(6493070954582498647)  has been removed and release the connection to itESC[0m
+2017/12/27 16:36:45 pump.go:378: ESC[0;33m[warning] [Get pull binlogs stream ip-10-10-8-6:8250] rpc error: code = Unavailable desc = grpc: the connection is unavailableESC[0m
+2017/12/27 16:36:48 pump.go:378: ESC[0;33m[warning] [Get pull binlogs stream ip-10-10-8-6:8250] rpc error: code = Unavailable desc = grpc: the connection is unavailableESC[0m
+2017/12/27 16:36:51 pump.go:378: ESC[0;33m[warning] [Get pull binlogs stream ip-10-10-8-6:8250] rpc error: code = Unavailable desc = grpc: the connection is unavailableESC[0m
+2017/12/27 16:36:54 pump.go:378: ESC[0;33m[warning] [Get pull binlogs stream ip-10-10-8-6:8250] rpc error: code = Unavailable desc = grpc: the connection is unavailableESC[0m
+2017/12/27 16:36:57 pump.go:378: ESC[0;33m[warning] [Get pull binlogs stream ip-10-10-8-6:8250] rpc error: code = Unavailable desc = grpc: the connection is unavailableESC[0m
+2017/12/27 16:37:00 pump.go:378: ESC[0;33m[warning] [Get pull binlogs stream ip-10-10-8-6:8250] rpc error: code = Unavailable desc = grpc: the connection is unavailableESC[0m
+2017/12/27 16:37:03 pump.go:378: ESC[0;33m[warning] [Get pull binlogs stream ip-10-10-8-6:8250] rpc error: code = Unavailable desc = grpc: the connection is unavailableESC[0m
+2017/12/27 16:37:05 collector.go:166: ESC[0;37m[info] node tidb-online-tidb-2:8250 get save point {75 0}ESC[0m
+2017/12/27 16:37:05 pump.go:378: ESC[0;33m[warning] [Get pull binlogs stream tidb-online-tidb-2:8250] rpc error: code = Unavailable desc = grpc: the connection is unavailableESC[0m
+2017/12/27 16:37:06 pump.go:378: ESC[0;33m[warning] [Get pull binlogs stream ip-10-10-8-6:8250] rpc error: code = Unavailable desc = grpc: the connection is unavailableESC[0m
+2017/12/27 16:37:08 pump.go:284: ESC[0;31m[error] FATAL ERROR: commitTs(396914383516074000) of binlog exceeds the lower boundary of window 396981384481603586, may miss processing, ITEM(&amp;{0xc50ebf8980 {75 0} tidb-online-tidb-2:8250 &lt;nil&gt;})ESC[0m
+2017/12/27 16:37:08 pump.go:284: ESC[0;31m[error] FATAL ERROR: commitTs(396914383542288387) of binlog exceeds the lower boundary of window 396981384481603586, may miss processing, ITEM(&amp;{0xc50201cf80 {75 1105} tidb-online-tidb-2:8250 &lt;nil&gt;})ESC[0m
+2017/12/27 16:37:08 pump.go:284: ESC[0;31m[error] FATAL ERROR: commitTs(396914383542288392) of binlog exceeds the lower boundary of window 396981384481603586, may miss processing, ITEM(&amp;{0xc50201d580 {75 1865} tidb-online-tidb-2:8250 &lt;nil&gt;})ESC[0m
+2017/12/27 16:37:08 pump.go:284: ESC[0;31m[error] FATAL ERROR: commitTs(396914383555395593) of binlog exceeds the lower boundary of window 396981384481603586, may miss processing, ITEM(&amp;{0xc4f4b98580 {75 2599} tidb-online-tidb-2:8250 &lt;nil&gt;})ESC[0m
+2017/12/27 17:28:35 pump.go:386: ESC[0;33m[warning] [stream] node ip-10-10-8-7:8250, pos {Suffix:80 Offset:210137628}, error rpc error: code = Canceled desc = context canceledESC[0m
+2017/12/27 17:28:38 collector.go:184: ESC[0;37m[info] node(ip-10-10-8-7:8250) of cluster(6493070954582498647)  has been removed and release the connection to itESC[0m
+2017/12/27 17:28:58 pump.go:386: ESC[0;33m[warning] [stream] node ip-10-10-8-6:8250, pos {Suffix:77 Offset:26341996}, error rpc error: code = Canceled desc = context canceledESC[0m
+2017/12/27 17:29:01 collector.go:184: ESC[0;37m[info] node(ip-10-10-8-6:8250) of cluster(6493070954582498647)  has been removed and release the connection to itESC[0m
+2017/12/27 17:58:47 pump.go:386: ESC[0;33m[warning] [stream] node tidb-online-tidb-1:8250, pos {Suffix:81 Offset:177552746}, error rpc error: code = Unknown desc = unexpected EOFESC[0m
+2017/12/27 18:34:29 pump.go:386: ESC[0;33m[warning] [stream] node tidb-online-tidb-3:8250, pos {Suffix:80 Offset:273173616}, error rpc error: code = Unknown desc = unexpected EOFESC[0m
+2017/12/27 19:16:06 pump.go:386: ESC[0;33m[warning] [stream] node tidb-online-tidb-1:8250, pos {Suffix:81 Offset:212949758}, error rpc error: code = Unknown desc = unexpected EOFESC[0m
+2017/12/27 19:28:17 pump.go:386: ESC[0;33m[warning] [stream] node tidb-online-tidb-4:8250, pos {Suffix:80 Offset:526663116}, error rpc error: code = Unknown desc = unexpected EOFESC[0m
+2017/12/29 11:58:13 pump.go:386: ESC[0;33m[warning] [stream] node tidb-online-tidb-4:8250, pos {Suffix:81 Offset:480434923}, error rpc error: code = Unknown desc = unexpected EOFESC[0m
+2017/12/29 12:38:00 pump.go:386: ESC[0;33m[warning] [stream] node tidb-online-tidb-1:8250, pos {Suffix:82 Offset:184323012}, error rpc error: code = Unknown desc = unexpected EOFESC[0m
+2017/12/29 14:25:16 pump.go:386: ESC[0;33m[warning] [stream] node tidb-online-tidb-4:8250, pos {Suffix:82 Offset:3389669}, error rpc error: code = Unknown desc = unexpected EOFESC[0m
+2017/12/29 18:50:41 pump.go:386: ESC[0;33m[warning] [stream] node tidb-online-tidb-1:8250, pos {Suffix:82 Offset:365276552}, error rpc error: code = Unknown desc = unexpected EOFESC[0m
+2017/12/12 20:38:38 pump.go:386: ESC[0;33m[warning] [stream] node tidb-online-tidb-1:8250, pos {Suffix:70 Offset:517918272}, error rpc error: code = Unknown desc = unexpected EOFESC[0m
+2017/12/12 20:59:17 pump.go:386: ESC[0;33m[warning] [stream] node tidb-online-tidb-3:8250, pos {Suffix:69 Offset:505588696}, error rpc error: code = Unknown desc = unexpected EOFESC[0m
+2017/12/12 23:52:17 util.go:161: ESC[0;31m[error] close db failed - driver: bad connectionESC[0m
+</code></pre></td></tr></table>
+</div>
+</div><p><img src="/global/helpertools.jpg" alt="helper-tools" title="ap.tidb.cc helper tools"></p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Jeff</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2018-05-22
+        
+    </span>
+  </p>
+  
+  <p class="copyright-item">
+    <span class="item-title">License</span>
+    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span>
+  </p>
+</div>
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/binlog/">Binlog</a>
+          <a href="/tags/drainer/">Drainer</a>
+          <a href="/tags/pump/">PUMP</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/20180605-syncer-mindmap/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">总结 - Syncer 助力思维成长</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/20180503-disk-space-recovery/">
+            <span class="next-text nav-default">TiKV 磁盘空间回收步骤记录</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="https://github.com/BigerCAP/TiDB-AirPlan/issues" class="iconfont icon-github" title="github"></a>
+  <a href="https://ap.tidb.cc/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2020
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">TiDB - AirPlan</span>
+  </span>
+</div>
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js" integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js" integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin="anonymous"></script>
+  <script><!-- NOTE: timeago.js uses the language code format like "zh_CN" (underscore and case sensitive) -->
+    var languageCode = "en".replace(/-/g, '_').replace(/_(.*)/, function ($0, $1) {return $0.replace($1, $1.toUpperCase());});
+    timeago().render(document.querySelectorAll('.timeago'), languageCode);
+    timeago.cancel();  
+  </script>
+<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>
