@@ -23,10 +23,10 @@
     
     <item>
       <title>TiDB &amp; Haproxy / show processlist View real IP</title>
-      <link>https://ap.tidb.cc/post/20200102-tidb-haproxy-real-ip/</link>
+      <link>https://ap.tidb.cc/post/20200102-1-tidb-haproxy-real-ip/</link>
       <pubDate>Thu, 02 Jan 2020 00:00:00 +0800</pubDate>
       
-      <guid>https://ap.tidb.cc/post/20200102-tidb-haproxy-real-ip/</guid>
+      <guid>https://ap.tidb.cc/post/20200102-1-tidb-haproxy-real-ip/</guid>
       <description>0x00 - 背景 高可用性（英语：high availability，缩写为 HA）测试 failpoint 场景，需要在服务前面添加 load balance 组件；比如 F5、LVS、Haprox</description>
     </item>
     

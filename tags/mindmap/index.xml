@@ -7,17 +7,17 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>TiDB - AirPlan</copyright>
-    <lastBuildDate>Wed, 22 Jan 2020 00:00:00 +0800</lastBuildDate>
+    <lastBuildDate>Tue, 08 Oct 2019 00:00:00 +0800</lastBuildDate>
     
 	<atom:link href="https://ap.tidb.cc/tags/mindmap/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>总结 - Data Migration（数据同步）</title>
-      <link>https://ap.tidb.cc/post/20191008-dm-faq/</link>
-      <pubDate>Wed, 22 Jan 2020 00:00:00 +0800</pubDate>
+      <link>https://ap.tidb.cc/post/20191008-41-dm-faq/</link>
+      <pubDate>Tue, 08 Oct 2019 00:00:00 +0800</pubDate>
       
-      <guid>https://ap.tidb.cc/post/20191008-dm-faq/</guid>
+      <guid>https://ap.tidb.cc/post/20191008-41-dm-faq/</guid>
       <description>0x00 开局 本文仅记录了对 DM 的学习，处理问题经验慢慢补充（没有素材编场景） 版本使用从 RC 到 v1.0.3 ；架构整体变化不大，有着上纲上线的框架守护 本页内容没有干</description>
     </item>
     

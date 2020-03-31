@@ -107,34 +107,6 @@
   </url>
   
   <url>
-    <loc>https://ap.tidb.cc/tags/dm/</loc>
-    <lastmod>2020-02-05T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://ap.tidb.cc/tags/mindmap/</loc>
-    <lastmod>2020-02-05T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://ap.tidb.cc/categories/troubleshooting/</loc>
-    <lastmod>2020-02-05T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://ap.tidb.cc/post/20191008-dm-faq/</loc>
-    <lastmod>2020-02-05T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
     <loc>https://ap.tidb.cc/tags/ci-cd/</loc>
     <lastmod>2020-02-03T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
@@ -156,7 +128,7 @@
   </url>
   
   <url>
-    <loc>https://ap.tidb.cc/post/20200108-github-hugo-actions/</loc>
+    <loc>https://ap.tidb.cc/post/20200108-2-github-hugo-actions/</loc>
     <lastmod>2020-02-03T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -184,8 +156,36 @@
   </url>
   
   <url>
-    <loc>https://ap.tidb.cc/post/20200102-tidb-haproxy-real-ip/</loc>
+    <loc>https://ap.tidb.cc/post/20200102-1-tidb-haproxy-real-ip/</loc>
     <lastmod>2020-01-10T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/dm/</loc>
+    <lastmod>2020-02-05T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/mindmap/</loc>
+    <lastmod>2020-02-05T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/categories/troubleshooting/</loc>
+    <lastmod>2020-02-05T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/post/20191008-41-dm-faq/</loc>
+    <lastmod>2020-02-05T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
