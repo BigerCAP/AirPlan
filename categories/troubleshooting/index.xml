@@ -48,5 +48,14 @@
       <description>0x00 前景介绍 该版本文档内容适用于 TiKV 3.0 之前版本；不包含使用 TiKV Titan engine 架构的内容 TiKV 节点磁盘占用主要为以下三个目录 {{deploy_dir}}/log TiKV 日志目录，目前日志 GC 需要单独脚本操</description>
     </item>
     
+    <item>
+      <title>Linux - OOM &gt; out of memory</title>
+      <link>https://ap.tidb.cc/post/20171119-46-linux-oom-killer/</link>
+      <pubDate>Sun, 19 Nov 2017 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20171119-46-linux-oom-killer/</guid>
+      <description>0x00 开头 测试机器环境配置比较低，使用 TiDB Join 表连接查询时偶尔会出现重启现象，按照官方指导查看问题原因说时 TiDB-server OOM 了，那么 OOM 是什么呢？为什么 OOM 啊？怎么才</description>
+    </item>
+    
   </channel>
 </rss>

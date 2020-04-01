@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>OOM on TiDB AirPlan - A biger solution</title>
+    <link>https://ap.tidb.cc/tags/oom/</link>
+    <description>Recent content in OOM on TiDB AirPlan - A biger solution</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright>TiDB - AirPlan</copyright>
+    <lastBuildDate>Sun, 19 Nov 2017 00:00:00 +0800</lastBuildDate>
+    
+	<atom:link href="https://ap.tidb.cc/tags/oom/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Linux - OOM &gt; out of memory</title>
+      <link>https://ap.tidb.cc/post/20171119-46-linux-oom-killer/</link>
+      <pubDate>Sun, 19 Nov 2017 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20171119-46-linux-oom-killer/</guid>
+      <description>0x00 开头 测试机器环境配置比较低，使用 TiDB Join 表连接查询时偶尔会出现重启现象，按照官方指导查看问题原因说时 TiDB-server OOM 了，那么 OOM 是什么呢？为什么 OOM 啊？怎么才</description>
+    </item>
+    
+  </channel>
+</rss>

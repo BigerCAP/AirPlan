@@ -331,6 +331,20 @@
   </url>
   
   <url>
+    <loc>https://ap.tidb.cc/post/20171119-46-linux-oom-killer/</loc>
+    <lastmod>2018-05-22T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/oom/</loc>
+    <lastmod>2018-05-22T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
     <loc>https://ap.tidb.cc/airplan/</loc>
     <lastmod>2018-01-28T21:41:52+08:00</lastmod>
     <changefreq>weekly</changefreq>
