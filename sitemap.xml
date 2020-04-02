@@ -310,13 +310,6 @@
   </url>
   
   <url>
-    <loc>https://ap.tidb.cc/categories/deploy/</loc>
-    <lastmod>2020-01-26T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
     <loc>https://ap.tidb.cc/post/20180323-systemd-syncer/</loc>
     <lastmod>2020-01-26T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
@@ -340,6 +333,34 @@
   <url>
     <loc>https://ap.tidb.cc/tags/oom/</loc>
     <lastmod>2018-05-22T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/etcd-ctl/</loc>
+    <lastmod>2017-11-20T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/pd-ctl/</loc>
+    <lastmod>2017-11-20T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/testing/</loc>
+    <lastmod>2017-11-20T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/post/201711008-40-testing-binlog/</loc>
+    <lastmod>2017-11-20T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>

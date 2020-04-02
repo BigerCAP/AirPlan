@@ -238,6 +238,33 @@
     </item>
     
     <item>
+      <title>etcd-ctl</title>
+      <link>https://ap.tidb.cc/tags/etcd-ctl/</link>
+      <pubDate>Sun, 08 Oct 2017 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/tags/etcd-ctl/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>pd-ctl</title>
+      <link>https://ap.tidb.cc/tags/pd-ctl/</link>
+      <pubDate>Sun, 08 Oct 2017 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/tags/pd-ctl/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>testing</title>
+      <link>https://ap.tidb.cc/tags/testing/</link>
+      <pubDate>Sun, 08 Oct 2017 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/tags/testing/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>AirPlan</title>
       <link>https://ap.tidb.cc/tags/airplan/</link>
       <pubDate>Wed, 09 Aug 2017 00:00:00 +0800</pubDate>

@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>TiDB - Binlog 数据同步架构测试 - TiDB AirPlan - A biger solution</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Jeff" /><meta name="description" content="0x00 测试 前段时间部署了一套 TiDB 数据库，只有单纯的数据库放养是肯定不行的。还要一些灾备方案满足删库跑路之后的恢复工作。 按照以往（mysql）经验有" /><meta name="keywords" content="TiDB, AirPlan, TiDB OPS, tidb-operator, 2pc, raft, databases, mysql, htap" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.63.2 with theme even" />
+
+
+<link rel="canonical" href="https://ap.tidb.cc/post/201711008-40-testing-binlog/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<link href="/dist/even.04bd84cd.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="TiDB - Binlog 数据同步架构测试" />
+<meta property="og:description" content="0x00 测试 前段时间部署了一套 TiDB 数据库，只有单纯的数据库放养是肯定不行的。还要一些灾备方案满足删库跑路之后的恢复工作。 按照以往（mysql）经验有" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://ap.tidb.cc/post/201711008-40-testing-binlog/" />
+<meta property="article:published_time" content="2017-10-08T00:00:00+08:00" />
+<meta property="article:modified_time" content="2017-11-20T00:00:00+08:00" />
+<meta itemprop="name" content="TiDB - Binlog 数据同步架构测试">
+<meta itemprop="description" content="0x00 测试 前段时间部署了一套 TiDB 数据库，只有单纯的数据库放养是肯定不行的。还要一些灾备方案满足删库跑路之后的恢复工作。 按照以往（mysql）经验有">
+<meta itemprop="datePublished" content="2017-10-08T00:00:00&#43;08:00" />
+<meta itemprop="dateModified" content="2017-11-20T00:00:00&#43;08:00" />
+<meta itemprop="wordCount" content="2623">
+
+
+
+<meta itemprop="keywords" content="Binlog,testing,etcd-ctl,pd-ctl," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="TiDB - Binlog 数据同步架构测试"/>
+<meta name="twitter:description" content="0x00 测试 前段时间部署了一套 TiDB 数据库，只有单纯的数据库放养是肯定不行的。还要一些灾备方案满足删库跑路之后的恢复工作。 按照以往（mysql）经验有"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">TiDB AirPlan</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">About</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">TiDB AirPlan</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/about/">About</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">TiDB - Binlog 数据同步架构测试</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2017-10-08 </span>
+        <div class="post-category">
+            <a href="/categories/tidb/"> TiDB </a>
+            </div>
+          <span class="more-meta"> 2623 words </span>
+          <span class="more-meta"> 6 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#0x00-测试">0x00 测试</a>
+      <ul>
+        <li><a href="#组件">组件</a></li>
+      </ul>
+    </li>
+    <li><a href="#0x01-部署">0x01 部署</a>
+      <ul>
+        <li><a href="#ansible">ansible</a></li>
+        <li><a href="#manual">manual</a></li>
+      </ul>
+    </li>
+    <li><a href="#0x02-常规">0x02 常规</a>
+      <ul>
+        <li><a href="#宅男">宅男</a></li>
+      </ul>
+    </li>
+    <li><a href="#0x03-折腾">0x03 折腾</a>
+      <ul>
+        <li><a href="#status-api">status api</a></li>
+        <li><a href="#case-one">case one</a></li>
+      </ul>
+    </li>
+    <li><a href="#0x04-忒傻">0x04 忒傻</a>
+      <ul>
+        <li><a href="#监控">监控</a></li>
+      </ul>
+    </li>
+    <li><a href="#0x05-工具人">0x05 工具人</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+  <div class="post-outdated">
+    <div class="warn">
+      <p>[NOTE] Updated <span class="timeago" datetime="2017-11-20T00:00:00" title="November 20, 2017">November 20, 2017</span>. This article may have outdated content or subject matter.</p>
+    </div>
+  </div>
+    <div class="post-content">
+      <h2 id="0x00-测试">0x00 测试</h2>
+<p>前段时间部署了一套 TiDB 数据库，只有单纯的数据库放养是肯定不行的。还要一些灾备方案满足删库跑路之后的恢复工作。<br>
+按照以往（mysql）经验有物理（文件冷存）备份（xbackup）&amp; 逻辑（热备）备份（ SQL 语句同步）；然 TiDB 底层与 mysql 不一样，没有类似 xbackup 类似的工具做物理备份（测试过程是发现一个<del>奇技淫巧</del>做<em>类物理备份</em>）；那么接下来还有逻辑备份测试，这部分有 PingCAP 官方提供的 TiDB-Binlog 组件来支持。<br>
+没玩过的东西先找个小环境随意折腾下，折腾到死位置……</p>
+<blockquote>
+<p>先看下 TiDB-binlog 架构，如图（20171008 复制于官方网站）:</p>
+</blockquote>
+<p><img src="./binlog-1.0-architecture.jpeg" alt="Binlog 1.0 tidb pump socket drainer"></p>
+<h3 id="组件">组件</h3>
+<blockquote>
+<p>直接复制官网内容</p>
+</blockquote>
+<p>TiDB-Binlog 支持以下功能场景:</p>
+<p>数据同步: 同步 TiDB 集群数据到其他数据库<br>
+实时备份和恢复: 备份 TiDB 集群数据，同时可以用于 TiDB 集群故障时恢复</p>
+<p>PUMP：Pump 是一个守护进程，在每个 TiDB 的主机上后台运行。他的主要功能是实时记录 TiDB 产生的 Binlog 并顺序写入磁盘文件</p>
+<p>Drainer：Drainer 从各个 Pump 节点收集 Binlog，并按照在 TiDB 中事务的提交顺序转化为指定数据库兼容的 SQL 语句，最后同步到目的数据库或者写到顺序文件</p>
+<blockquote>
+<p>⚠️ 需要为一个 TiDB 集群中的每台 TiDB server 部署一个 pump，目前 TiDB server 只支持以 unix socket 方式的输出 binlog</p>
+</blockquote>
+<h2 id="0x01-部署">0x01 部署</h2>
+<h3 id="ansible">ansible</h3>
+<blockquote>
+<p>通过修改 inventory.ini 文件中的 enable_binlog 开关确定是否部署 Binlog，针对第一次部署时方便<br>
+如果已经部署了 TiDB-server ，就要使用 deploy + stop + start 三板斧解决了</p>
+</blockquote>
+<h3 id="manual">manual</h3>
+<blockquote>
+<p>先部署 PUMP 服务，并在启动参数生命 unix-socket 信息，相当于生命了一个服务端接口<br>
+然后配置 TiDB 启动参数，填写 PUMP 的 unix-socket 路径信息，TiDB &amp; PUMP 只能一对一服务，不能跨机器、不能一对多使用<br>
+启动优先级为： PUMP &gt; TiDB<br>
+停止优先级为 TiDB &gt; PUMP</p>
+</blockquote>
+<h2 id="0x02-常规">0x02 常规</h2>
+<p>当 PUMP &amp; TiDB 都启动后，启动 Drainer ；按照官方手册写配置文件输出到下游的一个 mysql 节点（此处省略 mysql 启动方式，docker run 最省事）。<br>
+然后在上游执行各种 CDUR / 增删改查 DML 工作、DDL 工作，看下游响应。</p>
+<blockquote>
+<p>此处⚠️一个事情：Drainer 有个 <code>ignore-schemas = &quot;INFORMATION_SCHEMA,PERFORMANCE_SCHEMA,mysql&quot;</code> 参数，默认这里是不同步 mysql 修改的，如果使用 update 语句修改 user 密码，下游不会更改。<br>
+还有一个参数是 <code>replicate-do-db</code> 只同步那些库，这个优先级比上面那个 ignore 要高，并且设置了这个后就只同步这个数据库了……（按照语义理解貌似没啥毛病，不吐槽了）<br>
+⚠️ PS：如果有不同的数据库同步到不同的下游，需要启动多个 Drainer 来工作才能完成这个场景</p>
+</blockquote>
+<p>主机性能有限，官方文档说通过 <code>txn-batch = 1</code> &amp; <code>worker-count = 1</code> 可以配置同步速度流控，简单用 sysbench 创建了 15 张表，每张表 10w 数据，上游很畅快的插入成功；然后默默看着 mysql 数据的同步、反正总会有些延迟。【我这上下游都是配置 Binlog 后产生的新数据，不存在老数据 mydumper + loader 的过程，这部分和 mysql 的 mysql dumper + mysql laod 是一样的，就不测试了】</p>
+<h3 id="宅男">宅男</h3>
+<p>简单的灾难场景简单测试了下：</p>
+<ol>
+<li>比如某个 PUMP 挂掉了，因为有多个 TiDB-server，必须要每个 TiDB-server 配置一个 PUMP；单个 PUMP 挂掉之后 TiDB-server 也就挂掉了……（好吧，我忍了，毕竟官方说如果不停 TiDB-server 那么 PUMP 故障后的 SQL BINLOG 就丢失记录了，可是我业务也断掉了。这里并没有提供啥子选择。比如我想做个好人）</li>
+<li>PUMP 所在机器磁盘坏掉了，解决方案就是重新做一套 Binlog 流程。（mysql 貌似也是这样）</li>
+<li>Drainer 需要链接 PD 获取到 PUMP 信息，如果 PD 地址写错了，辣么要么失败、要么写错数据，貌似没啥校验行为</li>
+<li>Drainer 启动时有个 init tso 的参数，提示从哪里开始同步。如果写错了辣么数据就不得而知了 （和 mysql 一个行为，木的啥问题）</li>
+<li>数据过滤行为只在 Drainer 上有，PUMP 上木有；如果上游 100 个库，只有一个库同步。辣么你懂的。</li>
+<li>跨机房行为，比如 PUMP &amp; Drainer 在两个机房，会出现延迟加大（与 mysql 一样，一样可以断点续传，毕竟这是增量同步基本功能），其他就是有可能时断时连，drainer 的断是进程挂掉，所以 ansible 里有个 supervise 的东西一直一直一直的等他挂掉，然后又一直一直一直的拉起他。即时 draienr 不是因为网络挂掉，比如 DDL 、DML 卡住了……（然后、貌似、大概、可能、似乎告警就延迟了）</li>
+</ol>
+<p>后面暂时想不到了，就不测了，这套流程太长了；折腾坏了之后要研究半个多小时才能修好……</p>
+<h2 id="0x03-折腾">0x03 折腾</h2>
+<blockquote>
+<p>既然是折腾，总需要一些手段查问题，在与官方研发沟通中总结出来的东东</p>
+</blockquote>
+<p>出问题排查流程大致分以下几步：</p>
+<ol>
+<li>先查 TiDB-Server &amp; PUMP 之间的状态
+<ol>
+<li>PUMP 磁盘写满了么</li>
+<li>TiDB-server 使用 unix-socket 参数了么</li>
+</ol>
+</li>
+<li>在查 PUMP &amp; Drainer 链接
+<ol>
+<li>Drainer PD URL 写对了么</li>
+<li>Drainer 配置文件中的 ignore、replicate-do-db、写正确了么</li>
+<li>查 Drainer data-dir 目录下是否有 savepoint 文件，内容是否更新（有时候数据一直同步，但是文件不更新）</li>
+<li>Drainer 不确定是否工作，那就调成 PD 模式吧，先看看有木有 PB 文件（这个 PB 是个文本编码格式，用 vi 打开就是乱码，需要解码才能看，搜 protobuf</li>
+</ol>
+</li>
+<li>查 PD 中的一些信息
+<ol>
+<li>需要用到一个 etcd-ctl 工具，读取 PUMP、Drainer 在 PD 中的状态</li>
+<li>使用 pd-ctl 工具查 PD cluster id ，判断 Drainer 同步的那个集群</li>
+</ol>
+</li>
+</ol>
+<h3 id="status-api">status api</h3>
+<ul>
+<li>获取 pump binlog 文件数量信息，请求地址为 pump ip:port
+<ul>
+<li><code>curl  10.10.1.4:8250/status</code></li>
+</ul>
+</li>
+<li>获取 Drainer 同步信息，以及同步位置断点记录
+<ul>
+<li><code>curl  10.10.1.4:8249/status</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="case-one">case one</h3>
+<blockquote>
+<p>分享一个因为做了很多遍的🦐测试，造成 Drainer 无法启动的排查过程</p>
+</blockquote>
+<ul>
+<li>
+<p>通过 drainer 获取 savepoint 报错</p>
+<ul>
+<li>
+<p><code>./bin/drainer -gen-savepoint -data-dir ./s -pd-urls &quot;http://10.10.1.6:2379&quot;</code></p>
+</li>
+<li>
+<p>通过 Drainer 先行获取 tso 断点信息时失败，提示有个 pump 节点 ip-10-10-1-6:8250 是离线状态 【只有所有 PUMP 都在线时，Drainer 才可以启动，这样可以保证数据完整性】</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-shell" data-lang="shell">INFO<span class="o">[</span>0000<span class="o">]</span> new store
+INFO<span class="o">[</span>0000<span class="o">]</span> <span class="o">[</span>pd<span class="o">]</span> create pd client with endpoints <span class="o">[</span>10.30.1.6:2379<span class="o">]</span>
+INFO<span class="o">[</span>0000<span class="o">]</span> <span class="o">[</span>pd<span class="o">]</span> leader switches to: http://10.30.1.5:2379, previous:
+INFO<span class="o">[</span>0000<span class="o">]</span> <span class="o">[</span>pd<span class="o">]</span> init cluster id 6493070954582498647
+2017/12/27 16:35:15 main.go:31: <span class="o">[</span>fatal<span class="o">]</span> fail to generate savepoint error pump <span class="p">&amp;</span><span class="o">{</span>NodeID:ip-10-10-1-6:8250 Host:10.30.1.6:8250 IsAlive:false LatestBinlogFile:binlog-0000000000000000<span class="o">}</span> is offline
+</code></pre></td></tr></table>
+</div>
+</div></li>
+</ul>
+</li>
+<li>
+<p>通过 curl 命令请求 PUMP 状态得到以下结果【PUMP 状态接口可以看到邻居的状态】</p>
+<ul>
+<li><code>curl  10.10.1.6:8250/status</code></li>
+<li>看到邻居兄弟都是存活的……</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-shell" data-lang="shell"><span class="o">{</span><span class="s2">&#34;LatestBinlog&#34;</span>:<span class="o">{</span><span class="s2">&#34;ip-10-10-1-6:8250&#34;</span>:<span class="o">{</span><span class="o">}</span>,<span class="s2">&#34;ip-10-10-1-7:8250&#34;</span>:<span class="o">{</span><span class="o">}</span>,<span class="s2">&#34;tidb-online-tidb-1:8250&#34;</span>:<span class="o">{</span><span class="s2">&#34;suffix&#34;</span>:81<span class="o">}</span>,<span class="s2">&#34;tidb-online-tidb-2:8250&#34;</span>:<span class="o">{</span><span class="s2">&#34;suffix&#34;</span>:77<span class="o">}</span>,<span class="s2">&#34;tidb-online-tidb-3:8250&#34;</span>:<span class="o">{</span><span class="s2">&#34;suffix&#34;</span>:80<span class="o">}</span>,<span class="s2">&#34;tidb-online-tidb-4:8250&#34;</span>:<span class="o">{</span><span class="s2">&#34;suffix&#34;</span>:80<span class="o">}</span><span class="o">}</span>,<span class="s2">&#34;CommitTS&#34;</span>:396981399817027585,<span class="s2">&#34;ErrMsg&#34;</span>:<span class="s2">&#34;&#34;</span><span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div></li>
+<li>
+<p>官方大佬提示：观察 data.pump 下 node 文件内容</p>
+<ul>
+<li>此处的 .node  文件内容就是 PUMP ID 信息；回顾下报错日志 <code>pump &amp;{NodeID:ip-10-10-1-6:8250 Host:10.30.1.6:8250</code> ，发现文件内容与报错对不起来。看起来是这个问题</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-shell" data-lang="shell">cat /data1/tidb/deploy/data.pump/.node
+tidb-online-tidb-2:8250
+</code></pre></td></tr></table>
+</div>
+</div></li>
+<li>
+<p>需要用到一个神奇的工（ etcd-ctl）去 PD-server 删除这个无效的 ID 信息</p>
+<ul>
+<li>通过 etcd 删除 <code>ip-10-10-1-6:8250</code> 与 <code>ip-10-10-1-7:8250</code></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-fallback" data-lang="fallback">export ETCDCTL_API=3 // 配置 etcd api 版本信息
+
+#在 github etcd repo 下载 etcd-v3.2.9-linux-amd64.tar.gz
+
+./etcdctl --endpoints=http://10.10.1.6:2379 get --prefix  tidb-binlog  
+  // 获取所有 tidb-binlog key信息
+
+./etcdctl --endpoints=http://10.10.1.6:2379 get tidb-binlog/pumps/ip-10-10-1-6:8250/object
+  // 获取指定 object 信息，验证其是否存在、是否还有子集
+
+./etcdctl --endpoints=http://10.10.1.6:2379 del tidb-binlog/pumps/ip-10-10-1-6:8250/object 
+  // 删除指定 object 信息
+</code></pre></td></tr></table>
+</div>
+</div></li>
+<li>
+<p>总结</p>
+<ul>
+<li>造成这种问题的原因大概是：没有正常的停止 PUMP 节点，比如使用 kill -9 的方式停止，PUMP 进程在正常退出的时候会自动去 PD 节点执行 offline 和清理自身 ID 的动作，但异常情况下无法清理，辣么造成的垃圾数据就会影响 Drainer 的运行了。</li>
+</ul>
+</li>
+</ul>
+<h2 id="0x04-忒傻">0x04 忒傻</h2>
+<h3 id="监控">监控</h3>
+<blockquote>
+<p>比较重要的几个监控项（实际上就看到了这几个）</p>
+</blockquote>
+<ul>
+<li>
+<p>RPC QPS(pump)</p>
+<ul>
+<li><code>irate(binlog_pump_rpc_counter[1m])</code></li>
+<li>pump rpc 接口平均每分钟调用次数</li>
+</ul>
+</li>
+<li>
+<p>95% RPC Latency(pump)</p>
+<ul>
+<li>pump rpc 请求 95% 平均延迟</li>
+<li><code>histogram_quantile(0.95, rate(binlog_pump_rpc_duration_seconds_bucket[1m]))</code></li>
+</ul>
+</li>
+<li>
+<p>slave  lower boundary</p>
+<ul>
+<li>drainer 已经排序处理的事务的最大 TS （也可以理解为最大事务 ID）</li>
+<li><code>binlog_drainer_window{marker=\&quot;lower\&quot;, }/(2^18*10^3)</code></li>
+</ul>
+</li>
+<li>
+<p>slave position</p>
+<ul>
+<li>drainer 同步到 ts</li>
+<li><code>binlog_drainer_position{}/((2^18)*1000)</code></li>
+</ul>
+</li>
+<li>
+<p>error binlogs</p>
+<ul>
+<li>错误的 binlog 个数</li>
+<li><code>binlog_drainer_error_binlog_count{}</code></li>
+</ul>
+</li>
+<li>
+<p>slave tikv query</p>
+<ul>
+<li>drainer 查询 tikv 请求数量</li>
+<li><code>binlog_drainer_query_tikv_count{}</code></li>
+</ul>
+</li>
+<li>
+<p>synchronization delay</p>
+<ul>
+<li>drainer 数据同步延迟时间，单位秒</li>
+<li><code>(binlog_drainer_window{marker=\&quot;upper\&quot;, } - ignoring(marker)binlog_drainer_position{})/(2^18*10^3)</code></li>
+</ul>
+</li>
+<li>
+<p>Drainer Event</p>
+<ul>
+<li>drainer 数据同步 sql 语句类型的数量</li>
+<li><code>rate(binlog_drainer_event{}[1m])</code></li>
+</ul>
+</li>
+<li>
+<p>99% drainer txn latency</p>
+<ul>
+<li>.99 同步 binlog txn 延迟时间</li>
+<li><code>histogram_quantile(0.99, rate(binlog_drainer_txn_duration_time_bucket[1m]))</code></li>
+</ul>
+</li>
+<li>
+<p>Goroutine</p>
+<ul>
+<li>binlog 目前存在的go routines数量。</li>
+<li><code>go_goroutines{job=\&quot;binlog\&quot;}</code></li>
+</ul>
+</li>
+<li>
+<p>Memory</p>
+<ul>
+<li>查看 Binlog 组件占用的内存数量，使用的 go 内置统计，而非 linux 系统统计</li>
+<li><code>go_memstats_heap_inuse_bytes{job=\&quot;binlog\&quot;}</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="0x05-工具人">0x05 工具人</h2>
+<blockquote>
+<p>我是一个冷酷无情的工具人，蒸腾到死了</p>
+</blockquote>
+<p><img src="/global/helpertools.jpg" alt="折腾到死方休止"></p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Jeff</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2017-11-20
+        
+    </span>
+  </p>
+  
+  <p class="copyright-item">
+    <span class="item-title">License</span>
+    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span>
+  </p>
+</div>
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/binlog/">Binlog</a>
+          <a href="/tags/testing/">testing</a>
+          <a href="/tags/etcd-ctl/">etcd-ctl</a>
+          <a href="/tags/pd-ctl/">pd-ctl</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/20171119-46-linux-oom-killer/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">Linux - OOM &gt; out of memory</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/20170809-transfer.sh/">
+            <span class="next-text nav-default">Linux - Transfer.sh 一键文件服务器</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="https://github.com/BigerCAP/TiDB-AirPlan/issues" class="iconfont icon-github" title="github"></a>
+  <a href="https://ap.tidb.cc/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2020
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">TiDB - AirPlan</span>
+  </span>
+</div>
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js" integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js" integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin="anonymous"></script>
+  <script><!-- NOTE: timeago.js uses the language code format like "zh_CN" (underscore and case sensitive) -->
+    var languageCode = "en".replace(/-/g, '_').replace(/_(.*)/, function ($0, $1) {return $0.replace($1, $1.toUpperCase());});
+    timeago().render(document.querySelectorAll('.timeago'), languageCode);
+    timeago.cancel();  
+  </script>
+<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

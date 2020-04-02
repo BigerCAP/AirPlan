@@ -48,5 +48,23 @@
       <description>0x00 背景 物理网络在实际生产环境会存在 vlan、IP 集群部署可能横跨多台机器甚至横跨机房，在有离线或在线业务情况下应该怎么操作变更 IP 地址信息，配</description>
     </item>
     
+    <item>
+      <title>Linux - Systemd &amp; Syncer 相爱相杀</title>
+      <link>https://ap.tidb.cc/post/20180323-systemd-syncer/</link>
+      <pubDate>Fri, 23 Mar 2018 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20180323-systemd-syncer/</guid>
+      <description>0x00 缘来 Syncer 数据同步，会因为网络延迟与网络丢包、上下游压力过大等原因导致断开，这些场景本身是可重启恢复的。 最初与 TiDB 使用的 supervise 小工具，这个工具有个问</description>
+    </item>
+    
+    <item>
+      <title>TiDB - Binlog 数据同步架构测试</title>
+      <link>https://ap.tidb.cc/post/201711008-40-testing-binlog/</link>
+      <pubDate>Sun, 08 Oct 2017 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/201711008-40-testing-binlog/</guid>
+      <description>0x00 测试 前段时间部署了一套 TiDB 数据库，只有单纯的数据库放养是肯定不行的。还要一些灾备方案满足删库跑路之后的恢复工作。 按照以往（mysql）经验有</description>
+    </item>
+    
   </channel>
 </rss>
