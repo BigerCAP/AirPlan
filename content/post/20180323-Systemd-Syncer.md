@@ -3,8 +3,10 @@ title: Linux - Systemd & Syncer 相爱相杀
 date: 2018-03-23T00:00:00+08:00
 lastmod: 2020-01-26T00:00:00+08:00
 categories: 
-  - Deploy
+  - TiDB
+  - software
 tags:
+  - Linux
   - Syncer
   - Systemd
 ---
