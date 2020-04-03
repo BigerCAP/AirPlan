@@ -1,7 +1,7 @@
 ---
-title: TiDB - Binlog 数据同步架构测试
-date: 2017-10-08T00:00:00+08:00
-lastmod: 2017-11-20T00:00:00+08:00
+title: K8S 安装记录 - 真神了
+date: 2020-04-03T00:00:00+08:00
+lastmod: 2020-04-03T00:00:00+08:00
 categories:
   - software
 tags:
