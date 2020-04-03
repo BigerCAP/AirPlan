@@ -48,7 +48,7 @@
 <meta itemprop="description" content="0x00 缘起 无它，就是学习学习，然后装逼用 0x01 准备 K8S 有一些要求限制，不按照处理是无法启动滴 以下内容随手复制的，非原创 关闭 swap 1 2 3 4 5 6 7 8 9 sed -i 7,9s/0/1/g /usr/lib/sysctl.d/00-system.conf">
 <meta itemprop="datePublished" content="2020-04-03T00:00:00&#43;08:00" />
 <meta itemprop="dateModified" content="2020-04-03T00:00:00&#43;08:00" />
-<meta itemprop="wordCount" content="6563">
+<meta itemprop="wordCount" content="6577">
 
 
 
@@ -128,7 +128,7 @@
         <div class="post-category">
             <a href="/categories/software/"> software </a>
             </div>
-          <span class="more-meta"> 6563 words </span>
+          <span class="more-meta"> 6577 words </span>
           <span class="more-meta"> 14 mins read </span>
         <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
       </div>
@@ -900,6 +900,26 @@ To see the stack trace of this error execute with --v=5 or higher
 </span><span class="lnt">20
 </span><span class="lnt">21
 </span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
 </span></code></pre></td>
 <td class="lntd">
 <pre class="chroma"><code class="language-bash" data-lang="bash"><span class="o">[</span>root@tmp49h ~<span class="o">]</span><span class="c1"># kubeadm config print init-defaults</span>
@@ -924,51 +944,44 @@ nodeRegistration:
   taints:
   - effect: NoSchedule
     key: node-role.kubernetes.io/master
-</code></pre></td></tr></table>
-</div>
-</div></li>
-</ul>
-<hr>
-<p>apiServer:
-timeoutForControlPlane: 4m0s
+  
+apiServer:
+  timeoutForControlPlane: 4m0s
 apiVersion: kubeadm.k8s.io/v1beta2
 certificatesDir: /etc/kubernetes/pki
 clusterName: kubernetes
-controllerManager: {}
+controllerManager: <span class="o">{</span><span class="o">}</span>
 dns:
-type: CoreDNS
+  type: CoreDNS
 etcd:
-local:
-dataDir: /var/lib/etcd
+  local:
+    dataDir: /var/lib/etcd
 imageRepository: k8s.gcr.io  // kubeadm 使用的源，可以修改为 gcr.azk8s.cn/google_containers
 kind: ClusterConfiguration
 kubernetesVersion: v1.18.0
 networking:
-dnsDomain: cluster.local
-podSubnet: 192.240.0.0/16    // POD 预分配网段地址不可以与 node 主机地址重复
-serviceSubnet: 192.96.0.0/12 // 不知道干啥的
-scheduler: {}</p>
+  dnsDomain: cluster.local
+  podSubnet: 192.240.0.0/16    // POD 预分配网段地址不可以与 node 主机地址重复
+  serviceSubnet: 192.96.0.0/12 // 不知道干啥的
+scheduler: <span class="o">{</span><span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div></li>
+<li>
+<p>命令行参数与配置文件内容冲突，无法覆盖</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
 </span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
 </span></code></pre></td>
 <td class="lntd">
-<pre class="chroma"><code class="language-fallback" data-lang="fallback">
-- 命令行参数与配置文件内容冲突，无法覆盖
-
-```bahs
-[root@tmp49h ~]# kubeadm --config .kube/config init --kubernetes-version=stable-1 --pod-network-cidr=10.244.0.0/16 --service-cidr=10.96.0.0/12
+<pre class="chroma"><code class="language-fallback" data-lang="fallback">[root@tmp49h ~]# kubeadm --config .kube/config init --kubernetes-version=stable-1 --pod-network-cidr=10.244.0.0/16 --service-cidr=10.96.0.0/12
 can not mix &#39;--config&#39; with arguments [kubernetes-version pod-network-cidr service-cidr]
 To see the stack trace of this error execute with --v=5 or higher
 </code></pre></td></tr></table>
 </div>
-</div><ul>
+</div></li>
 <li>
 <p>advertiseAddress 参数配置错误</p>
 <ul>
