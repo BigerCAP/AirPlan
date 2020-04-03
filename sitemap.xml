@@ -345,6 +345,20 @@
   </url>
   
   <url>
+    <loc>https://ap.tidb.cc/tags/k8s/</loc>
+    <lastmod>2017-11-20T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/kubernetes/</loc>
+    <lastmod>2017-11-20T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
     <loc>https://ap.tidb.cc/tags/pd-ctl/</loc>
     <lastmod>2017-11-20T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
@@ -360,6 +374,13 @@
   
   <url>
     <loc>https://ap.tidb.cc/post/201711008-40-testing-binlog/</loc>
+    <lastmod>2017-11-20T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/post/20200403-14-k8s-install/</loc>
     <lastmod>2017-11-20T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>

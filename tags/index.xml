@@ -247,6 +247,24 @@
     </item>
     
     <item>
+      <title>K8S</title>
+      <link>https://ap.tidb.cc/tags/k8s/</link>
+      <pubDate>Sun, 08 Oct 2017 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/tags/k8s/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>kubernetes</title>
+      <link>https://ap.tidb.cc/tags/kubernetes/</link>
+      <pubDate>Sun, 08 Oct 2017 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/tags/kubernetes/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>pd-ctl</title>
       <link>https://ap.tidb.cc/tags/pd-ctl/</link>
       <pubDate>Sun, 08 Oct 2017 00:00:00 +0800</pubDate>
