@@ -7,10 +7,19 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>TiDB - AirPlan</copyright>
-    <lastBuildDate>Mon, 23 Mar 2020 12:40:52 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 03 Apr 2020 00:00:00 +0800</lastBuildDate>
     
 	<atom:link href="https://ap.tidb.cc/categories/software/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>K8S 安装记录 - 真神了</title>
+      <link>https://ap.tidb.cc/post/20200403-14-k8s-install/</link>
+      <pubDate>Fri, 03 Apr 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20200403-14-k8s-install/</guid>
+      <description>0x00 缘起 无它，就是学习学习，然后装逼用 0x01 准备 K8S 有一些要求限制，不按照处理是无法启动滴 以下内容随手复制的，非原创 关闭 swap 1 2 3 4 5 6 7 8 9 sed -i 7,9s/0/1/g /usr/lib/sysctl.d/00-system.conf</description>
+    </item>
     
     <item>
       <title>使用软件时强制升级的设计</title>
@@ -55,15 +64,6 @@
       
       <guid>https://ap.tidb.cc/post/20180323-systemd-syncer/</guid>
       <description>0x00 缘来 Syncer 数据同步，会因为网络延迟与网络丢包、上下游压力过大等原因导致断开，这些场景本身是可重启恢复的。 最初与 TiDB 使用的 supervise 小工具，这个工具有个问</description>
-    </item>
-    
-    <item>
-      <title>TiDB - Binlog 数据同步架构测试</title>
-      <link>https://ap.tidb.cc/post/20200403-14-k8s-install/</link>
-      <pubDate>Sun, 08 Oct 2017 00:00:00 +0800</pubDate>
-      
-      <guid>https://ap.tidb.cc/post/20200403-14-k8s-install/</guid>
-      <description>0x00 缘起 无它，就是学习学习，然后装逼用 0x01 准备 K8S 有一些要求限制，不按照处理是无法启动滴 以下内容随手复制的，非原创 关闭 swap 1 2 3 4 5 6 7 8 9 sed -i 7,9s/0/1/g /usr/lib/sysctl.d/00-system.conf</description>
     </item>
     
     <item>

@@ -7,10 +7,55 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>TiDB - AirPlan</copyright>
-    <lastBuildDate>Mon, 23 Mar 2020 12:40:52 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 03 Apr 2020 00:00:00 +0800</lastBuildDate>
     
 	<atom:link href="https://ap.tidb.cc/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Deploy</title>
+      <link>https://ap.tidb.cc/tags/deploy/</link>
+      <pubDate>Fri, 03 Apr 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/tags/deploy/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>K8S</title>
+      <link>https://ap.tidb.cc/tags/k8s/</link>
+      <pubDate>Fri, 03 Apr 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/tags/k8s/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>kubernetes</title>
+      <link>https://ap.tidb.cc/tags/kubernetes/</link>
+      <pubDate>Fri, 03 Apr 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/tags/kubernetes/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Linux</title>
+      <link>https://ap.tidb.cc/tags/linux/</link>
+      <pubDate>Fri, 03 Apr 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/tags/linux/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>testing</title>
+      <link>https://ap.tidb.cc/tags/testing/</link>
+      <pubDate>Fri, 03 Apr 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/tags/testing/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>teamviewer</title>
@@ -18,15 +63,6 @@
       <pubDate>Mon, 23 Mar 2020 12:40:52 +0000</pubDate>
       
       <guid>https://ap.tidb.cc/tags/teamviewer/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Linux</title>
-      <link>https://ap.tidb.cc/tags/linux/</link>
-      <pubDate>Sat, 21 Mar 2020 00:00:00 +0800</pubDate>
-      
-      <guid>https://ap.tidb.cc/tags/linux/</guid>
       <description></description>
     </item>
     
@@ -193,15 +229,6 @@
     </item>
     
     <item>
-      <title>Deploy</title>
-      <link>https://ap.tidb.cc/tags/deploy/</link>
-      <pubDate>Mon, 16 Apr 2018 00:00:00 +0800</pubDate>
-      
-      <guid>https://ap.tidb.cc/tags/deploy/</guid>
-      <description></description>
-    </item>
-    
-    <item>
       <title>Zeppelin</title>
       <link>https://ap.tidb.cc/tags/zeppelin/</link>
       <pubDate>Mon, 16 Apr 2018 00:00:00 +0800</pubDate>
@@ -247,38 +274,11 @@
     </item>
     
     <item>
-      <title>K8S</title>
-      <link>https://ap.tidb.cc/tags/k8s/</link>
-      <pubDate>Sun, 08 Oct 2017 00:00:00 +0800</pubDate>
-      
-      <guid>https://ap.tidb.cc/tags/k8s/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>kubernetes</title>
-      <link>https://ap.tidb.cc/tags/kubernetes/</link>
-      <pubDate>Sun, 08 Oct 2017 00:00:00 +0800</pubDate>
-      
-      <guid>https://ap.tidb.cc/tags/kubernetes/</guid>
-      <description></description>
-    </item>
-    
-    <item>
       <title>pd-ctl</title>
       <link>https://ap.tidb.cc/tags/pd-ctl/</link>
       <pubDate>Sun, 08 Oct 2017 00:00:00 +0800</pubDate>
       
       <guid>https://ap.tidb.cc/tags/pd-ctl/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>testing</title>
-      <link>https://ap.tidb.cc/tags/testing/</link>
-      <pubDate>Sun, 08 Oct 2017 00:00:00 +0800</pubDate>
-      
-      <guid>https://ap.tidb.cc/tags/testing/</guid>
       <description></description>
     </item>
     

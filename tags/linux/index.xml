@@ -7,10 +7,19 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>TiDB - AirPlan</copyright>
-    <lastBuildDate>Sat, 21 Mar 2020 00:00:00 +0800</lastBuildDate>
+    <lastBuildDate>Fri, 03 Apr 2020 00:00:00 +0800</lastBuildDate>
     
 	<atom:link href="https://ap.tidb.cc/tags/linux/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>K8S 安装记录 - 真神了</title>
+      <link>https://ap.tidb.cc/post/20200403-14-k8s-install/</link>
+      <pubDate>Fri, 03 Apr 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20200403-14-k8s-install/</guid>
+      <description>0x00 缘起 无它，就是学习学习，然后装逼用 0x01 准备 K8S 有一些要求限制，不按照处理是无法启动滴 以下内容随手复制的，非原创 关闭 swap 1 2 3 4 5 6 7 8 9 sed -i 7,9s/0/1/g /usr/lib/sysctl.d/00-system.conf</description>
+    </item>
     
     <item>
       <title>Linux - 可大可小的 LVM</title>
@@ -37,15 +46,6 @@
       
       <guid>https://ap.tidb.cc/post/20171119-46-linux-oom-killer/</guid>
       <description>0x00 开头 测试机器环境配置比较低，使用 TiDB Join 表连接查询时偶尔会出现重启现象，按照官方指导查看问题原因说时 TiDB-server OOM 了，那么 OOM 是什么呢？为什么 OOM 啊？怎么才</description>
-    </item>
-    
-    <item>
-      <title>TiDB - Binlog 数据同步架构测试</title>
-      <link>https://ap.tidb.cc/post/20200403-14-k8s-install/</link>
-      <pubDate>Sun, 08 Oct 2017 00:00:00 +0800</pubDate>
-      
-      <guid>https://ap.tidb.cc/post/20200403-14-k8s-install/</guid>
-      <description>0x00 缘起 无它，就是学习学习，然后装逼用 0x01 准备 K8S 有一些要求限制，不按照处理是无法启动滴 以下内容随手复制的，非原创 关闭 swap 1 2 3 4 5 6 7 8 9 sed -i 7,9s/0/1/g /usr/lib/sysctl.d/00-system.conf</description>
     </item>
     
     <item>

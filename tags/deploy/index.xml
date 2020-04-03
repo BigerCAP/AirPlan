@@ -7,10 +7,19 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>TiDB - AirPlan</copyright>
-    <lastBuildDate>Mon, 16 Apr 2018 00:00:00 +0800</lastBuildDate>
+    <lastBuildDate>Fri, 03 Apr 2020 00:00:00 +0800</lastBuildDate>
     
 	<atom:link href="https://ap.tidb.cc/tags/deploy/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>K8S 安装记录 - 真神了</title>
+      <link>https://ap.tidb.cc/post/20200403-14-k8s-install/</link>
+      <pubDate>Fri, 03 Apr 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20200403-14-k8s-install/</guid>
+      <description>0x00 缘起 无它，就是学习学习，然后装逼用 0x01 准备 K8S 有一些要求限制，不按照处理是无法启动滴 以下内容随手复制的，非原创 关闭 swap 1 2 3 4 5 6 7 8 9 sed -i 7,9s/0/1/g /usr/lib/sysctl.d/00-system.conf</description>
+    </item>
     
     <item>
       <title>AP - TiSpark 服务安装 部署 测试</title>
@@ -37,15 +46,6 @@
       
       <guid>https://ap.tidb.cc/post/20180327-change-tidb-ip/</guid>
       <description>0x00 背景 物理网络在实际生产环境会存在 vlan、IP 集群部署可能横跨多台机器甚至横跨机房，在有离线或在线业务情况下应该怎么操作变更 IP 地址信息，配</description>
-    </item>
-    
-    <item>
-      <title>TiDB - Binlog 数据同步架构测试</title>
-      <link>https://ap.tidb.cc/post/20200403-14-k8s-install/</link>
-      <pubDate>Sun, 08 Oct 2017 00:00:00 +0800</pubDate>
-      
-      <guid>https://ap.tidb.cc/post/20200403-14-k8s-install/</guid>
-      <description>0x00 缘起 无它，就是学习学习，然后装逼用 0x01 准备 K8S 有一些要求限制，不按照处理是无法启动滴 以下内容随手复制的，非原创 关闭 swap 1 2 3 4 5 6 7 8 9 sed -i 7,9s/0/1/g /usr/lib/sysctl.d/00-system.conf</description>
     </item>
     
     <item>

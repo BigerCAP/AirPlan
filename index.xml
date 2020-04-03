@@ -7,7 +7,7 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>TiDB - AirPlan</copyright>
-    <lastBuildDate>Mon, 23 Mar 2020 12:40:52 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 03 Apr 2020 00:00:00 +0800</lastBuildDate>
     
 	<atom:link href="https://ap.tidb.cc/index.xml" rel="self" type="application/rss+xml" />
     
@@ -19,6 +19,15 @@
       
       <guid>https://ap.tidb.cc/about/</guid>
       <description>About | TiDB AirPlan 本站内容信仰：望闻问切之术 望而知之谓之神，闻而知之谓之圣 问而知之谓之工，切脉而知之谓之巧 缘由 域名：ap.tidb.cc 中的前缀 ap 为 air</description>
+    </item>
+    
+    <item>
+      <title>K8S 安装记录 - 真神了</title>
+      <link>https://ap.tidb.cc/post/20200403-14-k8s-install/</link>
+      <pubDate>Fri, 03 Apr 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20200403-14-k8s-install/</guid>
+      <description>0x00 缘起 无它，就是学习学习，然后装逼用 0x01 准备 K8S 有一些要求限制，不按照处理是无法启动滴 以下内容随手复制的，非原创 关闭 swap 1 2 3 4 5 6 7 8 9 sed -i 7,9s/0/1/g /usr/lib/sysctl.d/00-system.conf</description>
     </item>
     
     <item>
@@ -154,15 +163,6 @@
       
       <guid>https://ap.tidb.cc/post/201711008-40-testing-binlog/</guid>
       <description>0x00 测试 前段时间部署了一套 TiDB 数据库，只有单纯的数据库放养是肯定不行的。还要一些灾备方案满足删库跑路之后的恢复工作。 按照以往（mysql）经验有</description>
-    </item>
-    
-    <item>
-      <title>TiDB - Binlog 数据同步架构测试</title>
-      <link>https://ap.tidb.cc/post/20200403-14-k8s-install/</link>
-      <pubDate>Sun, 08 Oct 2017 00:00:00 +0800</pubDate>
-      
-      <guid>https://ap.tidb.cc/post/20200403-14-k8s-install/</guid>
-      <description>0x00 缘起 无它，就是学习学习，然后装逼用 0x01 准备 K8S 有一些要求限制，不按照处理是无法启动滴 以下内容随手复制的，非原创 关闭 swap 1 2 3 4 5 6 7 8 9 sed -i 7,9s/0/1/g /usr/lib/sysctl.d/00-system.conf</description>
     </item>
     
     <item>
