@@ -420,7 +420,7 @@ tags:
     taints:
     - effect: NoSchedule
       key: node-role.kubernetes.io/master
-  ---
+  
   apiServer:
     timeoutForControlPlane: 4m0s
   apiVersion: kubeadm.k8s.io/v1beta2
