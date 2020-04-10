@@ -10,76 +10,83 @@
   
   <url>
     <loc>https://ap.tidb.cc/categories/</loc>
-    <lastmod>2020-04-03T00:00:00+08:00</lastmod>
+    <lastmod>2020-04-08T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://ap.tidb.cc/tags/deploy/</loc>
-    <lastmod>2020-04-03T00:00:00+08:00</lastmod>
+    <lastmod>2020-04-08T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://ap.tidb.cc/tags/k8s/</loc>
-    <lastmod>2020-04-03T00:00:00+08:00</lastmod>
+    <lastmod>2020-04-08T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
-    <loc>https://ap.tidb.cc/post/20200403-14-k8s-install/</loc>
-    <lastmod>2020-04-03T00:00:00+08:00</lastmod>
+    <loc>https://ap.tidb.cc/post/20200408-15-k8s-pv/</loc>
+    <lastmod>2020-04-08T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://ap.tidb.cc/tags/kubernetes/</loc>
-    <lastmod>2020-04-03T00:00:00+08:00</lastmod>
+    <lastmod>2020-04-08T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://ap.tidb.cc/tags/linux/</loc>
-    <lastmod>2020-04-03T00:00:00+08:00</lastmod>
+    <lastmod>2020-04-08T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://ap.tidb.cc/post/</loc>
-    <lastmod>2020-04-03T00:00:00+08:00</lastmod>
+    <lastmod>2020-04-08T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://ap.tidb.cc/categories/software/</loc>
-    <lastmod>2020-04-03T00:00:00+08:00</lastmod>
+    <lastmod>2020-04-08T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://ap.tidb.cc/tags/</loc>
-    <lastmod>2020-04-03T00:00:00+08:00</lastmod>
+    <lastmod>2020-04-08T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://ap.tidb.cc/tags/testing/</loc>
-    <lastmod>2020-04-03T00:00:00+08:00</lastmod>
+    <lastmod>2020-04-08T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://ap.tidb.cc/</loc>
+    <lastmod>2020-04-08T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/post/20200403-14-k8s-install/</loc>
     <lastmod>2020-04-03T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>

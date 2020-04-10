@@ -7,10 +7,19 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>TiDB - AirPlan</copyright>
-    <lastBuildDate>Fri, 03 Apr 2020 00:00:00 +0800</lastBuildDate>
+    <lastBuildDate>Wed, 08 Apr 2020 00:00:00 +0800</lastBuildDate>
     
 	<atom:link href="https://ap.tidb.cc/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>K8S 安装记录 - PV &amp; PVC</title>
+      <link>https://ap.tidb.cc/post/20200408-15-k8s-pv/</link>
+      <pubDate>Wed, 08 Apr 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20200408-15-k8s-pv/</guid>
+      <description>0x00 书接上回 友情提示：这是一篇非常水的文档，因为对 PV/PVC 理解层次太低；后续继续学习然后会重构文档内容 # 20200410 安装完 K8S 需要验证下 K8S 整体可用程度，在测试 POD</description>
+    </item>
     
     <item>
       <title>K8S 安装记录 - 真神了</title>

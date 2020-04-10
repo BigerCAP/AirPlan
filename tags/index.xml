@@ -7,7 +7,7 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>TiDB - AirPlan</copyright>
-    <lastBuildDate>Fri, 03 Apr 2020 00:00:00 +0800</lastBuildDate>
+    <lastBuildDate>Wed, 08 Apr 2020 00:00:00 +0800</lastBuildDate>
     
 	<atom:link href="https://ap.tidb.cc/tags/index.xml" rel="self" type="application/rss+xml" />
     
@@ -15,7 +15,7 @@
     <item>
       <title>Deploy</title>
       <link>https://ap.tidb.cc/tags/deploy/</link>
-      <pubDate>Fri, 03 Apr 2020 00:00:00 +0800</pubDate>
+      <pubDate>Wed, 08 Apr 2020 00:00:00 +0800</pubDate>
       
       <guid>https://ap.tidb.cc/tags/deploy/</guid>
       <description></description>
@@ -24,7 +24,7 @@
     <item>
       <title>K8S</title>
       <link>https://ap.tidb.cc/tags/k8s/</link>
-      <pubDate>Fri, 03 Apr 2020 00:00:00 +0800</pubDate>
+      <pubDate>Wed, 08 Apr 2020 00:00:00 +0800</pubDate>
       
       <guid>https://ap.tidb.cc/tags/k8s/</guid>
       <description></description>
@@ -33,7 +33,7 @@
     <item>
       <title>kubernetes</title>
       <link>https://ap.tidb.cc/tags/kubernetes/</link>
-      <pubDate>Fri, 03 Apr 2020 00:00:00 +0800</pubDate>
+      <pubDate>Wed, 08 Apr 2020 00:00:00 +0800</pubDate>
       
       <guid>https://ap.tidb.cc/tags/kubernetes/</guid>
       <description></description>
@@ -42,7 +42,7 @@
     <item>
       <title>Linux</title>
       <link>https://ap.tidb.cc/tags/linux/</link>
-      <pubDate>Fri, 03 Apr 2020 00:00:00 +0800</pubDate>
+      <pubDate>Wed, 08 Apr 2020 00:00:00 +0800</pubDate>
       
       <guid>https://ap.tidb.cc/tags/linux/</guid>
       <description></description>
@@ -51,7 +51,7 @@
     <item>
       <title>testing</title>
       <link>https://ap.tidb.cc/tags/testing/</link>
-      <pubDate>Fri, 03 Apr 2020 00:00:00 +0800</pubDate>
+      <pubDate>Wed, 08 Apr 2020 00:00:00 +0800</pubDate>
       
       <guid>https://ap.tidb.cc/tags/testing/</guid>
       <description></description>
