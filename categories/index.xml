@@ -7,10 +7,28 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>TiDB - AirPlan</copyright>
-    <lastBuildDate>Wed, 08 Apr 2020 00:00:00 +0800</lastBuildDate>
+    <lastBuildDate>Thu, 16 Apr 2020 00:00:00 +0800</lastBuildDate>
     
 	<atom:link href="https://ap.tidb.cc/categories/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Monitoring</title>
+      <link>https://ap.tidb.cc/categories/monitoring/</link>
+      <pubDate>Thu, 16 Apr 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/categories/monitoring/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>TiDB</title>
+      <link>https://ap.tidb.cc/categories/tidb/</link>
+      <pubDate>Thu, 16 Apr 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/categories/tidb/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>software</title>
@@ -18,15 +36,6 @@
       <pubDate>Wed, 08 Apr 2020 00:00:00 +0800</pubDate>
       
       <guid>https://ap.tidb.cc/categories/software/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>TiDB</title>
-      <link>https://ap.tidb.cc/categories/tidb/</link>
-      <pubDate>Wed, 11 Mar 2020 00:00:00 +0800</pubDate>
-      
-      <guid>https://ap.tidb.cc/categories/tidb/</guid>
       <description></description>
     </item>
     
@@ -45,15 +54,6 @@
       <pubDate>Mon, 16 Apr 2018 00:00:00 +0800</pubDate>
       
       <guid>https://ap.tidb.cc/categories/tispark/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Monitoring</title>
-      <link>https://ap.tidb.cc/categories/monitoring/</link>
-      <pubDate>Wed, 07 Jun 2017 00:00:00 +0800</pubDate>
-      
-      <guid>https://ap.tidb.cc/categories/monitoring/</guid>
       <description></description>
     </item>
     

@@ -7,10 +7,19 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>TiDB - AirPlan</copyright>
-    <lastBuildDate>Wed, 11 Mar 2020 00:00:00 +0800</lastBuildDate>
+    <lastBuildDate>Thu, 16 Apr 2020 00:00:00 +0800</lastBuildDate>
     
 	<atom:link href="https://ap.tidb.cc/categories/tidb/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>沙盘点将 - TiDB 监控知识初始化</title>
+      <link>https://ap.tidb.cc/post/20200416-16-init-monitoring-map/</link>
+      <pubDate>Thu, 16 Apr 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20200416-16-init-monitoring-map/</guid>
+      <description>0x00 点点滴滴 之前有篇文档是 纸上谈兵 - TiDB 性能调优，仅仅这篇文档无法承载想表达的豪言壮语，因此出现了一话三联内容，分别是 纸上谈兵（性能调优逻辑、S</description>
+    </item>
     
     <item>
       <title>纸上谈兵 - TiDB 性能调优</title>

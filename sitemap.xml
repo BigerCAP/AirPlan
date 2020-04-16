@@ -10,7 +10,70 @@
   
   <url>
     <loc>https://ap.tidb.cc/categories/</loc>
-    <lastmod>2020-04-08T00:00:00+08:00</lastmod>
+    <lastmod>2020-04-16T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/categories/monitoring/</loc>
+    <lastmod>2020-04-16T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/monitoring/</loc>
+    <lastmod>2020-04-16T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/performance/</loc>
+    <lastmod>2020-04-16T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/post/</loc>
+    <lastmod>2020-04-16T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/</loc>
+    <lastmod>2020-04-16T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/categories/tidb/</loc>
+    <lastmod>2020-04-16T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/tidb/</loc>
+    <lastmod>2020-04-16T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/</loc>
+    <lastmod>2020-04-16T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/post/20200416-16-init-monitoring-map/</loc>
+    <lastmod>2020-04-16T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -51,13 +114,6 @@
   </url>
   
   <url>
-    <loc>https://ap.tidb.cc/post/</loc>
-    <lastmod>2020-04-08T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
     <loc>https://ap.tidb.cc/categories/software/</loc>
     <lastmod>2020-04-08T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
@@ -65,21 +121,7 @@
   </url>
   
   <url>
-    <loc>https://ap.tidb.cc/tags/</loc>
-    <lastmod>2020-04-08T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
     <loc>https://ap.tidb.cc/tags/testing/</loc>
-    <lastmod>2020-04-08T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://ap.tidb.cc/</loc>
     <lastmod>2020-04-08T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -116,27 +158,6 @@
   <url>
     <loc>https://ap.tidb.cc/tags/lvm/</loc>
     <lastmod>2020-03-22T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://ap.tidb.cc/tags/performance/</loc>
-    <lastmod>2020-03-12T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://ap.tidb.cc/categories/tidb/</loc>
-    <lastmod>2020-03-12T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://ap.tidb.cc/tags/tidb/</loc>
-    <lastmod>2020-03-12T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -430,13 +451,6 @@
   
   <url>
     <loc>https://ap.tidb.cc/tags/grafana/</loc>
-    <lastmod>2020-01-23T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://ap.tidb.cc/categories/monitoring/</loc>
     <lastmod>2020-01-23T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>

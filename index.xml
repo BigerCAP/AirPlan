@@ -7,7 +7,7 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>TiDB - AirPlan</copyright>
-    <lastBuildDate>Wed, 08 Apr 2020 00:00:00 +0800</lastBuildDate>
+    <lastBuildDate>Thu, 16 Apr 2020 00:00:00 +0800</lastBuildDate>
     
 	<atom:link href="https://ap.tidb.cc/index.xml" rel="self" type="application/rss+xml" />
     
@@ -19,6 +19,15 @@
       
       <guid>https://ap.tidb.cc/about/</guid>
       <description>About | TiDB AirPlan 本站内容信仰：望闻问切之术 望而知之谓之神，闻而知之谓之圣 问而知之谓之工，切脉而知之谓之巧 缘由 域名：ap.tidb.cc 中的前缀 ap 为 air</description>
+    </item>
+    
+    <item>
+      <title>沙盘点将 - TiDB 监控知识初始化</title>
+      <link>https://ap.tidb.cc/post/20200416-16-init-monitoring-map/</link>
+      <pubDate>Thu, 16 Apr 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20200416-16-init-monitoring-map/</guid>
+      <description>0x00 点点滴滴 之前有篇文档是 纸上谈兵 - TiDB 性能调优，仅仅这篇文档无法承载想表达的豪言壮语，因此出现了一话三联内容，分别是 纸上谈兵（性能调优逻辑、S</description>
     </item>
     
     <item>

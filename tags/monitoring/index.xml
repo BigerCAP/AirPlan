@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>performance on TiDB AirPlan - A biger solution</title>
-    <link>https://ap.tidb.cc/tags/performance/</link>
-    <description>Recent content in performance on TiDB AirPlan - A biger solution</description>
+    <title>monitoring on TiDB AirPlan - A biger solution</title>
+    <link>https://ap.tidb.cc/tags/monitoring/</link>
+    <description>Recent content in monitoring on TiDB AirPlan - A biger solution</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>TiDB - AirPlan</copyright>
     <lastBuildDate>Thu, 16 Apr 2020 00:00:00 +0800</lastBuildDate>
     
-	<atom:link href="https://ap.tidb.cc/tags/performance/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://ap.tidb.cc/tags/monitoring/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
@@ -19,15 +19,6 @@
       
       <guid>https://ap.tidb.cc/post/20200416-16-init-monitoring-map/</guid>
       <description>0x00 点点滴滴 之前有篇文档是 纸上谈兵 - TiDB 性能调优，仅仅这篇文档无法承载想表达的豪言壮语，因此出现了一话三联内容，分别是 纸上谈兵（性能调优逻辑、S</description>
-    </item>
-    
-    <item>
-      <title>纸上谈兵 - TiDB 性能调优</title>
-      <link>https://ap.tidb.cc/post/20200311-11-performance-map/</link>
-      <pubDate>Wed, 11 Mar 2020 00:00:00 +0800</pubDate>
-      
-      <guid>https://ap.tidb.cc/post/20200311-11-performance-map/</guid>
-      <description>0x00 缘 妙不可言 开局一张图，其他全靠编。本文内容中 performance map 基于 TiDB 2.1 &amp;amp; TiDB 3.0 构建；部分内容与新版本不适配，具体以官方解释为准（e.g: TiDB 4.0 Titan engine 读写与本文</description>
     </item>
     
   </channel>
