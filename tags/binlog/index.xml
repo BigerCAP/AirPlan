@@ -23,10 +23,10 @@
     
     <item>
       <title>TiDB - Binlog 数据同步架构测试</title>
-      <link>https://ap.tidb.cc/post/201711008-40-testing-binlog/</link>
+      <link>https://ap.tidb.cc/post/20171108-40-testing-binlog/</link>
       <pubDate>Sun, 08 Oct 2017 00:00:00 +0800</pubDate>
       
-      <guid>https://ap.tidb.cc/post/201711008-40-testing-binlog/</guid>
+      <guid>https://ap.tidb.cc/post/20171108-40-testing-binlog/</guid>
       <description>0x00 测试 前段时间部署了一套 TiDB 数据库，只有单纯的数据库放养是肯定不行的。还要一些灾备方案满足删库跑路之后的恢复工作。 按照以往（mysql）经验有</description>
     </item>
     
