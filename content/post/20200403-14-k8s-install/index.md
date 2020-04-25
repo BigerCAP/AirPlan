@@ -34,6 +34,9 @@ tags:
   swapoff -a
 
   sysctl -p /usr/lib/sysctl.d/00-system.conf
+
+  echo “net.ipv4.ip_forward = 1” >> /etc/sysctl.conf && sysctl -p
+  # 开启 ipv4 forward
   ```
 
 - 关闭防火墙
