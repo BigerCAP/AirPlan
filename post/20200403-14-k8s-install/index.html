@@ -16,7 +16,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
 
 
-<meta name="author" content="Jeff" /><meta name="description" content="0x00 缘起 无它，就是学习学习，然后装逼用 0x01 准备 K8S 有一些要求限制，不按照处理是无法启动滴 以下内容随手复制的，非原创 关闭 swap 1 2 3 4 5 6 7 8 9 sed -i 7,9s/0/1/g /usr/lib/sysctl.d/00-system.conf" /><meta name="keywords" content="TiDB, AirPlan, TiDB OPS, tidb-operator, 2pc, raft, databases, mysql, htap" />
+<meta name="author" content="Jeff" /><meta name="description" content="0x00 缘起 无它，就是学习学习，然后装逼用 0x01 准备 K8S 有一些要求限制，不按照处理是无法启动滴 以下内容随手复制的，非原创 关闭 swap 1 2 3 4 5 6 7 8 9 10 11 12 sed" /><meta name="keywords" content="TiDB, AirPlan, TiDB OPS, tidb-operator, 2pc, raft, databases, mysql, htap" />
 
 
 
@@ -39,22 +39,22 @@
 
 
 <meta property="og:title" content="K8S 安装记录 - 真神了" />
-<meta property="og:description" content="0x00 缘起 无它，就是学习学习，然后装逼用 0x01 准备 K8S 有一些要求限制，不按照处理是无法启动滴 以下内容随手复制的，非原创 关闭 swap 1 2 3 4 5 6 7 8 9 sed -i 7,9s/0/1/g /usr/lib/sysctl.d/00-system.conf" />
+<meta property="og:description" content="0x00 缘起 无它，就是学习学习，然后装逼用 0x01 准备 K8S 有一些要求限制，不按照处理是无法启动滴 以下内容随手复制的，非原创 关闭 swap 1 2 3 4 5 6 7 8 9 10 11 12 sed" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://ap.tidb.cc/post/20200403-14-k8s-install/" />
 <meta property="article:published_time" content="2020-04-03T00:00:00+08:00" />
 <meta property="article:modified_time" content="2020-04-03T00:00:00+08:00" />
 <meta itemprop="name" content="K8S 安装记录 - 真神了">
-<meta itemprop="description" content="0x00 缘起 无它，就是学习学习，然后装逼用 0x01 准备 K8S 有一些要求限制，不按照处理是无法启动滴 以下内容随手复制的，非原创 关闭 swap 1 2 3 4 5 6 7 8 9 sed -i 7,9s/0/1/g /usr/lib/sysctl.d/00-system.conf">
+<meta itemprop="description" content="0x00 缘起 无它，就是学习学习，然后装逼用 0x01 准备 K8S 有一些要求限制，不按照处理是无法启动滴 以下内容随手复制的，非原创 关闭 swap 1 2 3 4 5 6 7 8 9 10 11 12 sed">
 <meta itemprop="datePublished" content="2020-04-03T00:00:00&#43;08:00" />
 <meta itemprop="dateModified" content="2020-04-03T00:00:00&#43;08:00" />
-<meta itemprop="wordCount" content="6577">
+<meta itemprop="wordCount" content="6614">
 
 
 
 <meta itemprop="keywords" content="Linux,testing,deploy,K8S,kubernetes," /><meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="K8S 安装记录 - 真神了"/>
-<meta name="twitter:description" content="0x00 缘起 无它，就是学习学习，然后装逼用 0x01 准备 K8S 有一些要求限制，不按照处理是无法启动滴 以下内容随手复制的，非原创 关闭 swap 1 2 3 4 5 6 7 8 9 sed -i 7,9s/0/1/g /usr/lib/sysctl.d/00-system.conf"/>
+<meta name="twitter:description" content="0x00 缘起 无它，就是学习学习，然后装逼用 0x01 准备 K8S 有一些要求限制，不按照处理是无法启动滴 以下内容随手复制的，非原创 关闭 swap 1 2 3 4 5 6 7 8 9 10 11 12 sed"/>
 
 <!--[if lte IE 9]>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
@@ -128,7 +128,7 @@
         <div class="post-category">
             <a href="/categories/software/"> software </a>
             </div>
-          <span class="more-meta"> 6577 words </span>
+          <span class="more-meta"> 6614 words </span>
           <span class="more-meta"> 14 mins read </span>
         <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
       </div>
@@ -187,15 +187,18 @@
 <p>关闭 swap</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span><span class="lnt">8
-</span><span class="lnt">9
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
 </span></code></pre></td>
 <td class="lntd">
 <pre class="chroma"><code class="language-bash" data-lang="bash">sed -i 7,9s/0/1/g /usr/lib/sysctl.d/00-system.conf
@@ -207,6 +210,9 @@ modprobe br_netfilter
 swapoff -a
 
 sysctl -p /usr/lib/sysctl.d/00-system.conf
+
+<span class="nb">echo</span> “net.ipv4.ip_forward <span class="o">=</span> 1” &gt;&gt; /etc/sysctl.conf <span class="o">&amp;&amp;</span> sysctl -p
+<span class="c1"># 开启 ipv4 forward</span>
 </code></pre></td></tr></table>
 </div>
 </div></li>

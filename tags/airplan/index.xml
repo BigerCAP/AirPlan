@@ -27,7 +27,7 @@
       <pubDate>Sat, 10 Jun 2017 00:00:00 +0800</pubDate>
       
       <guid>https://ap.tidb.cc/post/20170610-haproxy/</guid>
-      <description>0x01 介绍 官网 百家饭内容，将测试环境的最终结果整理了下 0x02 功能 负载均衡：L4(TCP) 和 L7(HTTP/HTTPS) 两种模式，支持 RR(roundrobin) / 静态 RR / LC / IP Hash/ URI Hash/ URL_PARAM Hash/ HTTP_HEADER Hash 等丰富的负</description>
+      <description>0x01 介绍 Haproxy 官网 百家饭内容，将测试环境的最终结果整理了下 0x02 功能 负载均衡：L4(TCP) 和 L7(HTTP/HTTPS) 两种模式，支持 RR(roundrobin) / 静态 RR / LC / IP Hash/ URI Hash/ URL_PARAM Hash/ HTTP_HEADER Hash 等丰富的</description>
     </item>
     
     <item>

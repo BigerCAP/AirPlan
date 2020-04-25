@@ -27,7 +27,7 @@
       <pubDate>Fri, 03 Apr 2020 00:00:00 +0800</pubDate>
       
       <guid>https://ap.tidb.cc/post/20200403-14-k8s-install/</guid>
-      <description>0x00 缘起 无它，就是学习学习，然后装逼用 0x01 准备 K8S 有一些要求限制，不按照处理是无法启动滴 以下内容随手复制的，非原创 关闭 swap 1 2 3 4 5 6 7 8 9 sed -i 7,9s/0/1/g /usr/lib/sysctl.d/00-system.conf</description>
+      <description>0x00 缘起 无它，就是学习学习，然后装逼用 0x01 准备 K8S 有一些要求限制，不按照处理是无法启动滴 以下内容随手复制的，非原创 关闭 swap 1 2 3 4 5 6 7 8 9 10 11 12 sed</description>
     </item>
     
   </channel>
