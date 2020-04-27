@@ -130,7 +130,7 @@
     </item>
     
     <item>
-      <title>Haproxy</title>
+      <title>HAProxy</title>
       <link>https://ap.tidb.cc/tags/haproxy/</link>
       <pubDate>Thu, 02 Jan 2020 00:00:00 +0800</pubDate>
       
@@ -171,6 +171,15 @@
       <pubDate>Tue, 08 Oct 2019 00:00:00 +0800</pubDate>
       
       <guid>https://ap.tidb.cc/tags/mindmap/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>AirPlan</title>
+      <link>https://ap.tidb.cc/tags/airplan/</link>
+      <pubDate>Wed, 06 Mar 2019 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/tags/airplan/</guid>
       <description></description>
     </item>
     
@@ -288,15 +297,6 @@
       <pubDate>Sun, 08 Oct 2017 00:00:00 +0800</pubDate>
       
       <guid>https://ap.tidb.cc/tags/pd-ctl/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>AirPlan</title>
-      <link>https://ap.tidb.cc/tags/airplan/</link>
-      <pubDate>Wed, 09 Aug 2017 00:00:00 +0800</pubDate>
-      
-      <guid>https://ap.tidb.cc/tags/airplan/</guid>
       <description></description>
     </item>
     

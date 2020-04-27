@@ -67,6 +67,15 @@
     </item>
     
     <item>
+      <title>入库检查 - 物理机 &amp; 系统安装数据库前预检查</title>
+      <link>https://ap.tidb.cc/post/20190306-10-precheck/</link>
+      <pubDate>Wed, 06 Mar 2019 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20190306-10-precheck/</guid>
+      <description>0x01 precheck 本篇文档产生原因来自 Step 7: Configure the CPUfreq governor mode on the target machine 根据 TiDB-ansible 安装时的报错反推物理机安装 TiDB 时需要干点啥…… 0x02 OS 结合官方文档 使用 TiDB Ansible 部署 TiDB 集群 文档先整理</description>
+    </item>
+    
+    <item>
       <title>Linux - Systemd &amp; Syncer 相爱相杀</title>
       <link>https://ap.tidb.cc/post/20180323-systemd-syncer/</link>
       <pubDate>Fri, 23 Mar 2018 00:00:00 +0800</pubDate>
