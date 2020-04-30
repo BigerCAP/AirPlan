@@ -112,6 +112,15 @@
     </item>
     
     <item>
+      <title>序列化事物 ID 策略 - TSO</title>
+      <link>https://ap.tidb.cc/post/20190201-5-pd-tso/</link>
+      <pubDate>Fri, 01 Feb 2019 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20190201-5-pd-tso/</guid>
+      <description>0x00 院子 MySQL 有个东东的叫 GTID（GTID = server_uuid:transaction_id）；它在 Binlog 文件中大概长这样【3E11FA55-7</description>
+    </item>
+    
+    <item>
       <title>总结 - Syncer 助力思维成长</title>
       <link>https://ap.tidb.cc/post/20180605-syncer-mindmap/</link>
       <pubDate>Tue, 05 Jun 2018 00:00:00 +0800</pubDate>
