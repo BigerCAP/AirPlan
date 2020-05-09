@@ -14,10 +14,10 @@ MySQL 有个东东的叫 GTID（GTID = server_uuid:transaction_id）；它在 Bi
 
 TiDB 数据库有个类似的东东，由 PD 组件管理和发放。它叫做 TSO（timestamp oracle），长成这样的一个东东【395181938313123110】，是由 physical time + logical time 信息组合计算得到的东东。
 
-> PD 的 TSO 使用的是中心式的混合逻辑时钟。PD 通过集成了 etcd ，保证了持久化数据的强一致性并且可以做到 auto failover，解决了集中式服务带来的单点故障问题。
-> ![pd-auto-failover](./pd-auto-failover.png "ap.tidb.cc 序列化事物 ID 策略 - TSO")
-> 其使用 64 位表示一个时间，其中低 18 位代表逻辑时钟部分，剩余部分代表物理时钟部分，其结构如下图所示。由于其逻辑部分为 18 位，因此理论上每秒可以分配时间戳为 218 * 1000 = 262144000 个，即每秒可以产生 2.6 亿个时间戳。
-> ![tso](./tso.png "ap.tidb.cc 序列化事物 ID 策略 - TSO")
+> PD 的 TSO 使用的是中心式的混合逻辑时钟。PD 通过集成了 etcd ，保证了持久化数据的强一致性并且可以做到 auto failover，解决了集中式服务带来的单点故障问题。  
+> ![pd-auto-failover](./pd-auto-failover.png "ap.tidb.cc 序列化事物 ID 策略 - TSO")  
+> 其使用 64 位表示一个时间，其中低 18 位代表逻辑时钟部分，剩余部分代表物理时钟部分，其结构如下图所示。由于其逻辑部分为 18 位，因此理论上每秒可以分配时间戳为 218 * 1000 = 262144000 个，即每秒可以产生 2.6 亿个时间戳。  
+> ![tso](./tso.png "ap.tidb.cc 序列化事物 ID 策略 - TSO")  
 
 ### 灌水
 
