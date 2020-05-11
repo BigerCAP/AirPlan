@@ -10,7 +10,56 @@
   
   <url>
     <loc>https://ap.tidb.cc/categories/</loc>
-    <lastmod>2020-04-16T00:00:00+08:00</lastmod>
+    <lastmod>2020-05-09T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/categories/look/</loc>
+    <lastmod>2020-05-09T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/look/</loc>
+    <lastmod>2020-05-09T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/paper/</loc>
+    <lastmod>2020-05-09T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/raft/</loc>
+    <lastmod>2020-05-09T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/look/20200509-19-raft/</loc>
+    <lastmod>2020-05-09T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/</loc>
+    <lastmod>2020-05-09T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/</loc>
+    <lastmod>2020-05-09T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -44,13 +93,6 @@
   </url>
   
   <url>
-    <loc>https://ap.tidb.cc/tags/</loc>
-    <lastmod>2020-04-16T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
     <loc>https://ap.tidb.cc/tags/tidb/</loc>
     <lastmod>2020-04-16T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
@@ -59,13 +101,6 @@
   
   <url>
     <loc>https://ap.tidb.cc/categories/tidb/</loc>
-    <lastmod>2020-04-16T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://ap.tidb.cc/</loc>
     <lastmod>2020-04-16T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
