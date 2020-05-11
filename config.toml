@@ -29,15 +29,15 @@ copyright = "TiDB - AirPlan"            # default: author.name ↓        # 默�
   filename = "sitemap.xml"
 
 [[menu.main]]             # config your menu              # 配置目录
-  name = "Home"
+  name = "Blog"
   weight = 10
-  identifier = "home"
-  url = "/"
-[[menu.main]]
-  name = "Archives"
-  weight = 20
-  identifier = "archives"
+  identifier = "自制饭"
   url = "/post/"
+[[menu.main]]
+  name = "Look"
+  weight = 20
+  identifier = "百家饭"
+  url = "/look/"
 [[menu.main]]
   name = "Tags"
   weight = 30
