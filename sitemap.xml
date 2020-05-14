@@ -9,8 +9,64 @@
   </url>
   
   <url>
+    <loc>https://ap.tidb.cc/tags/airplan/</loc>
+    <lastmod>2020-05-14T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
     <loc>https://ap.tidb.cc/categories/</loc>
-    <lastmod>2020-05-09T00:00:00+08:00</lastmod>
+    <lastmod>2020-05-14T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/grafana/</loc>
+    <lastmod>2020-05-14T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/linux/</loc>
+    <lastmod>2020-05-14T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/categories/monitoring/</loc>
+    <lastmod>2020-05-14T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/post/</loc>
+    <lastmod>2020-05-14T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/</loc>
+    <lastmod>2020-05-14T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/</loc>
+    <lastmod>2020-05-14T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/post/20200513-provisioning-grafana/</loc>
+    <lastmod>2020-05-14T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -51,27 +107,6 @@
   </url>
   
   <url>
-    <loc>https://ap.tidb.cc/tags/</loc>
-    <lastmod>2020-05-09T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://ap.tidb.cc/</loc>
-    <lastmod>2020-05-09T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://ap.tidb.cc/categories/monitoring/</loc>
-    <lastmod>2020-04-16T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
     <loc>https://ap.tidb.cc/tags/monitoring/</loc>
     <lastmod>2020-04-16T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
@@ -80,13 +115,6 @@
   
   <url>
     <loc>https://ap.tidb.cc/tags/performance/</loc>
-    <lastmod>2020-04-16T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://ap.tidb.cc/post/</loc>
     <lastmod>2020-04-16T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -136,13 +164,6 @@
   
   <url>
     <loc>https://ap.tidb.cc/tags/kubernetes/</loc>
-    <lastmod>2020-04-08T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://ap.tidb.cc/tags/linux/</loc>
     <lastmod>2020-04-08T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -284,13 +305,6 @@
   <url>
     <loc>https://ap.tidb.cc/post/20191008-41-dm-faq/</loc>
     <lastmod>2020-02-05T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://ap.tidb.cc/tags/airplan/</loc>
-    <lastmod>2020-01-21T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -508,13 +522,6 @@
   <url>
     <loc>https://ap.tidb.cc/post/20170610-haproxy/</loc>
     <lastmod>2020-01-20T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://ap.tidb.cc/tags/grafana/</loc>
-    <lastmod>2020-01-23T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>

@@ -7,10 +7,19 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>TiDB - AirPlan</copyright>
-    <lastBuildDate>Thu, 16 Apr 2020 00:00:00 +0800</lastBuildDate>
+    <lastBuildDate>Wed, 13 May 2020 00:00:00 +0800</lastBuildDate>
     
 	<atom:link href="https://ap.tidb.cc/categories/monitoring/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>监控组件 - Provisioning Grafana</title>
+      <link>https://ap.tidb.cc/post/20200513-provisioning-grafana/</link>
+      <pubDate>Wed, 13 May 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20200513-provisioning-grafana/</guid>
+      <description>0x00 话不多说 Grafana 用于 TiDB-cluster 集群监控展示功能（如果不了解的同学可以看下以前的文档），如果每套集群都部署一个 Grafana，使用不方便且运维也繁琐。因此</description>
+    </item>
     
     <item>
       <title>沙盘点将 - TiDB 监控知识初始化</title>
