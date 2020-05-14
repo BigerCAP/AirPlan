@@ -124,6 +124,36 @@ Grafana 用于 TiDB-cluster 集群监控展示功能（如果不了解的同学�
         └── run_grafana.sh
     ```
 
+### Run Grafana sh
+
+Grafana 启动脚本，脚本中的 mkdir、cp、find + send 选配，非必选项。
+
+```bash
+# 新建 dashboard、provisioning 相关目录
+mkdir -p /home/tmpuser/tidb-deploy/grafana-14409/plugins
+mkdir -p /home/tmpuser/tidb-deploy/grafana-14409/dashboards
+mkdir -p /home/tmpuser/tidb-deploy/grafana-14409/provisioning/dashboards
+mkdir -p /home/tmpuser/tidb-deploy/grafana-14409/provisioning/datasources
+
+# copy 模版文件到 provisioning 相关目录
+cp /home/tmpuser/tidb-deploy/grafana-14409/bin/*.json /home/tmpuser/tidb-deploy/grafana-14409/dashboards/
+cp /home/tmpuser/tidb-deploy/grafana-14409/conf/datasource.yml /home/tmpuser/tidb-deploy/grafana-14409/provisioning/datasources
+cp /home/tmpuser/tidb-deploy/grafana-14409/conf/dashboard.yml /home/tmpuser/tidb-deploy/grafana-14409/provisioning/dashboards
+
+# 批量修改 & 替换 json 模版文件中的关键词【方便在页面观赏】
+find /home/tmpuser/tidb-deploy/grafana-14409/dashboards/ -type f -exec sed -i "s/\${DS_.*-CLUSTER}/cluster-1/g" {} \;
+find /home/tmpuser/tidb-deploy/grafana-14409/dashboards/ -type f -exec sed -i "s/\${DS_LIGHTNING}/cluster-1/g" {} \;
+find /home/tmpuser/tidb-deploy/grafana-14409/dashboards/ -type f -exec sed -i "s/test-cluster/cluster-1/g" {} \;
+find /home/tmpuser/tidb-deploy/grafana-14409/dashboards/ -type f -exec sed -i "s/Test-Cluster/cluster-1/g" {} \;
+
+# 启动命令
+LANG=en_US.UTF-8 \
+exec bin/bin/grafana-server \
+    --homepath="/home/tmpuser/tidb-deploy/grafana-14409/bin" \
+    --config="/home/tmpuser/tidb-deploy/grafana-14409/conf/grafana.ini"
+```
+
+
 ### Start log
 
 ```js
