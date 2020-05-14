@@ -65,7 +65,7 @@
   </url>
   
   <url>
-    <loc>https://ap.tidb.cc/post/20200513-provisioning-grafana/</loc>
+    <loc>https://ap.tidb.cc/post/20200513-20-provisioning-grafana/</loc>
     <lastmod>2020-05-14T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -305,6 +305,20 @@
   <url>
     <loc>https://ap.tidb.cc/post/20191008-41-dm-faq/</loc>
     <lastmod>2020-02-05T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/numactl/</loc>
+    <lastmod>2019-03-14T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/post/20190313-11-numactl/</loc>
+    <lastmod>2019-03-14T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>

@@ -23,10 +23,10 @@
     
     <item>
       <title>监控组件 - Provisioning Grafana</title>
-      <link>https://ap.tidb.cc/post/20200513-provisioning-grafana/</link>
+      <link>https://ap.tidb.cc/post/20200513-20-provisioning-grafana/</link>
       <pubDate>Wed, 13 May 2020 00:00:00 +0800</pubDate>
       
-      <guid>https://ap.tidb.cc/post/20200513-provisioning-grafana/</guid>
+      <guid>https://ap.tidb.cc/post/20200513-20-provisioning-grafana/</guid>
       <description>0x00 话不多说 Grafana 用于 TiDB-cluster 集群监控展示功能（如果不了解的同学可以看下以前的文档），如果每套集群都部署一个 Grafana，使用不方便且运维也繁琐。因此</description>
     </item>
     
@@ -118,6 +118,15 @@
       
       <guid>https://ap.tidb.cc/post/20191008-41-dm-faq/</guid>
       <description>0x00 开局 本文仅记录了对 DM 的学习，处理问题经验慢慢补充（没有素材编场景） 版本使用从 RC 到 v1.0.3 ；架构整体变化不大，有着上纲上线的框架守护 本页内容没有干</description>
+    </item>
+    
+    <item>
+      <title>系统调优 - numactl cpubind</title>
+      <link>https://ap.tidb.cc/post/20190313-11-numactl/</link>
+      <pubDate>Wed, 13 Mar 2019 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20190313-11-numactl/</guid>
+      <description>0x00 CCC 单个不够，数量来凑，太多人跑也会不规划好跑道容易干架；使用 Linux 软件 numactl 将服务进程绑定在目标 CPU 上，支持按 Vcore、物理 CPU 绑定。 0x01 numactl numactl &amp;ndash;show 查看当</description>
     </item>
     
     <item>

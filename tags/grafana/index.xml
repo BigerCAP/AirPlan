@@ -14,10 +14,10 @@
     
     <item>
       <title>监控组件 - Provisioning Grafana</title>
-      <link>https://ap.tidb.cc/post/20200513-provisioning-grafana/</link>
+      <link>https://ap.tidb.cc/post/20200513-20-provisioning-grafana/</link>
       <pubDate>Wed, 13 May 2020 00:00:00 +0800</pubDate>
       
-      <guid>https://ap.tidb.cc/post/20200513-provisioning-grafana/</guid>
+      <guid>https://ap.tidb.cc/post/20200513-20-provisioning-grafana/</guid>
       <description>0x00 话不多说 Grafana 用于 TiDB-cluster 集群监控展示功能（如果不了解的同学可以看下以前的文档），如果每套集群都部署一个 Grafana，使用不方便且运维也繁琐。因此</description>
     </item>
     

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>numactl on TiDB AirPlan - A biger solution</title>
+    <link>https://ap.tidb.cc/tags/numactl/</link>
+    <description>Recent content in numactl on TiDB AirPlan - A biger solution</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright>TiDB - AirPlan</copyright>
+    <lastBuildDate>Wed, 13 Mar 2019 00:00:00 +0800</lastBuildDate>
+    
+	<atom:link href="https://ap.tidb.cc/tags/numactl/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>系统调优 - numactl cpubind</title>
+      <link>https://ap.tidb.cc/post/20190313-11-numactl/</link>
+      <pubDate>Wed, 13 Mar 2019 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20190313-11-numactl/</guid>
+      <description>0x00 CCC 单个不够，数量来凑，太多人跑也会不规划好跑道容易干架；使用 Linux 软件 numactl 将服务进程绑定在目标 CPU 上，支持按 Vcore、物理 CPU 绑定。 0x01 numactl numactl &amp;ndash;show 查看当</description>
+    </item>
+    
+  </channel>
+</rss>
