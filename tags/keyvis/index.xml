@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>keyvis on TiDB AirPlan - A biger solution</title>
+    <link>https://ap.tidb.cc/tags/keyvis/</link>
+    <description>Recent content in keyvis on TiDB AirPlan - A biger solution</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright>TiDB - AirPlan</copyright>
+    <lastBuildDate>Thu, 21 May 2020 00:00:00 +0800</lastBuildDate>
+    
+	<atom:link href="https://ap.tidb.cc/tags/keyvis/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>TiDB 4.0 -- keyvis-diagnostics</title>
+      <link>https://ap.tidb.cc/post/20200521-21-keyvis/</link>
+      <pubDate>Thu, 21 May 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20200521-21-keyvis/</guid>
+      <description>0x00 KeyVis 不介绍这个功能来历了，贴点资料大家看下开心阅读 Cloud Bigtable【官方提供多国语言】 Key Visualizer 概览 Key Visualizer 使用入门 Key Visualizer 探索热图 Key Visualizer 热图模式 Key Visualizer 指标</description>
+    </item>
+    
+  </channel>
+</rss>

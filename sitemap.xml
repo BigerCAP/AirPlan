@@ -9,14 +9,56 @@
   </url>
   
   <url>
-    <loc>https://ap.tidb.cc/tags/airplan/</loc>
-    <lastmod>2020-05-14T00:00:00+08:00</lastmod>
+    <loc>https://ap.tidb.cc/categories/</loc>
+    <lastmod>2020-05-21T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
-    <loc>https://ap.tidb.cc/categories/</loc>
+    <loc>https://ap.tidb.cc/tags/keyvis/</loc>
+    <lastmod>2020-05-21T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/post/</loc>
+    <lastmod>2020-05-21T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/</loc>
+    <lastmod>2020-05-21T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/categories/tidb/</loc>
+    <lastmod>2020-05-21T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/post/20200521-21-keyvis/</loc>
+    <lastmod>2020-05-21T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/</loc>
+    <lastmod>2020-05-21T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/airplan/</loc>
     <lastmod>2020-05-14T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -38,27 +80,6 @@
   
   <url>
     <loc>https://ap.tidb.cc/categories/monitoring/</loc>
-    <lastmod>2020-05-14T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://ap.tidb.cc/post/</loc>
-    <lastmod>2020-05-14T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://ap.tidb.cc/tags/</loc>
-    <lastmod>2020-05-14T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://ap.tidb.cc/</loc>
     <lastmod>2020-05-14T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -122,13 +143,6 @@
   
   <url>
     <loc>https://ap.tidb.cc/tags/tidb/</loc>
-    <lastmod>2020-04-16T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://ap.tidb.cc/categories/tidb/</loc>
     <lastmod>2020-04-16T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>

@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>TiDB 4.0 -- keyvis-diagnostics - TiDB AirPlan - A biger solution</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Jeff" /><meta name="description" content="0x00 KeyVis 不介绍这个功能来历了，贴点资料大家看下开心阅读 Cloud Bigtable【官方提供多国语言】 Key Visualizer 概览 Key Visualizer 使用入门 Key Visualizer 探索热图 Key Visualizer 热图模式 Key Visualizer 指标" /><meta name="keywords" content="TiDB, AirPlan, TiDB OPS, tidb-operator, 2pc, raft, databases, mysql, htap" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.63.2 with theme even" />
+
+
+<link rel="canonical" href="https://ap.tidb.cc/post/20200521-21-keyvis/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<link href="/dist/even.04bd84cd.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="TiDB 4.0 -- keyvis-diagnostics" />
+<meta property="og:description" content="0x00 KeyVis 不介绍这个功能来历了，贴点资料大家看下开心阅读 Cloud Bigtable【官方提供多国语言】 Key Visualizer 概览 Key Visualizer 使用入门 Key Visualizer 探索热图 Key Visualizer 热图模式 Key Visualizer 指标" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://ap.tidb.cc/post/20200521-21-keyvis/" />
+<meta property="article:published_time" content="2020-05-21T00:00:00+08:00" />
+<meta property="article:modified_time" content="2020-05-21T00:00:00+08:00" />
+<meta itemprop="name" content="TiDB 4.0 -- keyvis-diagnostics">
+<meta itemprop="description" content="0x00 KeyVis 不介绍这个功能来历了，贴点资料大家看下开心阅读 Cloud Bigtable【官方提供多国语言】 Key Visualizer 概览 Key Visualizer 使用入门 Key Visualizer 探索热图 Key Visualizer 热图模式 Key Visualizer 指标">
+<meta itemprop="datePublished" content="2020-05-21T00:00:00&#43;08:00" />
+<meta itemprop="dateModified" content="2020-05-21T00:00:00&#43;08:00" />
+<meta itemprop="wordCount" content="3929">
+
+
+
+<meta itemprop="keywords" content="keyvis," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="TiDB 4.0 -- keyvis-diagnostics"/>
+<meta name="twitter:description" content="0x00 KeyVis 不介绍这个功能来历了，贴点资料大家看下开心阅读 Cloud Bigtable【官方提供多国语言】 Key Visualizer 概览 Key Visualizer 使用入门 Key Visualizer 探索热图 Key Visualizer 热图模式 Key Visualizer 指标"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">TiDB AirPlan</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/post/">
+        <li class="mobile-menu-item">Blog</li>
+      </a><a href="/look/">
+        <li class="mobile-menu-item">Look</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">About</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">TiDB AirPlan</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/post/">Blog</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/look/">Look</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/about/">About</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">TiDB 4.0 -- keyvis-diagnostics</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2020-05-21 </span>
+        <div class="post-category">
+            <a href="/categories/tidb/"> TiDB </a>
+            </div>
+          <span class="more-meta"> 3929 words </span>
+          <span class="more-meta"> 8 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#0x00-keyvis">0x00 KeyVis</a></li>
+    <li><a href="#0x01-研究">0x01 研究</a></li>
+    <li><a href="#0x02-探探">0x02 探探</a>
+      <ul>
+        <li><a href="#高亮后">高亮后</a></li>
+      </ul>
+    </li>
+    <li><a href="#0x03-新知识">0x03 新知识</a>
+      <ul>
+        <li><a href="#pandadalao">Pandadalao</a></li>
+        <li><a href="#know">Know</a></li>
+      </ul>
+    </li>
+    <li><a href="#0x04-臆测">0x04 臆测</a>
+      <ul>
+        <li><a href="#无逻辑思考">无逻辑思考</a></li>
+        <li><a href="#展望理论">展望理论</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h2 id="0x00-keyvis">0x00 KeyVis</h2>
+<blockquote>
+<p>不介绍这个功能来历了，贴点资料大家看下开心阅读</p>
+</blockquote>
+<ul>
+<li>Cloud Bigtable【官方提供多国语言】
+<ul>
+<li><a href="https://cloud.google.com/bigtable/docs/keyvis-overview">Key Visualizer 概览</a></li>
+<li><a href="https://cloud.google.com/bigtable/docs/keyvis-getting-started">Key Visualizer 使用入门</a></li>
+<li><a href="https://cloud.google.com/bigtable/docs/keyvis-exploring-heatmaps">Key Visualizer 探索热图</a></li>
+<li><a href="https://cloud.google.com/bigtable/docs/keyvis-patterns">Key Visualizer 热图模式</a></li>
+<li><a href="https://cloud.google.com/bigtable/docs/keyvis-metrics">Key Visualizer 指标</a></li>
+<li><a href="https://cloud.google.com/bigtable/docs/keyvis-diagnostics">Key Visualizer 诊断消息</a></li>
+</ul>
+</li>
+<li>TiDB 4.0 新功能物料
+<ul>
+<li><a href="https://pingcap.com/docs-cn/dev/key-visualizer-monitoring-tool/">Key Visualizer 流量可视化</a></li>
+<li><a href="https://book.tidb.io/session3/chapter2/key-vis.html">tidb in action / 2.1 识别集群热点和业务访问模式</a>：</li>
+<li><a href="https://pingcap.com/blog-cn/tidb-4.0-key-visualizer/">TiDB 4.0 新特性前瞻（一）拍个 CT 诊断集群热点问题</a></li>
+<li><a href="https://pingcap.com/blog-cn/observability-of-distributed-system/">我眼中的分布式系统可观测性</a></li>
+</ul>
+</li>
+<li>数据业务场景 &ndash; <a href="https://asktug.com/t/topic/358">数据热点</a></li>
+</ul>
+<h2 id="0x01-研究">0x01 研究</h2>
+<blockquote>
+<p>from TiDB 官网：古代，医者看病讲究「望、闻、问、切」，通过病人的外部综合表现对病症做出判断。现代，CT 的发明使得人们可以使用 X 光穿透身体各组织内部，将整体的情况以图像的方式展现出来，医生可以根据这个信息快速地排查问题。CT 的出现不仅将诊断的效率提升到了新的高度，也给客观描述身体状态提供了一个标准，是医学史上重要的里程碑。</p>
+</blockquote>
+<p>关于功能测试和图案展现，可以围观上述 Bigtable 或者 TiDB 官方文档，现在我们研究下看到 key-vis 高亮之后的动作。</p>
+<p><img src="./bigtable-case.png" alt="bigtable-case 一张图"></p>
+<blockquote>
+<p>TiDB key vis 竖向是 「库 &gt; 表 &gt; 行」信息，横向是时间线，最新数据在右部显示，不断向左归拢消失。</p>
+</blockquote>
+<p>将「业务代码访问硬件资源上的 KV 数据」调度占用「场景形象化」，从观看 QPS / Duration 趋势图转换为 KV Block 「流量、次数」为基础的访问记录「Region」。</p>
+<p>该形象化记录“业务场景  &ndash;&gt; 执行动作（get、put、del、post）调用 KV 数据”，不断循环♻️运行后随着时间进度记录下的「流程链路」反应。</p>
+<p>「通过读文档看到」在大量业务场景的测试下并通过一系列的总结，数据反应基本组成以下几个特征图（不同业务特点下的反应）：</p>
+<ul>
+<li>自增 ID「三角斜线高亮」</li>
+<li>周期跑批「竖向的重复高亮，类似夜晚开车看路灯」</li>
+<li>局部小范围高亮「可能是小表热点（比如参数表）」</li>
+<li>局部大范围高亮「可能是业务大量增加」</li>
+<li>期望结果「明暗叠加 — 大范围下的模糊覆盖」</li>
+</ul>
+<p><img src="./tidb-keyvis.png" alt="tidb-keyvis 转载图片"></p>
+<blockquote>
+<p>from TiDB CTO Ed Huang : 现在如果有朋友问我，“这个业务适不适合 TiDB？”我只需要通过录制线上流量，或者搭建一个从集群，只需要把 KeyViz 的图给我看一眼，我甚至都不需要压力测试就能判断这个业务是否适合，而且即使不适合，我也能准确的给出修改建议，因为 KeyViz 的图对我的「假设」的可解释性有了很强的支持。</p>
+</blockquote>
+<h2 id="0x02-探探">0x02 探探</h2>
+<p>使用 Key vis 之前有几个疑问：</p>
+<ul>
+<li>Key vis 怎么做出来的？
+<ul>
+<li>TiKV 上报给 PD 的心跳信息包含了 KV 流量信息，通过 html + JS 解析 json 数据在浏览器展现</li>
+</ul>
+</li>
+<li>Key vis 高亮后 DBA 可以做什么？</li>
+<li>Key vis 高级功能使用方式？
+<ul>
+<li>一顿测试玩耍，暂未发现高级功能</li>
+</ul>
+</li>
+<li>人工怎么自定义 Key vis 亮暗走向？
+<ul>
+<li>见 <a href="#pandadalao">0x03 Panda</a></li>
+</ul>
+</li>
+</ul>
+<h3 id="高亮后">高亮后</h3>
+<p><img src="./bytesmin.png" alt="key vis tpch 高亮信息"></p>
+<blockquote>
+<p>上图是通过 tiup 部署了单节点 TiDB 集群，准备了 100 workhouse 数据，使用 tpch 单线程压测时出现的场景<br>
+当 key viz 出现「黄色高亮区域」之后：怎么找到这个数据？怎么找到相应 SQL 或者业务逻辑信息？然后怎么解决它呢？</p>
+</blockquote>
+<p>和以前一样，我们需要先获取到 QPS、Slow query、duration 等数据库信息和硬件 CPU、IOPS、带宽等信息综合判断目前 TiDB 集群负载和业务压力「这一步看起来是必不可少的」。</p>
+<p>有了以上信息后，放在以前 DBA 会想办法「找到最慢或者影响最大」的 SQL 语句，然后加索引或者通知业务调整流量压力。现在 DBA 可以进一步看到 「KV 数据」 的访问次数、流量带宽信息，这可以进一步锁定业务出现问题的场景（然快速意味着拥有更多经验）。</p>
+<blockquote>
+<p>一般情况下：数据出现热点、业务流量暴涨都会出现高亮区域，这些相对来说正向问题，不排除产品有 BUG 出现计算错误、调度雪崩等场景。<br>
+流量暴涨场景：取决于业务对 schema 的设计是否有隐患「连续自增、小表热点、周期热点、单表暴增」、机器资源是否充足「换更好的硬件是最好的调优方式&ndash;鲁迅说的」</p>
+</blockquote>
+<p>有了经验值「做一些特定场景的测试，然后看 key vis 的断层，鉴该文档第一张图」之后，从两个方向交叉验证 TiDB 集群运行压力和高亮场景。</p>
+<p>然目前 Key Viz 提供的信息中无法直接关联到 「业务 SQL」，信息中还剩下 STARK KEY 可以使用</p>
+<ul>
+<li>
+<p>通过 <code>pd-ctl -u http://&lt;PD_ADDRESS&gt; region key &lt;KEY&gt;</code> 工具解析该 key region 位置，</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-json" data-lang="json"><span class="p">[</span><span class="err">t</span><span class="err">m</span><span class="err">p</span><span class="err">u</span><span class="err">s</span><span class="err">e</span><span class="err">r</span><span class="err">@</span><span class="err">j</span><span class="err">u</span><span class="err">m</span><span class="err">p</span><span class="err">h</span><span class="err">o</span><span class="err">s</span><span class="err">t</span> <span class="err">~</span><span class="p">]</span><span class="err">$</span> <span class="err">t</span><span class="err">i</span><span class="err">u</span><span class="err">p</span> <span class="err">c</span><span class="err">t</span><span class="err">l</span> <span class="err">p</span><span class="err">d</span> <span class="err">-</span><span class="err">u</span> <span class="err">h</span><span class="err">t</span><span class="err">t</span><span class="err">p</span><span class="err">:</span><span class="err">/</span><span class="err">/</span><span class="mf">172.16</span><span class="err">.</span><span class="mf">4.51</span><span class="err">:</span><span class="mi">14379</span> <span class="err">r</span><span class="err">e</span><span class="err">g</span><span class="err">i</span><span class="err">o</span><span class="err">n</span> <span class="err">k</span><span class="err">e</span><span class="err">y</span> <span class="mi">7480000000000000</span><span class="err">f</span><span class="err">f</span><span class="mi">515</span><span class="err">f</span><span class="mi">728000000000</span><span class="err">f</span><span class="err">f</span><span class="mi">0</span><span class="mi">44</span><span class="err">d</span><span class="mi">0</span><span class="mi">60000000000</span><span class="err">f</span><span class="err">a</span>
+<span class="err">S</span><span class="err">t</span><span class="err">a</span><span class="err">r</span><span class="err">t</span><span class="err">i</span><span class="err">n</span><span class="err">g</span> <span class="err">c</span><span class="err">o</span><span class="err">m</span><span class="err">p</span><span class="err">o</span><span class="err">n</span><span class="err">e</span><span class="err">n</span><span class="err">t</span> <span class="err">`</span><span class="err">c</span><span class="err">t</span><span class="err">l</span><span class="err">`</span><span class="err">:</span> <span class="err">/</span><span class="err">h</span><span class="err">o</span><span class="err">m</span><span class="err">e</span><span class="err">/</span><span class="err">t</span><span class="err">m</span><span class="err">p</span><span class="err">u</span><span class="err">s</span><span class="err">e</span><span class="err">r</span><span class="err">/</span><span class="err">.</span><span class="err">t</span><span class="err">i</span><span class="err">u</span><span class="err">p</span><span class="err">/</span><span class="err">c</span><span class="err">o</span><span class="err">m</span><span class="err">p</span><span class="err">o</span><span class="err">n</span><span class="err">e</span><span class="err">n</span><span class="err">t</span><span class="err">s</span><span class="err">/</span><span class="err">c</span><span class="err">t</span><span class="err">l</span><span class="err">/</span><span class="err">v</span><span class="mf">4.0</span><span class="err">.</span><span class="mi">0</span><span class="err">-</span><span class="err">r</span><span class="err">c</span><span class="err">.</span><span class="mi">2</span><span class="err">/</span><span class="err">c</span><span class="err">t</span><span class="err">l</span> <span class="err">p</span><span class="err">d</span> <span class="err">-</span><span class="err">u</span> <span class="err">h</span><span class="err">t</span><span class="err">t</span><span class="err">p</span><span class="err">:</span><span class="err">/</span><span class="err">/</span><span class="mf">172.16</span><span class="err">.</span><span class="mf">4.51</span><span class="err">:</span><span class="mi">14379</span> <span class="err">r</span><span class="err">e</span><span class="err">g</span><span class="err">i</span><span class="err">o</span><span class="err">n</span> <span class="err">k</span><span class="err">e</span><span class="err">y</span> <span class="mi">7480000000000000</span><span class="err">f</span><span class="err">f</span><span class="mi">515</span><span class="err">f</span><span class="mi">728000000000</span><span class="err">f</span><span class="err">f</span><span class="mi">0</span><span class="mi">44</span><span class="err">d</span><span class="mi">0</span><span class="mi">60000000000</span><span class="err">f</span><span class="err">a</span>
+<span class="p">{</span>
+  <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="mi">240</span><span class="p">,</span>
+  <span class="nt">&#34;start_key&#34;</span><span class="p">:</span> <span class="s2">&#34;7480000000000000FF515F728000000000FF044D060000000000FA&#34;</span><span class="p">,</span>
+  <span class="nt">&#34;end_key&#34;</span><span class="p">:</span> <span class="s2">&#34;7480000000000000FF515F728000000000FF0B649B0000000000FA&#34;</span><span class="p">,</span>
+  <span class="nt">&#34;epoch&#34;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">&#34;conf_ver&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="mi">40</span>
+  <span class="p">}</span><span class="p">,</span>
+  <span class="nt">&#34;peers&#34;</span><span class="p">:</span> <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="mi">241</span><span class="p">,</span>
+      <span class="nt">&#34;store_id&#34;</span><span class="p">:</span> <span class="mi">1</span>
+    <span class="p">}</span>
+  <span class="p">]</span><span class="p">,</span>
+  <span class="nt">&#34;leader&#34;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="mi">241</span><span class="p">,</span>
+    <span class="nt">&#34;store_id&#34;</span><span class="p">:</span> <span class="mi">1</span>
+  <span class="p">}</span><span class="p">,</span>
+  <span class="nt">&#34;written_bytes&#34;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+  <span class="nt">&#34;read_bytes&#34;</span><span class="p">:</span> <span class="mi">1168682168</span><span class="p">,</span>
+  <span class="nt">&#34;written_keys&#34;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+  <span class="nt">&#34;read_keys&#34;</span><span class="p">:</span> <span class="mi">5399413</span><span class="p">,</span>
+  <span class="nt">&#34;approximate_size&#34;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+  <span class="nt">&#34;approximate_keys&#34;</span><span class="p">:</span> <span class="mi">498011</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div></li>
+<li>
+<p>通过 <a href="https://github.com/pingcap/tidb/blob/master/docs/tidb_http_api.md" title="文档第 5 条啊">curl http://{TiDBIP}:10080/regions/{regionID}</a> 可以反解析到该 region 属于那张表。</p>
+<ul>
+<li>然后可以做 <a href="https://pingcap.com/docs-cn/stable/pd-control/#operator-show--add--remove"><code>pd-ctl operator add split-region 1 --policy=approximate</code></a>，或者修改 <a href="https://pingcap.com/docs-cn/stable/tidb-specific-system-variables/#shard_row_id_bits"><code>shard_row_id_bits=4</code></a>，或者查阅 <a href="https://pingcap.com/docs-cn/stable/sql-statements/sql-statement-split-region/#split-region-%E4%BD%BF%E7%94%A8%E6%96%87%E6%A1%A3">Split Region 使用文档</a></li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-json" data-lang="json"><span class="p">[</span><span class="err">t</span><span class="err">m</span><span class="err">p</span><span class="err">u</span><span class="err">s</span><span class="err">e</span><span class="err">r</span><span class="err">@</span><span class="err">j</span><span class="err">u</span><span class="err">m</span><span class="err">p</span><span class="err">h</span><span class="err">o</span><span class="err">s</span><span class="err">t</span> <span class="err">~</span><span class="p">]</span><span class="err">$</span> <span class="err">c</span><span class="err">u</span><span class="err">r</span><span class="err">l</span> <span class="err">h</span><span class="err">t</span><span class="err">t</span><span class="err">p</span><span class="err">:</span><span class="err">/</span><span class="err">/</span><span class="mf">172.16</span><span class="err">.</span><span class="mf">4.51</span><span class="err">:</span><span class="mi">14080</span><span class="err">/</span><span class="err">r</span><span class="err">e</span><span class="err">g</span><span class="err">i</span><span class="err">o</span><span class="err">n</span><span class="err">s</span><span class="err">/</span><span class="mi">240</span>
+<span class="p">{</span>
+<span class="nt">&#34;region_id&#34;</span><span class="p">:</span> <span class="mi">240</span><span class="p">,</span>
+<span class="nt">&#34;start_key&#34;</span><span class="p">:</span> <span class="s2">&#34;dIAAAAAAAABRX3KAAAAAAARNBg==&#34;</span><span class="p">,</span>
+<span class="nt">&#34;end_key&#34;</span><span class="p">:</span> <span class="s2">&#34;dIAAAAAAAABRX3KAAAAAAAtkmw==&#34;</span><span class="p">,</span>
+<span class="nt">&#34;frames&#34;</span><span class="p">:</span> <span class="p">[</span>
+  <span class="p">{</span>
+  <span class="nt">&#34;db_name&#34;</span><span class="p">:</span> <span class="s2">&#34;tpch&#34;</span><span class="p">,</span>
+  <span class="nt">&#34;table_name&#34;</span><span class="p">:</span> <span class="s2">&#34;lineitem&#34;</span><span class="p">,</span>
+  <span class="nt">&#34;table_id&#34;</span><span class="p">:</span> <span class="mi">81</span><span class="p">,</span>
+  <span class="nt">&#34;is_record&#34;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+  <span class="nt">&#34;record_id&#34;</span><span class="p">:</span> <span class="mi">281862</span>
+  <span class="p">}</span>
+<span class="p">]</span>
+</code></pre></td></tr></table>
+</div>
+</div></li>
+</ul>
+<p>如果当前通过 key viz 看横向尾部持续高亮：可以开启 general log 获取目前正在运行的 SQL 「slow query 不等于读取高亮 KV 数据，比如小表热点」；和业务开发一起聊下「业务代码逻辑」确认下目前正在执行的操作，同时看下 slow query 是否有关于该表的信息。</p>
+<blockquote>
+<p>截图中有个 <code>row_5397937</code> 上是 TiDB rowid（TiDB 特产）信息，可在数据库中执行 <code>select * from tech.lineitem where _tidb_rowid = 5397937</code> 查看；这有助于你和开发一起聊业务代码逻辑。</p>
+</blockquote>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-sql" data-lang="sql"><span class="p">(</span><span class="n">root</span><span class="o">@</span><span class="mi">127</span><span class="p">.</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">.</span><span class="mi">1</span><span class="p">)</span> <span class="p">[</span><span class="n">tpch</span><span class="p">]</span><span class="o">&gt;</span><span class="k">select</span> <span class="o">*</span> <span class="k">from</span> <span class="n">lineitem</span> <span class="k">where</span> <span class="n">_tidb_rowid</span> <span class="o">=</span> <span class="mi">5397937</span><span class="p">;</span>
+<span class="o">+</span><span class="c1">------------+-----------+-----------+--------------+------------+-----------------+------------+-------+--------------+--------------+------------+--------------+---------------+-------------------+------------+-----------------------+
+</span><span class="c1"></span><span class="o">|</span> <span class="n">L_ORDERKEY</span> <span class="o">|</span> <span class="n">L_PARTKEY</span> <span class="o">|</span> <span class="n">L_SUPPKEY</span> <span class="o">|</span> <span class="n">L_LINENUMBER</span> <span class="o">|</span> <span class="n">L_QUANTITY</span> <span class="o">|</span> <span class="n">L_EXTENDEDPRICE</span> <span class="o">|</span> <span class="n">L_DISCOUNT</span> <span class="o">|</span> <span class="n">L_TAX</span> <span class="o">|</span> <span class="n">L_RETURNFLAG</span> <span class="o">|</span> <span class="n">L_LINESTATUS</span> <span class="o">|</span> <span class="n">L_SHIPDATE</span> <span class="o">|</span> <span class="n">L_COMMITDATE</span> <span class="o">|</span> <span class="n">L_RECEIPTDATE</span> <span class="o">|</span> <span class="n">L_SHIPINSTRUCT</span>    <span class="o">|</span> <span class="n">L_SHIPMODE</span> <span class="o">|</span> <span class="n">L_COMMENT</span>             <span class="o">|</span>
+<span class="o">+</span><span class="c1">------------+-----------+-----------+--------------+------------+-----------------+------------+-------+--------------+--------------+------------+--------------+---------------+-------------------+------------+-----------------------+
+</span><span class="c1"></span><span class="o">|</span>    <span class="mi">5372642</span> <span class="o">|</span>    <span class="mi">106219</span> <span class="o">|</span>      <span class="mi">8730</span> <span class="o">|</span>            <span class="mi">4</span> <span class="o">|</span>      <span class="mi">39</span><span class="p">.</span><span class="mi">00</span> <span class="o">|</span>        <span class="mi">47783</span><span class="p">.</span><span class="mi">19</span> <span class="o">|</span>       <span class="mi">0</span><span class="p">.</span><span class="mi">10</span> <span class="o">|</span>  <span class="mi">0</span><span class="p">.</span><span class="mi">08</span> <span class="o">|</span> <span class="n">A</span>            <span class="o">|</span> <span class="n">F</span>            <span class="o">|</span> <span class="mi">1994</span><span class="o">-</span><span class="mi">02</span><span class="o">-</span><span class="mi">07</span> <span class="o">|</span> <span class="mi">1994</span><span class="o">-</span><span class="mi">03</span><span class="o">-</span><span class="mi">28</span>   <span class="o">|</span> <span class="mi">1994</span><span class="o">-</span><span class="mi">02</span><span class="o">-</span><span class="mi">16</span>    <span class="o">|</span> <span class="n">DELIVER</span> <span class="k">IN</span> <span class="n">PERSON</span> <span class="o">|</span> <span class="n">RAIL</span>       <span class="o">|</span> <span class="n">e</span> <span class="n">evenly</span> <span class="n">carefully</span> <span class="n">un</span> <span class="o">|</span>
+<span class="o">+</span><span class="c1">------------+-----------+-----------+--------------+------------+-----------------+------------+-------+--------------+--------------+------------+--------------+---------------+-------------------+------------+-----------------------+
+</span><span class="c1"></span><span class="mi">1</span> <span class="k">row</span> <span class="k">in</span> <span class="k">set</span> <span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span> <span class="n">sec</span><span class="p">)</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="0x03-新知识">0x03 新知识</h2>
+<blockquote>
+<p>学习 key viz 期间遇见的新知识点，耳目一新的视角</p>
+</blockquote>
+<h3 id="pandadalao">Pandadalao</h3>
+<p>源代码存放在 Github <a href="https://github.com/andylokandy/drawvis" title="TiDB key-vis pandadalao">andylokandy/drawvis</a></p>
+<p><img src="./TiDB-Dashboard.png" alt="key-vis 作图"></p>
+<blockquote>
+<p>作图思路</p>
+</blockquote>
+<p>计算 d2.jpg 图片高度然后表里插入相应高度的数据：图片高度 == 数据库中的行数，假设图片 1000px 高度，在数据库插入 1000 行数据。</p>
+<p>然后从左向右、从上向下扫描黑色和白色；将竖着的黑色和白色映射为 Y 坐标，与数据库中 1 - 1000 行对应。</p>
+<p>扫描到白色情况下【链接到数据库】疯狂更新 Y 坐标对应行的数据，遇见黑色的情况停止增删改查。</p>
+<p>从左向右间隔 60s 执行一次，随着时间的流失，逐渐在 key-vis 上展现出来一张由高亮热点数据和暗部冷数据组成的图案。</p>
+<h3 id="know">Know</h3>
+<blockquote>
+<p>复制于：<a href="https://pingcap.com/blog-cn/observability-of-distributed-system/">我眼中的分布式系统可观测性</a><br>
+在过去，一个物理机器的状态确实可以通过几个监控指标描述，但是随着我们的系统越来越复杂，我们的观测对象正渐渐的从「Infrastructure」转到「应用」，观察行为本身从「Monitoring（监控）」到「Observability（观测）」。<br>
+虽然看上去这两者只是文字上的差别，但是请仔细思考背后的含义。关于这个话题，我很喜欢引用下面这张图：</p>
+</blockquote>
+<p><img src="./9-coordinate-drawing-2.png" alt="key-vis 作图"></p>
+<blockquote>
+<p>回到数据库的世界，TiDB KeyViz 的意义在于，就像上面提到的，这个工具不仅仅是一个监控工具，而且它能以一个非常低门槛且形象的方式让架构师具象化的看到自己对于业务的「假设」是否符合预期，这些「假设」不一定是能够通过监控反映的，以获得对业务更深刻的 Insight。</p>
+</blockquote>
+<h2 id="0x04-臆测">0x04 臆测</h2>
+<blockquote>
+<p>正向循环♻️体系</p>
+</blockquote>
+<p>TiDB 官方文档将 key viz 比喻为医疗行业 CT、核磁共振、X 光 等高精尖机器；现实中医生使用这些工具获取身体断层扫描资料做交叉对比，靠自身医学经验判断该目标是否身陷某种疾病，当有诊断目标后通过血常规、局部微创等进一步确定患者症状。</p>
+<p>目前 key viz 依据业务场景可以生成众多现象（图片），剩下的就是汇聚更多的场景 （ 业务逻辑 &amp; 数据结构 &amp; 读写频率 &amp; 修复方案 ）即可智能提出解决方案，毕竟 核磁、CT 等已经做到智能化识别肿瘤、病毒扩散等。</p>
+<p>上述文档中已知的几种类型图可转换为特征（医生知识库），根据 QPS、硬件资源占用 综合推算出目前机器可运行业务峰值扭矩，超过后会导致拐点出现断崖式下降。</p>
+<blockquote>
+<p>CT(Computed Tomography)，即电子计算机断层扫描，它是利用精确准直的 X 线束、γ射线、超声波等，与灵敏度极高的探测器一同围绕人体的某一部位作一个接一个的断面扫描，具有扫描时间快，图像清晰等特点，可用于多种疾病的检查；根据所采用的射线不同可分为：X 射线 CT（X-CT）以及γ射线 CT（γ-CT) 等。它根据人体不同组织对 X 线的吸收与透过率的不同，应用灵敏度极高的仪器对人体进行测量，然后将测量所获取的数据输入电子计算机，电子计算机对数据进行处理后，就可摄下人体被检查部位的断面或立体的图像，发现体内任何部位的细小病变。</p>
+<p>核磁共振 MRI 是一台巨大的圆筒状机器，能在受检者的周围制造一个强烈磁场区的环境，借由无线电波的脉冲撞击身体细胞中的氢原子核，改变身体内氢原子的排列，当氢原子再次进入适当的位置排列时，会发出无线电讯号，此讯号借由电脑的接收并加以分析及转换处理，可将身体构造及器官中的氢原子活动，转换成 2D 影像，因 MRI 运用了生化、物理特性来区分组织，获得的影像会比电脑断层更加详细。</p>
+</blockquote>
+<h3 id="无逻辑思考">无逻辑思考</h3>
+<p>现象 &ndash;&gt; 特征收集 &ndash;&gt;【初步判定 A &ndash;&gt; 收集依赖 B &ndash;&gt; 判定 A &ndash;&gt; 记录循环并继续判定 B （可能需要更高级专家会诊）】（直到解决循环中括号内疑问）&ndash;&gt; 解决整个问题并提出完整方案和后续优化建议</p>
+<p>这套过程基本上就是病人去医院后的流程</p>
+<p>现实例子： 头疼脑热（现象） &ndash;&gt; 根据特征现象送选 「脑科 or 感冒发烧」 &ndash;&gt; 【抽血化验、测体温 &ndash;&gt; 初步判定感冒了 &ndash;&gt; 等血常规结果发现是 各种减号  &ndash;&gt;  判定比较严重送去「传染科看是否为新冠病毒」 &ndash;&gt; 虚惊一场不是感冒，确认是新冠】 &ndash;&gt; 启动紧急预案&ndash;&gt; 检查接触并隔离人群 &ndash;&gt; 就地升华</p>
+<p>整个流程中：最大最长最复杂的是发现问题的过程，每次新工具的产生大家希望是发现更深刻的问题以及更快的发现核心问题，然感受到的是对被测介质加测更多的实验场景，导致被测介质不稳定从而爆发。那么怎么才能减少被测介质的实验场景或者减少被测介质焦作不安等煎熬心情呢？</p>
+<h3 id="展望理论">展望理论</h3>
+<blockquote>
+<p><a href="https://baike.baidu.com/item/%E5%B1%95%E6%9C%9B%E7%90%86%E8%AE%BA">展望理论</a>（prospect theory）也译作 “前景理论”</p>
+</blockquote>
+<p>有时参考点选择的不同甚至可以带来<a href="https://baike.baidu.com/item/%E6%A1%86%E6%9E%B6%E6%95%88%E5%BA%94/9738412">框架效应</a>，即同样的意思用收益型结果来表述，还是用损失型结果来表述，会影响人的选择。<br>
+比如有 100 个病人，用 (a)、(b) 两种治疗方案，可以将治疗结果表述为：方案 (a) 救活 50 人；方案 (b) 有 50% 的概率全部救活，50% 的概率无人救活；<br>
+也可以表述为：方案 (a) 死去 50 人；方案 (b) 有 50% 的概率无人死去，50% 的概率全部死去。</p>
+<p>多数人两次的选择是不一致的。因为第一种表述是以无人生还为参考点，每多救活一个人都是一种 “收益”；而第二种表述是以无人死去为参考点，每多死去一个人都是一种 “损失”。参考点选择不同改变了决策人的风险偏好，因而做出了不同选择。</p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Jeff</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2020-05-21
+        
+    </span>
+  </p>
+  
+  <p class="copyright-item">
+    <span class="item-title">License</span>
+    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span>
+  </p>
+</div>
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/keyvis/">keyvis</a>
+          </div>
+      <nav class="post-nav">
+        
+        <a class="next" href="/post/20200513-20-provisioning-grafana/">
+            <span class="next-text nav-default">监控组件 - Provisioning Grafana</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="https://github.com/BigerCAP/TiDB-AirPlan/issues" class="iconfont icon-github" title="github"></a>
+  <a href="https://ap.tidb.cc/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2020
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">TiDB - AirPlan</span>
+  </span>
+</div>
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js" integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js" integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin="anonymous"></script>
+  <script><!-- NOTE: timeago.js uses the language code format like "zh_CN" (underscore and case sensitive) -->
+    var languageCode = "en".replace(/-/g, '_').replace(/_(.*)/, function ($0, $1) {return $0.replace($1, $1.toUpperCase());});
+    timeago().render(document.querySelectorAll('.timeago'), languageCode);
+    timeago.cancel();  
+  </script>
+<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>
