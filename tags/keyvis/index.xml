@@ -21,5 +21,14 @@
       <description>0x00 KeyVis 不介绍这个功能来历了，贴点资料大家看下开心阅读 Cloud Bigtable【官方提供多国语言】 Key Visualizer 概览 Key Visualizer 使用入门 Key Visualizer 探索热图 Key Visualizer 热图模式 Key Visualizer 指标</description>
     </item>
     
+    <item>
+      <title>TiDB 4.0 新特性</title>
+      <link>https://ap.tidb.cc/post/20200504-19-tidb4.0/</link>
+      <pubDate>Mon, 04 May 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20200504-19-tidb4.0/</guid>
+      <description>0x00 Live 最近几周 TiDB 官方搞了好多次直播，一直在宣传 TiDB 4.0 版本的新特性，本文汇总下 4.0 特色功能；数据来源于 TiDB bilibili 直播、官网文档、用户微信群、公众号等几个地</description>
+    </item>
+    
   </channel>
 </rss>

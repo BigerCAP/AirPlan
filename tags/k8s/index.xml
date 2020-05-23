@@ -7,10 +7,19 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>TiDB - AirPlan</copyright>
-    <lastBuildDate>Wed, 08 Apr 2020 00:00:00 +0800</lastBuildDate>
+    <lastBuildDate>Mon, 04 May 2020 00:00:00 +0800</lastBuildDate>
     
 	<atom:link href="https://ap.tidb.cc/tags/k8s/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>TiDB 4.0 新特性</title>
+      <link>https://ap.tidb.cc/post/20200504-19-tidb4.0/</link>
+      <pubDate>Mon, 04 May 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20200504-19-tidb4.0/</guid>
+      <description>0x00 Live 最近几周 TiDB 官方搞了好多次直播，一直在宣传 TiDB 4.0 版本的新特性，本文汇总下 4.0 特色功能；数据来源于 TiDB bilibili 直播、官网文档、用户微信群、公众号等几个地</description>
+    </item>
     
     <item>
       <title>K8S 安装记录 - PV &amp; PVC</title>

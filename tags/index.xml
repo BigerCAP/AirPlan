@@ -67,6 +67,24 @@
     </item>
     
     <item>
+      <title>HTAP</title>
+      <link>https://ap.tidb.cc/tags/htap/</link>
+      <pubDate>Mon, 04 May 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/tags/htap/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>K8S</title>
+      <link>https://ap.tidb.cc/tags/k8s/</link>
+      <pubDate>Mon, 04 May 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/tags/k8s/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>monitoring</title>
       <link>https://ap.tidb.cc/tags/monitoring/</link>
       <pubDate>Thu, 16 Apr 2020 00:00:00 +0800</pubDate>
@@ -99,15 +117,6 @@
       <pubDate>Wed, 08 Apr 2020 00:00:00 +0800</pubDate>
       
       <guid>https://ap.tidb.cc/tags/deploy/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>K8S</title>
-      <link>https://ap.tidb.cc/tags/k8s/</link>
-      <pubDate>Wed, 08 Apr 2020 00:00:00 +0800</pubDate>
-      
-      <guid>https://ap.tidb.cc/tags/k8s/</guid>
       <description></description>
     </item>
     

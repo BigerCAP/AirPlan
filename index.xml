@@ -49,6 +49,15 @@
     </item>
     
     <item>
+      <title>TiDB 4.0 新特性</title>
+      <link>https://ap.tidb.cc/post/20200504-19-tidb4.0/</link>
+      <pubDate>Mon, 04 May 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20200504-19-tidb4.0/</guid>
+      <description>0x00 Live 最近几周 TiDB 官方搞了好多次直播，一直在宣传 TiDB 4.0 版本的新特性，本文汇总下 4.0 特色功能；数据来源于 TiDB bilibili 直播、官网文档、用户微信群、公众号等几个地</description>
+    </item>
+    
+    <item>
       <title>沙盘点将 - TiDB 监控知识初始化</title>
       <link>https://ap.tidb.cc/post/20200416-16-init-monitoring-map/</link>
       <pubDate>Thu, 16 Apr 2020 00:00:00 +0800</pubDate>
