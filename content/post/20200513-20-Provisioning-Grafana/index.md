@@ -37,9 +37,9 @@ Grafana 用于 TiDB-cluster 集群监控展示功能（如果不了解的同学�
     ```yaml
     apiVersion: 1
     deleteDatasources:
-    - name: cluster-1  # 此处传递的 tidb-ansible inventory.ini 文件中的 cluster-name
+      - name: cluster-1  # 此处传递的 tidb-ansible inventory.ini 文件中的 cluster-name
     datasources:
-    - name: cluster-1  # datasource 名称，在配置文件中唯一
+      - name: cluster-1  # datasource 名称，在配置文件中唯一
         type: prometheus
         access: proxy
         url: http://10.10.10.4:14090
@@ -49,7 +49,7 @@ Grafana 用于 TiDB-cluster 集群监控展示功能（如果不了解的同学�
         tlsAuthWithCACert: false
         version: 1
         editable: true
-    - name: cluster-2 # 这个是测试手写的
+      - name: cluster-2 # 这个是测试手写的
         type: prometheus
         access: proxy
         url: http://10.10.10.4:14090
@@ -67,7 +67,7 @@ Grafana 用于 TiDB-cluster 集群监控展示功能（如果不了解的同学�
     ```yaml
     apiVersion: 1
     providers:
-    - name: cluster-1
+      - name: cluster-1
         folder: cluster-1  # 在 Grafana 页面中显示
         type: file
         disableDeletion: false
@@ -75,7 +75,7 @@ Grafana 用于 TiDB-cluster 集群监控展示功能（如果不了解的同学�
         updateIntervalSeconds: 30
         options:
         path: /home/tmpuser/tidb-deploy/grafana-14409/cluster-1
-    - name: cluster-2
+      - name: cluster-2
         folder: cluster-2
         type: file
         disableDeletion: false
@@ -153,7 +153,6 @@ exec bin/bin/grafana-server \
     --config="/home/tmpuser/tidb-deploy/grafana-14409/conf/grafana.ini"
 ```
 
-
 ### Start log
 
 ```js
@@ -203,6 +202,43 @@ lvl=info msg="Initializing Stream Manager"
 lvl=info msg="HTTP Server Listen" logger=http.server address=0.0.0.0:14409 protocol=http subUrl= socket=
 ```
 
-## 0x04 下面没了
+## 0x04 issue
 
-没了……
+> 使用 provisioning/datasources/datasource.yml 该功能注意事项  
+> Could not find datasource Data source not found 告警  
+> ![alert Could not find datasource Data source not found](./alert-1.png)  
+
+添加 Datasources 会占用一个 DatasourcesID，Datasources 无法使用重复名字。  deleteDatasources 是执行删除 Datasources 操作（此时 datasource ID 1 被删除了）。重复执行 deleteDatasources 就会导致以上现象。  
+
+```yaml
+apiVersion: 1
+deleteDatasources:
+    - name: cluster-1
+```
+
+从 Grafana repo 粗略看了下 alert 绑定了 DatasourceID。  
+`systemdctl restart grafana-3000` 操作从内容看只会重复执行 `datasource.yml` ，没有执行 dashboard.yml 文件。老的 dashboard 绑定的信息还是 `datasource ID = 1`，所以会提示 `Could not find datasource Data source not found`。
+
+  ```go
+  // AlertQuery contains information about what datasource a query
+  // should be sent to and the query object.
+  type AlertQuery struct {
+      Model        *simplejson.Json
+      DatasourceID int64
+      From         string
+      To           string
+  }
+  ```
+
+> 解决方案
+
+1. 停止 grafana-service
+2. 删掉 `{{deploy_dir}}/data/grafana.db`「删除后所有自定义设置丢失」
+3. 将 `{{deploy_dir}}/conf/datasource.yml` 文件中的以下内容注视或者删除
+
+   ```yaml
+   deleteDatasources:
+     - name: temp
+    ```
+
+4. 重新启动 grafana-service
