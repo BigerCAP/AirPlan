@@ -13,6 +13,15 @@
     
     
     <item>
+      <title>TiDB - 4.0 版图分析</title>
+      <link>https://ap.tidb.cc/post/20200529-22-tidb-4.0/</link>
+      <pubDate>Wed, 13 May 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20200529-22-tidb-4.0/</guid>
+      <description>0x00 History TiDB 1.0 2017 年 10 月 16 日 TiDB 2.0 2018 年 4 月 27 日 TiDB 2.1 2018 年 11 月 30 日 TiDB 3.0 2019 年 6 月 28 日 TiDB 3.1 2020 年 4 月 16 日 TiDB 4.0 2020 年 5 月 28 日 0x01 4.0 没有故事可讲，看图吧 根据上一篇文档 TiDB</description>
+    </item>
+    
+    <item>
       <title>监控组件 - Provisioning Grafana</title>
       <link>https://ap.tidb.cc/post/20200513-20-provisioning-grafana/</link>
       <pubDate>Wed, 13 May 2020 00:00:00 +0800</pubDate>
