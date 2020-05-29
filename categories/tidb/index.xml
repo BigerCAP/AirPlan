@@ -7,10 +7,19 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>TiDB - AirPlan</copyright>
-    <lastBuildDate>Thu, 21 May 2020 00:00:00 +0800</lastBuildDate>
+    <lastBuildDate>Fri, 29 May 2020 00:00:00 +0800</lastBuildDate>
     
 	<atom:link href="https://ap.tidb.cc/categories/tidb/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>TiDB - 4.0 版图分析</title>
+      <link>https://ap.tidb.cc/post/20200529-22-tidb-4.0/</link>
+      <pubDate>Fri, 29 May 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20200529-22-tidb-4.0/</guid>
+      <description>0x00 History TiDB 1.0 2017 年 10 月 16 日 TiDB 2.0 2018 年 4 月 27 日 TiDB 2.1 2018 年 11 月 30 日 TiDB 3.0 2019 年 6 月 28 日 TiDB 3.1 2020 年 4 月 16 日 TiDB 4.0 2020 年 5 月 28 日 0x01 4.0 没有故事可讲，看图吧 根据上一篇文档 TiDB</description>
+    </item>
     
     <item>
       <title>TiDB 4.0 -- keyvis-diagnostics</title>
@@ -19,15 +28,6 @@
       
       <guid>https://ap.tidb.cc/post/20200521-21-keyvis/</guid>
       <description>0x00 KeyVis 不介绍这个功能来历了，贴点资料大家看下开心阅读 Cloud Bigtable【官方提供多国语言】 Key Visualizer 概览 Key Visualizer 使用入门 Key Visualizer 探索热图 Key Visualizer 热图模式 Key Visualizer 指标</description>
-    </item>
-    
-    <item>
-      <title>TiDB - 4.0 版图分析</title>
-      <link>https://ap.tidb.cc/post/20200529-22-tidb-4.0/</link>
-      <pubDate>Wed, 13 May 2020 00:00:00 +0800</pubDate>
-      
-      <guid>https://ap.tidb.cc/post/20200529-22-tidb-4.0/</guid>
-      <description>0x00 History TiDB 1.0 2017 年 10 月 16 日 TiDB 2.0 2018 年 4 月 27 日 TiDB 2.1 2018 年 11 月 30 日 TiDB 3.0 2019 年 6 月 28 日 TiDB 3.1 2020 年 4 月 16 日 TiDB 4.0 2020 年 5 月 28 日 0x01 4.0 没有故事可讲，看图吧 根据上一篇文档 TiDB</description>
     </item>
     
     <item>
