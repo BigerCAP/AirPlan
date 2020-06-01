@@ -7,7 +7,7 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>TiDB - AirPlan</copyright>
-    <lastBuildDate>Fri, 29 May 2020 00:00:00 +0800</lastBuildDate>
+    <lastBuildDate>Mon, 01 Jun 2020 00:00:00 +0800</lastBuildDate>
     
 	<atom:link href="https://ap.tidb.cc/tags/index.xml" rel="self" type="application/rss+xml" />
     
@@ -15,9 +15,18 @@
     <item>
       <title>AirPlan</title>
       <link>https://ap.tidb.cc/tags/airplan/</link>
-      <pubDate>Fri, 29 May 2020 00:00:00 +0800</pubDate>
+      <pubDate>Mon, 01 Jun 2020 00:00:00 +0800</pubDate>
       
       <guid>https://ap.tidb.cc/tags/airplan/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>CDC</title>
+      <link>https://ap.tidb.cc/tags/cdc/</link>
+      <pubDate>Mon, 01 Jun 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/tags/cdc/</guid>
       <description></description>
     </item>
     

@@ -10,48 +10,62 @@
   
   <url>
     <loc>https://ap.tidb.cc/tags/airplan/</loc>
-    <lastmod>2020-05-29T00:00:00+08:00</lastmod>
+    <lastmod>2020-06-01T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://ap.tidb.cc/categories/</loc>
-    <lastmod>2020-05-29T00:00:00+08:00</lastmod>
+    <lastmod>2020-06-01T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/cdc/</loc>
+    <lastmod>2020-06-01T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://ap.tidb.cc/post/</loc>
-    <lastmod>2020-05-29T00:00:00+08:00</lastmod>
+    <lastmod>2020-06-01T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://ap.tidb.cc/tags/</loc>
-    <lastmod>2020-05-29T00:00:00+08:00</lastmod>
+    <lastmod>2020-06-01T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://ap.tidb.cc/categories/tidb/</loc>
-    <lastmod>2020-05-29T00:00:00+08:00</lastmod>
+    <lastmod>2020-06-01T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
-    <loc>https://ap.tidb.cc/post/20200529-22-tidb-4.0/</loc>
-    <lastmod>2020-05-29T00:00:00+08:00</lastmod>
+    <loc>https://ap.tidb.cc/post/20200601-23-cdc-4.0rc1/</loc>
+    <lastmod>2020-06-01T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://ap.tidb.cc/</loc>
+    <lastmod>2020-06-01T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/post/20200529-22-tidb-4.0/</loc>
     <lastmod>2020-05-29T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>

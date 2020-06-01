@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>CDC on TiDB AirPlan - A biger solution</title>
+    <link>https://ap.tidb.cc/tags/cdc/</link>
+    <description>Recent content in CDC on TiDB AirPlan - A biger solution</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright>TiDB - AirPlan</copyright>
+    <lastBuildDate>Mon, 01 Jun 2020 00:00:00 +0800</lastBuildDate>
+    
+	<atom:link href="https://ap.tidb.cc/tags/cdc/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>TiDB - CDC RC1 测试</title>
+      <link>https://ap.tidb.cc/post/20200601-23-cdc-4.0rc1/</link>
+      <pubDate>Mon, 01 Jun 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20200601-23-cdc-4.0rc1/</guid>
+      <description>0x00 CDC 嗯，同场竞技 Binlog 与 CDC 组件 本页内容仅针对 v4.0.0-rc.1-25 版本，不对后续操作做任何评价 // 最终解释权归制图者 本页无言，看图脑补 参考各种 官网文档 安装部署 Github Repo TiCDC Improve</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>TiDB - 4.0 版图分析 - TiDB AirPlan - A biger solution</title>
+  <title>TiDB - CDC RC1 测试 - TiDB AirPlan - A biger solution</title>
   <meta name="renderer" content="webkit" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
 
@@ -16,7 +16,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
 
 
-<meta name="author" content="Jeff" /><meta name="description" content="0x00 History TiDB 1.0 2017 年 10 月 16 日 TiDB 2.0 2018 年 4 月 27 日 TiDB 2.1 2018 年 11 月 30 日 TiDB 3.0 2019 年 6 月 28 日 TiDB 3.1 2020 年 4 月 16 日 TiDB 4.0 2020 年 5 月 28 日 0x01 4.0 没有故事可讲，看图吧 根据上一篇文档 TiDB" /><meta name="keywords" content="TiDB, AirPlan, TiDB OPS, tidb-operator, 2pc, raft, databases, mysql, htap" />
+<meta name="author" content="Jeff" /><meta name="description" content="0x00 CDC 嗯，同场竞技 Binlog 与 CDC 组件 本页内容仅针对 v4.0.0-rc.1-25 版本，不对后续操作做任何评价 // 最终解释权归制图者 本页无言，看图脑补 参考各种 官网文档 安装部署 Github Repo TiCDC Improve" /><meta name="keywords" content="TiDB, AirPlan, TiDB OPS, tidb-operator, 2pc, raft, databases, mysql, htap" />
 
 
 
@@ -26,7 +26,7 @@
 <meta name="generator" content="Hugo 0.63.2 with theme even" />
 
 
-<link rel="canonical" href="https://ap.tidb.cc/post/20200529-22-tidb-4.0/" />
+<link rel="canonical" href="https://ap.tidb.cc/post/20200601-23-cdc-4.0rc1/" />
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -38,23 +38,23 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
 
 
-<meta property="og:title" content="TiDB - 4.0 版图分析" />
-<meta property="og:description" content="0x00 History TiDB 1.0 2017 年 10 月 16 日 TiDB 2.0 2018 年 4 月 27 日 TiDB 2.1 2018 年 11 月 30 日 TiDB 3.0 2019 年 6 月 28 日 TiDB 3.1 2020 年 4 月 16 日 TiDB 4.0 2020 年 5 月 28 日 0x01 4.0 没有故事可讲，看图吧 根据上一篇文档 TiDB" />
+<meta property="og:title" content="TiDB - CDC RC1 测试" />
+<meta property="og:description" content="0x00 CDC 嗯，同场竞技 Binlog 与 CDC 组件 本页内容仅针对 v4.0.0-rc.1-25 版本，不对后续操作做任何评价 // 最终解释权归制图者 本页无言，看图脑补 参考各种 官网文档 安装部署 Github Repo TiCDC Improve" />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://ap.tidb.cc/post/20200529-22-tidb-4.0/" />
-<meta property="article:published_time" content="2020-05-29T00:00:00+08:00" />
-<meta property="article:modified_time" content="2020-05-29T00:00:00+08:00" />
-<meta itemprop="name" content="TiDB - 4.0 版图分析">
-<meta itemprop="description" content="0x00 History TiDB 1.0 2017 年 10 月 16 日 TiDB 2.0 2018 年 4 月 27 日 TiDB 2.1 2018 年 11 月 30 日 TiDB 3.0 2019 年 6 月 28 日 TiDB 3.1 2020 年 4 月 16 日 TiDB 4.0 2020 年 5 月 28 日 0x01 4.0 没有故事可讲，看图吧 根据上一篇文档 TiDB">
-<meta itemprop="datePublished" content="2020-05-29T00:00:00&#43;08:00" />
-<meta itemprop="dateModified" content="2020-05-29T00:00:00&#43;08:00" />
-<meta itemprop="wordCount" content="428">
+<meta property="og:url" content="https://ap.tidb.cc/post/20200601-23-cdc-4.0rc1/" />
+<meta property="article:published_time" content="2020-06-01T00:00:00+08:00" />
+<meta property="article:modified_time" content="2020-06-01T00:00:00+08:00" />
+<meta itemprop="name" content="TiDB - CDC RC1 测试">
+<meta itemprop="description" content="0x00 CDC 嗯，同场竞技 Binlog 与 CDC 组件 本页内容仅针对 v4.0.0-rc.1-25 版本，不对后续操作做任何评价 // 最终解释权归制图者 本页无言，看图脑补 参考各种 官网文档 安装部署 Github Repo TiCDC Improve">
+<meta itemprop="datePublished" content="2020-06-01T00:00:00&#43;08:00" />
+<meta itemprop="dateModified" content="2020-06-01T00:00:00&#43;08:00" />
+<meta itemprop="wordCount" content="94">
 
 
 
-<meta itemprop="keywords" content="AirPlan," /><meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="TiDB - 4.0 版图分析"/>
-<meta name="twitter:description" content="0x00 History TiDB 1.0 2017 年 10 月 16 日 TiDB 2.0 2018 年 4 月 27 日 TiDB 2.1 2018 年 11 月 30 日 TiDB 3.0 2019 年 6 月 28 日 TiDB 3.1 2020 年 4 月 16 日 TiDB 4.0 2020 年 5 月 28 日 0x01 4.0 没有故事可讲，看图吧 根据上一篇文档 TiDB"/>
+<meta itemprop="keywords" content="AirPlan,CDC," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="TiDB - CDC RC1 测试"/>
+<meta name="twitter:description" content="0x00 CDC 嗯，同场竞技 Binlog 与 CDC 组件 本页内容仅针对 v4.0.0-rc.1-25 版本，不对后续操作做任何评价 // 最终解释权归制图者 本页无言，看图脑补 参考各种 官网文档 安装部署 Github Repo TiCDC Improve"/>
 
 <!--[if lte IE 9]>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
@@ -121,14 +121,14 @@
           <article class="post">
     
     <header class="post-header">
-      <h1 class="post-title">TiDB - 4.0 版图分析</h1>
+      <h1 class="post-title">TiDB - CDC RC1 测试</h1>
 
       <div class="post-meta">
-        <span class="post-time"> 2020-05-29 </span>
+        <span class="post-time"> 2020-06-01 </span>
         <div class="post-category">
             <a href="/categories/tidb/"> TiDB </a>
             </div>
-          <span class="more-meta"> 428 words </span>
+          <span class="more-meta"> 94 words </span>
           <span class="more-meta"> 1 min read </span>
         <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
       </div>
@@ -139,99 +139,33 @@
   <div class="post-toc-content">
     <nav id="TableOfContents">
   <ul>
-    <li><a href="#0x00-history">0x00 History</a></li>
-    <li><a href="#0x01-40">0x01 4.0</a></li>
-    <li><a href="#0x02-未来可期">0x02 未来可期</a></li>
+    <li><a href="#0x00-cdc">0x00 CDC</a></li>
   </ul>
 </nav>
   </div>
 </div>
     <div class="post-content">
-      <h2 id="0x00-history">0x00 History</h2>
-<ul>
-<li>TiDB 1.0 2017 年 10 月 16 日</li>
-<li>TiDB 2.0 2018 年 4 月 27 日</li>
-<li>TiDB 2.1 2018 年 11 月 30 日</li>
-<li>TiDB 3.0 2019 年 6 月 28 日</li>
-<li>TiDB 3.1 2020 年 4 月 16 日</li>
-<li>TiDB 4.0 2020 年 5 月 28 日</li>
-</ul>
-<h2 id="0x01-40">0x01 4.0</h2>
+      <h2 id="0x00-cdc">0x00 CDC</h2>
 <blockquote>
-<p>没有故事可讲，看图吧<br>
-根据上一篇文档 <a href="/post/20200504-19-tidb4.0/">TiDB 4.0 新特性</a>和各种猜测揣摩构图<br>
-<strong>本图不代表 TiDB 官方解答，部分组件还未 GA ，请勿直接引用复制</strong><br>
-<strong>本图不代表 TiDB 官方解答，部分组件还未 GA ，请勿直接引用复制</strong><br>
-<strong>本图不代表 TiDB 官方解答，部分组件还未 GA ，请勿直接引用复制</strong></p>
+<p>嗯，同场竞技 Binlog 与 CDC 组件<br>
+本页内容仅针对 v4.0.0-rc.1-25 版本，不对后续操作做任何评价 //  最终解释权归制图者</p>
 </blockquote>
-<p><img src="./TiDB-4.0.png" alt="TiDB-4.0 版图分析" title="TiDB-4.0 版图分析"></p>
-<h2 id="0x02-未来可期">0x02 未来可期</h2>
-<blockquote>
-<p>一些组成故事和场景的关键词，具体故事内容自行脑补</p>
-</blockquote>
-<ol>
-<li>online DDL</li>
-<li>scale out</li>
-<li>region schedule
+<p>本页无言，看图脑补</p>
 <ul>
-<li>hot region
+<li>参考各种
 <ul>
-<li>follower read（部分）</li>
+<li>官网文档 <a href="https://pingcap.com/docs-cn/stable/ticdc/ticdc-overview/">安装部署</a></li>
+<li>Github Repo <a href="https://github.com/pingcap/ticdc">TiCDC</a>
+<ul>
+<li>Improve usability in cdc client <a href="https://github.com/pingcap/ticdc/issues/542">Issue 542</a></li>
 </ul>
 </li>
-<li>静默 region</li>
+<li>官网文档 TiKV <a href="https://pingcap.com/docs-cn/stable/garbage-collection-overview/">GC 机制介绍</a></li>
+<li>官网文档 <a href="https://pingcap.com/docs-cn/stable/tidb-binlog/tidb-binlog-overview/">TiDB Binlog 简介</a></li>
 </ul>
 </li>
-<li>超大容量</li>
-<li>高可用
-<ul>
-<li>Raft</li>
-<li>无状态组件</li>
 </ul>
-</li>
-<li>未来可期
-<ul>
-<li>文档、工具、生态</li>
-<li>代码开源</li>
-<li>成本：支出 &amp; 收益
-<ul>
-<li>硬件支出与用户量线性可控</li>
-<li>收益 与 “平台” 互相扩展</li>
-</ul>
-</li>
-<li>员工幸福度</li>
-</ul>
-</li>
-<li>平台化、标准化
-<ul>
-<li>精细可控、水到渠成</li>
-<li>打包、共享、自主、灵活</li>
-</ul>
-</li>
-<li>路程 == 不同硬件场景适配
-<ul>
-<li>从传统到共有云</li>
-<li>从共有云回归私有云</li>
-<li>从私有云到 K8S</li>
-<li>从人造肉故障到自动化运维</li>
-<li>顺应时代的变迁</li>
-</ul>
-</li>
-<li>心砺 == 不同软件场景适配
-<ul>
-<li>金融、保险、证券；厂商 mysql  protocols 保底</li>
-<li>互联网快速迭代，粮草满足战场</li>
-</ul>
-</li>
-<li>大、快、稳
-<ul>
-<li>大数据量到来了</li>
-<li>快速分析需求到来了</li>
-<li>同时跑起来还要稳起来</li>
-</ul>
-</li>
-</ol>
-<p><img src="./bigfish.jpeg" alt="大鱼吃小鱼的故事"></p>
+<p><img src="./CDC.png" alt="CDC 测试脑图"></p>
 
     </div>
 
@@ -243,7 +177,7 @@
   <p class="copyright-item">
     <span class="item-title">LastMod</span>
     <span class="item-content">
-        2020-05-29
+        2020-06-01
         
     </span>
   </p>
@@ -256,15 +190,12 @@
 <footer class="post-footer">
       <div class="post-tags">
           <a href="/tags/airplan/">AirPlan</a>
+          <a href="/tags/cdc/">CDC</a>
           </div>
       <nav class="post-nav">
-        <a class="prev" href="/post/20200601-23-cdc-4.0rc1/">
-            <i class="iconfont icon-left"></i>
-            <span class="prev-text nav-default">TiDB - CDC RC1 测试</span>
-            <span class="prev-text nav-mobile">Prev</span>
-          </a>
-        <a class="next" href="/post/20200521-21-keyvis/">
-            <span class="next-text nav-default">TiDB 4.0 -- keyvis-diagnostics</span>
+        
+        <a class="next" href="/post/20200529-22-tidb-4.0/">
+            <span class="next-text nav-default">TiDB - 4.0 版图分析</span>
             <span class="next-text nav-mobile">Next</span>
             <i class="iconfont icon-right"></i>
           </a>
