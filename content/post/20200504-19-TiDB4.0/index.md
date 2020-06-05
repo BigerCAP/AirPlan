@@ -13,6 +13,8 @@ tags:
 
 最近几周 TiDB 官方搞了好多次直播，一直在宣传 TiDB 4.0 版本的新特性，本文汇总下 4.0 特色功能；数据来源于 TiDB bilibili 直播、官网文档、用户微信群、公众号等几个地方。
 
+![TiDB 重点](./TiDB4.png)
+
 ## 0x01 new bee
 
 > 部分数据来源与官方文档 [TiDB 4.0 新特性尝鲜指南](https://pingcap.com/blog-cn/tidb-4.0-new-features-tasting-guide/)
