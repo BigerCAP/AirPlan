@@ -18,7 +18,7 @@
       <pubDate>Mon, 01 Jun 2020 00:00:00 +0800</pubDate>
       
       <guid>https://ap.tidb.cc/post/20200601-23-cdc-4.0rc1/</guid>
-      <description>0x00 CDC 嗯，同场竞技 Binlog 与 CDC 组件 本页内容仅针对 v4.0.0-rc.1-25 版本，不对后续操作做任何评价 // 最终解释权归制图者 本页无言，看图脑补 参考各种 官网文档 安装部署 Github Repo TiCDC Improve</description>
+      <description>0x00 CDC 嗯，同场竞技 Binlog 与 CDC 组件 本页内容仅针对 v4.0.0-rc.1-25 版本，不对后续版本做任何预测性的评论 // 最终解释权归制图者 参考各种文档 官网文档 安装部署 Github Repo TiCDC Improve usability in cdc</description>
     </item>
     
   </channel>
