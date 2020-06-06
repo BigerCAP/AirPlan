@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Look on TiDB AirPlan - A biger solution</title>
-    <link>https://ap.tidb.cc/categories/look/</link>
-    <description>Recent content in Look on TiDB AirPlan - A biger solution</description>
+    <title>Book on TiDB AirPlan - A biger solution</title>
+    <link>https://ap.tidb.cc/tags/book/</link>
+    <description>Recent content in Book on TiDB AirPlan - A biger solution</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>TiDB - AirPlan</copyright>
     <lastBuildDate>Sat, 06 Jun 2020 00:00:00 +0800</lastBuildDate>
     
-	<atom:link href="https://ap.tidb.cc/categories/look/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://ap.tidb.cc/tags/book/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
@@ -19,15 +19,6 @@
       
       <guid>https://ap.tidb.cc/look/20200606-23-inspired/</guid>
       <description>0x00 inspired douban link 产品是什么 产品经理职能定义 产品未来发展方向 平台打包 产品与用户之间的情感曲线 0x01 人人都是产品经理 douban link 0x02 未完待续</description>
-    </item>
-    
-    <item>
-      <title>Raft 多数派选举策略</title>
-      <link>https://ap.tidb.cc/look/20200509-19-raft/</link>
-      <pubDate>Sat, 09 May 2020 00:00:00 +0800</pubDate>
-      
-      <guid>https://ap.tidb.cc/look/20200509-19-raft/</guid>
-      <description>0x00 Look 全文复制 青蛙小白 - Raft Raft 多数派选举策略 分布式一致性协议允许一组服务器节点像一个整体一样工作，允许其中一些节点出现故障也能继续工作下去。正式</description>
     </item>
     
   </channel>

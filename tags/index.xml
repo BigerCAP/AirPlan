@@ -7,10 +7,28 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>TiDB - AirPlan</copyright>
-    <lastBuildDate>Mon, 01 Jun 2020 00:00:00 +0800</lastBuildDate>
+    <lastBuildDate>Sat, 06 Jun 2020 00:00:00 +0800</lastBuildDate>
     
 	<atom:link href="https://ap.tidb.cc/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Book</title>
+      <link>https://ap.tidb.cc/tags/book/</link>
+      <pubDate>Sat, 06 Jun 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/tags/book/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Product manager</title>
+      <link>https://ap.tidb.cc/tags/product-manager/</link>
+      <pubDate>Sat, 06 Jun 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/tags/product-manager/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>AirPlan</title>
