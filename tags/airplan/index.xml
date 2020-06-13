@@ -7,10 +7,19 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>TiDB - AirPlan</copyright>
-    <lastBuildDate>Mon, 01 Jun 2020 00:00:00 +0800</lastBuildDate>
+    <lastBuildDate>Fri, 12 Jun 2020 00:00:00 +0800</lastBuildDate>
     
 	<atom:link href="https://ap.tidb.cc/tags/airplan/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>软件测试 - S3 协议与 minio</title>
+      <link>https://ap.tidb.cc/post/20200612-24-minio/</link>
+      <pubDate>Fri, 12 Jun 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20200612-24-minio/</guid>
+      <description>0x00 S3 S3（Amazon Simple Storage Service (Amazon S3)）着重于简易性和稳健性的最小功能集【具体信息跳转到 亚马逊 S3 技术介绍页面】： 创建存储桶 – 创建和命名存储数据</description>
+    </item>
     
     <item>
       <title>TiDB - CDC RC1 测试</title>

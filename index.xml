@@ -7,7 +7,7 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>TiDB - AirPlan</copyright>
-    <lastBuildDate>Sat, 06 Jun 2020 00:00:00 +0800</lastBuildDate>
+    <lastBuildDate>Fri, 12 Jun 2020 00:00:00 +0800</lastBuildDate>
     
 	<atom:link href="https://ap.tidb.cc/index.xml" rel="self" type="application/rss+xml" />
     
@@ -19,6 +19,15 @@
       
       <guid>https://ap.tidb.cc/about/</guid>
       <description>About | TiDB AirPlan 本站内容信仰：望闻问切之术 望而知之谓之神，闻而知之谓之圣 问而知之谓之工，切脉而知之谓之巧 缘由 域名：ap.tidb.cc 中的前缀 ap 为 air</description>
+    </item>
+    
+    <item>
+      <title>软件测试 - S3 协议与 minio</title>
+      <link>https://ap.tidb.cc/post/20200612-24-minio/</link>
+      <pubDate>Fri, 12 Jun 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20200612-24-minio/</guid>
+      <description>0x00 S3 S3（Amazon Simple Storage Service (Amazon S3)）着重于简易性和稳健性的最小功能集【具体信息跳转到 亚马逊 S3 技术介绍页面】： 创建存储桶 – 创建和命名存储数据</description>
     </item>
     
     <item>
@@ -73,6 +82,15 @@
       
       <guid>https://ap.tidb.cc/look/20200509-19-raft/</guid>
       <description>0x00 Look 全文复制 青蛙小白 - Raft Raft 多数派选举策略 分布式一致性协议允许一组服务器节点像一个整体一样工作，允许其中一些节点出现故障也能继续工作下去。正式</description>
+    </item>
+    
+    <item>
+      <title>TPC-C 相关内容</title>
+      <link>https://ap.tidb.cc/look/20200525-22-tpcc/</link>
+      <pubDate>Sat, 09 May 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/look/20200525-22-tpcc/</guid>
+      <description>0x00 TPC-C 是 TPC(Transaction Processing Performance Council) 组织发布的一个测试规范，用于模拟测试复杂的在线事务处理系统。其测试结果包括每分钟事务数 (tpmC)，以及每事务的成本 (Pric</description>
     </item>
     
     <item>

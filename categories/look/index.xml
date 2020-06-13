@@ -30,5 +30,14 @@
       <description>0x00 Look 全文复制 青蛙小白 - Raft Raft 多数派选举策略 分布式一致性协议允许一组服务器节点像一个整体一样工作，允许其中一些节点出现故障也能继续工作下去。正式</description>
     </item>
     
+    <item>
+      <title>TPC-C 相关内容</title>
+      <link>https://ap.tidb.cc/look/20200525-22-tpcc/</link>
+      <pubDate>Sat, 09 May 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/look/20200525-22-tpcc/</guid>
+      <description>0x00 TPC-C 是 TPC(Transaction Processing Performance Council) 组织发布的一个测试规范，用于模拟测试复杂的在线事务处理系统。其测试结果包括每分钟事务数 (tpmC)，以及每事务的成本 (Pric</description>
+    </item>
+    
   </channel>
 </rss>
