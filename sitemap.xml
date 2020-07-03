@@ -10,34 +10,55 @@
   
   <url>
     <loc>https://ap.tidb.cc/tags/airplan/</loc>
-    <lastmod>2020-06-18T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://ap.tidb.cc/tags/br/</loc>
-    <lastmod>2020-06-18T00:00:00+08:00</lastmod>
+    <lastmod>2020-07-03T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://ap.tidb.cc/categories/</loc>
-    <lastmod>2020-06-18T00:00:00+08:00</lastmod>
+    <lastmod>2020-07-03T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://ap.tidb.cc/post/</loc>
-    <lastmod>2020-06-18T00:00:00+08:00</lastmod>
+    <lastmod>2020-07-03T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://ap.tidb.cc/tags/</loc>
+    <lastmod>2020-07-03T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/</loc>
+    <lastmod>2020-07-03T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/categories/troubleshooting/</loc>
+    <lastmod>2020-07-03T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/post/20200703-27-tskill/</loc>
+    <lastmod>2020-07-03T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/br/</loc>
     <lastmod>2020-06-18T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -52,13 +73,6 @@
   
   <url>
     <loc>https://ap.tidb.cc/post/20200618-25-br-rc/</loc>
-    <lastmod>2020-06-18T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://ap.tidb.cc/</loc>
     <lastmod>2020-06-18T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -395,13 +409,6 @@
   
   <url>
     <loc>https://ap.tidb.cc/tags/mindmap/</loc>
-    <lastmod>2020-02-05T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://ap.tidb.cc/categories/troubleshooting/</loc>
     <lastmod>2020-02-05T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>

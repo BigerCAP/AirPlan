@@ -7,10 +7,19 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>TiDB - AirPlan</copyright>
-    <lastBuildDate>Wed, 17 Jun 2020 00:00:00 +0800</lastBuildDate>
+    <lastBuildDate>Thu, 02 Jul 2020 00:00:00 +0800</lastBuildDate>
     
 	<atom:link href="https://ap.tidb.cc/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>九死一生 - 运维小技巧</title>
+      <link>https://ap.tidb.cc/post/20200703-27-tskill/</link>
+      <pubDate>Thu, 02 Jul 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20200703-27-tskill/</guid>
+      <description>0x00 陷入江局 回顾下前两篇文档 《纸上谈兵 - TiDB 性能调优》&amp;amp; 《沙盘点将 - TiDB 监控知识初始化》；处理问题的时候从总是一脸懵逼到偶尔无证懵逼；然后</description>
+    </item>
     
     <item>
       <title>TiDB - Backup/Restore 测试</title>
