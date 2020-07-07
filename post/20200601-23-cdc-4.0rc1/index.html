@@ -48,7 +48,7 @@
 <meta itemprop="description" content="0x00 CDC 嗯，同场竞技 Binlog 与 CDC 组件 本页内容仅针对 v4.0.0-rc.1-25 版本，不对后续版本做任何预测性的评论 // 最终解释权归制图者 参考各种文档 官网文档 安装部署 Github Repo TiCDC Improve usability in cdc">
 <meta itemprop="datePublished" content="2020-06-01T00:00:00&#43;08:00" />
 <meta itemprop="dateModified" content="2020-06-01T00:00:00&#43;08:00" />
-<meta itemprop="wordCount" content="748">
+<meta itemprop="wordCount" content="1534">
 
 
 
@@ -128,8 +128,8 @@
         <div class="post-category">
             <a href="/categories/tidb/"> TiDB </a>
             </div>
-          <span class="more-meta"> 748 words </span>
-          <span class="more-meta"> 2 mins read </span>
+          <span class="more-meta"> 1534 words </span>
+          <span class="more-meta"> 4 mins read </span>
         <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
       </div>
     </header>
@@ -141,7 +141,8 @@
   <ul>
     <li><a href="#0x00-cdc">0x00 CDC</a></li>
     <li><a href="#0x01-gc-safepoint">0x01 GC safepoint</a></li>
-    <li><a href="#0x01-case">0x01 case</a></li>
+    <li><a href="#0x02-case">0x02 CASE</a></li>
+    <li><a href="#0x03-faq">0x03 FAQ</a></li>
   </ul>
 </nav>
   </div>
@@ -168,12 +169,14 @@
 </ul>
 <p><img src="./CDC.png" alt="CDC 测试脑图"></p>
 <ul>
-<li>未测试
+<li>测试状态 lastdate 20200707
 <ul>
 <li><input disabled="" type="checkbox">主从跨机房部署</li>
 <li><input disabled="" type="checkbox">事物一致性还原（过程一致性、最终一致性）</li>
 <li><input disabled="" type="checkbox">主备灾难时 CDC 状态</li>
-<li><input disabled="" type="checkbox">CDC 自定义数据源输出</li>
+<li><input checked="" disabled="" type="checkbox">CDC 自定义数据源输出；支持 canal 协议「写入到 kafka」</li>
+<li><input checked="" disabled="" type="checkbox">db/table 过滤；支持完整的 <a href="https://github.com/pingcap/tidb-tools/blob/master/pkg/table-filter/README.md#wildcards">Wildcards</a></li>
+<li><input checked="" disabled="" type="checkbox">支持环形复制</li>
 </ul>
 </li>
 </ul>
@@ -200,7 +203,7 @@
 <span class="mi">416997967863480321</span>
 </code></pre></td></tr></table>
 </div>
-</div><h2 id="0x01-case">0x01 case</h2>
+</div><h2 id="0x02-case">0x02 CASE</h2>
 <ul>
 <li>
 <p>创建一个同步任务</p>
@@ -231,7 +234,7 @@
 <li>
 <p>各种查看</p>
 <ul>
-<li>capture / jianjie 等于一个 CDC server</li>
+<li>capture / 间接等于一个 CDC server</li>
 <li>change feed / 等于一个同步任务</li>
 </ul>
 <div class="highlight"><div class="chroma">
@@ -436,6 +439,119 @@
 </div>
 </div></li>
 </ul>
+<h2 id="0x03-faq">0x03 FAQ</h2>
+<blockquote>
+<p>测试时问题处理思路</p>
+</blockquote>
+<ul>
+<li>GC not work 告警
+<ul>
+<li>影响：MVCC 版本过多，TikV 数据存储空间变大</li>
+<li>原因：changefeed 依赖 TiKV MVCC + Raft log 解析数据，mvcc 数据在未同步到下游时被 GC 删除会导致数据同步丢失；
+<ul>
+<li>场景 1：changefeed 同步的快慢与 GC worker 有关系，怎么解决 change feed 同步速度问题；手下要了解 change feed 怎么来的
+<ol>
+<li>CDC 链接 PD 获取 TiKV 节点信息</li>
+<li>CDC 创建 change feed，change feed 信息存储在 PD etcd 中「cdc 高可用中心节点」</li>
+<li>CDC 接受 TiKV 主动推送数据「与 change feed 有关系」放在 <strong>cdc 内存</strong> 里解析、转换 SQL「数据量过大可能造成 OOM，官网有解决方案」「此处非全局有序（单个 change feed 可以放在多个 CDC 上负载方式运行）」</li>
+<li>CDC 将 SQL 写入到下游 TiDB「并发由 worker-count&amp;max-txn-row 控制」「不支持同步无主键或无唯一索引的表」</li>
+<li>回顾下：CDC 个数、下游的吞吐能力、上下游网络延迟 决定了同步速度快慢（隐藏条件 CDC 内存处理性能）</li>
+</ol>
+</li>
+<li>场景 2：CDC 创建多个 change feed 任务，其中有任务状态为 pause（<a href="https://pingcap.com/docs-cn/stable/ticdc/manage-ticdc/#%E6%9F%A5%E8%AF%A2%E7%89%B9%E5%AE%9A%E5%90%8C%E6%AD%A5%E4%BB%BB%E5%8A%A1">admin job type</a> = 1）；
+<ul>
+<li>pause 状态下防止丢失“数据窗口”信息，会停止 MVCC 数据 GC 直到状态更改为 remove（3）或者等 resume（2）正常消费</li>
+<li>使用 <code>cdc cli changefeed query</code> 查看</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>其他</p>
+</blockquote>
+<ul>
+<li>创建一条 changefeed 过程</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-go" data-lang="go"><span class="p">[</span><span class="nx">owner</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">822</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;watch capture exited&#34;</span><span class="p">]</span>
+<span class="p">[</span><span class="nx">server</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">159</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;campaign owner successfully&#34;</span><span class="p">]</span> <span class="p">[</span><span class="nx">capture</span><span class="p">=</span><span class="nx">fde93803</span><span class="o">-</span><span class="nx">d051</span><span class="o">-</span><span class="mi">42</span><span class="nx">f6</span><span class="o">-</span><span class="mi">92</span><span class="nx">c9</span><span class="o">-</span><span class="nx">dfa7896a4b71</span><span class="p">]</span>
+<span class="p">[</span><span class="nx">client</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">141</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;[pd] create pd client with endpoints&#34;</span><span class="p">]</span> <span class="p">[</span><span class="nx">pd</span><span class="o">-</span><span class="nx">address</span><span class="p">=</span><span class="s">&#34;[http://172.16.4.51:14379]&#34;</span><span class="p">]</span>
+<span class="p">[</span><span class="nx">base_client</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">242</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;[pd] switch leader&#34;</span><span class="p">]</span> <span class="p">[</span><span class="nx">new</span><span class="o">-</span><span class="nx">leader</span><span class="p">=</span><span class="nx">http</span><span class="p">:</span><span class="c1">//172.16.4.51:14379] [old-leader=]
+</span><span class="c1"></span><span class="p">[</span><span class="nx">base_client</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">92</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;[pd] init cluster id&#34;</span><span class="p">]</span> <span class="p">[</span><span class="nx">cluster</span><span class="o">-</span><span class="nx">id</span><span class="p">=</span><span class="mi">6826949771068502967</span><span class="p">]</span>
+<span class="p">[</span><span class="nx">owner</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">810</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;start to watch captures&#34;</span><span class="p">]</span>
+<span class="p">[</span><span class="nx">owner</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">740</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;monitoring captures&#34;</span><span class="p">]</span> <span class="p">[</span><span class="nx">key</span><span class="p">=</span><span class="o">/</span><span class="nx">tidb</span><span class="o">/</span><span class="nx">cdc</span><span class="o">/</span><span class="nx">capture</span><span class="p">]</span> <span class="p">[</span><span class="nx">rev</span><span class="p">=</span><span class="mi">1574342</span><span class="p">]</span>
+<span class="p">[</span><span class="nx">owner</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">416</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;handle admin job&#34;</span><span class="p">]</span> <span class="p">[</span><span class="nx">changefeed</span><span class="p">=</span><span class="mi">6281</span><span class="nx">d51f</span><span class="o">-</span><span class="nx">f62c</span><span class="o">-</span><span class="mi">46</span><span class="nx">c6</span><span class="o">-</span><span class="nx">b10e</span><span class="o">-</span><span class="mi">33013470</span><span class="nx">fbaa</span><span class="p">]</span> <span class="p">[</span><span class="kd">type</span><span class="p">=</span><span class="s">&#34;resume changefeed&#34;</span><span class="p">]</span>
+<span class="p">[</span><span class="nx">owner</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">159</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;Find new changefeed&#34;</span><span class="p">]</span> <span class="p">[</span><span class="nx">info</span><span class="p">=</span><span class="s">&#34;{\&#34;sink-uri\&#34;:\&#34;mysql://root:root@127.0.0.1:44/?worker-count=1\\u0026max-txn-row=50\&#34;,\&#34;opts\&#34;:{},\&#34;create-time\&#34;:\&#34;2020-05-27T17:34:43.836728552+08:00\&#34;,\&#34;start-ts\&#34;:416958928342220801,\&#34;target-ts\&#34;:0,\&#34;admin-job-type\&#34;:2,\&#34;sort-engine\&#34;:\&#34;memory\&#34;,\&#34;sort-dir\&#34;:\&#34;.\&#34;,\&#34;config\&#34;:{\&#34;ddl-white-list\&#34;:null,\&#34;filter-case-sensitive\&#34;:false,\&#34;filter-rules\&#34;:{\&#34;do-tables\&#34;:null,\&#34;do-dbs\&#34;:[\&#34;ddcc\&#34;],\&#34;ignore-tables\&#34;:null,\&#34;ignore-dbs\&#34;:[\&#34;tpcc\&#34;,\&#34;tpch\&#34;,\&#34;mysql\&#34;,\&#34;test\&#34;]},\&#34;ignore-txn-commit-ts\&#34;:[],\&#34;sink-dispatch-rules\&#34;:null,\&#34;mounter-worker-num\&#34;:0}}&#34;</span><span class="p">]</span> <span class="p">[</span><span class="nx">id</span><span class="p">=</span><span class="mi">6281</span><span class="nx">d51f</span><span class="o">-</span><span class="nx">f62c</span><span class="o">-</span><span class="mi">46</span><span class="nx">c6</span><span class="o">-</span><span class="nx">b10e</span><span class="o">-</span><span class="mi">33013470</span><span class="nx">fbaa</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;checkpoint ts&#34;</span><span class="p">=</span><span class="mi">416974641884037174</span><span class="p">]</span>
+<span class="p">[</span><span class="nx">store</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">68</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;new store&#34;</span><span class="p">]</span> <span class="p">[</span><span class="nx">path</span><span class="p">=</span><span class="s">&#34;tikv://172.16.4.51:14379?disableGC=true&#34;</span><span class="p">]</span>
+<span class="p">[</span><span class="nx">client</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">141</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;[pd] create pd client with endpoints&#34;</span><span class="p">]</span> <span class="p">[</span><span class="nx">pd</span><span class="o">-</span><span class="nx">address</span><span class="p">=</span><span class="s">&#34;[172.16.4.51:14379]&#34;</span><span class="p">]</span>
+<span class="p">[</span><span class="nx">base_client</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">242</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;[pd] switch leader&#34;</span><span class="p">]</span> <span class="p">[</span><span class="nx">new</span><span class="o">-</span><span class="nx">leader</span><span class="p">=</span><span class="nx">http</span><span class="p">:</span><span class="c1">//172.16.4.51:14379] [old-leader=]
+</span><span class="c1"></span><span class="p">[</span><span class="nx">base_client</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">92</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;[pd] init cluster id&#34;</span><span class="p">]</span> <span class="p">[</span><span class="nx">cluster</span><span class="o">-</span><span class="nx">id</span><span class="p">=</span><span class="mi">6826949771068502967</span><span class="p">]</span>
+<span class="p">[</span><span class="nx">store</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">74</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;new store with retry success&#34;</span><span class="p">]</span>
+<span class="p">[</span><span class="nx">client_batch</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">628</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;recycle idle connection&#34;</span><span class="p">]</span> <span class="p">[</span><span class="nx">target</span><span class="p">=</span><span class="mf">172.16</span><span class="mf">.4</span><span class="mf">.53</span><span class="p">:</span><span class="mi">15160</span><span class="p">]</span>
+<span class="p">[</span><span class="nx">client_batch</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">628</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;recycle idle connection&#34;</span><span class="p">]</span> <span class="p">[</span><span class="nx">target</span><span class="p">=</span><span class="mf">172.16</span><span class="mf">.4</span><span class="mf">.52</span><span class="p">:</span><span class="mi">15160</span><span class="p">]</span>
+<span class="p">[</span><span class="nx">client_batch</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">628</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;recycle idle connection&#34;</span><span class="p">]</span> <span class="p">[</span><span class="nx">target</span><span class="p">=</span><span class="mf">172.16</span><span class="mf">.4</span><span class="mf">.51</span><span class="p">:</span><span class="mi">14160</span><span class="p">]</span>
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>指定一个错误或者小于当前 savepoint 的方式启动 CDC changefeed
+<ul>
+<li><code>GC life time is shorter than transaction duration, transaction starts at 2020-05-28 10:13:46.23 +0800 CST, GC safe point is 2020-05-28 11:38:33.33 +0800 CST</code></li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-go" data-lang="go"><span class="p">[</span><span class="mi">2020</span><span class="o">/</span><span class="mo">05</span><span class="o">/</span><span class="mi">28</span> <span class="mi">17</span><span class="p">:</span><span class="mo">02</span><span class="p">:</span><span class="mf">26.760</span> <span class="o">+</span><span class="mi">0</span><span class="mi">8</span><span class="p">:</span><span class="mo">00</span><span class="p">]</span> <span class="p">[</span><span class="nx">ERROR</span><span class="p">]</span> <span class="p">[</span><span class="nx">owner</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">539</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;owner exited with error&#34;</span><span class="p">]</span> <span class="p">[</span><span class="kt">error</span><span class="p">=</span><span class="s">&#34;create change feed 6281d51f-f62c-46c6-b10e-33013470fbaa: [tikv:9006]GC life time is shorter than transaction duration, transaction starts at 2020-05-28 10:13:46.23 +0800 CST, GC safe point is 2020-05-28 11:38:33.33 +0800 CST&#34;</span><span class="p">]</span> <span class="p">[</span><span class="nx">errorVerbose</span><span class="p">=</span><span class="s">&#34;[tikv:9006]GC life time is shorter than transaction duration, transaction starts at 2020-05-28 10:13:46.23 +0800 CST, GC safe point is 2020-05-28 11:38:33.33 +0800 CST\ngithub.com/pingcap/errors.AddStack\n\tgithub.com/pingcap/errors@v0.11.5-0.20190809092503-95897b64e011/errors.go:174\ngithub.com/pingcap/parser/terror.(*Error).GenWithStackByArgs\n\tgithub.com/pingcap/parser@v0.0.0-20200422082501-7329d80eaf2c/terror/terror.go:243\ngithub.com/pingcap/tidb/store/tikv.(*tikvStore).CheckVisibility\n\tgithub.com/pingcap/tidb@v1.1.0-beta.0.20200424111313-5e4a6948977f/store/tikv/kv.go:189\ngithub.com/pingcap/tidb/store/tikv.(*Scanner).getData\n\tgithub.com/pingcap/tidb@v1.1.0-beta.0.20200424111313-5e4a6948977f/store/tikv/scan.go:227\ngithub.com/pingcap/tidb/store/tikv.(*Scanner).Next\n\tgithub.com/pingcap/tidb@v1.1.0-beta.0.20200424111313-5e4a6948977f/store/tikv/scan.go:101\ngithub.com/pingcap/tidb/store/tikv.newScanner\n\tgithub.com/pingcap/tidb@v1.1.0-beta.0.20200424111313-5e4a6948977f/store/tikv/scan.go:59\ngithub.com/pingcap/tidb/store/tikv.(*tikvSnapshot).Iter\n\tgithub.com/pingcap/tidb@v1.1.0-beta.0.20200424111313-5e4a6948977f/store/tikv/snapshot.go:390\ngithub.com/pingcap/tidb/structure.(*TxStructure).iterateHash\n\tgithub.com/pingcap/tidb@v1.1.0-beta.0.20200424111313-5e4a6948977f/structure/hash.go:259\ngithub.com/pingcap/tidb/structure.(*TxStructure).HGetAll\n\tgithub.com/pingcap/tidb@v1.1.0-beta.0.20200424111313-5e4a6948977f/structure/hash.go:208\ngithub.com/pingcap/tidb/meta.(*Meta).ListDatabases\n\tgithub.com/pingcap/tidb@v1.1.0-beta.0.20200424111313-5e4a6948977f/meta/meta.go:494\ngithub.com/pingcap/ticdc/cdc/entry.newSchemaSnapshotFromMeta\n\tgithub.com/pingcap/ticdc@/cdc/entry/schema_storage.go:81\ngithub.com/pingcap/ticdc/cdc/entry.NewSingleSchemaSnapshotFromMeta\n\tgithub.com/pingcap/ticdc@/cdc/entry/schema_storage.go:63\ngithub.com/pingcap/ticdc/cdc.(*Owner).newChangeFeed\n\tgithub.com/pingcap/ticdc@/cdc/owner.go:171\ngithub.com/pingcap/ticdc/cdc.(*Owner).loadChangeFeeds\n\tgithub.com/pingcap/ticdc@/cdc/owner.go:303\ngithub.com/pingcap/ticdc/cdc.(*Owner).run\n\tgithub.com/pingcap/ticdc@/cdc/owner.go:584\ngithub.com/pingcap/ticdc/cdc.(*Owner).Run\n\tgithub.com/pingcap/ticdc@/cdc/owner.go:536\ngithub.com/pingcap/ticdc/cdc.(*Server).campaignOwnerLoop\n\tgithub.com/pingcap/ticdc@/cdc/server.go:167\ngithub.com/pingcap/ticdc/cdc.(*Server).run.func1\n\tgithub.com/pingcap/ticdc@/cdc/server.go:199\ngolang.org/x/sync/errgroup.(*Group).Go.func1\n\tgolang.org/x/sync@v0.0.0-20190911185100-cd5d95a43a6e/errgroup/errgroup.go:57\nruntime.goexit\n\truntime/asm_amd64.s:1357\ncreate change feed 6281d51f-f62c-46c6-b10e-33013470fbaa&#34;</span><span class="p">]</span>
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>下游未创建目标数据库
+<ul>
+<li><code>Error 1146: Table 'tpcc.district' doesn't exist</code></li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-go" data-lang="go"><span class="p">[</span><span class="nx">INFO</span><span class="p">]</span> <span class="p">[</span><span class="nx">client</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">642</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;start new request&#34;</span><span class="p">]</span> <span class="p">[</span><span class="nx">request</span><span class="p">=</span><span class="s">&#34;{\&#34;header\&#34;:{\&#34;cluster_id\&#34;:6826949771068502967},\&#34;region_id\&#34;:56301,\&#34;region_epoch\&#34;:{\&#34;conf_ver\&#34;:14,\&#34;version\&#34;:203},\&#34; checkpoint_ts\&#34;:416957675215257608,\&#34;start_key\&#34;:\&#34;dIAAAAAAAAD/PV9ygAAAAAj/aLrDAAAAAAD6\&#34;,\&#34;end_key\&#34;:\&#34;dIAAAAAAAAD/PV9ygAAAAAj/bdPyAAAAAAD6\&#34;,\&#34;request_id\&#34;:988}&#34;</span><span class="p">]</span> <span class="p">[</span><span class="nx">addr</span><span class="p">=</span><span class="mf">172.16</span><span class="mf">.4</span><span class="mf">.52</span><span class="p">:</span><span class="mi">15160</span><span class="p">]</span>
+<span class="p">[</span><span class="nx">WARN</span><span class="p">]</span> <span class="p">[</span><span class="nx">mysql</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">445</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;execute DMLs with error, retry later&#34;</span><span class="p">]</span> <span class="p">[</span><span class="kt">error</span><span class="p">=</span><span class="s">&#34;Error 1146: Table &#39;tpcc.district&#39; doesn&#39;t exist&#34;</span><span class="p">]</span> <span class="p">[</span><span class="nx">errorVerbose</span><span class="p">=</span><span class="s">&#34;Error 1146: Table &#39;tpcc.district&#39; doesn&#39;t exist\ngithub.com/pingcap/errors.AddStack\n\tgithub.com/pingcap/errors@v0.11.5-0.20190809092503-95897b64e011/errors.go:174\ngithub.com/pingcap/errors.Trace\n\tgithub.com/pingcap/errors@v0.11.5-0.20190809092503 -95897b64e011/juju_adaptor.go:15\ngithub.com/pingcap/ticdc/cdc/sink.(*mysqlSink).execDMLWithMaxRetries.func2.2\n\tgithub.com/pingcap/ticdc@/cdc/sink/mysql.go:461\ngithub.com/pingcap/ticdc/cdc/sink.(*Statistics) .RecordBatchExecution\n\tgithub.com/pingcap/ticdc@/cdc/sink/statistics.go:47\ngithub.com/pingcap/ticdc/cdc/sink.(*mysqlSink).execDMLWithMaxRetries.func2\n\tgithub.com/pingcap/ticdc@/cdc/sink/mysql.go:453\ngithu b.com/pingcap/ticdc/pkg/retry.Run.func1\n\tgithub.com/pingcap/ticdc@/pkg/retry/retry.go:31\ngithub.com/cenkalti/backoff.RetryNotify\n\tgithub.com/cenkalti/backoff@v2.2.1+incompatible/retry.go:37\ngithub.com/cen kalti/backoff.Retry\n\tgithub.com/cenkalti/backoff@v2.2.1+incompatible/retry.go:24\ngithub.com/pingcap/ticdc/pkg/retry.Run\n\tgithub.com/pingcap/ticdc@/pkg/retry/retry.go:30\ngithub.com/pingcap/ticdc/cdc/sink.( *mysqlSink).execDMLWithMaxRetries\n\tgithub.com/pingcap/ticdc@/cdc/sink/mysql.go:448\ngithub.com/pingcap/ticdc/cdc/sink.(*mysqlSink).execDMLs\n\tgithub.com/pingcap/ticdc@/cdc/sink/mysql.go:506\ngithub.com/pingc ap/ticdc/cdc/sink.(*mysqlSinkWorker).run\n\tgithub.com/pingcap/ticdc@/cdc/sink/mysql.go:399\nruntime.goexit\n\truntime/asm_amd64.s:1357&#34;</span><span class="p">]</span>
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>附图两张</li>
+</ul>
+<p><img src="./cdc-memory.png" alt="cdc-memroy ap.tidb.cc" title="cdc ap.tidb.cc"><br>
+<img src="./cdc-uptime.png" alt="cdc-uptime ap.tidb.cc" title="ap.tidb.cc cdc"></p>
 
     </div>
 
