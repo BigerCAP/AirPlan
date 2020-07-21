@@ -7,7 +7,7 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>TiDB - AirPlan</copyright>
-    <lastBuildDate>Thu, 02 Jul 2020 00:00:00 +0800</lastBuildDate>
+    <lastBuildDate>Fri, 17 Jul 2020 00:00:00 +0800</lastBuildDate>
     
 	<atom:link href="https://ap.tidb.cc/index.xml" rel="self" type="application/rss+xml" />
     
@@ -19,6 +19,15 @@
       
       <guid>https://ap.tidb.cc/about/</guid>
       <description>About | TiDB AirPlan 本站内容信仰：望闻问切之术 望而知之谓之神，闻而知之谓之圣 问而知之谓之工，切脉而知之谓之巧 缘由 域名：ap.tidb.cc 中的前缀 ap 为 air</description>
+    </item>
+    
+    <item>
+      <title>TiDB - PD Region Merge 食草兽</title>
+      <link>https://ap.tidb.cc/post/202007017-29-region-merge/</link>
+      <pubDate>Fri, 17 Jul 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/202007017-29-region-merge/</guid>
+      <description>0x00 开始 Region Merge 是否要开启 观察 pd dashboard 中 region health 中 empty-region-count 信息； 如该数值大于 store * 100 ，建议开启 Region Merge 如该数值大于 store * 1000 ，建议调整 Region Merge 阈值「或者检查是否开启了 Region Mer</description>
     </item>
     
     <item>

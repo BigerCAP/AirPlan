@@ -10,35 +10,56 @@
   
   <url>
     <loc>https://ap.tidb.cc/tags/airplan/</loc>
-    <lastmod>2020-07-03T00:00:00+08:00</lastmod>
+    <lastmod>2020-07-18T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://ap.tidb.cc/categories/</loc>
-    <lastmod>2020-07-03T00:00:00+08:00</lastmod>
+    <lastmod>2020-07-18T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/pd/</loc>
+    <lastmod>2020-07-18T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://ap.tidb.cc/post/</loc>
-    <lastmod>2020-07-03T00:00:00+08:00</lastmod>
+    <lastmod>2020-07-18T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://ap.tidb.cc/tags/</loc>
-    <lastmod>2020-07-03T00:00:00+08:00</lastmod>
+    <lastmod>2020-07-18T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/categories/tidb/</loc>
+    <lastmod>2020-07-18T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/post/202007017-29-region-merge/</loc>
+    <lastmod>2020-07-18T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://ap.tidb.cc/</loc>
-    <lastmod>2020-07-03T00:00:00+08:00</lastmod>
+    <lastmod>2020-07-18T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -59,13 +80,6 @@
   
   <url>
     <loc>https://ap.tidb.cc/tags/br/</loc>
-    <lastmod>2020-06-18T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://ap.tidb.cc/categories/tidb/</loc>
     <lastmod>2020-06-18T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -438,13 +452,6 @@
   <url>
     <loc>https://ap.tidb.cc/post/20190306-10-precheck/</loc>
     <lastmod>2019-03-05T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://ap.tidb.cc/tags/pd/</loc>
-    <lastmod>2019-02-01T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
