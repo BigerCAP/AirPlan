@@ -202,6 +202,15 @@
     </item>
     
     <item>
+      <title>School - TiDB 根据 PK 查询不到数据</title>
+      <link>https://ap.tidb.cc/post/20180803-31-select-hash/</link>
+      <pubDate>Fri, 03 Aug 2018 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20180803-31-select-hash/</guid>
+      <description>0x00 复古文档 根据 PK 查询不不到数据、根据其他索引字段可以查询到数据、根据 count 确认不同字段下数据量一致； 0x01 过程 先行随机校验数据 1 2 3 4 5 6 7 8 9 10 11</description>
+    </item>
+    
+    <item>
       <title>总结 - Syncer 助力思维成长</title>
       <link>https://ap.tidb.cc/post/20180605-syncer-mindmap/</link>
       <pubDate>Tue, 05 Jun 2018 00:00:00 +0800</pubDate>
