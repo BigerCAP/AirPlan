@@ -202,6 +202,15 @@
     </item>
     
     <item>
+      <title>School - TiKV write stall</title>
+      <link>https://ap.tidb.cc/post/20180807-32-write-stall/</link>
+      <pubDate>Tue, 07 Aug 2018 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20180807-32-write-stall/</guid>
+      <description>0x00 告警 TiDB 与 TiKV 出现大量 backoff；触发 backoff 告警阈值 相应时间段 tidb kv error 监控趋势升高 相应时间段 tikv thread cpu / apply cpu 监控趋势升高 1 2 3 4 5 6 7 8 9 10 11 12 13 14</description>
+    </item>
+    
+    <item>
       <title>School - TiDB 根据 PK 查询不到数据</title>
       <link>https://ap.tidb.cc/post/20180803-31-select-hash/</link>
       <pubDate>Fri, 03 Aug 2018 00:00:00 +0800</pubDate>

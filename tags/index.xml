@@ -303,9 +303,18 @@
     <item>
       <title>TiDB 2.0</title>
       <link>https://ap.tidb.cc/tags/tidb-2.0/</link>
-      <pubDate>Fri, 03 Aug 2018 00:00:00 +0800</pubDate>
+      <pubDate>Tue, 07 Aug 2018 00:00:00 +0800</pubDate>
       
       <guid>https://ap.tidb.cc/tags/tidb-2.0/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>write stall</title>
+      <link>https://ap.tidb.cc/tags/write-stall/</link>
+      <pubDate>Tue, 07 Aug 2018 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/tags/write-stall/</guid>
       <description></description>
     </item>
     
