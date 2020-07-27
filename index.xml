@@ -238,6 +238,15 @@
     </item>
     
     <item>
+      <title>School - TiKV not leader</title>
+      <link>https://ap.tidb.cc/post/20181126-48-not-leader/</link>
+      <pubDate>Mon, 26 Nov 2018 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20181126-48-not-leader/</guid>
+      <description>0x00 监控 使用云机房物理机设备组建同城三中心方式部署 部署时已知 idc3 与其他两个机房 ping latency 稍高，大约在 1 - 3 ms 之间，idc1 与 idc2 机房延迟稳定在 1ms 以内 0x01 架</description>
+    </item>
+    
+    <item>
       <title>School - TiKV write stall</title>
       <link>https://ap.tidb.cc/post/20180807-32-write-stall/</link>
       <pubDate>Tue, 07 Aug 2018 00:00:00 +0800</pubDate>

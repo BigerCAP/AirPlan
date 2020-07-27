@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>序列化事物 ID 策略 - TSO - TiDB AirPlan - A biger solution</title>
+  <title>School - TiKV not leader - TiDB AirPlan - A biger solution</title>
   <meta name="renderer" content="webkit" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
 
@@ -16,7 +16,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
 
 
-<meta name="author" content="Jeff" /><meta name="description" content="0x00 院子 MySQL 有个东东的叫 GTID（GTID = server_uuid:transaction_id）；它在 Binlog 文件中大概长这样【3E11FA55-7" /><meta name="keywords" content="TiDB, AirPlan, TiDB OPS, tidb-operator, 2pc, raft, databases, mysql, htap" />
+<meta name="author" content="Jeff" /><meta name="description" content="0x00 监控 使用云机房物理机设备组建同城三中心方式部署 部署时已知 idc3 与其他两个机房 ping latency 稍高，大约在 1 - 3 ms 之间，idc1 与 idc2 机房延迟稳定在 1ms 以内 0x01 架" /><meta name="keywords" content="TiDB, AirPlan, TiDB OPS, tidb-operator, 2pc, raft, databases, mysql, htap" />
 
 
 
@@ -26,7 +26,7 @@
 <meta name="generator" content="Hugo 0.63.2 with theme even" />
 
 
-<link rel="canonical" href="https://ap.tidb.cc/post/20190201-5-pd-tso/" />
+<link rel="canonical" href="https://ap.tidb.cc/post/20181126-48-not-leader/" />
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -38,23 +38,23 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
 
 
-<meta property="og:title" content="序列化事物 ID 策略 - TSO" />
-<meta property="og:description" content="0x00 院子 MySQL 有个东东的叫 GTID（GTID = server_uuid:transaction_id）；它在 Binlog 文件中大概长这样【3E11FA55-7" />
+<meta property="og:title" content="School - TiKV not leader" />
+<meta property="og:description" content="0x00 监控 使用云机房物理机设备组建同城三中心方式部署 部署时已知 idc3 与其他两个机房 ping latency 稍高，大约在 1 - 3 ms 之间，idc1 与 idc2 机房延迟稳定在 1ms 以内 0x01 架" />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://ap.tidb.cc/post/20190201-5-pd-tso/" />
-<meta property="article:published_time" content="2019-02-01T00:00:00+08:00" />
-<meta property="article:modified_time" content="2019-02-01T00:00:00+08:00" />
-<meta itemprop="name" content="序列化事物 ID 策略 - TSO">
-<meta itemprop="description" content="0x00 院子 MySQL 有个东东的叫 GTID（GTID = server_uuid:transaction_id）；它在 Binlog 文件中大概长这样【3E11FA55-7">
-<meta itemprop="datePublished" content="2019-02-01T00:00:00&#43;08:00" />
-<meta itemprop="dateModified" content="2019-02-01T00:00:00&#43;08:00" />
-<meta itemprop="wordCount" content="768">
+<meta property="og:url" content="https://ap.tidb.cc/post/20181126-48-not-leader/" />
+<meta property="article:published_time" content="2018-11-26T00:00:00+08:00" />
+<meta property="article:modified_time" content="2018-11-26T00:00:00+08:00" />
+<meta itemprop="name" content="School - TiKV not leader">
+<meta itemprop="description" content="0x00 监控 使用云机房物理机设备组建同城三中心方式部署 部署时已知 idc3 与其他两个机房 ping latency 稍高，大约在 1 - 3 ms 之间，idc1 与 idc2 机房延迟稳定在 1ms 以内 0x01 架">
+<meta itemprop="datePublished" content="2018-11-26T00:00:00&#43;08:00" />
+<meta itemprop="dateModified" content="2018-11-26T00:00:00&#43;08:00" />
+<meta itemprop="wordCount" content="736">
 
 
 
-<meta itemprop="keywords" content="TSO,PD," /><meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="序列化事物 ID 策略 - TSO"/>
-<meta name="twitter:description" content="0x00 院子 MySQL 有个东东的叫 GTID（GTID = server_uuid:transaction_id）；它在 Binlog 文件中大概长这样【3E11FA55-7"/>
+<meta itemprop="keywords" content="not leader,server is busy,prevote," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="School - TiKV not leader"/>
+<meta name="twitter:description" content="0x00 监控 使用云机房物理机设备组建同城三中心方式部署 部署时已知 idc3 与其他两个机房 ping latency 稍高，大约在 1 - 3 ms 之间，idc1 与 idc2 机房延迟稳定在 1ms 以内 0x01 架"/>
 
 <!--[if lte IE 9]>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
@@ -121,14 +121,14 @@
           <article class="post">
     
     <header class="post-header">
-      <h1 class="post-title">序列化事物 ID 策略 - TSO</h1>
+      <h1 class="post-title">School - TiKV not leader</h1>
 
       <div class="post-meta">
-        <span class="post-time"> 2019-02-01 </span>
+        <span class="post-time"> 2018-11-26 </span>
         <div class="post-category">
-            <a href="/categories/tidb/"> TiDB </a>
+            <a href="/categories/troubleshooting/"> troubleshooting </a>
             </div>
-          <span class="more-meta"> 768 words </span>
+          <span class="more-meta"> 736 words </span>
           <span class="more-meta"> 2 mins read </span>
         <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
       </div>
@@ -139,79 +139,65 @@
   <div class="post-toc-content">
     <nav id="TableOfContents">
   <ul>
-    <li><a href="#0x00-院子">0x00 院子</a>
+    <li><a href="#0x00-监控">0x00 监控</a></li>
+    <li><a href="#0x01-架构">0x01 架构</a>
       <ul>
-        <li><a href="#灌水">灌水</a></li>
+        <li><a href="#排查思路">排查思路</a></li>
       </ul>
     </li>
-    <li><a href="#0x01-院中">0x01 院中</a></li>
-    <li><a href="#0x02-烧水">0x02 烧水</a></li>
+    <li><a href="#0x02-原因">0x02 原因</a>
+      <ul>
+        <li><a href="#prevote">prevote</a></li>
+      </ul>
+    </li>
   </ul>
 </nav>
   </div>
 </div>
   <div class="post-outdated">
     <div class="warn">
-      <p>[NOTE] Updated <span class="timeago" datetime="2019-02-01T00:00:00" title="February 1, 2019">February 1, 2019</span>. This article may have outdated content or subject matter.</p>
+      <p>[NOTE] Updated <span class="timeago" datetime="2018-11-26T00:00:00" title="November 26, 2018">November 26, 2018</span>. This article may have outdated content or subject matter.</p>
     </div>
   </div>
     <div class="post-content">
-      <h2 id="0x00-院子">0x00 院子</h2>
-<p>MySQL 有个东东的叫 GTID（GTID = server_uuid:transaction_id）；它在 Binlog 文件中大概长这样【3E11FA55-71CA-99E1-9E10-C80AA9444562:10】.用于管理 MySQL 事物的状态和校验数据在事物之间的正确性。</p>
-<p>TiDB 数据库有个类似的东东，由 PD 组件管理和发放。它叫做 TSO（timestamp oracle），长成这样的一个东东【395181938313123110】，是由 physical time + logical time 信息组合计算得到的东东。</p>
-<blockquote>
-<p>PD 的 TSO 使用的是中心式的混合逻辑时钟。PD 通过集成了 etcd ，保证了持久化数据的强一致性并且可以做到 auto failover，解决了集中式服务带来的单点故障问题。<br>
-<img src="./pd-auto-failover.png" alt="pd-auto-failover" title="ap.tidb.cc 序列化事物 ID 策略 - TSO"><br>
-其使用 64 位表示一个时间，其中低 18 位代表逻辑时钟部分，剩余部分代表物理时钟部分，其结构如下图所示。由于其逻辑部分为 18 位，因此理论上每秒可以分配时间戳为 218 * 1000 = 262144000 个，即每秒可以产生 2.6 亿个时间戳。<br>
-<img src="./tso.png" alt="tso" title="ap.tidb.cc 序列化事物 ID 策略 - TSO"></p>
-</blockquote>
-<h3 id="灌水">灌水</h3>
-<p>分布式数据库要实现全局一致性快照，需要解决不同节点之间时钟一致的问题。工业界目前有3种解决方案：</p>
-<ol>
-<li>全局集中式授时服务，对网络要求比较高，不能跨地域，理论上可以做到外部一致性【TSO 家族】</li>
-<li>混合逻辑时钟（HLC），可以保证同一个进程内部事件的时钟顺序，但是解决不了系统外事件发生的逻辑前后顺序与物理时间前后顺序的一致性，因此做不到 Linearizability，也就做不到外部一致性【比如隔壁小强家】</li>
-<li>Google 的物理时钟 Turetime API，可以做到外部一致性，同时能做到全球化部署【土豪专属：卫星 GPS + 原子钟（硬件设备）】</li>
-</ol>
-<h2 id="0x01-院中">0x01 院中</h2>
-<blockquote>
-<p>本文没 TSO 原理，聊聊使用场景就好了。</p>
-</blockquote>
+      <h2 id="0x00-监控">0x00 监控</h2>
+<p>使用云机房物理机设备组建同城三中心方式部署<br>
+部署时已知 idc3 与其他两个机房 ping latency 稍高，大约在 1 - 3 ms 之间，idc1 与 idc2 机房延迟稳定在 1ms 以内</p>
+<p><img src="./multi-data-centers-in-one-city-deployment-sample.png" alt="同城多中心部署" title="ap.tidb.cc"></p>
+<h2 id="0x01-架构">0x01 架构</h2>
+<p><img src="./QPS-duration.png" alt="QPS 出现较大延迟" title="ap.tidb.cc">
+<img src="./qps-by-instance.png" alt="QPS 链接出现下降" title="ap.tidb.cc"></p>
+<p><img src="./tikv-error.png" alt="tikv error 没有明显错误" title="ap.tidb.cc"></p>
+<p><img src="./blackbox-ping.png" alt="网络 ping 延迟增高" title="ap.tidb.cc"></p>
+<h3 id="排查思路">排查思路</h3>
+<p><img src="./not-leader.png" alt="not leader 排查思路" title="ap.tidb.cc"></p>
+<h2 id="0x02-原因">0x02 原因</h2>
 <ul>
-<li><input disabled="" type="checkbox">放空</li>
-</ul>
-<h2 id="0x02-烧水">0x02 烧水</h2>
+<li>14:56:30 - 14:58:00 时间出现网络抖动
 <ul>
-<li>
-<p>通过 tso 解析为物理时间</p>
-<ul>
-<li>通过 pd-ctl 工具可以解析 tso 信息，并且可以得到 logic 位置点</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-bash" data-lang="bash">&gt;&gt; tso <span class="m">395181938313123110</span>
-
-system:  2017-10-09 05:50:59 +0800 CST
-logic:  <span class="m">120102</span>
-</code></pre></td></tr></table>
-</div>
-</div></li>
-<li>
-<p>通过物理时间模糊计算 TSO 范围</p>
-<ul>
-<li><code>timestamp * (2^18*10^3)</code> 可以得到一个模糊的 TSO</li>
-<li>比如 <code>1588232534 * (2^18*10^3) = 416345629392896000</code></li>
-<li>linux 命令可以用 <code>date -d '01/12/2019 07:21:22' +&quot;%s&quot;</code></li>
-<li>macos 可以用 <code>date -j -f &quot;%Y-%m-%d %H:%M:%S&quot; &quot;2019-01-13 18:02:00&quot; &quot;+%s&quot;</code></li>
+<li>TiKV to TiKV 之间出现 region 心跳链接断开发起重新选举</li>
 </ul>
 </li>
+<li>14:58 region 重新被选举过程中遇到 TiDB 读取数据
+<ul>
+<li>TiKV 经 backoff 返回 not leader 消息</li>
 </ul>
-<p><img src="/global/helpertools.jpg" alt="ap.tidb.cc"></p>
+</li>
+<li>整体场景是某个节点被网络隔离后出现的问题（CAP 隔离）</li>
+</ul>
+<p><img src="./cap.png" alt="cap" title="ap.tidb.cc"></p>
+<h3 id="prevote">prevote</h3>
+<p><img src="./prevote.webp" alt="prevote" title="ap.tidb.cc"></p>
+<p>Follower_2 在 electionTimeout 没收到心跳之后, 会发起选举，并转为 Candidate。每次发起选举时，会把 Term 加一。由于网络隔离，它既不会被选成 Leader，也不会收到 Leader 的消息，而是会一直不断地发起选举。Term 会不断增大。</p>
+<p>一段时间之后，这个节点的 Term 会非常大。在网络恢复之后，这个节点会把它的 Term 传播到集群的其他节点，导致其他节点更新自己的 term，变为 Follower。然后触发重新选主，但这个旧的 Follower_2 节点由于其日志不是最新，并不会成为 Leader。整个集群被这个网络隔离过的旧节点扰乱，显然需要避免的。</p>
+<blockquote>
+<p>Raft 作者博士论文《CONSENSUS: BRIDGING THEORY AND PRACTICE》的第 9.6 节 &ldquo;Preventing disruptions when a server rejoins the cluster&rdquo; 提到了 PreVote 算法的大概实现思路。</p>
+</blockquote>
+<p>在 PreVote 算法中，Candidate 首先要确认自己能赢得集群中大多数节点的投票，这样才会把自己的 term 增加，然后发起真正的投票。其他投票节点同意发起选举的条件是（同时满足下面两个条件）：</p>
+<p>没有收到有效领导的心跳，至少有一次选举超时<br>
+Candidate 的日志足够新（Term 更大，或者 Term 相同 raft index 更大）<br>
+PreVote 算法解决了网络分区节点在重新加入时，会中断集群的问题。在 PreVote 算法中，网络分区节点由于无法获得大部分节点的许可，因此无法增加其 Term<br>
+然后当它重新加入集群时，它仍然无法递增其 Term，因为其他服务器将一直收到来自 Leader 节点的定期心跳信息。一旦该服务器从领导者接收到心跳，它将返回到 Follower 状态，Term 和 Leader 一致</p>
 
     </div>
 
@@ -223,7 +209,7 @@ logic:  <span class="m">120102</span>
   <p class="copyright-item">
     <span class="item-title">LastMod</span>
     <span class="item-content">
-        2019-02-01
+        2018-11-26
         
     </span>
   </p>
@@ -235,17 +221,18 @@ logic:  <span class="m">120102</span>
 </div>
 <footer class="post-footer">
       <div class="post-tags">
-          <a href="/tags/tso/">TSO</a>
-          <a href="/tags/pd/">PD</a>
+          <a href="/tags/not-leader/">not leader</a>
+          <a href="/tags/server-is-busy/">server is busy</a>
+          <a href="/tags/prevote/">prevote</a>
           </div>
       <nav class="post-nav">
-        <a class="prev" href="/post/20190306-10-precheck/">
+        <a class="prev" href="/post/20190201-5-pd-tso/">
             <i class="iconfont icon-left"></i>
-            <span class="prev-text nav-default">入库检查 - 物理机 &amp; 系统安装数据库前预检查</span>
+            <span class="prev-text nav-default">序列化事物 ID 策略 - TSO</span>
             <span class="prev-text nav-mobile">Prev</span>
           </a>
-        <a class="next" href="/post/20181126-48-not-leader/">
-            <span class="next-text nav-default">School - TiKV not leader</span>
+        <a class="next" href="/post/20180807-32-write-stall/">
+            <span class="next-text nav-default">School - TiKV write stall</span>
             <span class="next-text nav-mobile">Next</span>
             <i class="iconfont icon-right"></i>
           </a>
