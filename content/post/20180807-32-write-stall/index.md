@@ -1,11 +1,12 @@
 ---
 title: School - TiKV write stall
 date: 2018-08-07T00:00:00+08:00
-lastmod: 2020-08-07T00:00:00+08:00
+lastmod: 2018-08-07T00:00:00+08:00
 categories:
   - troubleshooting
 tags:
   - TiDB 2.0
+  - server is busy
   - write stall
 ---
 ## 0x00 告警
