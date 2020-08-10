@@ -22,6 +22,48 @@ tags:
   - region group 信息需要 raft 状态机维护「raft cpu」；当 empty-region 过多会产生不必要的 region 心跳消耗
   - 开启 Region Merge 可以降低 raft cpu 消耗，同时减少 coprocessor cpu 扫描数据请求「delete 一批数据之后，还剩下 1000 数据，这些数据随机分布在 800 个 region 中，执行 sum/count 时就要向这 800 region 发起请求统计数据；合并之后只需要 1 个 region 请求」
 
+### Regions info
+
+```json
+{
+  "count": 168,   // 集群中 Region 总数量
+  "regions": [
+    {
+      "id": 241,  // Region id
+      "start_key": "7480000000000000FF565F728000000000FF03F07A0000000000FA",
+      "end_key": "7480000000000000FF565F728000000000FF0B07BE0000000000FA",
+      "epoch": {
+        "conf_ver": 5,
+        "version": 46
+      },
+      "peers": [  // Region 成员信息
+        {
+          "id": 242,
+          "store_id": 1
+        },
+        {
+          "id": 243,
+          "store_id": 4
+        },
+        {
+          "id": 244,
+          "store_id": 5
+        }
+      ],
+      "leader": {
+        "id": 244,  // Reigon 成员中 leader id「角色」
+        "store_id": 5
+      },
+      "written_bytes": 0,
+      "read_bytes": 0,
+      "written_keys": 0,
+      "read_keys": 0,
+      "approximate_size": 99,     // Region 大小
+      "approximate_keys": 478217  // Region Key-Values 数量
+    },
+  ... ... 省略其他信息
+```
+
 ### empty-region
 
 ```golang
@@ -164,9 +206,16 @@ checkerCounter.WithLabelValues("merge_checker", "check").Inc()
 
 ## 0x03 其他
 
-[operator [check | show | add | remove]](https://docs.pingcap.com/zh/tidb/stable/pd-control#operator-check--show--add--remove) 是 [2.0 时代](https://docs.pingcap.com/zh/tidb/stable/release-2.0.1#pd)加入功能，当时需要人工使用 pd-ctl operator add region merge ，后续逐渐优化到了根据阈值自动处理 region merge。未来可期  
+[operator [check | show | add | remove]](https://docs.pingcap.com/zh/tidb/stable/pd-control#operator-check--show--add--remove) 是 [2.0 时代](https://docs.pingcap.com/zh/tidb/stable/release-2.0.1#pd)加入功能，当时需要人工使用 `pd-ctl operator add region merge` ，后续逐渐优化到了根据阈值自动处理 region merge。未来可期  
 
-pd-ctl 命令格式 merge-region <source_region_id> <target_region_id>  
-operator add merge-region 1 2     // 将 Region 1 与 Region 2 合并
+> 手工操作思路
+
+查询 Region size 低于 xx MB 的数量以及 Region id；需要使用 pd-api「http://ip:2379/pdapi/v1/regions」 获取所有 Regions 信息，然后分析 approximate_size 低于 xx MB 的 Region ID  
+
+使用 [region sibling <region_id>](https://docs.pingcap.com/zh/tidb/stable/pd-control#region-sibling-region_id) 查询 Region 相邻的 Region  
+`>> region sibling 2`
+
+使用 merge-region <source_region_id> <target_region_id> 功能合并 “小 Region” 和“邻居 Region”  
+`operator add merge-region 1 2     // 将 Region 1 与 Region 2 合并`
 
 ![help-tools-man](/global/helpertools.jpg)

@@ -96,6 +96,21 @@ explain analyze select id from T_DATA_0210  WHERE (`id`='800764181');
 4 rows in set (0.00 sec)
 ```
 
+```sql
+// explain analyze select count(*)/count(distinct date_format(account_mdate,'%Y-%m-%d')) from account;
+// 看起来只做了一次 table full scan、同时 distinct 与 date_format 无法下推到 tikv 上执行
++-----------------------------+--------------+-----------+-----------+---------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------+-----------------------+------+
+| id                          | estRows      | actRows   | task      | access object | execution info                                                                                                                                                             | operator info                                                                                | memory                | disk |
++-----------------------------+--------------+-----------+-----------+---------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------+-----------------------+------+
+| Projection_4                | 1.00         | 1         | root      |               | time:18.899834996s, loops:2, Concurrency:OFF                                                                                                                               | div(cast(Column#19, decimal(20,0) BINARY), cast(Column#20, decimal(20,0) BINARY))->Column#21 | 744 Bytes             | N/A  |
+| └─StreamAgg_6               | 1.00         | 1         | root      |               | time:18.899801597s, loops:2                                                                                                                                                | funcs:count(1)->Column#19, funcs:count(distinct Column#23)->Column#20                        | 17.5087890625 KB      | N/A  |
+|   └─Projection_11           | 100036000.00 | 100036000 | root      |               | time:670.978479ms, loops:98163, Concurrency:8                                                                                                                              | date_format(findpt.account.account_mdate, %Y-%m-%d)->Column#23                               | 208.76953125 KB       | N/A  |
+|     └─TableReader_10        | 100036000.00 | 100036000 | root      |               | time:528.386518ms, loops:98163, rpc num: 560, rpc max:684.898903ms, min:70.020085ms, avg:427.347923ms, p80:474.446604ms, p95:546.15945ms, proc keys max:255761, p95:178374 | data:TableFullScan_9                                                                         | 113.44037055969238 MB | N/A  |
+|       └─TableFullScan_9     | 100036000.00 | 100036000 | cop[tikv] | table:account | proc max:659ms, min:65ms, p80:459ms, p95:529ms, iters:100403, tasks:560                                                                                                    | keep order:false                                                                             | N/A                   | N/A  |
++-----------------------------+--------------+-----------+-----------+---------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------+-----------------------+------+
+5 rows in set (18.98 sec)
+```
+
 ### Trace
 
 [PingCAP 官网-Trace](https://docs.pingcap.com/zh/tidb/v4.0/sql-statement-trace#trace)；TRACE 语句用于提供查询执行的详细信息，可通过 TiDB 服务器状态端口所公开的图形界面进行查看。
@@ -119,6 +134,47 @@ trace format = 'row' select id from T_DATA_0210  WHERE (`id`='800764181');
 |   └─projection.Next       | 17:10:42.723518 | 1.747µs    |
 +---------------------------+-----------------+------------+
 12 rows in set (0.01 sec)
+```
+
+```sql
+// 以下信息省略 19 万行，通过 trace 清晰的发现 tidb 与 tikv 之间的网络交互频率
+trace format = 'row' select count(*)/count(distinct date_format(account_mdate,'%Y-%m-%d')) from account;
++------------------------------------------------------+-----------------+-----------------+
+| operation                                            | startTS         | duration        |
++------------------------------------------------------+-----------------+-----------------+
+| trace                                                | 11:37:08.052125 | 3m58.620078133s |
+|   ├─session.Execute                                  | 11:37:08.052129 | 1.714218ms      |
+|   │ ├─session.ParseSQL                               | 11:37:08.052134 | 21.379µs        |
+|   │ ├─executor.Compile                               | 11:37:08.052177 | 270.936µs       |
+|   │ │ └─session.getTxnFuture                         | 11:37:08.052184 | 2.886µs         |
+|   │ └─session.runStmt                                | 11:37:08.052468 | 1.353082ms      |
+|   │   ├─TableReaderExecutor.Open                     | 11:37:08.052518 | 1.215215ms      |
+|   │   │ └─distsql.Select                             | 11:37:08.052529 | 1.193386ms      |
+|   │   │   ├─rpcClient.SendRequest                    | 11:37:08.053832 | 404.531258ms    |
+|   │   │   ├─rpcClient.SendRequest                    | 11:39:53.082502 | 269.187122ms    |
+|   │   │   ├─rpcClient.SendRequest                    | 11:39:53.785311 | 240.928959ms    |
+|   │   │   └─rpcClient.SendRequest * N                | 11:39:54.539536 | 331.98845ms     |
+|   │   └─session.CommitTxn                            | 11:37:08.053803 | 13.513µs        |
+|   │     └─session.doCommitWitRetry                   | 11:37:08.053806 | 2.235µs         |
+|   ├─*executor.ProjectionExec.Next                    | 11:37:08.053865 | 3m58.617880366s |
+|   │ └─*executor.StreamAggExec.Next                   | 11:37:08.053867 | 3m58.614767904s |
+|   │   ├─*executor.ProjectionExec.Next                | 11:37:08.053869 | 26.269835ms     |
+|   │   │ ├─*executor.TableReaderExecutor.Next         | 11:37:08.053915 | 25.530341ms     |
+|   │   │ ├─*executor.TableReaderExecutor.Next         | 11:37:08.079471 | 8.329µs         |
+|   │   │ ├─*executor.TableReaderExecutor.Next         | 11:37:08.079491 | 3.369µs         |
+|   │   │ ├─*executor.TableReaderExecutor.Next         | 11:41:06.572221 | 14.026µs        |
+|   │   │ ├─*executor.TableReaderExecutor.Next         | 11:41:06.577805 | 31.832µs        |
+|   │   │ └─*executor.TableReaderExecutor.Next  * N    | 11:41:06.583194 | 19.7µs          |
+|   │   ├─*executor.ProjectionExec.Next                | 11:37:08.080339 | 5.499µs         |
+|   │   ├─*executor.ProjectionExec.Next                | 11:37:08.080509 | 5.065µs         |
+|   │   ├─*executor.ProjectionExec.Next                | 11:37:08.080681 | 5.46µs          |
+|   │   ├─*executor.ProjectionExec.Next                | 11:37:08.080855 | 9.297µs         |
+|   │   ├─*executor.ProjectionExec.Next                | 11:41:06.663323 | 2.028µs         |
+|   │   └─*executor.ProjectionExec.Next  * N           | 11:41:06.665968 | 1.844µs         |
+|   └─*executor.ProjectionExec.Next                    | 11:41:06.671764 | 11.448µs        |
+|     └─*executor.StreamAggExec.Next                   | 11:41:06.671767 | 568ns           |
++------------------------------------------------------+-----------------+-----------------+
+196901 rows in set (5 min 56.31 sec)
 ```
 
 ## 0x02 SSR
