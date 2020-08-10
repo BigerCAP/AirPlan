@@ -48,7 +48,7 @@
 <meta itemprop="description" content="0x00 开始 Region Merge 是否要开启 观察 pd dashboard 中 region health 中 empty-region-count 信息； 如该数值大于 store * 100 ，建议开启 Region Merge 如该数值大于 store * 1000 ，建议调整 Region Merge 阈值「或者检查是否开启了 Region Mer">
 <meta itemprop="datePublished" content="2020-07-17T00:00:00&#43;08:00" />
 <meta itemprop="dateModified" content="2020-07-18T00:00:00&#43;08:00" />
-<meta itemprop="wordCount" content="1656">
+<meta itemprop="wordCount" content="1924">
 
 
 
@@ -128,7 +128,7 @@
         <div class="post-category">
             <a href="/categories/tidb/"> TiDB </a>
             </div>
-          <span class="more-meta"> 1656 words </span>
+          <span class="more-meta"> 1924 words </span>
           <span class="more-meta"> 4 mins read </span>
         <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
       </div>
@@ -141,6 +141,7 @@
   <ul>
     <li><a href="#0x00-开始">0x00 开始</a>
       <ul>
+        <li><a href="#regions-info">Regions info</a></li>
         <li><a href="#empty-region">empty-region</a></li>
       </ul>
     </li>
@@ -179,7 +180,88 @@
 </ul>
 </li>
 </ul>
-<h3 id="empty-region">empty-region</h3>
+<h3 id="regions-info">Regions info</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-json" data-lang="json"><span class="p">{</span>
+  <span class="nt">&#34;count&#34;</span><span class="p">:</span> <span class="mi">168</span><span class="p">,</span>   <span class="err">/</span><span class="err">/</span> <span class="err">集</span><span class="err">群</span><span class="err">中</span> <span class="err">R</span><span class="err">e</span><span class="err">g</span><span class="err">i</span><span class="err">o</span><span class="err">n</span> <span class="err">总</span><span class="err">数</span><span class="err">量</span>
+  <span class="nt">&#34;regions&#34;</span><span class="p">:</span> <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="mi">241</span><span class="p">,</span>  <span class="err">/</span><span class="err">/</span> <span class="err">R</span><span class="err">e</span><span class="err">g</span><span class="err">i</span><span class="err">o</span><span class="err">n</span> <span class="err">i</span><span class="err">d</span>
+      <span class="nt">&#34;start_key&#34;</span><span class="p">:</span> <span class="s2">&#34;7480000000000000FF565F728000000000FF03F07A0000000000FA&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;end_key&#34;</span><span class="p">:</span> <span class="s2">&#34;7480000000000000FF565F728000000000FF0B07BE0000000000FA&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;epoch&#34;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&#34;conf_ver&#34;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="mi">46</span>
+      <span class="p">}</span><span class="p">,</span>
+      <span class="nt">&#34;peers&#34;</span><span class="p">:</span> <span class="p">[</span>  <span class="err">/</span><span class="err">/</span> <span class="err">R</span><span class="err">e</span><span class="err">g</span><span class="err">i</span><span class="err">o</span><span class="err">n</span> <span class="err">成</span><span class="err">员</span><span class="err">信</span><span class="err">息</span>
+        <span class="p">{</span>
+          <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="mi">242</span><span class="p">,</span>
+          <span class="nt">&#34;store_id&#34;</span><span class="p">:</span> <span class="mi">1</span>
+        <span class="p">}</span><span class="p">,</span>
+        <span class="p">{</span>
+          <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="mi">243</span><span class="p">,</span>
+          <span class="nt">&#34;store_id&#34;</span><span class="p">:</span> <span class="mi">4</span>
+        <span class="p">}</span><span class="p">,</span>
+        <span class="p">{</span>
+          <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="mi">244</span><span class="p">,</span>
+          <span class="nt">&#34;store_id&#34;</span><span class="p">:</span> <span class="mi">5</span>
+        <span class="p">}</span>
+      <span class="p">]</span><span class="p">,</span>
+      <span class="nt">&#34;leader&#34;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="mi">244</span><span class="p">,</span>  <span class="err">/</span><span class="err">/</span> <span class="err">R</span><span class="err">e</span><span class="err">i</span><span class="err">g</span><span class="err">o</span><span class="err">n</span> <span class="err">成</span><span class="err">员</span><span class="err">中</span> <span class="err">l</span><span class="err">e</span><span class="err">a</span><span class="err">d</span><span class="err">e</span><span class="err">r</span> <span class="err">i</span><span class="err">d</span><span class="err">「</span><span class="err">角</span><span class="err">色</span><span class="err">」</span>
+        <span class="nt">&#34;store_id&#34;</span><span class="p">:</span> <span class="mi">5</span>
+      <span class="p">}</span><span class="p">,</span>
+      <span class="nt">&#34;written_bytes&#34;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+      <span class="nt">&#34;read_bytes&#34;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+      <span class="nt">&#34;written_keys&#34;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+      <span class="nt">&#34;read_keys&#34;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+      <span class="nt">&#34;approximate_size&#34;</span><span class="p">:</span> <span class="mi">99</span><span class="p">,</span>     <span class="err">/</span><span class="err">/</span> <span class="err">R</span><span class="err">e</span><span class="err">g</span><span class="err">i</span><span class="err">o</span><span class="err">n</span> <span class="err">大</span><span class="err">小</span>
+      <span class="nt">&#34;approximate_keys&#34;</span><span class="p">:</span> <span class="mi">478217</span>  <span class="err">/</span><span class="err">/</span> <span class="err">R</span><span class="err">e</span><span class="err">g</span><span class="err">i</span><span class="err">o</span><span class="err">n</span> <span class="err">K</span><span class="err">e</span><span class="err">y</span><span class="err">-</span><span class="err">V</span><span class="err">a</span><span class="err">l</span><span class="err">u</span><span class="err">e</span><span class="err">s</span> <span class="err">数</span><span class="err">量</span>
+    <span class="p">}</span><span class="p">,</span>
+  <span class="err">.</span><span class="err">.</span><span class="err">.</span> <span class="err">.</span><span class="err">.</span><span class="err">.</span> <span class="err">省</span><span class="err">略</span><span class="err">其</span><span class="err">他</span><span class="err">信</span><span class="err">息</span>
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="empty-region">empty-region</h3>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre class="chroma"><code><span class="lnt"> 1
@@ -466,9 +548,15 @@
 </li>
 </ul>
 <h2 id="0x03-其他">0x03 其他</h2>
-<p><a href="https://docs.pingcap.com/zh/tidb/stable/pd-control#operator-check--show--add--remove">operator [check | show | add | remove]</a> 是 <a href="https://docs.pingcap.com/zh/tidb/stable/release-2.0.1#pd">2.0 时代</a>加入功能，当时需要人工使用 pd-ctl operator add region merge ，后续逐渐优化到了根据阈值自动处理 region merge。未来可期</p>
-<p>pd-ctl 命令格式 merge-region &lt;source_region_id&gt; &lt;target_region_id&gt;<br>
-operator add merge-region 1 2     // 将 Region 1 与 Region 2 合并</p>
+<p><a href="https://docs.pingcap.com/zh/tidb/stable/pd-control#operator-check--show--add--remove">operator [check | show | add | remove]</a> 是 <a href="https://docs.pingcap.com/zh/tidb/stable/release-2.0.1#pd">2.0 时代</a>加入功能，当时需要人工使用 <code>pd-ctl operator add region merge</code> ，后续逐渐优化到了根据阈值自动处理 region merge。未来可期</p>
+<blockquote>
+<p>手工操作思路</p>
+</blockquote>
+<p>查询 Region size 低于 xx MB 的数量以及 Region id；需要使用 pd-api「http://ip:2379/pdapi/v1/regions」 获取所有 Regions 信息，然后分析 approximate_size 低于 xx MB 的 Region ID</p>
+<p>使用 <a href="https://docs.pingcap.com/zh/tidb/stable/pd-control#region-sibling-region_id">region sibling &lt;region_id&gt;</a> 查询 Region 相邻的 Region<br>
+<code>&gt;&gt; region sibling 2</code></p>
+<p>使用 merge-region &lt;source_region_id&gt; &lt;target_region_id&gt; 功能合并 “小 Region” 和“邻居 Region”<br>
+<code>operator add merge-region 1 2     // 将 Region 1 与 Region 2 合并</code></p>
 <p><img src="/global/helpertools.jpg" alt="help-tools-man"></p>
 
     </div>

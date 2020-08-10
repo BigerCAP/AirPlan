@@ -436,6 +436,27 @@
   </url>
   
   <url>
+    <loc>https://ap.tidb.cc/tags/2pc/</loc>
+    <lastmod>2019-06-06T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/tags/backoff/</loc>
+    <lastmod>2019-06-06T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/post/20190606-23-backoff/</loc>
+    <lastmod>2019-06-06T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
     <loc>https://ap.tidb.cc/tags/numactl/</loc>
     <lastmod>2019-03-14T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>

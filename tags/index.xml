@@ -283,6 +283,24 @@
     </item>
     
     <item>
+      <title>2PC</title>
+      <link>https://ap.tidb.cc/tags/2pc/</link>
+      <pubDate>Wed, 05 Jun 2019 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/tags/2pc/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>backoff</title>
+      <link>https://ap.tidb.cc/tags/backoff/</link>
+      <pubDate>Wed, 05 Jun 2019 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/tags/backoff/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>numactl</title>
       <link>https://ap.tidb.cc/tags/numactl/</link>
       <pubDate>Wed, 13 Mar 2019 00:00:00 +0800</pubDate>

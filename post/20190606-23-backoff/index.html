@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>TiDB - 4.0 版图分析 - TiDB AirPlan - A biger solution</title>
+  <title>TiDB - 2PC &amp; Backoff - TiDB AirPlan - A biger solution</title>
   <meta name="renderer" content="webkit" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
 
@@ -16,7 +16,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
 
 
-<meta name="author" content="Jeff" /><meta name="description" content="0x00 History TiDB 1.0 2017 年 10 月 16 日 TiDB 2.0 2018 年 4 月 27 日 TiDB 2.1 2018 年 11 月 30 日 TiDB 3.0 2019 年 6 月 28 日 TiDB 3.1 2020 年 4 月 16 日 TiDB 4.0 2020 年 5 月 28 日 0x01 4.0 没有故事可讲，看图吧 根据上一篇文档 TiDB" /><meta name="keywords" content="TiDB, AirPlan, TiDB OPS, tidb-operator, 2pc, raft, databases, mysql, htap" />
+<meta name="author" content="Jeff" /><meta name="description" content="0x00 源 TiDB to TiKV 之间的网络状态(图片来自与 PingCAP 官网锁冲突)「该图包含悲观锁逻辑，来自 2020 年的 PingCAP 官网」；部分内容来自 Google Percolator 的事务模型。 0x01 2PC 2PC (Two-phaseCommit) 是指在计算机" /><meta name="keywords" content="TiDB, AirPlan, TiDB OPS, tidb-operator, 2pc, raft, databases, mysql, htap" />
 
 
 
@@ -26,7 +26,7 @@
 <meta name="generator" content="Hugo 0.63.2 with theme even" />
 
 
-<link rel="canonical" href="https://ap.tidb.cc/post/20200529-22-tidb-4.0/" />
+<link rel="canonical" href="https://ap.tidb.cc/post/20190606-23-backoff/" />
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -38,23 +38,23 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
 
 
-<meta property="og:title" content="TiDB - 4.0 版图分析" />
-<meta property="og:description" content="0x00 History TiDB 1.0 2017 年 10 月 16 日 TiDB 2.0 2018 年 4 月 27 日 TiDB 2.1 2018 年 11 月 30 日 TiDB 3.0 2019 年 6 月 28 日 TiDB 3.1 2020 年 4 月 16 日 TiDB 4.0 2020 年 5 月 28 日 0x01 4.0 没有故事可讲，看图吧 根据上一篇文档 TiDB" />
+<meta property="og:title" content="TiDB - 2PC &amp; Backoff" />
+<meta property="og:description" content="0x00 源 TiDB to TiKV 之间的网络状态(图片来自与 PingCAP 官网锁冲突)「该图包含悲观锁逻辑，来自 2020 年的 PingCAP 官网」；部分内容来自 Google Percolator 的事务模型。 0x01 2PC 2PC (Two-phaseCommit) 是指在计算机" />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://ap.tidb.cc/post/20200529-22-tidb-4.0/" />
-<meta property="article:published_time" content="2020-05-29T00:00:00+08:00" />
-<meta property="article:modified_time" content="2020-05-29T00:00:00+08:00" />
-<meta itemprop="name" content="TiDB - 4.0 版图分析">
-<meta itemprop="description" content="0x00 History TiDB 1.0 2017 年 10 月 16 日 TiDB 2.0 2018 年 4 月 27 日 TiDB 2.1 2018 年 11 月 30 日 TiDB 3.0 2019 年 6 月 28 日 TiDB 3.1 2020 年 4 月 16 日 TiDB 4.0 2020 年 5 月 28 日 0x01 4.0 没有故事可讲，看图吧 根据上一篇文档 TiDB">
-<meta itemprop="datePublished" content="2020-05-29T00:00:00&#43;08:00" />
-<meta itemprop="dateModified" content="2020-05-29T00:00:00&#43;08:00" />
-<meta itemprop="wordCount" content="428">
+<meta property="og:url" content="https://ap.tidb.cc/post/20190606-23-backoff/" />
+<meta property="article:published_time" content="2019-06-05T00:00:00+08:00" />
+<meta property="article:modified_time" content="2019-06-06T00:00:00+08:00" />
+<meta itemprop="name" content="TiDB - 2PC &amp; Backoff">
+<meta itemprop="description" content="0x00 源 TiDB to TiKV 之间的网络状态(图片来自与 PingCAP 官网锁冲突)「该图包含悲观锁逻辑，来自 2020 年的 PingCAP 官网」；部分内容来自 Google Percolator 的事务模型。 0x01 2PC 2PC (Two-phaseCommit) 是指在计算机">
+<meta itemprop="datePublished" content="2019-06-05T00:00:00&#43;08:00" />
+<meta itemprop="dateModified" content="2019-06-06T00:00:00&#43;08:00" />
+<meta itemprop="wordCount" content="696">
 
 
 
-<meta itemprop="keywords" content="AirPlan," /><meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="TiDB - 4.0 版图分析"/>
-<meta name="twitter:description" content="0x00 History TiDB 1.0 2017 年 10 月 16 日 TiDB 2.0 2018 年 4 月 27 日 TiDB 2.1 2018 年 11 月 30 日 TiDB 3.0 2019 年 6 月 28 日 TiDB 3.1 2020 年 4 月 16 日 TiDB 4.0 2020 年 5 月 28 日 0x01 4.0 没有故事可讲，看图吧 根据上一篇文档 TiDB"/>
+<meta itemprop="keywords" content="AirPlan,2PC,backoff," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="TiDB - 2PC &amp; Backoff"/>
+<meta name="twitter:description" content="0x00 源 TiDB to TiKV 之间的网络状态(图片来自与 PingCAP 官网锁冲突)「该图包含悲观锁逻辑，来自 2020 年的 PingCAP 官网」；部分内容来自 Google Percolator 的事务模型。 0x01 2PC 2PC (Two-phaseCommit) 是指在计算机"/>
 
 <!--[if lte IE 9]>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
@@ -121,15 +121,15 @@
           <article class="post">
     
     <header class="post-header">
-      <h1 class="post-title">TiDB - 4.0 版图分析</h1>
+      <h1 class="post-title">TiDB - 2PC &amp; Backoff</h1>
 
       <div class="post-meta">
-        <span class="post-time"> 2020-05-29 </span>
+        <span class="post-time"> 2019-06-05 </span>
         <div class="post-category">
             <a href="/categories/tidb/"> TiDB </a>
             </div>
-          <span class="more-meta"> 428 words </span>
-          <span class="more-meta"> 1 min read </span>
+          <span class="more-meta"> 696 words </span>
+          <span class="more-meta"> 2 mins read </span>
         <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
       </div>
     </header>
@@ -139,104 +139,68 @@
   <div class="post-toc-content">
     <nav id="TableOfContents">
   <ul>
-    <li><a href="#0x00-history">0x00 History</a></li>
-    <li><a href="#0x01-40">0x01 4.0</a></li>
-    <li><a href="#0x02-未来可期">0x02 未来可期</a></li>
+    <li><a href="#0x00-源">0x00 源</a></li>
+    <li><a href="#0x01-2pc">0x01 2PC</a></li>
+    <li><a href="#0x02-rpc">0x02 RPC</a></li>
+    <li><a href="#0x03-backoff">0x03 Backoff</a></li>
+    <li><a href="#0x04-resolve-lock">0x04 Resolve lock</a></li>
   </ul>
 </nav>
   </div>
 </div>
   <div class="post-outdated">
-    <div class="hint">
-      <p>[NOTE] Updated <span class="timeago" datetime="2020-05-29T00:00:00" title="May 29, 2020">May 29, 2020</span>. This article may have outdated content or subject matter.</p>
+    <div class="warn">
+      <p>[NOTE] Updated <span class="timeago" datetime="2019-06-06T00:00:00" title="June 6, 2019">June 6, 2019</span>. This article may have outdated content or subject matter.</p>
     </div>
   </div>
     <div class="post-content">
-      <h2 id="0x00-history">0x00 History</h2>
-<ul>
-<li>TiDB 1.0 2017 年 10 月 16 日</li>
-<li>TiDB 2.0 2018 年 4 月 27 日</li>
-<li>TiDB 2.1 2018 年 11 月 30 日</li>
-<li>TiDB 3.0 2019 年 6 月 28 日</li>
-<li>TiDB 3.1 2020 年 4 月 16 日</li>
-<li>TiDB 4.0 2020 年 5 月 28 日</li>
-</ul>
-<h2 id="0x01-40">0x01 4.0</h2>
+      <h2 id="0x00-源">0x00 源</h2>
+<p>TiDB to TiKV 之间的网络状态(图片来自与 PingCAP 官网<a href="https://docs.pingcap.com/zh/tidb/stable/troubleshoot-lock-conflicts">锁冲突</a>)「该图包含悲观锁逻辑，来自 2020 年的 PingCAP 官网」；部分内容来自 <a href="https://github.com/ngaut/builddatabase/blob/master/percolator/README.md">Google Percolator 的事务模型</a>。</p>
+<p><img src="./troubleshooting-lock-pic-05.png" alt="TiDB to TiKV"></p>
+<h2 id="0x01-2pc">0x01 2PC</h2>
+<p>2PC (Two-phaseCommit) 是指在计算机网络以及数据库领域内，为了使基于分布式系统架构下的所有节点在进行事务提交时保持一致性而设计的一种算法 (Algorithm)。第一阶段：准备阶段(投票阶段)和第二阶段：提交阶段（执行阶段）。</p>
+<p>在分布式系统中，每个节点虽然可以知晓自己的操作时成功或者失败，却无法知道其他节点的操作的成功或失败。</p>
+<p>当一个事务跨越多个节点时，为了保持事务的 ACID 特性，需要引入一个作为协调者的组件来统一掌控所有节点(称作参与者) 的操作结果，并最终指示这些节点是否要把操作结果进行真正的提交(比如将更新后的数据写入磁盘等等)，参与者将操作成败通知协调者，再由协调者根据所有参与者的反馈情报决定各参与者是否要提交操作还是中止操作。</p>
 <blockquote>
-<p>没有故事可讲，看图吧<br>
-根据上一篇文档 <a href="/post/20200504-19-tidb4.0/">TiDB 4.0 新特性</a>和各种猜测揣摩构图<br>
-<strong>本图不代表 TiDB 官方解答，部分组件还未 GA ，请勿直接引用复制</strong><br>
-<strong>本图不代表 TiDB 官方解答，部分组件还未 GA ，请勿直接引用复制</strong><br>
-<strong>本图不代表 TiDB 官方解答，部分组件还未 GA ，请勿直接引用复制</strong></p>
+<p>see store/tikv/2pc.go // 内容过于复杂，没有理解
+2PC 模型</p>
 </blockquote>
-<p><img src="./TiDB-4.0.png" alt="TiDB-4.0 版图分析" title="TiDB-4.0 版图分析"></p>
-<h2 id="0x02-未来可期">0x02 未来可期</h2>
+<p><img src="./2pc.webp" alt="2pc (Two-phaseCommit)"></p>
 <blockquote>
-<p>一些组成故事和场景的关键词，具体故事内容自行脑补</p>
+<p>乐观锁 2PC in TiDB</p>
 </blockquote>
-<ol>
-<li>online DDL</li>
-<li>scale out</li>
-<li>region schedule
+<p><img src="./troubleshooting-lock-pic-01.png" alt="TiDB-2PC"></p>
+<blockquote>
+<p>悲观锁 2PC in TiDB</p>
+</blockquote>
+<p><img src="./troubleshooting-lock-pic-06.png" alt="TiDB-2PC-Pessimistic-lock"></p>
+<h2 id="0x02-rpc">0x02 RPC</h2>
+<p>RPC（Remote Procedure Call Protocol 远程过程调用）是分布式架构的核心之一</p>
 <ul>
-<li>hot region
+<li>TiDB 2.0 之后使用的 Google RPC 协议 <a href="https://godoc.org/google.golang.org/grpc">gRPC</a>
 <ul>
-<li>follower read（部分）</li>
+<li>同步调用：客户端调用服务方方法，等待直到服务方返回结果或者超时，再继续自己的操作</li>
+<li>异步调用：客户端把消息发送给中间件，不再等待服务端返回，直接继续自己的操作</li>
 </ul>
 </li>
-<li>静默 region</li>
 </ul>
-</li>
-<li>超大容量</li>
-<li>高可用
+<p><img src="./rpc.jpg" alt="Remote Procedure Call Protocol"></p>
+<h2 id="0x03-backoff">0x03 Backoff</h2>
+<p>网络之间建立链接会产生各种各样的状态，只做重连机制会造成网络拥堵或者网络风暴，backoff 机制降低资源开销「CPU、时间」，提高网络资源再次链接成功率。</p>
 <ul>
-<li>Raft</li>
-<li>无状态组件</li>
-</ul>
-</li>
-<li>未来可期
+<li>RPC 网络交互之间需要一个 backoff 机制 <a href="https://godoc.org/google.golang.org/grpc/backoff">gRPC backoff</a>
 <ul>
-<li>文档、工具、生态</li>
-<li>代码开源</li>
-<li>成本：支出 &amp; 收益
-<ul>
-<li>硬件支出与用户量线性可控</li>
-<li>收益 与 “平台” 互相扩展</li>
+<li>Backoff 文档解释 <a href="https://github.com/grpc/grpc/blob/master/doc/connection-backoff.md">gRPC backoff protocol</a></li>
+<li>Backoff Full jitter、Equal jitter、Decorrelated jitter、no jitter 性能测试 <a href="https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/">Exponential Backoff And Jitter</a></li>
 </ul>
 </li>
-<li>员工幸福度</li>
 </ul>
-</li>
-<li>平台化、标准化
-<ul>
-<li>精细可控、水到渠成</li>
-<li>打包、共享、自主、灵活</li>
-</ul>
-</li>
-<li>路程 == 不同硬件场景适配
-<ul>
-<li>从传统到共有云</li>
-<li>从共有云回归私有云</li>
-<li>从私有云到 K8S</li>
-<li>从人造肉故障到自动化运维</li>
-<li>顺应时代的变迁</li>
-</ul>
-</li>
-<li>心砺 == 不同软件场景适配
-<ul>
-<li>金融、保险、证券；厂商 mysql  protocols 保底</li>
-<li>互联网快速迭代，粮草满足战场</li>
-</ul>
-</li>
-<li>大、快、稳
-<ul>
-<li>大数据量到来了</li>
-<li>快速分析需求到来了</li>
-<li>同时跑起来还要稳起来</li>
-</ul>
-</li>
-</ol>
-<p><img src="./bigfish.jpeg" alt="大鱼吃小鱼的故事"></p>
+<h2 id="0x04-resolve-lock">0x04 Resolve lock</h2>
+<blockquote>
+<p>see store/tikv/lock_resolver.go</p>
+</blockquote>
+<p>对应监控图 tidb dashboard &ndash; kv error 中的 resolve lock 部分 <code>sum(rate(tidb_tikvclient_lock_resolver_actions_total[1m])) by (type)</code></p>
+<p><img src="./TXN%20.png" alt="ap.tidb.cc txn resolve lock status"></p>
 
     </div>
 
@@ -248,7 +212,7 @@
   <p class="copyright-item">
     <span class="item-title">LastMod</span>
     <span class="item-content">
-        2020-05-29
+        2019-06-06
         
     </span>
   </p>
@@ -261,15 +225,17 @@
 <footer class="post-footer">
       <div class="post-tags">
           <a href="/tags/airplan/">AirPlan</a>
+          <a href="/tags/2pc/">2PC</a>
+          <a href="/tags/backoff/">backoff</a>
           </div>
       <nav class="post-nav">
-        <a class="prev" href="/post/20200601-23-cdc-4.0rc1/">
+        <a class="prev" href="/post/20191008-41-dm-faq/">
             <i class="iconfont icon-left"></i>
-            <span class="prev-text nav-default">TiDB - CDC RC1 测试</span>
+            <span class="prev-text nav-default">总结 - Data Migration（数据同步）</span>
             <span class="prev-text nav-mobile">Prev</span>
           </a>
-        <a class="next" href="/post/20200521-21-keyvis/">
-            <span class="next-text nav-default">TiDB 4.0 -- keyvis-diagnostics</span>
+        <a class="next" href="/post/20190313-11-numactl/">
+            <span class="next-text nav-default">系统调优 - numactl cpubind</span>
             <span class="next-text nav-mobile">Next</span>
             <i class="iconfont icon-right"></i>
           </a>

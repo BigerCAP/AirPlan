@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>backoff on TiDB AirPlan - A biger solution</title>
+    <link>https://ap.tidb.cc/tags/backoff/</link>
+    <description>Recent content in backoff on TiDB AirPlan - A biger solution</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright>TiDB - AirPlan</copyright>
+    <lastBuildDate>Wed, 05 Jun 2019 00:00:00 +0800</lastBuildDate>
+    
+	<atom:link href="https://ap.tidb.cc/tags/backoff/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>TiDB - 2PC &amp; Backoff</title>
+      <link>https://ap.tidb.cc/post/20190606-23-backoff/</link>
+      <pubDate>Wed, 05 Jun 2019 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20190606-23-backoff/</guid>
+      <description>0x00 源 TiDB to TiKV 之间的网络状态(图片来自与 PingCAP 官网锁冲突)「该图包含悲观锁逻辑，来自 2020 年的 PingCAP 官网」；部分内容来自 Google Percolator 的事务模型。 0x01 2PC 2PC (Two-phaseCommit) 是指在计算机</description>
+    </item>
+    
+  </channel>
+</rss>
