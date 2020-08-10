@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>School - TiDB Region Spilt - TiDB AirPlan - A biger solution</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Jeff" /><meta name="description" content="0x00 元 收到监控 &amp;amp; 业务告警，内容为目前 QPS duration &amp;gt; 1s 首先排查监控缩小范围 交叉信息判定为 region 超过 144mb 以后未分裂，造成 get snapshot 持续失败，同时 region 过大造成写入和读取数" /><meta name="keywords" content="TiDB, AirPlan, TiDB OPS, tidb-operator, 2pc, raft, databases, mysql, htap" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.63.2 with theme even" />
+
+
+<link rel="canonical" href="https://ap.tidb.cc/post/20180824-34-region-spilt/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<link href="/dist/even.04bd84cd.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="School - TiDB Region Spilt" />
+<meta property="og:description" content="0x00 元 收到监控 &amp; 业务告警，内容为目前 QPS duration &gt; 1s 首先排查监控缩小范围 交叉信息判定为 region 超过 144mb 以后未分裂，造成 get snapshot 持续失败，同时 region 过大造成写入和读取数" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://ap.tidb.cc/post/20180824-34-region-spilt/" />
+<meta property="article:published_time" content="2018-08-24T00:00:00+08:00" />
+<meta property="article:modified_time" content="2018-08-24T00:00:00+08:00" />
+<meta itemprop="name" content="School - TiDB Region Spilt">
+<meta itemprop="description" content="0x00 元 收到监控 &amp; 业务告警，内容为目前 QPS duration &gt; 1s 首先排查监控缩小范围 交叉信息判定为 region 超过 144mb 以后未分裂，造成 get snapshot 持续失败，同时 region 过大造成写入和读取数">
+<meta itemprop="datePublished" content="2018-08-24T00:00:00&#43;08:00" />
+<meta itemprop="dateModified" content="2018-08-24T00:00:00&#43;08:00" />
+<meta itemprop="wordCount" content="813">
+
+
+
+<meta itemprop="keywords" content="region spilt," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="School - TiDB Region Spilt"/>
+<meta name="twitter:description" content="0x00 元 收到监控 &amp; 业务告警，内容为目前 QPS duration &gt; 1s 首先排查监控缩小范围 交叉信息判定为 region 超过 144mb 以后未分裂，造成 get snapshot 持续失败，同时 region 过大造成写入和读取数"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">TiDB AirPlan</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/post/">
+        <li class="mobile-menu-item">Blog</li>
+      </a><a href="/look/">
+        <li class="mobile-menu-item">Look</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">About</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">TiDB AirPlan</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/post/">Blog</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/look/">Look</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/about/">About</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">School - TiDB Region Spilt</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2018-08-24 </span>
+        <div class="post-category">
+            <a href="/categories/troubleshooting/"> troubleshooting </a>
+            </div>
+          <span class="more-meta"> 813 words </span>
+          <span class="more-meta"> 2 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#0x00-元">0x00 元</a>
+      <ul>
+        <li><a href="#region-spilt">region spilt</a></li>
+        <li><a href="#0x01-二次确认">0x01 二次确认</a></li>
+        <li><a href="#tikv-日志">TiKV 日志</a></li>
+        <li><a href="#region-meta">Region meta</a></li>
+        <li><a href="#0x02-修复">0x02 修复</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+  <div class="post-outdated">
+    <div class="warn">
+      <p>[NOTE] Updated <span class="timeago" datetime="2018-08-24T00:00:00" title="August 24, 2018">August 24, 2018</span>. This article may have outdated content or subject matter.</p>
+    </div>
+  </div>
+    <div class="post-content">
+      <h2 id="0x00-元">0x00 元</h2>
+<blockquote>
+<p>收到监控 &amp; 业务告警，内容为目前 QPS duration &gt; 1s<br>
+首先排查监控缩小范围</p>
+</blockquote>
+<p><img src="./1-qps.png" alt="ap.tidb.cc TiDB Region Spilt QPS duration" title="ap.tidb.cc TiDB Region Spilt"><br>
+<img src="./2-apply.png" alt="ap.tidb.cc TiDB Region Spilt apply cpu 上涨" title="ap.tidb.cc TiDB Region Spilt"><br>
+<img src="./3-max.png" alt="ap.tidb.cc TiDB Region Spilt region 大小" title="ap.tidb.cc TiDB Region Spilt"><br>
+<img src="./4-snapshot.png" alt="ap.tidb.cc TiDB Region Spilt get snapshot failed" title="ap.tidb.cc TiDB Region Spilt"><br>
+<img src="./5-schedule.png" alt="ap.tidb.cc TiDB Region Spilt schedule duration" title="ap.tidb.cc TiDB Region Spilt"></p>
+<blockquote>
+<p>交叉信息判定为 region 超过 144mb 以后未分裂，造成 get snapshot 持续失败，同时 region 过大造成<strong>写入和读取</strong>数据动作资源消耗过大<br>
+SQL 读取数据时 tikv 向命中每 region 发送单次 tikvRPC 请求；由于 region 过大，可能包含该 SQL 命中的所有数据，造成 tikvRPC 数据包过大<br>
+写入数据时，region 数量大于过半时才能提交成功，region 过大造成无法 compaction 、被 PD schedule region 时成本加大、region 内查询数据成本过大等</p>
+</blockquote>
+<h3 id="region-spilt">region spilt</h3>
+<blockquote>
+<p>正常流程</p>
+</blockquote>
+<ol>
+<li>初始化 region ，region id 2</li>
+<li>region id 2 写入数据达到 144MB</li>
+<li>region id 2 接收 split 操作
+<ol>
+<li>region 从尾部追加写入</li>
+<li>切割时从头部粗略计算 96mb</li>
+<li>保持尾部 id 不变、尾部可持续写入</li>
+</ol>
+</li>
+<li>region id 2 分列成 id 2 &amp; id 10 两个 region / 其中 id 2 为 48mb，id 10 为 96mb（实际非精准计算）</li>
+</ol>
+<blockquote>
+<p>异常场景</p>
+</blockquote>
+<ul>
+<li>数据写入过快时，磁盘或者 split cpu work 跟不上时可能会出现 split 持续失败
+<ul>
+<li>region spilt 单线程工作，前期版本 reigon spilt 根据 IO 大小扫描 96mb 后执行 split</li>
+<li>会实际消耗 96mb 扫描 region 的 IOPS / 消耗创建新 region + 创建 snapshot 等 IOPS</li>
+</ul>
+</li>
+</ul>
+<h3 id="0x01-二次确认">0x01 二次确认</h3>
+<h3 id="tikv-日志">TiKV 日志</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-fallback" data-lang="fallback">2018/08/10 22:13:03.168 scheduler.rs:1306: [ERROR] 
+    get snapshot failed for cids=[1792370849], error Request(message: &#34;region is stale&#34; 
+        stale_epoch {new_regions {id: 4351912 
+            start_key:&#34;t\200\000\000\000\000\0009\377\364_i\200\000\000\000\000\377\000\000\003\001A336\3770001\37762\000\377\000\000\000\000\000\371\003\216\377\000\000\001\344\317\341i\000\376&#34; 
+            end_key: &#34;t\200\000\000\000\000\0009\377\364_i\200\000\000\000\000\377\000\000\003\001A760\3770035\37733\000\377\000\000\000\000\000\371\003\200\377\000\000\000\000\2233\242\000\376&#34; 
+        region_epoch {conf_ver: 1153 version: 15846} peers {id: 4351914 store_id: 4215749} peers {id: 4351915 store_id: 3169321} peers {id: 4841324 store_id: 8}} 
+    new_regions {id: 4841440 
+            start_key: &#34;t\200\000\000\000\000\0009\377\364_i\200\000\000\000\000\377\000\000\003\001A120\3770031\37739\000\377\000\000\000\000\000\371\003\200\377\000\000\000\000V\311\254\000\376&#34; 
+            end_key: &#34;t\200\000\000\000\000\0009\377\364_i\200\000\000\000\000\377\000\000\003\001A336\3770001\37762\000\377\000\000\000\000\000\371\003\216\377\000\000\001\344\317\341i\000\376&#34; 
+        region_epoch {conf_ver: 1153 version: 15846} peers {id: 4841441 store_id: 4215749} peers {id: 4841442 store_id: 3169321} peers {id: 4841443 store_id: 8}}})
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="region-meta">Region meta</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-json" data-lang="json"><span class="err">»</span> <span class="err">r</span><span class="err">e</span><span class="err">g</span><span class="err">i</span><span class="err">o</span><span class="err">n</span> <span class="mi">4803248</span>
+<span class="p">{</span>
+  <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="mi">4803248</span><span class="p">,</span>
+  <span class="nt">&#34;start_key&#34;</span><span class="p">:</span> <span class="s2">&#34;t\\x80\\x00\\x00\\x00\\x00\\x00:\\xff$_r\\x80\\x00\\x00\\x00&#39;\\xffױ\\xf4\\x00\\x00\\x00\\x00\\x00\\xfa&#34;</span><span class="p">,</span>
+  <span class="nt">&#34;end_key&#34;</span><span class="p">:</span> <span class="s2">&#34;&#34;</span><span class="p">,</span>
+  <span class="nt">&#34;epoch&#34;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">&#34;conf_ver&#34;</span><span class="p">:</span> <span class="mi">1159</span><span class="p">,</span>
+    <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="mi">17467</span>
+  <span class="p">}</span><span class="p">,</span>
+  <span class="nt">&#34;peers&#34;</span><span class="p">:</span> <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="mi">4227577</span><span class="p">,</span>
+      <span class="nt">&#34;store_id&#34;</span><span class="p">:</span> <span class="mi">4215744</span>
+    <span class="p">}</span><span class="p">,</span>
+    <span class="p">{</span>
+      <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="mi">4803248</span><span class="p">,</span>
+      <span class="nt">&#34;store_id&#34;</span><span class="p">:</span> <span class="mi">4215749</span>
+    <span class="p">}</span><span class="p">,</span>
+    <span class="p">{</span>
+      <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="mi">4804713</span><span class="p">,</span>
+      <span class="nt">&#34;store_id&#34;</span><span class="p">:</span> <span class="mi">4</span>
+    <span class="p">}</span>
+  <span class="p">]</span><span class="p">,</span>
+  <span class="nt">&#34;leader&#34;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="mi">4803248</span><span class="p">,</span>
+    <span class="nt">&#34;store_id&#34;</span><span class="p">:</span> <span class="mi">4215749</span>
+  <span class="p">}</span><span class="p">,</span>
+  <span class="nt">&#34;pending_peers&#34;</span><span class="p">:</span> <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="mi">4804713</span><span class="p">,</span>
+      <span class="nt">&#34;store_id&#34;</span><span class="p">:</span> <span class="mi">4</span>
+    <span class="p">}</span>
+  <span class="p">]</span><span class="p">,</span>
+  <span class="nt">&#34;written_bytes&#34;</span><span class="p">:</span> <span class="mi">267</span><span class="p">,</span>
+  <span class="nt">&#34;approximate_size&#34;</span><span class="p">:</span> <span class="mi">124183</span> <span class="err">/</span><span class="err">/</span> <span class="err">此</span><span class="err">处</span><span class="err">是</span> <span class="err">M</span><span class="err">B</span> <span class="err">大</span><span class="err">小</span><span class="err">。</span><span class="err">正</span><span class="err">常</span><span class="err">应</span><span class="err">该</span><span class="err">再</span> <span class="mi">144</span><span class="err">M</span> <span class="err">以</span><span class="err">内</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="0x02-修复">0x02 修复</h3>
+<ul>
+<li>
+<p>查看 split 线程状态使用用 <code>strace -p &quot;tid of split worker&quot;</code></p>
+<ul>
+<li>strace 会阻断程序运行，谨慎使用</li>
+</ul>
+</li>
+<li>
+<p>使用 PD-ctl 工具手工发起 split region 请求</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-json" data-lang="json"><span class="err">&gt;</span><span class="err">&gt;</span> <span class="err">o</span><span class="err">p</span><span class="err">e</span><span class="err">r</span><span class="err">a</span><span class="err">t</span><span class="err">o</span><span class="err">r</span> <span class="err">a</span><span class="err">d</span><span class="err">d</span> <span class="err">s</span><span class="err">p</span><span class="err">l</span><span class="err">i</span><span class="err">t</span><span class="err">-</span><span class="err">r</span><span class="err">e</span><span class="err">g</span><span class="err">i</span><span class="err">o</span><span class="err">n</span> <span class="mi">1</span> <span class="err">-</span><span class="err">-</span><span class="err">p</span><span class="err">o</span><span class="err">l</span><span class="err">i</span><span class="err">c</span><span class="err">y</span><span class="err">=</span><span class="err">a</span><span class="err">p</span><span class="err">p</span><span class="err">r</span><span class="err">o</span><span class="err">x</span><span class="err">i</span><span class="err">m</span><span class="err">a</span><span class="err">t</span><span class="err">e</span>     <span class="err">/</span><span class="err">/</span> <span class="err">将</span> <span class="err">R</span><span class="err">e</span><span class="err">g</span><span class="err">i</span><span class="err">o</span><span class="err">n</span> <span class="mi">1</span> <span class="err">对</span><span class="err">半</span><span class="err">拆</span><span class="err">分</span><span class="err">成</span><span class="err">两</span><span class="err">个</span> <span class="err">R</span><span class="err">e</span><span class="err">g</span><span class="err">i</span><span class="err">o</span><span class="err">n</span><span class="err">，</span><span class="err">基</span><span class="err">于</span><span class="err">粗</span><span class="err">略</span><span class="err">估</span><span class="err">计</span><span class="err">值</span>
+<span class="err">&gt;</span><span class="err">&gt;</span> <span class="err">o</span><span class="err">p</span><span class="err">e</span><span class="err">r</span><span class="err">a</span><span class="err">t</span><span class="err">o</span><span class="err">r</span> <span class="err">a</span><span class="err">d</span><span class="err">d</span> <span class="err">s</span><span class="err">p</span><span class="err">l</span><span class="err">i</span><span class="err">t</span><span class="err">-</span><span class="err">r</span><span class="err">e</span><span class="err">g</span><span class="err">i</span><span class="err">o</span><span class="err">n</span> <span class="mi">1</span> <span class="err">-</span><span class="err">-</span><span class="err">p</span><span class="err">o</span><span class="err">l</span><span class="err">i</span><span class="err">c</span><span class="err">y</span><span class="err">=</span><span class="err">s</span><span class="err">c</span><span class="err">a</span><span class="err">n</span>            <span class="err">/</span><span class="err">/</span> <span class="err">将</span> <span class="err">R</span><span class="err">e</span><span class="err">g</span><span class="err">i</span><span class="err">o</span><span class="err">n</span> <span class="mi">1</span> <span class="err">对</span><span class="err">半</span><span class="err">拆</span><span class="err">分</span><span class="err">成</span><span class="err">两</span><span class="err">个</span> <span class="err">R</span><span class="err">e</span><span class="err">g</span><span class="err">i</span><span class="err">o</span><span class="err">n</span><span class="err">，</span><span class="err">基</span><span class="err">于</span><span class="err">精</span><span class="err">确</span><span class="err">扫</span><span class="err">描</span><span class="err">值</span>
+</code></pre></td></tr></table>
+</div>
+</div></li>
+</ul>
+<p><img src="./6-split.png" alt="ap.tidb.cc TiDB Region Spilt region split 请求后" title="ap.tidb.cc TiDB Region Spilt"><br>
+<img src="./7-snapshot-cpu.png" alt="ap.tidb.cc TiDB Region Spilt region split 请求后 snapshot cpu 占用" title="ap.tidb.cc TiDB Region Spilt"><br>
+<img src="./8-region-sum.png" alt="ap.tidb.cc TiDB Region Spilt region split 请求后 region 增长状态" title="ap.tidb.cc TiDB Region Spilt"></p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Jeff</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2018-08-24
+        
+    </span>
+  </p>
+  
+  <p class="copyright-item">
+    <span class="item-title">License</span>
+    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span>
+  </p>
+</div>
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/region-spilt/">region spilt</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/20181126-48-not-leader/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">School - TiKV not leader</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/20180807-32-write-stall/">
+            <span class="next-text nav-default">School - TiKV write stall</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="https://github.com/BigerCAP/TiDB-AirPlan/issues" class="iconfont icon-github" title="github"></a>
+  <a href="https://ap.tidb.cc/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2020
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">TiDB - AirPlan</span>
+  </span>
+</div>
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js" integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js" integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin="anonymous"></script>
+  <script><!-- NOTE: timeago.js uses the language code format like "zh_CN" (underscore and case sensitive) -->
+    var languageCode = "en".replace(/-/g, '_').replace(/_(.*)/, function ($0, $1) {return $0.replace($1, $1.toUpperCase());});
+    timeago().render(document.querySelectorAll('.timeago'), languageCode);
+    timeago.cancel();  
+  </script>
+<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>
