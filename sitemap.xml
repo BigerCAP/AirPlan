@@ -520,6 +520,13 @@
   </url>
   
   <url>
+    <loc>https://ap.tidb.cc/tags/ddl/</loc>
+    <lastmod>2018-08-24T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
     <loc>https://ap.tidb.cc/tags/region-spilt/</loc>
     <lastmod>2018-08-24T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
@@ -528,6 +535,13 @@
   
   <url>
     <loc>https://ap.tidb.cc/post/20180824-34-region-spilt/</loc>
+    <lastmod>2018-08-24T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/post/20190116-3-ddl-history/</loc>
     <lastmod>2018-08-24T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>

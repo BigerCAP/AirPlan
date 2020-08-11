@@ -265,6 +265,15 @@
     </item>
     
     <item>
+      <title>School - TiDB table info &amp; DDL history</title>
+      <link>https://ap.tidb.cc/post/20190116-3-ddl-history/</link>
+      <pubDate>Fri, 24 Aug 2018 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20190116-3-ddl-history/</guid>
+      <description>0x00 元 tidb ddl 3.0 版本之前只有一个队列提供服务，所有 ddl 都要在这个队列阻塞 多个 TiDB-server 会先选举 DDL owner TiDB 配置文件中的 run-ddl = false 该节点不支持运行 DDL DDL owner 处理所有 DDL 信息 更</description>
+    </item>
+    
+    <item>
       <title>School - TiKV write stall</title>
       <link>https://ap.tidb.cc/post/20180807-32-write-stall/</link>
       <pubDate>Tue, 07 Aug 2018 00:00:00 +0800</pubDate>
