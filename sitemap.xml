@@ -520,6 +520,20 @@
   </url>
   
   <url>
+    <loc>https://ap.tidb.cc/tags/binlog/</loc>
+    <lastmod>2018-10-29T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://ap.tidb.cc/post/20181029-44-binlog-tso/</loc>
+    <lastmod>2018-10-29T00:00:00+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
     <loc>https://ap.tidb.cc/tags/ddl/</loc>
     <lastmod>2018-08-24T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
@@ -592,13 +606,6 @@
   <url>
     <loc>https://ap.tidb.cc/post/20180605-syncer-mindmap/</loc>
     <lastmod>2020-01-20T00:00:00+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://ap.tidb.cc/tags/binlog/</loc>
-    <lastmod>2018-05-22T00:00:00+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>

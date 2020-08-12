@@ -346,6 +346,15 @@
     </item>
     
     <item>
+      <title>Binlog</title>
+      <link>https://ap.tidb.cc/tags/binlog/</link>
+      <pubDate>Mon, 29 Oct 2018 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/tags/binlog/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>DDL</title>
       <link>https://ap.tidb.cc/tags/ddl/</link>
       <pubDate>Fri, 24 Aug 2018 00:00:00 +0800</pubDate>
@@ -396,15 +405,6 @@
       <pubDate>Tue, 05 Jun 2018 00:00:00 +0800</pubDate>
       
       <guid>https://ap.tidb.cc/tags/syncer/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Binlog</title>
-      <link>https://ap.tidb.cc/tags/binlog/</link>
-      <pubDate>Sat, 12 May 2018 00:00:00 +0800</pubDate>
-      
-      <guid>https://ap.tidb.cc/tags/binlog/</guid>
       <description></description>
     </item>
     
