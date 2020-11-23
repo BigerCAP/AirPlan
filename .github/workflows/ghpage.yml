@@ -28,6 +28,3 @@ jobs:
         github_token: ${{ secrets.TP }}        
         publish_branch: gh-pages
         publish_dir: ./public
-        user_name: 'TiDB-AP-actions[bot]'
-        user_email: 'ap.tidb.cc'
-        commit_message: ${{ github.event.head_commit.message }}
