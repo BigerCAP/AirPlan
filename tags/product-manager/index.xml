@@ -7,11 +7,7 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>TiDB - AirPlan</copyright>
-    <lastBuildDate>Sat, 06 Jun 2020 00:00:00 +0800</lastBuildDate>
-    
-	<atom:link href="https://ap.tidb.cc/tags/product-manager/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Sat, 06 Jun 2020 00:00:00 +0800</lastBuildDate><atom:link href="https://ap.tidb.cc/tags/product-manager/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Product manager / 涉猎围观</title>
       <link>https://ap.tidb.cc/look/20200606-23-inspired/</link>

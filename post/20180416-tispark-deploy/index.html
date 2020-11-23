@@ -23,7 +23,7 @@
 
 
 
-<meta name="generator" content="Hugo 0.63.2 with theme even" />
+<meta name="generator" content="Hugo 0.78.2 with theme even" />
 
 
 <link rel="canonical" href="https://ap.tidb.cc/post/20180416-tispark-deploy/" />
@@ -46,13 +46,14 @@
 <meta property="article:modified_time" content="2020-01-26T00:00:00+08:00" />
 <meta itemprop="name" content="AP - TiSpark 服务安装 部署 测试">
 <meta itemprop="description" content="0x00 介绍 TiSpark 项目 2020 年会被姊妹家 TiFlash 升级替换 pingcap/TiSpark 项目地址，使用前阅读以下文档 TiSpark 用户指南（英文版本） 官方 Blog TiSpark 文档 0x01 部署 TiSpark 前情提要 tidb-ansible/roles/local/templates/binary_packages.yml.j2 下载连接 此处为 tispark 下载连">
-<meta itemprop="datePublished" content="2018-04-16T00:00:00&#43;08:00" />
-<meta itemprop="dateModified" content="2020-01-26T00:00:00&#43;08:00" />
+<meta itemprop="datePublished" content="2018-04-16T00:00:00+08:00" />
+<meta itemprop="dateModified" content="2020-01-26T00:00:00+08:00" />
 <meta itemprop="wordCount" content="1924">
 
 
 
-<meta itemprop="keywords" content="Deploy,Zeppelin," /><meta name="twitter:card" content="summary"/>
+<meta itemprop="keywords" content="Deploy,Zeppelin," />
+<meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="AP - TiSpark 服务安装 部署 测试"/>
 <meta name="twitter:description" content="0x00 介绍 TiSpark 项目 2020 年会被姊妹家 TiFlash 升级替换 pingcap/TiSpark 项目地址，使用前阅读以下文档 TiSpark 用户指南（英文版本） 官方 Blog TiSpark 文档 0x01 部署 TiSpark 前情提要 tidb-ansible/roles/local/templates/binary_packages.yml.j2 下载连接 此处为 tispark 下载连"/>
 
@@ -150,7 +151,7 @@
     </li>
     <li><a href="#0x02-测试服务">0x02 测试服务</a>
       <ul>
-        <li><a href="#端口--ip">端口 & IP</a></li>
+        <li><a href="#端口--ip">端口 &amp; IP</a></li>
         <li><a href="#使用姿势">使用姿势</a></li>
         <li><a href="#版本变更">版本变更</a></li>
       </ul>
@@ -172,7 +173,7 @@
   </div>
 </div>
   <div class="post-outdated">
-    <div class="hint">
+    <div class="warn">
       <p>[NOTE] Updated <span class="timeago" datetime="2020-01-26T00:00:00" title="January 26, 2020">January 26, 2020</span>. This article may have outdated content or subject matter.</p>
     </div>
   </div>
@@ -419,9 +420,9 @@ SPARK_WORKER_MEMORY=5g
 </span><span class="lnt">3
 </span></code></pre></td>
 <td class="lntd">
-<pre class="chroma"><code class="language-sql" data-lang="sql"><span class="n">spark</span><span class="p">.</span><span class="k">sql</span><span class="p">(</span><span class="s2">&#34;</span><span class="s2">show schemas</span><span class="s2">&#34;</span><span class="p">)</span><span class="p">.</span><span class="k">show</span>
-<span class="n">spark</span><span class="p">.</span><span class="k">sql</span><span class="p">(</span><span class="s2">&#34;</span><span class="s2">use mysql</span><span class="s2">&#34;</span><span class="p">)</span><span class="p">.</span><span class="k">show</span>
-<span class="n">spark</span><span class="p">.</span><span class="k">sql</span><span class="p">(</span><span class="s2">&#34;</span><span class="s2">show tables</span><span class="s2">&#34;</span><span class="p">)</span><span class="p">.</span><span class="k">show</span>
+<pre class="chroma"><code class="language-sql" data-lang="sql"><span class="n">spark</span><span class="p">.</span><span class="k">sql</span><span class="p">(</span><span class="s2">&#34;show schemas&#34;</span><span class="p">).</span><span class="k">show</span>
+<span class="n">spark</span><span class="p">.</span><span class="k">sql</span><span class="p">(</span><span class="s2">&#34;use mysql&#34;</span><span class="p">).</span><span class="k">show</span>
+<span class="n">spark</span><span class="p">.</span><span class="k">sql</span><span class="p">(</span><span class="s2">&#34;show tables&#34;</span><span class="p">).</span><span class="k">show</span>
 </code></pre></td></tr></table>
 </div>
 </div></li>
@@ -581,7 +582,7 @@ jackson-databind-2.6.5.jar
 <td class="lntd">
 <pre class="chroma"><code class="language-SQL" data-lang="SQL"><span class="n">import</span> <span class="n">org</span><span class="p">.</span><span class="n">apache</span><span class="p">.</span><span class="n">spark</span><span class="p">.</span><span class="k">sql</span><span class="p">.</span><span class="n">TiContext</span>
 <span class="n">val</span> <span class="n">ti</span> <span class="o">=</span> <span class="k">new</span> <span class="n">TiContext</span><span class="p">(</span><span class="n">spark</span><span class="p">)</span>
-<span class="n">ti</span><span class="p">.</span><span class="n">tidbMapDatabase</span><span class="p">(</span><span class="s2">&#34;</span><span class="s2">test</span><span class="s2">&#34;</span><span class="p">)</span>
+<span class="n">ti</span><span class="p">.</span><span class="n">tidbMapDatabase</span><span class="p">(</span><span class="s2">&#34;test&#34;</span><span class="p">)</span>
 <span class="o">%</span><span class="k">sql</span> <span class="k">show</span> <span class="n">tables</span>
 </code></pre></td></tr></table>
 </div>
@@ -623,8 +624,8 @@ import org.apache.spark.sql.TiContext
 
 scala&gt; val <span class="nv">ti</span> <span class="o">=</span> new TiContext<span class="o">(</span>spark<span class="o">)</span>
 java.util.NoSuchElementException: spark.tispark.pd.addresses
-at org.apache.spark.SparkConf<span class="nv">$$</span>anonfun<span class="nv">$get</span><span class="nv">$1</span>.apply<span class="o">(</span>SparkConf.scala:243<span class="o">)</span>
-at org.apache.spark.SparkConf<span class="nv">$$</span>anonfun<span class="nv">$get</span><span class="nv">$1</span>.apply<span class="o">(</span>SparkConf.scala:243<span class="o">)</span>
+at org.apache.spark.SparkConf<span class="nv">$$</span>anonfun<span class="nv">$get$1</span>.apply<span class="o">(</span>SparkConf.scala:243<span class="o">)</span>
+at org.apache.spark.SparkConf<span class="nv">$$</span>anonfun<span class="nv">$get$1</span>.apply<span class="o">(</span>SparkConf.scala:243<span class="o">)</span>
 at scala.Option.getOrElse<span class="o">(</span>Option.scala:121<span class="o">)</span>
 at org.apache.spark.SparkConf.get<span class="o">(</span>SparkConf.scala:243<span class="o">)</span>
 at com.pingcap.tispark.TiUtils$.sparkConfToTiConf<span class="o">(</span>TiUtils.scala:175<span class="o">)</span>

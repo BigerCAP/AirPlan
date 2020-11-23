@@ -23,7 +23,7 @@
 
 
 
-<meta name="generator" content="Hugo 0.63.2 with theme even" />
+<meta name="generator" content="Hugo 0.78.2 with theme even" />
 
 
 <link rel="canonical" href="https://ap.tidb.cc/post/20170604-alertmanager/" />
@@ -46,13 +46,14 @@
 <meta property="article:modified_time" content="2020-01-20T00:00:00+08:00" />
 <meta itemprop="name" content="监控架构 - 专业打小报告好多年">
 <meta itemprop="description" content="骑士 AlertManager 配置以及工具使用说明 AlertManager 配置文件模板 交叉 在 Prometheus 配置文件更新以下代码块(prometheus 2.0 &#43;)，修改完成后重启后生效 Prometheus 配置文件地址 {{deploy_dir}}/conf/prometheus.yml 1 2">
-<meta itemprop="datePublished" content="2017-06-04T00:00:00&#43;08:00" />
-<meta itemprop="dateModified" content="2020-01-20T00:00:00&#43;08:00" />
-<meta itemprop="wordCount" content="2294">
+<meta itemprop="datePublished" content="2017-06-04T00:00:00+08:00" />
+<meta itemprop="dateModified" content="2020-01-20T00:00:00+08:00" />
+<meta itemprop="wordCount" content="2479">
 
 
 
-<meta itemprop="keywords" content="Deploy,AlertManager,Prometheus," /><meta name="twitter:card" content="summary"/>
+<meta itemprop="keywords" content="Deploy,AlertManager,Prometheus," />
+<meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="监控架构 - 专业打小报告好多年"/>
 <meta name="twitter:description" content="骑士 AlertManager 配置以及工具使用说明 AlertManager 配置文件模板 交叉 在 Prometheus 配置文件更新以下代码块(prometheus 2.0 &#43;)，修改完成后重启后生效 Prometheus 配置文件地址 {{deploy_dir}}/conf/prometheus.yml 1 2"/>
 
@@ -128,7 +129,7 @@
         <div class="post-category">
             <a href="/categories/monitoring/"> Monitoring </a>
             </div>
-          <span class="more-meta"> 2294 words </span>
+          <span class="more-meta"> 2479 words </span>
           <span class="more-meta"> 5 mins read </span>
         <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
       </div>
@@ -157,7 +158,7 @@
   </div>
 </div>
   <div class="post-outdated">
-    <div class="hint">
+    <div class="warn">
       <p>[NOTE] Updated <span class="timeago" datetime="2020-01-20T00:00:00" title="January 20, 2020">January 20, 2020</span>. This article may have outdated content or subject matter.</p>
     </div>
   </div>
@@ -183,11 +184,11 @@
 </span><span class="lnt">5
 </span></code></pre></td>
 <td class="lntd">
-<pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="k">alerting</span><span class="p">:</span><span class="w">
-</span><span class="w"></span><span class="w">  </span><span class="k">alertmanagers</span><span class="p">:</span><span class="w">
-</span><span class="w"></span><span class="w">  </span>- <span class="k">static_configs</span><span class="p">:</span><span class="w">
-</span><span class="w"></span><span class="w">    </span>- <span class="k">targets</span><span class="p">:</span><span class="w">
-</span><span class="w"></span><span class="w">      </span>- <span class="s1">&#39;172.16.10.65:39093&#39;</span><span class="w"> </span><span class="c"># AlertManager 地址与端口</span><span class="w">
+<pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">alerting</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">alertmanagers</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">static_configs</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span>- <span class="nt">targets</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span>- <span class="s1">&#39;172.16.10.65:39093&#39;</span><span class="w"> </span><span class="c"># AlertManager 地址与端口</span><span class="w">
 </span></code></pre></td></tr></table>
 </div>
 </div></li>
@@ -329,95 +330,95 @@
 </span><span class="lnt">89
 </span></code></pre></td>
 <td class="lntd">
-<pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="k">global</span><span class="p">:</span><span class="w">
-</span><span class="w"></span><span class="w">  </span><span class="c"># Slack API 信息</span><span class="w">
-</span><span class="w">  </span><span class="k">slack_api_url</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;https://hooks.slack.com/services/T04A1PYPM/B2EJ1BSBG/12313424342342344&#39;</span><span class="w">
+<pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">global</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="c"># Slack API 信息</span><span class="w">
+</span><span class="w">  </span><span class="nt">slack_api_url</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;https://hooks.slack.com/services/T04A1PYPM/B2EJ1BSBG/12313424342342344&#39;</span><span class="w">
 </span><span class="w">
 </span><span class="w">  </span><span class="c"># Email SMTP 服务器信息</span><span class="w">
-</span><span class="w">  </span><span class="k">smtp_smarthost</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;smtp.ym.126.com:25&#39;</span><span class="w">
-</span><span class="w">  </span><span class="k">smtp_from</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;jump@tidb.cc&#39;</span><span class="w">
-</span><span class="w">  </span><span class="k">smtp_auth_username</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;jump@tidb.cc&#39;</span><span class="w">
-</span><span class="w">  </span><span class="k">smtp_auth_password</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;password&#39;</span><span class="w">
-</span><span class="w">  </span><span class="k">smtp_auth_secret</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="w">
-</span><span class="w">  </span><span class="k">smtp_auth_identity</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;&#34;</span><span class="w">
-</span><span class="w">  </span><span class="k">smtp_require_tls</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="c"># 邮箱服务是否开启 TLS</span><span class="w">
+</span><span class="w">  </span><span class="nt">smtp_smarthost</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;smtp.ym.126.com:25&#39;</span><span class="w">
+</span><span class="w">  </span><span class="nt">smtp_from</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;jump@tidb.cc&#39;</span><span class="w">
+</span><span class="w">  </span><span class="nt">smtp_auth_username</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;jump@tidb.cc&#39;</span><span class="w">
+</span><span class="w">  </span><span class="nt">smtp_auth_password</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;password&#39;</span><span class="w">
+</span><span class="w">  </span><span class="nt">smtp_auth_secret</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="w">
+</span><span class="w">  </span><span class="nt">smtp_auth_identity</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;&#34;</span><span class="w">
+</span><span class="w">  </span><span class="nt">smtp_require_tls</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="c"># 邮箱服务是否开启 TLS</span><span class="w">
 </span><span class="w">
-</span><span class="w"></span><span class="k">route</span><span class="p">:</span><span class="w"> </span><span class="w">                         </span><span class="c"># 声明 根路由节点</span><span class="w">
-</span><span class="w">  </span><span class="k">receiver</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;alert-default&#34;</span><span class="w">     </span><span class="c"># 如果没有接收器规则匹配到这条告警，默认发送到 `alert-default`，该 alert-default 必须存在，否则报错退出</span><span class="w">
-</span><span class="w">  </span><span class="k">group_by</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;env&#39;</span><span class="p">,</span><span class="s1">&#39;instance&#39;</span><span class="p">,</span><span class="s1">&#39;type&#39;</span><span class="p">,</span><span class="s1">&#39;group&#39;</span><span class="p">,</span><span class="s1">&#39;job&#39;</span><span class="p">]</span><span class="w">   </span><span class="c"># 按照该 labels 分组用于分组压缩短时间内产生的大量告警</span><span class="w">
-</span><span class="w">  </span><span class="k">group_wait</span><span class="p">:</span><span class="w"> </span><span class="w">     </span>30s<span class="w">
-</span><span class="w">  </span><span class="k">group_interval</span><span class="p">:</span><span class="w"> </span><span class="w"> </span>3m<span class="w">
-</span><span class="w">  </span><span class="k">repeat_interval</span><span class="p">:</span><span class="w"> </span>3m<span class="w">
-</span><span class="w">  </span><span class="k">routes</span><span class="p">:</span><span class="w"> </span><span class="w">                     </span><span class="c"># 声明 子路由</span><span class="w">
-</span><span class="w">  </span>- <span class="k">match</span><span class="p">:</span><span class="w"> </span><span class="w">                    </span><span class="c"># 规则匹配</span><span class="w">
-</span><span class="w">    </span><span class="k">env</span><span class="p">:</span><span class="w"> </span>test-cluster<span class="w">          </span><span class="c"># 集群环境名字，路由接收到后分配给接收器，接收器读取规则后发送至 slack_config</span><span class="w">
-</span><span class="w">    </span><span class="k">level: waring              # 匹配 alert.rule 中 level</span><span class="p">:</span><span class="w"> </span>waring<span class="w"> </span>labels<span class="w"> </span>属性，匹配成功后发送到相应接收器<span class="w">
-</span><span class="w">  </span><span class="k">receiver</span><span class="p">:</span><span class="w"> </span>alert-slack<span class="w">        </span><span class="c"># receiver 关键词，全局唯一，不能重复</span><span class="w">
-</span><span class="w">  </span><span class="k">continue</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">               </span><span class="c"># 默认告警匹配成功第一个 receivers 会退出匹配，开启 continue 参数后会继续匹配 receivers 列表，直到再无 receivers 时或者下一个 receivers 中 continue fasle 的时候才会退出 (continue default false)</span><span class="w">
-</span><span class="w">  </span>- <span class="k">match_re</span><span class="p">:</span><span class="w"> </span><span class="w">                 </span><span class="c"># 支持正则匹配</span><span class="w">
-</span><span class="w">    </span><span class="k">env</span><span class="p">:</span><span class="w"> </span>test-cluster<span class="w">          </span><span class="c"># 客户集群环境名字，路由接收到后分配给接收器，接收器读取规则后发送至 slack_config</span><span class="w">
-</span><span class="w">  </span><span class="k">receiver</span><span class="p">:</span><span class="w"> </span>alert-email-global<span class="w"> </span><span class="c"># 指定接收器唯一名字</span><span class="w">
-</span><span class="w">  </span><span class="k">continue</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
-</span><span class="w">  </span>- <span class="k">match_re</span><span class="p">:</span><span class="w"> </span><span class="w">                 </span><span class="c"># 支持正则匹配</span><span class="w">
-</span><span class="w">    </span><span class="k">level: emergency           # 匹配 alert.rule 中 level</span><span class="p">:</span><span class="w"> </span>emergency<span class="w"> </span>labels<span class="w"> </span>属性，匹配成功后发送到相应接收器<span class="w">
-</span><span class="w">    </span><span class="k">env</span><span class="p">:</span><span class="w"> </span>test-cluster<span class="w">          </span><span class="c"># 客户集群环境名字，路由接收到后分配给接收器，接收器读取规则后发送至 slack_config</span><span class="w">
-</span><span class="w">    </span><span class="k">severity</span><span class="p">:</span><span class="w"> </span>^(<span class="p">[</span>a-zA-Z0<span class="m">-9</span><span class="p">]</span><span class="cp">*)$</span><span class="w"> </span><span class="c"># 正则匹配</span><span class="w">
-</span><span class="w">  </span><span class="k">receiver</span><span class="p">:</span><span class="w"> </span>alert-webhook<span class="w">      </span><span class="c"># 指定接收器唯一名字</span><span class="w">
-</span><span class="w">  </span><span class="k">continue</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span><span class="w"></span><span class="nt">route</span><span class="p">:</span><span class="w">                          </span><span class="c"># 声明 根路由节点</span><span class="w">
+</span><span class="w">  </span><span class="nt">receiver</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;alert-default&#34;</span><span class="w">     </span><span class="c"># 如果没有接收器规则匹配到这条告警，默认发送到 `alert-default`，该 alert-default 必须存在，否则报错退出</span><span class="w">
+</span><span class="w">  </span><span class="nt">group_by</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;env&#39;</span><span class="p">,</span><span class="s1">&#39;instance&#39;</span><span class="p">,</span><span class="s1">&#39;type&#39;</span><span class="p">,</span><span class="s1">&#39;group&#39;</span><span class="p">,</span><span class="s1">&#39;job&#39;</span><span class="p">]</span><span class="w">   </span><span class="c"># 按照该 labels 分组用于分组压缩短时间内产生的大量告警</span><span class="w">
+</span><span class="w">  </span><span class="nt">group_wait</span><span class="p">:</span><span class="w">      </span><span class="l">30s</span><span class="w">
+</span><span class="w">  </span><span class="nt">group_interval</span><span class="p">:</span><span class="w">  </span><span class="l">3m</span><span class="w">
+</span><span class="w">  </span><span class="nt">repeat_interval</span><span class="p">:</span><span class="w"> </span><span class="l">3m</span><span class="w">
+</span><span class="w">  </span><span class="nt">routes</span><span class="p">:</span><span class="w">                      </span><span class="c"># 声明 子路由</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">match</span><span class="p">:</span><span class="w">                     </span><span class="c"># 规则匹配</span><span class="w">
+</span><span class="w">    </span><span class="nt">env</span><span class="p">:</span><span class="w"> </span><span class="l">test-cluster         </span><span class="w"> </span><span class="c"># 集群环境名字，路由接收到后分配给接收器，接收器读取规则后发送至 slack_config</span><span class="w">
+</span><span class="w">    </span><span class="nt">level: waring              # 匹配 alert.rule 中 level</span><span class="p">:</span><span class="w"> </span><span class="l">waring labels 属性，匹配成功后发送到相应接收器</span><span class="w">
+</span><span class="w">  </span><span class="nt">receiver</span><span class="p">:</span><span class="w"> </span><span class="l">alert-slack       </span><span class="w"> </span><span class="c"># receiver 关键词，全局唯一，不能重复</span><span class="w">
+</span><span class="w">  </span><span class="nt">continue</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">               </span><span class="c"># 默认告警匹配成功第一个 receivers 会退出匹配，开启 continue 参数后会继续匹配 receivers 列表，直到再无 receivers 时或者下一个 receivers 中 continue fasle 的时候才会退出 (continue default false)</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">match_re</span><span class="p">:</span><span class="w">                  </span><span class="c"># 支持正则匹配</span><span class="w">
+</span><span class="w">    </span><span class="nt">env</span><span class="p">:</span><span class="w"> </span><span class="l">test-cluster         </span><span class="w"> </span><span class="c"># 客户集群环境名字，路由接收到后分配给接收器，接收器读取规则后发送至 slack_config</span><span class="w">
+</span><span class="w">  </span><span class="nt">receiver</span><span class="p">:</span><span class="w"> </span><span class="l">alert-email-global</span><span class="w"> </span><span class="c"># 指定接收器唯一名字</span><span class="w">
+</span><span class="w">  </span><span class="nt">continue</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">match_re</span><span class="p">:</span><span class="w">                  </span><span class="c"># 支持正则匹配</span><span class="w">
+</span><span class="w">    </span><span class="nt">level: emergency           # 匹配 alert.rule 中 level</span><span class="p">:</span><span class="w"> </span><span class="l">emergency labels 属性，匹配成功后发送到相应接收器</span><span class="w">
+</span><span class="w">    </span><span class="nt">env</span><span class="p">:</span><span class="w"> </span><span class="l">test-cluster         </span><span class="w"> </span><span class="c"># 客户集群环境名字，路由接收到后分配给接收器，接收器读取规则后发送至 slack_config</span><span class="w">
+</span><span class="w">    </span><span class="nt">severity</span><span class="p">:</span><span class="w"> </span><span class="l">^([a-zA-Z0-9]*)$</span><span class="w"> </span><span class="c"># 正则匹配</span><span class="w">
+</span><span class="w">  </span><span class="nt">receiver</span><span class="p">:</span><span class="w"> </span><span class="l">alert-webhook     </span><span class="w"> </span><span class="c"># 指定接收器唯一名字</span><span class="w">
+</span><span class="w">  </span><span class="nt">continue</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
 </span><span class="w">
 </span><span class="w">
-</span><span class="w"></span><span class="k">receivers</span><span class="p">:</span><span class="w"> </span><span class="w">                       </span><span class="c"># 接收器根</span><span class="w">
+</span><span class="w"></span><span class="nt">receivers</span><span class="p">:</span><span class="w">                        </span><span class="c"># 接收器根</span><span class="w">
 </span><span class="w">
 </span><span class="w"></span><span class="c"># Slack template</span><span class="w">
 </span><span class="w">
-</span><span class="w"></span>- <span class="k">name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;alert-default&#39;</span><span class="w">           </span><span class="c"># 接收器唯一名字，如有重复，告警停用。与 `route` 节点规则关联使用。</span><span class="w">
-</span><span class="w">  </span><span class="k">slack_configs</span><span class="p">:</span><span class="w">
-</span><span class="w"></span><span class="w">  </span>- <span class="k">channel</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;#alerts-for-test&#39;</span><span class="w">   </span><span class="c"># 指定发送至 slack channel</span><span class="w">
-</span><span class="w">    </span><span class="k">username</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;office-alert&#39;</span><span class="w">        </span><span class="c"># 指定发送者 username</span><span class="w">
-</span><span class="w">    </span><span class="k">icon_emoji</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;:pingcap:&#39;</span><span class="w">         </span><span class="c"># 指定发送者头像, 可在 slack 表情包获取 emoji 信息</span><span class="w">
-</span><span class="w">    </span><span class="k">title</span><span class="p">:</span><span class="w"> </span><span class="w">  </span><span class="s1">&#39;{{.CommonLabels.alertname}}&#39;</span><span class="w">
-</span><span class="w">    </span><span class="k">text</span><span class="p">:</span><span class="w"> </span><span class="w">   </span><span class="s1">&#39;in {{.CommonLabels.env}}:   {{ .GroupLabels.alertname }}  {{ .CommonAnnotations.description }}    http://office.tidb.cc/alerts&#39;</span><span class="w">
+</span><span class="w"></span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;alert-default&#39;</span><span class="w">           </span><span class="c"># 接收器唯一名字，如有重复，告警停用。与 `route` 节点规则关联使用。</span><span class="w">
+</span><span class="w">  </span><span class="nt">slack_configs</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;#alerts-for-test&#39;</span><span class="w">   </span><span class="c"># 指定发送至 slack channel</span><span class="w">
+</span><span class="w">    </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;office-alert&#39;</span><span class="w">        </span><span class="c"># 指定发送者 username</span><span class="w">
+</span><span class="w">    </span><span class="nt">icon_emoji</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;:pingcap:&#39;</span><span class="w">         </span><span class="c"># 指定发送者头像, 可在 slack 表情包获取 emoji 信息</span><span class="w">
+</span><span class="w">    </span><span class="nt">title</span><span class="p">:</span><span class="w">   </span><span class="s1">&#39;{{.CommonLabels.alertname}}&#39;</span><span class="w">
+</span><span class="w">    </span><span class="nt">text</span><span class="p">:</span><span class="w">    </span><span class="s1">&#39;in {{.CommonLabels.env}}:   {{ .GroupLabels.alertname }}  {{ .CommonAnnotations.description }}    http://office.tidb.cc/alerts&#39;</span><span class="w">
 </span><span class="w">
-</span><span class="w"></span>- <span class="k">name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;alert-slack-user&#39;</span><span class="w">                  </span><span class="c"># 接收器唯一名字，如有重复，告警停用。与 `route` 节点规则关联使用。</span><span class="w">
-</span><span class="w">  </span><span class="k">slack_configs</span><span class="p">:</span><span class="w">
-</span><span class="w"></span><span class="w">  </span>- <span class="k">api_url</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;https://hooks.slack.com/services/T04AQPYPM/B2EJ1BSBG/zczczczczcdsadafsvdvsf&#39;</span><span class="w">
-</span><span class="w">    </span><span class="k">channel</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;@user&#39;</span><span class="w">                          </span><span class="c"># 指定发送至 slack 用户</span><span class="w">
-</span><span class="w">    </span><span class="k">username</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;{{.CommonLabels.env}}-alert&#39;</span><span class="w">   </span><span class="c"># 指定发送者 username (昵称) , 此处格式为 ` 集群名称 - alert`</span><span class="w">
-</span><span class="w">    </span><span class="k">icon_emoji</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;:{{.CommonLabels.env}}:&#39;</span><span class="w">     </span><span class="c"># 指定发送者头像, 此处格式为 `: 集群名称:`, 提前在 slack 定义该图片</span><span class="w">
-</span><span class="w">    </span><span class="k">title</span><span class="p">:</span><span class="w"> </span><span class="w">  </span><span class="s1">&#39;{{.CommonLabels.alertname}}&#39;</span><span class="w">
-</span><span class="w">    </span><span class="k">text</span><span class="p">:</span><span class="w"> </span><span class="w">   </span><span class="s1">&#39;in {{.CommonLabels.env}}:   {{ .GroupLabels.alertname }}  {{ .CommonAnnotations.description }}    http://office.tidb.cc/alerts&#39;</span><span class="w">
+</span><span class="w"></span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;alert-slack-user&#39;</span><span class="w">                  </span><span class="c"># 接收器唯一名字，如有重复，告警停用。与 `route` 节点规则关联使用。</span><span class="w">
+</span><span class="w">  </span><span class="nt">slack_configs</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">api_url</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;https://hooks.slack.com/services/T04AQPYPM/B2EJ1BSBG/zczczczczcdsadafsvdvsf&#39;</span><span class="w">
+</span><span class="w">    </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;@user&#39;</span><span class="w">                          </span><span class="c"># 指定发送至 slack 用户</span><span class="w">
+</span><span class="w">    </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;{{.CommonLabels.env}}-alert&#39;</span><span class="w">   </span><span class="c"># 指定发送者 username (昵称) , 此处格式为 ` 集群名称 - alert`</span><span class="w">
+</span><span class="w">    </span><span class="nt">icon_emoji</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;:{{.CommonLabels.env}}:&#39;</span><span class="w">     </span><span class="c"># 指定发送者头像, 此处格式为 `: 集群名称:`, 提前在 slack 定义该图片</span><span class="w">
+</span><span class="w">    </span><span class="nt">title</span><span class="p">:</span><span class="w">   </span><span class="s1">&#39;{{.CommonLabels.alertname}}&#39;</span><span class="w">
+</span><span class="w">    </span><span class="nt">text</span><span class="p">:</span><span class="w">    </span><span class="s1">&#39;in {{.CommonLabels.env}}:   {{ .GroupLabels.alertname }}  {{ .CommonAnnotations.description }}    http://office.tidb.cc/alerts&#39;</span><span class="w">
 </span><span class="w">
 </span><span class="w"></span><span class="c"># Email template</span><span class="w">
 </span><span class="w">
-</span><span class="w"></span>- <span class="k">name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;alert-email-global&#39;</span><span class="w">
-</span><span class="w">  </span><span class="k">email_configs</span><span class="p">:</span><span class="w">
-</span><span class="w"></span><span class="w">  </span>- <span class="k">send_resolved</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">         </span><span class="c"># 告警回执，监控下由 Alert 返回为 OK 状态时，会发送一条 OK 状态的回执</span><span class="w">
-</span><span class="w">    </span><span class="k">to</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;alert-global@tidb.cc&#39;</span><span class="w">  </span><span class="c"># 接收邮箱地址</span><span class="w">
-</span><span class="w">    </span><span class="k">from</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;jump@tidb.cc&#39;</span><span class="w">        </span><span class="c"># 发送邮箱地址</span><span class="w">
+</span><span class="w"></span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;alert-email-global&#39;</span><span class="w">
+</span><span class="w">  </span><span class="nt">email_configs</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">send_resolved</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">         </span><span class="c"># 告警回执，监控下由 Alert 返回为 OK 状态时，会发送一条 OK 状态的回执</span><span class="w">
+</span><span class="w">    </span><span class="nt">to</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;alert-global@tidb.cc&#39;</span><span class="w">  </span><span class="c"># 接收邮箱地址</span><span class="w">
+</span><span class="w">    </span><span class="nt">from</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;jump@tidb.cc&#39;</span><span class="w">        </span><span class="c"># 发送邮箱地址</span><span class="w">
 </span><span class="w">
-</span><span class="w"></span>- <span class="k">name</span><span class="p">:</span><span class="w"> </span>alert-email-user<span class="w">
-</span><span class="w">  </span><span class="k">email_configs</span><span class="p">:</span><span class="w">
-</span><span class="w"></span><span class="w">  </span>- <span class="k">send_resolved</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
-</span><span class="w">    </span><span class="k">to</span><span class="p">:</span><span class="w"> </span>alert-user@tidb.cc<span class="w">
-</span><span class="w">    </span><span class="k">from</span><span class="p">:</span><span class="w"> </span>jump@tidb.cc<span class="w">
-</span><span class="w">    </span><span class="k">smarthost</span><span class="p">:</span><span class="w"> </span>smtp.ym<span class="m">.126</span>.com<span class="p">:</span><span class="m">25</span><span class="w">   </span><span class="c"># 单独设置 smtp 信息</span><span class="w">
-</span><span class="w">    </span><span class="k">auth_username</span><span class="p">:</span><span class="w"> </span>jump@tidb.cc<span class="w">
-</span><span class="w">    </span><span class="k">auth_password</span><span class="p">:</span><span class="w"> </span>&lt;secret<span class="sd">&gt;
-</span><span class="sd">   </span><span class="sd"> </span><span class="sd">auth_secret: null</span><span class="w">
-</span><span class="w">    </span><span class="k">auth_identity</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;&#34;</span><span class="w">
-</span><span class="w">    </span><span class="k">headers</span><span class="p">:</span><span class="w">
-</span><span class="w"></span><span class="w">      </span><span class="k">From</span><span class="p">:</span><span class="w"> </span>jump@tidb.cc<span class="w">
-</span><span class="w">      </span><span class="k">Subject</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;{{template&#34;email.default.subject&#34;.}}&#39;</span><span class="w">
-</span><span class="w">      </span><span class="k">To</span><span class="p">:</span><span class="w"> </span>alert-user@tidb.cc<span class="w">
-</span><span class="w">    </span><span class="k">html</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;{{template&#34;email.default.html&#34;.}}&#39;</span><span class="w">
-</span><span class="w">    </span><span class="k">require_tls</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">         </span><span class="c"># 默认开启 TLS 协议</span><span class="w">
+</span><span class="w"></span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">alert-email-user</span><span class="w">
+</span><span class="w">  </span><span class="nt">email_configs</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">send_resolved</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span><span class="w">    </span><span class="nt">to</span><span class="p">:</span><span class="w"> </span><span class="l">alert-user@tidb.cc</span><span class="w">
+</span><span class="w">    </span><span class="nt">from</span><span class="p">:</span><span class="w"> </span><span class="l">jump@tidb.cc</span><span class="w">
+</span><span class="w">    </span><span class="nt">smarthost</span><span class="p">:</span><span class="w"> </span><span class="l">smtp.ym.126.com:25  </span><span class="w"> </span><span class="c"># 单独设置 smtp 信息</span><span class="w">
+</span><span class="w">    </span><span class="nt">auth_username</span><span class="p">:</span><span class="w"> </span><span class="l">jump@tidb.cc</span><span class="w">
+</span><span class="w">    </span><span class="nt">auth_password</span><span class="p">:</span><span class="w"> </span><span class="l">&lt;secret&gt;</span><span class="w">
+</span><span class="w">    </span><span class="nt">auth_secret</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="w">
+</span><span class="w">    </span><span class="nt">auth_identity</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;&#34;</span><span class="w">
+</span><span class="w">    </span><span class="nt">headers</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span><span class="nt">From</span><span class="p">:</span><span class="w"> </span><span class="l">jump@tidb.cc</span><span class="w">
+</span><span class="w">      </span><span class="nt">Subject</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;{{template&#34;email.default.subject&#34;.}}&#39;</span><span class="w">
+</span><span class="w">      </span><span class="nt">To</span><span class="p">:</span><span class="w"> </span><span class="l">alert-user@tidb.cc</span><span class="w">
+</span><span class="w">    </span><span class="nt">html</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;{{template&#34;email.default.html&#34;.}}&#39;</span><span class="w">
+</span><span class="w">    </span><span class="nt">require_tls</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">         </span><span class="c"># 默认开启 TLS 协议</span><span class="w">
 </span><span class="w">
 </span><span class="w"></span><span class="c"># webhook-pulgin</span><span class="w">
 </span><span class="w">
-</span><span class="w"></span>- <span class="k">name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;webhook-pulgin&#39;</span><span class="w">
-</span><span class="w">  </span><span class="k">webhook_configs</span><span class="p">:</span><span class="w">
-</span><span class="w"></span><span class="w">  </span>- <span class="k">send_resolved</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
-</span><span class="w">    </span><span class="k">url</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;http://172.16.10.65:28082/v1/alertmanager&#39;</span><span class="w">  </span><span class="c"># 该 URL 是一个小工具，用来解析 alertmanager json 告警数据，然后发往目的地</span><span class="w">
+</span><span class="w"></span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;webhook-pulgin&#39;</span><span class="w">
+</span><span class="w">  </span><span class="nt">webhook_configs</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">send_resolved</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span><span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;http://172.16.10.65:28082/v1/alertmanager&#39;</span><span class="w">  </span><span class="c"># 该 URL 是一个小工具，用来解析 alertmanager json 告警数据，然后发往目的地</span><span class="w">
 </span></code></pre></td></tr></table>
 </div>
 </div><h3 id="管理">管理</h3>

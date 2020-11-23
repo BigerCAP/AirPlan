@@ -23,7 +23,7 @@
 
 
 
-<meta name="generator" content="Hugo 0.63.2 with theme even" />
+<meta name="generator" content="Hugo 0.78.2 with theme even" />
 
 
 <link rel="canonical" href="https://ap.tidb.cc/post/20200108-2-github-hugo-actions/" />
@@ -46,13 +46,14 @@
 <meta property="article:modified_time" content="2020-02-03T00:00:00+08:00" />
 <meta itemprop="name" content="生态围墙 - Github Actions &amp; Hugo">
 <meta itemprop="description" content="0x00 上帝说有光 目标：持续 tidb.cc 域名的运转 初衷：让更多的人了解 xxxx 产品 内核：提升自身技能以及建立良性记录 动力：装逼 助力 OKR、分享与讨论技术的真实性、">
-<meta itemprop="datePublished" content="2020-01-08T00:00:00&#43;08:00" />
-<meta itemprop="dateModified" content="2020-02-03T00:00:00&#43;08:00" />
-<meta itemprop="wordCount" content="3324">
+<meta itemprop="datePublished" content="2020-01-08T00:00:00+08:00" />
+<meta itemprop="dateModified" content="2020-02-03T00:00:00+08:00" />
+<meta itemprop="wordCount" content="3169">
 
 
 
-<meta itemprop="keywords" content="hugo,Github actions,CI CD," /><meta name="twitter:card" content="summary"/>
+<meta itemprop="keywords" content="hugo,Github actions,CI CD," />
+<meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="生态围墙 - Github Actions &amp; Hugo"/>
 <meta name="twitter:description" content="0x00 上帝说有光 目标：持续 tidb.cc 域名的运转 初衷：让更多的人了解 xxxx 产品 内核：提升自身技能以及建立良性记录 动力：装逼 助力 OKR、分享与讨论技术的真实性、"/>
 
@@ -128,7 +129,7 @@
         <div class="post-category">
             <a href="/categories/software/"> software </a>
             </div>
-          <span class="more-meta"> 3324 words </span>
+          <span class="more-meta"> 3169 words </span>
           <span class="more-meta"> 7 mins read </span>
         <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
       </div>
@@ -162,7 +163,7 @@
   </div>
 </div>
   <div class="post-outdated">
-    <div class="hint">
+    <div class="warn">
       <p>[NOTE] Updated <span class="timeago" datetime="2020-02-03T00:00:00" title="February 3, 2020">February 3, 2020</span>. This article may have outdated content or subject matter.</p>
     </div>
   </div>
@@ -301,37 +302,37 @@ github actions 功能介绍直接看这篇 <strong>阮一峰 &ndash; <a href="ht
 </span><span class="lnt">31
 </span></code></pre></td>
 <td class="lntd">
-<pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="k">name</span><span class="p">:</span><span class="w"> </span>github<span class="w"> </span>pages<span class="w">
+<pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">github pages</span><span class="w">
 </span><span class="w">
-</span><span class="w"></span><span class="k">on</span><span class="p">:</span><span class="w">
-</span><span class="w"></span><span class="w">  </span><span class="k">push</span><span class="p">:</span><span class="w">
-</span><span class="w"></span><span class="w">    </span><span class="k">branches</span><span class="p">:</span><span class="w">
-</span><span class="w"></span><span class="w">    </span>- master<span class="w">  </span>//<span class="w"> </span>该位置不是用于监听<span class="w"> </span>master<span class="w"> </span>分支接收到<span class="w"> </span>push<span class="w"> </span>操作后执行以下内容。<span class="w">
-</span><span class="w">              </span>//<span class="w"> </span>而是当前分支收到<span class="w"> </span>push<span class="w"> </span>操作后，去对<span class="w"> </span>master<span class="w"> </span>分支做<span class="w"> </span>jobs<span class="w"> </span>操作<span class="w">
+</span><span class="w"></span><span class="nt">on</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">push</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span><span class="nt">branches</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span>- <span class="l">master  // 该位置不是用于监听 master 分支接收到 push 操作后执行以下内容。</span><span class="w">
+</span><span class="w">              </span><span class="l">// 而是当前分支收到 push 操作后，去对 master 分支做 jobs 操作</span><span class="w">
 </span><span class="w">
-</span><span class="w"></span><span class="k">jobs</span><span class="p">:</span><span class="w"> </span><span class="w"> </span>//<span class="w"> </span>actions<span class="w"> </span>在上述分支遇见<span class="w"> </span>push<span class="w"> </span>操作后，执行<span class="w"> </span>jobs<span class="w"> </span>内的动作<span class="w">
-</span><span class="w">  </span><span class="k">build-deploy</span><span class="p">:</span><span class="w">
-</span><span class="w"></span><span class="w">    </span><span class="k">runs-on</span><span class="p">:</span><span class="w"> </span>ubuntu<span class="m">-18.04</span><span class="w">
-</span><span class="w">    </span><span class="k">steps</span><span class="p">:</span><span class="w">
-</span><span class="w"></span><span class="w">    </span>- <span class="k">uses</span><span class="p">:</span><span class="w"> </span>actions/checkout@v1<span class="w">
+</span><span class="w"></span><span class="nt">jobs</span><span class="p">:</span><span class="w">  </span><span class="l">// actions 在上述分支遇见 push 操作后，执行 jobs 内的动作</span><span class="w">
+</span><span class="w">  </span><span class="nt">build-deploy</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l">ubuntu-18.04</span><span class="w">
+</span><span class="w">    </span><span class="nt">steps</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span>- <span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l">actions/checkout@v1</span><span class="w">
 </span><span class="w">      </span><span class="c"># with:</span><span class="w">
 </span><span class="w">      </span><span class="c">#   submodules: true</span><span class="w">
 </span><span class="w">
-</span><span class="w">    </span>- <span class="k">name</span><span class="p">:</span><span class="w"> </span>Hugo<span class="w"> </span>setup<span class="w">
-</span><span class="w">      </span><span class="k">uses</span><span class="p">:</span><span class="w"> </span>peaceiris/actions-hugo@v2<span class="m">.3</span><span class="m">.2</span><span class="w">
-</span><span class="w">      </span><span class="k">with</span><span class="p">:</span><span class="w">
-</span><span class="w"></span><span class="w">        </span><span class="k">hugo-version</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;latest&#39;</span><span class="w">
-</span><span class="w">        </span><span class="k">extended</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span><span class="w">    </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">Hugo setup</span><span class="w">
+</span><span class="w">      </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l">peaceiris/actions-hugo@v2.3.2</span><span class="w">
+</span><span class="w">      </span><span class="nt">with</span><span class="p">:</span><span class="w">
+</span><span class="w">        </span><span class="nt">hugo-version</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;latest&#39;</span><span class="w">
+</span><span class="w">        </span><span class="nt">extended</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
 </span><span class="w">
-</span><span class="w">    </span>- <span class="k">name</span><span class="p">:</span><span class="w"> </span>Build<span class="w">
-</span><span class="w">      </span><span class="k">run</span><span class="p">:</span><span class="w"> </span>hugo<span class="w"> </span>-D<span class="w">  </span>//<span class="w"> </span>hugo<span class="w"> </span>命令，用于生成静态文件，<span class="w"> </span>-D<span class="w"> </span>将草稿也生成文档<span class="w">
+</span><span class="w">    </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">Build</span><span class="w">
+</span><span class="w">      </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l">hugo -D  // hugo 命令，用于生成静态文件， -D 将草稿也生成文档</span><span class="w">
 </span><span class="w">
-</span><span class="w">    </span>- <span class="k">name</span><span class="p">:</span><span class="w"> </span>Deploy<span class="w">  </span>//<span class="w"> </span>引用<span class="w"> </span>github-pages<span class="w"> </span>将数据推送到当前<span class="w"> </span>repo<span class="w"> </span>gh-pages<span class="w"> </span>分支<span class="w">
-</span><span class="w">      </span><span class="k">uses</span><span class="p">:</span><span class="w"> </span>peaceiris/actions-gh-pages@v2<span class="w">
-</span><span class="w">      </span><span class="k">env</span><span class="p">:</span><span class="w">
-</span><span class="w"></span><span class="w">        </span><span class="k">ACTIONS_DEPLOY_KEY</span><span class="p">:</span><span class="w"> </span>${{<span class="w"> </span>secrets.si<span class="w"> </span>}}<span class="w">  </span>//<span class="w"> </span>注意此处<span class="w"> </span>secrets.si<span class="w"> </span>声明<span class="w"> </span>ssh-key<span class="w"> </span>信息，si<span class="w"> </span>是自定义变量名，取决于在<span class="w"> </span>repo-setting-secrers<span class="w"> </span>中的配置信息<span class="w">
-</span><span class="w">        </span><span class="k">PUBLISH_BRANCH</span><span class="p">:</span><span class="w"> </span>gh-pages<span class="w">
-</span><span class="w">        </span><span class="k">PUBLISH_DIR</span><span class="p">:</span><span class="w"> </span>./public<span class="w">  </span>//推送<span class="w"> </span>hugo/public<span class="w"> </span>目录下的数据到远程<span class="w"> </span>repo<span class="w"> </span>gh-pages<span class="w"> </span>分支<span class="w">
+</span><span class="w">    </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">Deploy  // 引用 github-pages 将数据推送到当前 repo gh-pages 分支</span><span class="w">
+</span><span class="w">      </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l">peaceiris/actions-gh-pages@v2</span><span class="w">
+</span><span class="w">      </span><span class="nt">env</span><span class="p">:</span><span class="w">
+</span><span class="w">        </span><span class="nt">ACTIONS_DEPLOY_KEY</span><span class="p">:</span><span class="w"> </span><span class="l">${{ secrets.si }}  // 注意此处 secrets.si 声明 ssh-key 信息，si 是自定义变量名，取决于在 repo-setting-secrers 中的配置信息</span><span class="w">
+</span><span class="w">        </span><span class="nt">PUBLISH_BRANCH</span><span class="p">:</span><span class="w"> </span><span class="l">gh-pages</span><span class="w">
+</span><span class="w">        </span><span class="nt">PUBLISH_DIR</span><span class="p">:</span><span class="w"> </span><span class="l">./public  //推送 hugo/public 目录下的数据到远程 repo gh-pages 分支</span><span class="w">
 </span></code></pre></td></tr></table>
 </div>
 </div><h2 id="0x04-点火">0x04 点火</h2>

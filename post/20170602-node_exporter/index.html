@@ -23,7 +23,7 @@
 
 
 
-<meta name="generator" content="Hugo 0.63.2 with theme even" />
+<meta name="generator" content="Hugo 0.78.2 with theme even" />
 
 
 <link rel="canonical" href="https://ap.tidb.cc/post/20170602-node_exporter/" />
@@ -46,13 +46,14 @@
 <meta property="article:modified_time" content="2020-01-20T00:00:00+08:00" />
 <meta itemprop="name" content="监控架构 - Node_exporter 系统监控组件">
 <meta itemprop="description" content="0x00 起源 学习 node export 存的 0x01 Collector 通过 http://IP:9100/metrics 查看当前主机监控信息 Node export 通过Collector代码块收集系统性能指标 以下内容引用 Prometeus/Node_export README 每个操作系统上的 Collectors 都有不同的">
-<meta itemprop="datePublished" content="2017-06-02T00:00:00&#43;08:00" />
-<meta itemprop="dateModified" content="2020-01-20T00:00:00&#43;08:00" />
+<meta itemprop="datePublished" content="2017-06-02T00:00:00+08:00" />
+<meta itemprop="dateModified" content="2020-01-20T00:00:00+08:00" />
 <meta itemprop="wordCount" content="2774">
 
 
 
-<meta itemprop="keywords" content="Node_exporter,Prometheus," /><meta name="twitter:card" content="summary"/>
+<meta itemprop="keywords" content="Node_exporter,Prometheus," />
+<meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="监控架构 - Node_exporter 系统监控组件"/>
 <meta name="twitter:description" content="0x00 起源 学习 node export 存的 0x01 Collector 通过 http://IP:9100/metrics 查看当前主机监控信息 Node export 通过Collector代码块收集系统性能指标 以下内容引用 Prometeus/Node_export README 每个操作系统上的 Collectors 都有不同的"/>
 
@@ -160,7 +161,7 @@
   </div>
 </div>
   <div class="post-outdated">
-    <div class="hint">
+    <div class="warn">
       <p>[NOTE] Updated <span class="timeago" datetime="2020-01-20T00:00:00" title="January 20, 2020">January 20, 2020</span>. This article may have outdated content or subject matter.</p>
     </div>
   </div>
@@ -533,15 +534,15 @@
 
 Flags:
   -h, --help                    Show context-sensitive <span class="nb">help</span> <span class="o">(</span>also try --help-long and --help-man<span class="o">)</span>.
-      --collector.diskstats.ignored-devices<span class="o">=</span><span class="s2">&#34;</span><span class="s2">^(ram|loop|fd|(h|s|v|xv)d[a-z]|nvme\\d+n\\d+p)\\d+</span>$<span class="s2">&#34;</span>
+      --collector.diskstats.ignored-devices<span class="o">=</span><span class="s2">&#34;^(ram|loop|fd|(h|s|v|xv)d[a-z]|nvme\\d+n\\d+p)\\d+</span>$<span class="s2">&#34;</span>
                                 Regexp of devices to ignore <span class="k">for</span> diskstats.
-      --collector.filesystem.ignored-mount-points<span class="o">=</span><span class="s2">&#34;</span><span class="s2">^/(sys|proc|dev)(</span>$<span class="s2">|/)</span><span class="s2">&#34;</span>
+      --collector.filesystem.ignored-mount-points<span class="o">=</span><span class="s2">&#34;^/(sys|proc|dev)(</span>$<span class="s2">|/)&#34;</span>
                                 Regexp of mount points to ignore <span class="k">for</span> filesystem collector.
-      --collector.filesystem.ignored-fs-types<span class="o">=</span><span class="s2">&#34;</span><span class="s2">^(sys|proc|auto)fs</span>$<span class="s2">&#34;</span>
+      --collector.filesystem.ignored-fs-types<span class="o">=</span><span class="s2">&#34;^(sys|proc|auto)fs</span>$<span class="s2">&#34;</span>
                                 Regexp of filesystem types to ignore <span class="k">for</span> filesystem collector.
       --collector.megacli.command<span class="o">=</span><span class="s2">&#34;megacli&#34;</span>
                                 Command to run megacli.
-      --collector.netdev.ignored-devices<span class="o">=</span><span class="s2">&#34;</span><span class="s2">^</span>$<span class="s2">&#34;</span>
+      --collector.netdev.ignored-devices<span class="o">=</span><span class="s2">&#34;^</span>$<span class="s2">&#34;</span>
                                 Regexp of net devices to ignore <span class="k">for</span> netdev collector.
       --collector.ntp.server<span class="o">=</span><span class="s2">&#34;127.0.0.1&#34;</span>
                                 NTP server to use <span class="k">for</span> ntp collector
@@ -746,7 +747,7 @@ INFO<span class="o">[</span>0000<span class="o">]</span> Listening on :9100     
 </span></code></pre></td>
 <td class="lntd">
 <pre class="chroma"><code class="language-go" data-lang="go"><span class="nx">metric_name</span> <span class="p">[</span>
-  <span class="s">&#34;{&#34;</span> <span class="nx">label_name</span> <span class="s">&#34;=&#34;</span> <span class="s">`</span><span class="s">&#34;</span><span class="s">`</span> <span class="nx">label_value</span> <span class="s">`</span><span class="s">&#34;</span><span class="s">`</span> <span class="p">{</span> <span class="s">&#34;,&#34;</span> <span class="nx">label_name</span> <span class="s">&#34;=&#34;</span> <span class="s">`</span><span class="s">&#34;</span><span class="s">`</span> <span class="nx">label_value</span> <span class="s">`</span><span class="s">&#34;</span><span class="s">`</span> <span class="p">}</span> <span class="p">[</span> <span class="s">&#34;,&#34;</span> <span class="p">]</span> <span class="s">&#34;}&#34;</span>
+  <span class="s">&#34;{&#34;</span> <span class="nx">label_name</span> <span class="s">&#34;=&#34;</span> <span class="s">`&#34;`</span> <span class="nx">label_value</span> <span class="s">`&#34;`</span> <span class="p">{</span> <span class="s">&#34;,&#34;</span> <span class="nx">label_name</span> <span class="s">&#34;=&#34;</span> <span class="s">`&#34;`</span> <span class="nx">label_value</span> <span class="s">`&#34;`</span> <span class="p">}</span> <span class="p">[</span> <span class="s">&#34;,&#34;</span> <span class="p">]</span> <span class="s">&#34;}&#34;</span>
 <span class="p">]</span> <span class="nx">value</span> <span class="p">[</span> <span class="nx">timestamp</span> <span class="p">]</span>
 </code></pre></td></tr></table>
 </div>
@@ -757,9 +758,9 @@ INFO<span class="o">[</span>0000<span class="o">]</span> Listening on :9100     
 <ul>
 <li>采样数据的总和应表示为 x_sum</li>
 <li>采样数据的总量应表示为 x_count</li>
-<li>summary 类型的采样数据的 quantile 应表示为 x{quantile=&quot;y&rdquo;}</li>
-<li>histogram 类型的采样分区统计数据将表示为 x_bucket{le=&quot;y&rdquo;}</li>
-<li>histogram 类型的采样必须包含 x_bucket{le=&quot;+Inf&rdquo;}, 它的值等于 x_count 的值</li>
+<li>summary 类型的采样数据的 quantile 应表示为 x{quantile=&ldquo;y&rdquo;}</li>
+<li>histogram 类型的采样分区统计数据将表示为 x_bucket{le=&ldquo;y&rdquo;}</li>
+<li>histogram 类型的采样必须包含 x_bucket{le=&quot;+Inf&quot;}, 它的值等于 x_count 的值</li>
 <li>summary 和 historam 中 quantile 和 le 必需按从小到大顺序排列</li>
 </ul>
 </li>

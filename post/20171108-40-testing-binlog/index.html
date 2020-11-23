@@ -23,7 +23,7 @@
 
 
 
-<meta name="generator" content="Hugo 0.63.2 with theme even" />
+<meta name="generator" content="Hugo 0.78.2 with theme even" />
 
 
 <link rel="canonical" href="https://ap.tidb.cc/post/20171108-40-testing-binlog/" />
@@ -46,13 +46,14 @@
 <meta property="article:modified_time" content="2017-11-20T00:00:00+08:00" />
 <meta itemprop="name" content="TiDB - Binlog 数据同步架构测试">
 <meta itemprop="description" content="0x00 测试 前段时间部署了一套 TiDB 数据库，只有单纯的数据库放养是肯定不行的。还要一些灾备方案满足删库跑路之后的恢复工作。 按照以往（mysql）经验有">
-<meta itemprop="datePublished" content="2017-10-08T00:00:00&#43;08:00" />
-<meta itemprop="dateModified" content="2017-11-20T00:00:00&#43;08:00" />
+<meta itemprop="datePublished" content="2017-10-08T00:00:00+08:00" />
+<meta itemprop="dateModified" content="2017-11-20T00:00:00+08:00" />
 <meta itemprop="wordCount" content="2623">
 
 
 
-<meta itemprop="keywords" content="Binlog,testing,etcd-ctl,pd-ctl," /><meta name="twitter:card" content="summary"/>
+<meta itemprop="keywords" content="Binlog,testing,etcd-ctl,pd-ctl," />
+<meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="TiDB - Binlog 数据同步架构测试"/>
 <meta name="twitter:description" content="0x00 测试 前段时间部署了一套 TiDB 数据库，只有单纯的数据库放养是肯定不行的。还要一些灾备方案满足删库跑路之后的恢复工作。 按照以往（mysql）经验有"/>
 
@@ -295,7 +296,7 @@
 <pre class="chroma"><code class="language-shell" data-lang="shell">INFO<span class="o">[</span>0000<span class="o">]</span> new store
 INFO<span class="o">[</span>0000<span class="o">]</span> <span class="o">[</span>pd<span class="o">]</span> create pd client with endpoints <span class="o">[</span>10.30.1.6:2379<span class="o">]</span>
 INFO<span class="o">[</span>0000<span class="o">]</span> <span class="o">[</span>pd<span class="o">]</span> leader switches to: http://10.30.1.5:2379, previous:
-INFO<span class="o">[</span>0000<span class="o">]</span> <span class="o">[</span>pd<span class="o">]</span> init cluster id 6493070954582498647
+INFO<span class="o">[</span>0000<span class="o">]</span> <span class="o">[</span>pd<span class="o">]</span> init cluster id <span class="m">6493070954582498647</span>
 2017/12/27 16:35:15 main.go:31: <span class="o">[</span>fatal<span class="o">]</span> fail to generate savepoint error pump <span class="p">&amp;</span><span class="o">{</span>NodeID:ip-10-10-1-6:8250 Host:10.30.1.6:8250 IsAlive:false LatestBinlogFile:binlog-0000000000000000<span class="o">}</span> is offline
 </code></pre></td></tr></table>
 </div>
@@ -313,7 +314,7 @@ INFO<span class="o">[</span>0000<span class="o">]</span> <span class="o">[</span
 <pre class="chroma"><code><span class="lnt">1
 </span></code></pre></td>
 <td class="lntd">
-<pre class="chroma"><code class="language-shell" data-lang="shell"><span class="o">{</span><span class="s2">&#34;LatestBinlog&#34;</span>:<span class="o">{</span><span class="s2">&#34;ip-10-10-1-6:8250&#34;</span>:<span class="o">{</span><span class="o">}</span>,<span class="s2">&#34;ip-10-10-1-7:8250&#34;</span>:<span class="o">{</span><span class="o">}</span>,<span class="s2">&#34;tidb-online-tidb-1:8250&#34;</span>:<span class="o">{</span><span class="s2">&#34;suffix&#34;</span>:81<span class="o">}</span>,<span class="s2">&#34;tidb-online-tidb-2:8250&#34;</span>:<span class="o">{</span><span class="s2">&#34;suffix&#34;</span>:77<span class="o">}</span>,<span class="s2">&#34;tidb-online-tidb-3:8250&#34;</span>:<span class="o">{</span><span class="s2">&#34;suffix&#34;</span>:80<span class="o">}</span>,<span class="s2">&#34;tidb-online-tidb-4:8250&#34;</span>:<span class="o">{</span><span class="s2">&#34;suffix&#34;</span>:80<span class="o">}</span><span class="o">}</span>,<span class="s2">&#34;CommitTS&#34;</span>:396981399817027585,<span class="s2">&#34;ErrMsg&#34;</span>:<span class="s2">&#34;&#34;</span><span class="o">}</span>
+<pre class="chroma"><code class="language-shell" data-lang="shell"><span class="o">{</span><span class="s2">&#34;LatestBinlog&#34;</span>:<span class="o">{</span><span class="s2">&#34;ip-10-10-1-6:8250&#34;</span>:<span class="o">{}</span>,<span class="s2">&#34;ip-10-10-1-7:8250&#34;</span>:<span class="o">{}</span>,<span class="s2">&#34;tidb-online-tidb-1:8250&#34;</span>:<span class="o">{</span><span class="s2">&#34;suffix&#34;</span>:81<span class="o">}</span>,<span class="s2">&#34;tidb-online-tidb-2:8250&#34;</span>:<span class="o">{</span><span class="s2">&#34;suffix&#34;</span>:77<span class="o">}</span>,<span class="s2">&#34;tidb-online-tidb-3:8250&#34;</span>:<span class="o">{</span><span class="s2">&#34;suffix&#34;</span>:80<span class="o">}</span>,<span class="s2">&#34;tidb-online-tidb-4:8250&#34;</span>:<span class="o">{</span><span class="s2">&#34;suffix&#34;</span>:80<span class="o">}}</span>,<span class="s2">&#34;CommitTS&#34;</span>:396981399817027585,<span class="s2">&#34;ErrMsg&#34;</span>:<span class="s2">&#34;&#34;</span><span class="o">}</span>
 </code></pre></td></tr></table>
 </div>
 </div></li>

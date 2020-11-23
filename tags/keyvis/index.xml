@@ -7,11 +7,7 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>TiDB - AirPlan</copyright>
-    <lastBuildDate>Thu, 21 May 2020 00:00:00 +0800</lastBuildDate>
-    
-	<atom:link href="https://ap.tidb.cc/tags/keyvis/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Thu, 21 May 2020 00:00:00 +0800</lastBuildDate><atom:link href="https://ap.tidb.cc/tags/keyvis/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>TiDB 4.0 -- keyvis-diagnostics</title>
       <link>https://ap.tidb.cc/post/20200521-21-keyvis/</link>

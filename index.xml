@@ -7,11 +7,7 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>TiDB - AirPlan</copyright>
-    <lastBuildDate>Fri, 17 Jul 2020 00:00:00 +0800</lastBuildDate>
-    
-	<atom:link href="https://ap.tidb.cc/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Mon, 23 Nov 2020 00:00:00 +0800</lastBuildDate><atom:link href="https://ap.tidb.cc/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>About</title>
       <link>https://ap.tidb.cc/about/</link>
@@ -19,6 +15,15 @@
       
       <guid>https://ap.tidb.cc/about/</guid>
       <description>About | TiDB AirPlan 本站内容信仰：望闻问切之术 望而知之谓之神，闻而知之谓之圣 问而知之谓之工，切脉而知之谓之巧 缘由 域名：ap.tidb.cc 中的前缀 ap 为 air</description>
+    </item>
+    
+    <item>
+      <title>Docker - MySQL SSL &amp; Binlog</title>
+      <link>https://ap.tidb.cc/post/20201123-49-docker-mysql-ssl-binlog/</link>
+      <pubDate>Mon, 23 Nov 2020 00:00:00 +0800</pubDate>
+      
+      <guid>https://ap.tidb.cc/post/20201123-49-docker-mysql-ssl-binlog/</guid>
+      <description>0x00 init 测试要求：需要 MySQL 开启 SSL 与 ROW format Binlog 功能 0x01 Docker command // 忽略安装 docker-ce 步骤 搜索网络资料，使用以下命令方式启动：「Docker 指定 &amp;ndash;ssl=1 参数时，docker 内已</description>
     </item>
     
     <item>

@@ -23,7 +23,7 @@
 
 
 
-<meta name="generator" content="Hugo 0.63.2 with theme even" />
+<meta name="generator" content="Hugo 0.78.2 with theme even" />
 
 
 <link rel="canonical" href="https://ap.tidb.cc/post/20191008-41-dm-faq/" />
@@ -46,13 +46,14 @@
 <meta property="article:modified_time" content="2020-02-05T00:00:00+08:00" />
 <meta itemprop="name" content="总结 - Data Migration（数据同步）">
 <meta itemprop="description" content="0x00 开局 本文仅记录了对 DM 的学习，处理问题经验慢慢补充（没有素材编场景） 版本使用从 RC 到 v1.0.3 ；架构整体变化不大，有着上纲上线的框架守护 本页内容没有干">
-<meta itemprop="datePublished" content="2019-10-08T00:00:00&#43;08:00" />
-<meta itemprop="dateModified" content="2020-02-05T00:00:00&#43;08:00" />
+<meta itemprop="datePublished" content="2019-10-08T00:00:00+08:00" />
+<meta itemprop="dateModified" content="2020-02-05T00:00:00+08:00" />
 <meta itemprop="wordCount" content="1791">
 
 
 
-<meta itemprop="keywords" content="DM,mindmap," /><meta name="twitter:card" content="summary"/>
+<meta itemprop="keywords" content="DM,mindmap," />
+<meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="总结 - Data Migration（数据同步）"/>
 <meta name="twitter:description" content="0x00 开局 本文仅记录了对 DM 的学习，处理问题经验慢慢补充（没有素材编场景） 版本使用从 RC 到 v1.0.3 ；架构整体变化不大，有着上纲上线的框架守护 本页内容没有干"/>
 
@@ -148,7 +149,7 @@
   </div>
 </div>
   <div class="post-outdated">
-    <div class="hint">
+    <div class="warn">
       <p>[NOTE] Updated <span class="timeago" datetime="2020-02-05T00:00:00" title="February 5, 2020">February 5, 2020</span>. This article may have outdated content or subject matter.</p>
     </div>
   </div>
@@ -207,10 +208,10 @@ DM 主要包括三个组件：DM-master，DM-worker 和 dmctl。其中 DM Worker
 <p>ToDo：此处准备整理几个容易出问题的场景介绍下（预计在未来一个月时间凑够蔬菜做饭 20200315）</p>
 </blockquote>
 <ul>
-<li><input disabled="" type="checkbox">数据不一致</li>
-<li><input disabled="" type="checkbox">数据同步慢</li>
-<li><input disabled="" type="checkbox">服务启动失败</li>
-<li><input disabled="" type="checkbox">数据重新同步</li>
+<li><input disabled="" type="checkbox"> 数据不一致</li>
+<li><input disabled="" type="checkbox"> 数据同步慢</li>
+<li><input disabled="" type="checkbox"> 服务启动失败</li>
+<li><input disabled="" type="checkbox"> 数据重新同步</li>
 </ul>
 
     </div>

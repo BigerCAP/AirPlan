@@ -23,7 +23,7 @@
 
 
 
-<meta name="generator" content="Hugo 0.63.2 with theme even" />
+<meta name="generator" content="Hugo 0.78.2 with theme even" />
 
 
 <link rel="canonical" href="https://ap.tidb.cc/post/20180323-systemd-syncer/" />
@@ -46,13 +46,14 @@
 <meta property="article:modified_time" content="2020-01-26T00:00:00+08:00" />
 <meta itemprop="name" content="Linux - Systemd &amp; Syncer 相爱相杀">
 <meta itemprop="description" content="0x00 缘来 Syncer 数据同步，会因为网络延迟与网络丢包、上下游压力过大等原因导致断开，这些场景本身是可重启恢复的。 最初与 TiDB 使用的 supervise 小工具，这个工具有个问">
-<meta itemprop="datePublished" content="2018-03-23T00:00:00&#43;08:00" />
-<meta itemprop="dateModified" content="2020-01-26T00:00:00&#43;08:00" />
+<meta itemprop="datePublished" content="2018-03-23T00:00:00+08:00" />
+<meta itemprop="dateModified" content="2020-01-26T00:00:00+08:00" />
 <meta itemprop="wordCount" content="1414">
 
 
 
-<meta itemprop="keywords" content="Linux,Syncer,Systemd," /><meta name="twitter:card" content="summary"/>
+<meta itemprop="keywords" content="Linux,Syncer,Systemd," />
+<meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Linux - Systemd &amp; Syncer 相爱相杀"/>
 <meta name="twitter:description" content="0x00 缘来 Syncer 数据同步，会因为网络延迟与网络丢包、上下游压力过大等原因导致断开，这些场景本身是可重启恢复的。 最初与 TiDB 使用的 supervise 小工具，这个工具有个问"/>
 
@@ -166,7 +167,7 @@
   </div>
 </div>
   <div class="post-outdated">
-    <div class="hint">
+    <div class="warn">
       <p>[NOTE] Updated <span class="timeago" datetime="2020-01-26T00:00:00" title="January 26, 2020">January 26, 2020</span>. This article may have outdated content or subject matter.</p>
     </div>
   </div>
@@ -258,12 +259,12 @@ Syncer 某些场景，如 DDL / DML 不支持这种就无法重试成功，这�
 <span class="n">After</span><span class="p">=</span><span class="n">syslog</span><span class="p">.</span><span class="n">target</span> <span class="n">network</span><span class="p">.</span><span class="n">target</span> <span class="n">remote</span><span class="p">-</span><span class="n">fs</span><span class="p">.</span><span class="n">target</span> <span class="n">nss</span><span class="p">-</span><span class="n">lookup</span><span class="p">.</span><span class="n">target</span>
 <span class="na">
 </span><span class="na">[Service]</span>
-<span class="n">LimitNOFILE</span><span class="p">=</span><span class="m">1</span><span class="m">0</span><span class="m">0</span><span class="m">0</span><span class="m">0</span><span class="m">0</span><span class="m">0</span>
+<span class="n">LimitNOFILE</span><span class="p">=</span><span class="m">1000000</span>
 <span class="n">User</span><span class="p">=</span><span class="n">root</span>
-<span class="n">ExecStart</span><span class="p">=</span><span class="p">/</span><span class="n">root</span><span class="p">/</span><span class="n">systemd</span><span class="p">-</span><span class="n">syncer</span><span class="p">/</span><span class="n">run_syncer</span><span class="p">.</span><span class="n">sh</span>
+<span class="n">ExecStart</span><span class="p">=/</span><span class="n">root</span><span class="p">/</span><span class="n">systemd</span><span class="p">-</span><span class="n">syncer</span><span class="p">/</span><span class="n">run_syncer</span><span class="p">.</span><span class="n">sh</span>
 <span class="n">Restart</span><span class="p">=</span><span class="n">always</span>
-<span class="n">RestartSec</span><span class="p">=</span><span class="m">1</span><span class="m">5</span><span class="n">s</span>
-<span class="n">StartLimitInterval</span><span class="p">=</span><span class="m">3</span><span class="m">0</span><span class="m">0</span>
+<span class="n">RestartSec</span><span class="p">=</span><span class="m">15</span><span class="n">s</span>
+<span class="n">StartLimitInterval</span><span class="p">=</span><span class="m">300</span>
 <span class="n">StartLimitBurst</span><span class="p">=</span><span class="m">5</span>
 <span class="na">
 </span><span class="na">[Install]</span>
@@ -294,7 +295,7 @@ Syncer 某些场景，如 DDL / DML 不支持这种就无法重试成功，这�
 </span><span class="lnt">10
 </span></code></pre></td>
 <td class="lntd">
-<pre class="chroma"><code class="language-c#" data-lang="c#"><span class="err">#</span><span class="p">!</span><span class="p">/</span><span class="n">bin</span><span class="p">/</span><span class="n">bash</span>
+<pre class="chroma"><code class="language-c#" data-lang="c#"><span class="err">#</span><span class="p">!/</span><span class="n">bin</span><span class="p">/</span><span class="n">bash</span>
 
 <span class="n">svr</span><span class="p">=</span><span class="n">syncer</span><span class="p">-</span><span class="n">job</span>
 <span class="n">work_dir</span><span class="p">=</span><span class="s">&#34;/root/systemd-syncer&#34;</span>
@@ -303,7 +304,7 @@ Syncer 某些场景，如 DDL / DML 不支持这种就无法重试成功，这�
 <span class="n">log_dir</span><span class="p">=</span><span class="s">&#34;${work_dir}/log&#34;</span>
 <span class="n">nohup_dir</span><span class="p">=</span><span class="s">&#34;${work_dir}/nohup&#34;</span>
 
-<span class="err">$</span><span class="p">{</span><span class="n">bin_dir</span><span class="p">}</span> <span class="p">-</span><span class="p">-</span><span class="n">config</span> <span class="err">$</span><span class="p">{</span><span class="n">conf_dir</span><span class="p">}</span><span class="p">/</span><span class="err">$</span><span class="p">{</span><span class="n">svr</span><span class="p">}</span><span class="p">.</span><span class="n">toml</span> <span class="p">-</span><span class="p">-</span><span class="n">enable</span><span class="p">-</span><span class="n">gtid</span>  <span class="p">-</span><span class="p">-</span><span class="n">auto</span><span class="p">-</span><span class="n">fix</span><span class="p">-</span><span class="n">gtid</span>  <span class="p">-</span><span class="p">-</span><span class="n">log</span><span class="p">-</span><span class="n">file</span> <span class="err">$</span><span class="p">{</span><span class="n">log_dir</span><span class="p">}</span><span class="p">/</span><span class="err">$</span><span class="p">{</span><span class="n">svr</span><span class="p">}</span><span class="p">.</span><span class="n">log</span> <span class="p">-</span><span class="p">-</span><span class="n">status</span><span class="p">-</span><span class="n">addr</span> <span class="p">:</span><span class="m">1</span><span class="m">1</span><span class="m">1</span><span class="m">0</span><span class="m">5</span> <span class="p">&amp;</span><span class="p">&gt;</span><span class="p">&gt;</span><span class="err">$</span><span class="p">{</span><span class="n">nohup_dir</span><span class="p">}</span><span class="p">/</span><span class="err">$</span><span class="p">{</span><span class="n">svr</span><span class="p">}</span><span class="p">.</span><span class="k">out</span>
+<span class="err">$</span><span class="p">{</span><span class="n">bin_dir</span><span class="p">}</span> <span class="p">--</span><span class="n">config</span> <span class="err">$</span><span class="p">{</span><span class="n">conf_dir</span><span class="p">}/</span><span class="err">$</span><span class="p">{</span><span class="n">svr</span><span class="p">}.</span><span class="n">toml</span> <span class="p">--</span><span class="n">enable</span><span class="p">-</span><span class="n">gtid</span>  <span class="p">--</span><span class="n">auto</span><span class="p">-</span><span class="n">fix</span><span class="p">-</span><span class="n">gtid</span>  <span class="p">--</span><span class="n">log</span><span class="p">-</span><span class="n">file</span> <span class="err">$</span><span class="p">{</span><span class="n">log_dir</span><span class="p">}/</span><span class="err">$</span><span class="p">{</span><span class="n">svr</span><span class="p">}.</span><span class="n">log</span> <span class="p">--</span><span class="n">status</span><span class="p">-</span><span class="n">addr</span> <span class="p">:</span><span class="m">11105</span> <span class="p">&amp;&gt;&gt;</span><span class="err">$</span><span class="p">{</span><span class="n">nohup_dir</span><span class="p">}/</span><span class="err">$</span><span class="p">{</span><span class="n">svr</span><span class="p">}.</span><span class="k">out</span>
 </code></pre></td></tr></table>
 </div>
 </div></li>
@@ -327,20 +328,20 @@ Syncer 某些场景，如 DDL / DML 不支持这种就无法重试成功，这�
 </span><span class="lnt">14
 </span></code></pre></td>
 <td class="lntd">
-<pre class="chroma"><code class="language-c#" data-lang="c#"><span class="na">[root@ip-172-16-10-65 systemd-syncer]</span><span class="err">#</span> <span class="n">tree</span> <span class="p">.</span><span class="p">/</span>
-<span class="p">.</span><span class="p">/</span>
-<span class="err">├</span><span class="err">─</span><span class="err">─</span> <span class="n">bin</span>
-<span class="err">│</span>   <span class="err">└</span><span class="err">─</span><span class="err">─</span> <span class="n">syncer</span>
-<span class="err">├</span><span class="err">─</span><span class="err">─</span> <span class="n">conf</span>
-<span class="err">│</span>   <span class="err">└</span><span class="err">─</span><span class="err">─</span> <span class="n">syncer</span><span class="p">-</span><span class="n">job</span><span class="p">.</span><span class="n">toml</span>
-<span class="err">├</span><span class="err">─</span><span class="err">─</span> <span class="n">log</span> <span class="p">-</span><span class="p">&gt;</span> <span class="p">/</span><span class="n">data1</span><span class="p">/</span><span class="n">systemd</span><span class="p">-</span><span class="n">syncer</span><span class="p">.</span><span class="n">log</span>
-<span class="err">│</span>   <span class="err">└</span><span class="err">─</span><span class="err">─</span> <span class="n">syncer</span><span class="p">-</span><span class="n">job</span><span class="p">.</span><span class="n">log</span>
-<span class="err">├</span><span class="err">─</span><span class="err">─</span> <span class="n">meta</span>
-<span class="err">│</span>   <span class="err">└</span><span class="err">─</span><span class="err">─</span> <span class="n">syncer</span><span class="p">-</span><span class="n">job</span><span class="p">.</span><span class="n">meta</span>
-<span class="err">├</span><span class="err">─</span><span class="err">─</span> <span class="n">nohup</span>
-<span class="err">│</span>   <span class="err">└</span><span class="err">─</span><span class="err">─</span> <span class="n">syncer</span><span class="p">-</span><span class="n">job</span><span class="p">.</span><span class="k">out</span>
-<span class="err">└</span><span class="err">─</span><span class="err">─</span> <span class="n">run</span><span class="p">-</span><span class="n">syncer</span>
-    <span class="err">└</span><span class="err">─</span><span class="err">─</span> <span class="n">run_syncer</span><span class="p">-</span><span class="n">job</span><span class="p">.</span><span class="n">sh</span>
+<pre class="chroma"><code class="language-c#" data-lang="c#"><span class="na">[root@ip-172-16-10-65 systemd-syncer]</span><span class="err">#</span> <span class="n">tree</span> <span class="p">./</span>
+<span class="p">./</span>
+<span class="err">├──</span> <span class="n">bin</span>
+<span class="err">│</span>   <span class="err">└──</span> <span class="n">syncer</span>
+<span class="err">├──</span> <span class="n">conf</span>
+<span class="err">│</span>   <span class="err">└──</span> <span class="n">syncer</span><span class="p">-</span><span class="n">job</span><span class="p">.</span><span class="n">toml</span>
+<span class="err">├──</span> <span class="n">log</span> <span class="p">-&gt;</span> <span class="p">/</span><span class="n">data1</span><span class="p">/</span><span class="n">systemd</span><span class="p">-</span><span class="n">syncer</span><span class="p">.</span><span class="n">log</span>
+<span class="err">│</span>   <span class="err">└──</span> <span class="n">syncer</span><span class="p">-</span><span class="n">job</span><span class="p">.</span><span class="n">log</span>
+<span class="err">├──</span> <span class="n">meta</span>
+<span class="err">│</span>   <span class="err">└──</span> <span class="n">syncer</span><span class="p">-</span><span class="n">job</span><span class="p">.</span><span class="n">meta</span>
+<span class="err">├──</span> <span class="n">nohup</span>
+<span class="err">│</span>   <span class="err">└──</span> <span class="n">syncer</span><span class="p">-</span><span class="n">job</span><span class="p">.</span><span class="k">out</span>
+<span class="err">└──</span> <span class="n">run</span><span class="p">-</span><span class="n">syncer</span>
+    <span class="err">└──</span> <span class="n">run_syncer</span><span class="p">-</span><span class="n">job</span><span class="p">.</span><span class="n">sh</span>
 </code></pre></td></tr></table>
 </div>
 </div></li>

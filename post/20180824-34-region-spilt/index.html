@@ -23,7 +23,7 @@
 
 
 
-<meta name="generator" content="Hugo 0.63.2 with theme even" />
+<meta name="generator" content="Hugo 0.78.2 with theme even" />
 
 
 <link rel="canonical" href="https://ap.tidb.cc/post/20180824-34-region-spilt/" />
@@ -46,13 +46,14 @@
 <meta property="article:modified_time" content="2018-08-24T00:00:00+08:00" />
 <meta itemprop="name" content="School - TiDB Region Spilt">
 <meta itemprop="description" content="0x00 元 收到监控 &amp; 业务告警，内容为目前 QPS duration &gt; 1s 首先排查监控缩小范围 交叉信息判定为 region 超过 144mb 以后未分裂，造成 get snapshot 持续失败，同时 region 过大造成写入和读取数">
-<meta itemprop="datePublished" content="2018-08-24T00:00:00&#43;08:00" />
-<meta itemprop="dateModified" content="2018-08-24T00:00:00&#43;08:00" />
+<meta itemprop="datePublished" content="2018-08-24T00:00:00+08:00" />
+<meta itemprop="dateModified" content="2018-08-24T00:00:00+08:00" />
 <meta itemprop="wordCount" content="813">
 
 
 
-<meta itemprop="keywords" content="region spilt," /><meta name="twitter:card" content="summary"/>
+<meta itemprop="keywords" content="region spilt," />
+<meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="School - TiDB Region Spilt"/>
 <meta name="twitter:description" content="0x00 元 收到监控 &amp; 业务告警，内容为目前 QPS duration &gt; 1s 首先排查监控缩小范围 交叉信息判定为 region 超过 144mb 以后未分裂，造成 get snapshot 持续失败，同时 region 过大造成写入和读取数"/>
 
@@ -269,7 +270,7 @@ SQL 读取数据时 tikv 向命中每 region 发送单次 tikvRPC 请求；由�
 </span><span class="lnt">36
 </span></code></pre></td>
 <td class="lntd">
-<pre class="chroma"><code class="language-json" data-lang="json"><span class="err">»</span> <span class="err">r</span><span class="err">e</span><span class="err">g</span><span class="err">i</span><span class="err">o</span><span class="err">n</span> <span class="mi">4803248</span>
+<pre class="chroma"><code class="language-json" data-lang="json"><span class="err">»</span> <span class="err">region</span> <span class="mi">4803248</span>
 <span class="p">{</span>
   <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="mi">4803248</span><span class="p">,</span>
   <span class="nt">&#34;start_key&#34;</span><span class="p">:</span> <span class="s2">&#34;t\\x80\\x00\\x00\\x00\\x00\\x00:\\xff$_r\\x80\\x00\\x00\\x00&#39;\\xffױ\\xf4\\x00\\x00\\x00\\x00\\x00\\xfa&#34;</span><span class="p">,</span>
@@ -277,33 +278,33 @@ SQL 读取数据时 tikv 向命中每 region 发送单次 tikvRPC 请求；由�
   <span class="nt">&#34;epoch&#34;</span><span class="p">:</span> <span class="p">{</span>
     <span class="nt">&#34;conf_ver&#34;</span><span class="p">:</span> <span class="mi">1159</span><span class="p">,</span>
     <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="mi">17467</span>
-  <span class="p">}</span><span class="p">,</span>
+  <span class="p">},</span>
   <span class="nt">&#34;peers&#34;</span><span class="p">:</span> <span class="p">[</span>
     <span class="p">{</span>
       <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="mi">4227577</span><span class="p">,</span>
       <span class="nt">&#34;store_id&#34;</span><span class="p">:</span> <span class="mi">4215744</span>
-    <span class="p">}</span><span class="p">,</span>
+    <span class="p">},</span>
     <span class="p">{</span>
       <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="mi">4803248</span><span class="p">,</span>
       <span class="nt">&#34;store_id&#34;</span><span class="p">:</span> <span class="mi">4215749</span>
-    <span class="p">}</span><span class="p">,</span>
+    <span class="p">},</span>
     <span class="p">{</span>
       <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="mi">4804713</span><span class="p">,</span>
       <span class="nt">&#34;store_id&#34;</span><span class="p">:</span> <span class="mi">4</span>
     <span class="p">}</span>
-  <span class="p">]</span><span class="p">,</span>
+  <span class="p">],</span>
   <span class="nt">&#34;leader&#34;</span><span class="p">:</span> <span class="p">{</span>
     <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="mi">4803248</span><span class="p">,</span>
     <span class="nt">&#34;store_id&#34;</span><span class="p">:</span> <span class="mi">4215749</span>
-  <span class="p">}</span><span class="p">,</span>
+  <span class="p">},</span>
   <span class="nt">&#34;pending_peers&#34;</span><span class="p">:</span> <span class="p">[</span>
     <span class="p">{</span>
       <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="mi">4804713</span><span class="p">,</span>
       <span class="nt">&#34;store_id&#34;</span><span class="p">:</span> <span class="mi">4</span>
     <span class="p">}</span>
-  <span class="p">]</span><span class="p">,</span>
+  <span class="p">],</span>
   <span class="nt">&#34;written_bytes&#34;</span><span class="p">:</span> <span class="mi">267</span><span class="p">,</span>
-  <span class="nt">&#34;approximate_size&#34;</span><span class="p">:</span> <span class="mi">124183</span> <span class="err">/</span><span class="err">/</span> <span class="err">此</span><span class="err">处</span><span class="err">是</span> <span class="err">M</span><span class="err">B</span> <span class="err">大</span><span class="err">小</span><span class="err">。</span><span class="err">正</span><span class="err">常</span><span class="err">应</span><span class="err">该</span><span class="err">再</span> <span class="mi">144</span><span class="err">M</span> <span class="err">以</span><span class="err">内</span>
+  <span class="nt">&#34;approximate_size&#34;</span><span class="p">:</span> <span class="mi">124183</span> <span class="err">//</span> <span class="err">此处是</span> <span class="err">MB</span> <span class="err">大小。正常应该再</span> <span class="mi">144</span><span class="err">M</span> <span class="err">以内</span>
 <span class="p">}</span>
 </code></pre></td></tr></table>
 </div>
@@ -323,8 +324,8 @@ SQL 读取数据时 tikv 向命中每 region 发送单次 tikvRPC 请求；由�
 </span><span class="lnt">2
 </span></code></pre></td>
 <td class="lntd">
-<pre class="chroma"><code class="language-json" data-lang="json"><span class="err">&gt;</span><span class="err">&gt;</span> <span class="err">o</span><span class="err">p</span><span class="err">e</span><span class="err">r</span><span class="err">a</span><span class="err">t</span><span class="err">o</span><span class="err">r</span> <span class="err">a</span><span class="err">d</span><span class="err">d</span> <span class="err">s</span><span class="err">p</span><span class="err">l</span><span class="err">i</span><span class="err">t</span><span class="err">-</span><span class="err">r</span><span class="err">e</span><span class="err">g</span><span class="err">i</span><span class="err">o</span><span class="err">n</span> <span class="mi">1</span> <span class="err">-</span><span class="err">-</span><span class="err">p</span><span class="err">o</span><span class="err">l</span><span class="err">i</span><span class="err">c</span><span class="err">y</span><span class="err">=</span><span class="err">a</span><span class="err">p</span><span class="err">p</span><span class="err">r</span><span class="err">o</span><span class="err">x</span><span class="err">i</span><span class="err">m</span><span class="err">a</span><span class="err">t</span><span class="err">e</span>     <span class="err">/</span><span class="err">/</span> <span class="err">将</span> <span class="err">R</span><span class="err">e</span><span class="err">g</span><span class="err">i</span><span class="err">o</span><span class="err">n</span> <span class="mi">1</span> <span class="err">对</span><span class="err">半</span><span class="err">拆</span><span class="err">分</span><span class="err">成</span><span class="err">两</span><span class="err">个</span> <span class="err">R</span><span class="err">e</span><span class="err">g</span><span class="err">i</span><span class="err">o</span><span class="err">n</span><span class="err">，</span><span class="err">基</span><span class="err">于</span><span class="err">粗</span><span class="err">略</span><span class="err">估</span><span class="err">计</span><span class="err">值</span>
-<span class="err">&gt;</span><span class="err">&gt;</span> <span class="err">o</span><span class="err">p</span><span class="err">e</span><span class="err">r</span><span class="err">a</span><span class="err">t</span><span class="err">o</span><span class="err">r</span> <span class="err">a</span><span class="err">d</span><span class="err">d</span> <span class="err">s</span><span class="err">p</span><span class="err">l</span><span class="err">i</span><span class="err">t</span><span class="err">-</span><span class="err">r</span><span class="err">e</span><span class="err">g</span><span class="err">i</span><span class="err">o</span><span class="err">n</span> <span class="mi">1</span> <span class="err">-</span><span class="err">-</span><span class="err">p</span><span class="err">o</span><span class="err">l</span><span class="err">i</span><span class="err">c</span><span class="err">y</span><span class="err">=</span><span class="err">s</span><span class="err">c</span><span class="err">a</span><span class="err">n</span>            <span class="err">/</span><span class="err">/</span> <span class="err">将</span> <span class="err">R</span><span class="err">e</span><span class="err">g</span><span class="err">i</span><span class="err">o</span><span class="err">n</span> <span class="mi">1</span> <span class="err">对</span><span class="err">半</span><span class="err">拆</span><span class="err">分</span><span class="err">成</span><span class="err">两</span><span class="err">个</span> <span class="err">R</span><span class="err">e</span><span class="err">g</span><span class="err">i</span><span class="err">o</span><span class="err">n</span><span class="err">，</span><span class="err">基</span><span class="err">于</span><span class="err">精</span><span class="err">确</span><span class="err">扫</span><span class="err">描</span><span class="err">值</span>
+<pre class="chroma"><code class="language-json" data-lang="json"><span class="err">&gt;&gt;</span> <span class="err">operator</span> <span class="err">add</span> <span class="err">split-region</span> <span class="mi">1</span> <span class="err">--policy=approximate</span>     <span class="err">//</span> <span class="err">将</span> <span class="err">Region</span> <span class="mi">1</span> <span class="err">对半拆分成两个</span> <span class="err">Region，基于粗略估计值</span>
+<span class="err">&gt;&gt;</span> <span class="err">operator</span> <span class="err">add</span> <span class="err">split-region</span> <span class="mi">1</span> <span class="err">--policy=scan</span>            <span class="err">//</span> <span class="err">将</span> <span class="err">Region</span> <span class="mi">1</span> <span class="err">对半拆分成两个</span> <span class="err">Region，基于精确扫描值</span>
 </code></pre></td></tr></table>
 </div>
 </div></li>

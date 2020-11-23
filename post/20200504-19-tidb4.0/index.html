@@ -23,7 +23,7 @@
 
 
 
-<meta name="generator" content="Hugo 0.63.2 with theme even" />
+<meta name="generator" content="Hugo 0.78.2 with theme even" />
 
 
 <link rel="canonical" href="https://ap.tidb.cc/post/20200504-19-tidb4.0/" />
@@ -46,13 +46,14 @@
 <meta property="article:modified_time" content="2020-05-04T00:00:00+08:00" />
 <meta itemprop="name" content="TiDB 4.0 新特性">
 <meta itemprop="description" content="0x00 Live 最近几周 TiDB 官方搞了好多次直播，一直在宣传 TiDB 4.0 版本的新特性，本文汇总下 4.0 特色功能；数据来源于 TiDB bilibili 直播、官网文档、用户微信群、公众号等几个地">
-<meta itemprop="datePublished" content="2020-05-04T00:00:00&#43;08:00" />
-<meta itemprop="dateModified" content="2020-05-04T00:00:00&#43;08:00" />
+<meta itemprop="datePublished" content="2020-05-04T00:00:00+08:00" />
+<meta itemprop="dateModified" content="2020-05-04T00:00:00+08:00" />
 <meta itemprop="wordCount" content="1210">
 
 
 
-<meta itemprop="keywords" content="keyvis,K8S,HTAP," /><meta name="twitter:card" content="summary"/>
+<meta itemprop="keywords" content="keyvis,K8S,HTAP," />
+<meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="TiDB 4.0 新特性"/>
 <meta name="twitter:description" content="0x00 Live 最近几周 TiDB 官方搞了好多次直播，一直在宣传 TiDB 4.0 版本的新特性，本文汇总下 4.0 特色功能；数据来源于 TiDB bilibili 直播、官网文档、用户微信群、公众号等几个地"/>
 
@@ -148,7 +149,7 @@
         <li><a href="#br--cdc">BR / CDC</a></li>
         <li><a href="#悲观锁">悲观锁</a></li>
         <li><a href="#view--windows-function">view / windows function</a></li>
-        <li><a href="#sql-hint--sql-plan-management">SQL Hint & SQL Plan Management</a></li>
+        <li><a href="#sql-hint--sql-plan-management">SQL Hint &amp; SQL Plan Management</a></li>
         <li><a href="#dashboard">Dashboard</a></li>
       </ul>
     </li>
@@ -208,8 +209,8 @@ TiCDC 从 TiKV-server 中收集 change log 信息作为 Binlog 数据，通过�
 <p>暂未测试，放个 ToDo</p>
 </blockquote>
 <ul>
-<li><input disabled="" type="checkbox">测试 SQL Hint // 大概是 use index 或者 <code>/* ---- */</code> 加强版</li>
-<li><input disabled="" type="checkbox">测试 SQL Plan Management // 大概是索引走错救命稻草</li>
+<li><input disabled="" type="checkbox"> 测试 SQL Hint // 大概是 use index 或者 <code>/* ---- */</code> 加强版</li>
+<li><input disabled="" type="checkbox"> 测试 SQL Plan Management // 大概是索引走错救命稻草</li>
 </ul>
 <h3 id="dashboard">Dashboard</h3>
 <p>4.0 版本的 PD-server，通过浏览器访问 <code>http://&lt;PDIP&gt;:&lt;PDport&gt;/dashboard/#/overview</code> 可以看到各种新功能。比如快速抓火焰图（性能分析）、查看 key viz（热点可视化）、查看 slow query、日志搜索功能。</p>
@@ -217,7 +218,7 @@ TiCDC 从 TiKV-server 中收集 change log 信息作为 Binlog 数据，通过�
 <h2 id="0x02-tree">0x02 tree</h2>
 <h3 id="智能调度">智能调度</h3>
 <ul>
-<li><input disabled="" type="checkbox">一种新奇的设计思路，暂无资料
+<li><input disabled="" type="checkbox"> 一种新奇的设计思路，暂无资料
 <ul>
 <li>通过将 follower read &amp; Hot region schedule &amp; Raft peer 结合起来一起食用</li>
 </ul>
@@ -225,11 +226,11 @@ TiCDC 从 TiKV-server 中收集 change log 信息作为 Binlog 数据，通过�
 </ul>
 <h3 id="dumplinglighting">Dumpling/Lighting</h3>
 <ul>
-<li><input disabled="" type="checkbox">升级版的 mydumper 和 loader 场景</li>
+<li><input disabled="" type="checkbox"> 升级版的 mydumper 和 loader 场景</li>
 </ul>
 <h3 id="dm">DM</h3>
 <ul>
-<li><input disabled="" type="checkbox">据说在做高可用和适配 K8S</li>
+<li><input disabled="" type="checkbox"> 据说在做高可用和适配 K8S</li>
 </ul>
 
     </div>

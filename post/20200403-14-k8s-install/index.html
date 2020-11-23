@@ -23,7 +23,7 @@
 
 
 
-<meta name="generator" content="Hugo 0.63.2 with theme even" />
+<meta name="generator" content="Hugo 0.78.2 with theme even" />
 
 
 <link rel="canonical" href="https://ap.tidb.cc/post/20200403-14-k8s-install/" />
@@ -46,13 +46,14 @@
 <meta property="article:modified_time" content="2020-04-03T00:00:00+08:00" />
 <meta itemprop="name" content="K8S 安装记录 - 真神了">
 <meta itemprop="description" content="0x00 缘起 无它，就是学习学习，然后装逼用 0x01 准备 K8S 有一些要求限制，不按照处理是无法启动滴 以下内容随手复制的，非原创 关闭 swap 1 2 3 4 5 6 7 8 9 10 11 12 sed">
-<meta itemprop="datePublished" content="2020-04-03T00:00:00&#43;08:00" />
-<meta itemprop="dateModified" content="2020-04-03T00:00:00&#43;08:00" />
+<meta itemprop="datePublished" content="2020-04-03T00:00:00+08:00" />
+<meta itemprop="dateModified" content="2020-04-03T00:00:00+08:00" />
 <meta itemprop="wordCount" content="6614">
 
 
 
-<meta itemprop="keywords" content="Linux,testing,deploy,K8S,kubernetes," /><meta name="twitter:card" content="summary"/>
+<meta itemprop="keywords" content="Linux,testing,deploy,K8S,kubernetes," />
+<meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="K8S 安装记录 - 真神了"/>
 <meta name="twitter:description" content="0x00 缘起 无它，就是学习学习，然后装逼用 0x01 准备 K8S 有一些要求限制，不按照处理是无法启动滴 以下内容随手复制的，非原创 关闭 swap 1 2 3 4 5 6 7 8 9 10 11 12 sed"/>
 
@@ -961,7 +962,7 @@ apiServer:
 apiVersion: kubeadm.k8s.io/v1beta2
 certificatesDir: /etc/kubernetes/pki
 clusterName: kubernetes
-controllerManager: <span class="o">{</span><span class="o">}</span>
+controllerManager: <span class="o">{}</span>
 dns:
   type: CoreDNS
 etcd:
@@ -974,7 +975,7 @@ networking:
   dnsDomain: cluster.local
   podSubnet: 192.240.0.0/16    // POD 预分配网段地址不可以与 node 主机地址重复
   serviceSubnet: 192.96.0.0/12 // 不知道干啥的
-scheduler: <span class="o">{</span><span class="o">}</span>
+scheduler: <span class="o">{}</span>
 </code></pre></td></tr></table>
 </div>
 </div></li>

@@ -23,7 +23,7 @@
 
 
 
-<meta name="generator" content="Hugo 0.63.2 with theme even" />
+<meta name="generator" content="Hugo 0.78.2 with theme even" />
 
 
 <link rel="canonical" href="https://ap.tidb.cc/post/20170605-alertmanager-rules/" />
@@ -46,13 +46,14 @@
 <meta property="article:modified_time" content="2020-01-20T00:00:00+08:00" />
 <meta itemprop="name" content="监控架构 - 那些年我们举报的神马">
 <meta itemprop="description" content="创业 先帝创业未半而中道崩殂，今三分天下…… 因为没有及时收到告警导致整体垮掉而被领导责罚就是这个样子啦，所以小兵挂掉需要及时获知消息用于及时作">
-<meta itemprop="datePublished" content="2017-06-05T00:00:00&#43;08:00" />
-<meta itemprop="dateModified" content="2020-01-20T00:00:00&#43;08:00" />
-<meta itemprop="wordCount" content="2929">
+<meta itemprop="datePublished" content="2017-06-05T00:00:00+08:00" />
+<meta itemprop="dateModified" content="2020-01-20T00:00:00+08:00" />
+<meta itemprop="wordCount" content="2702">
 
 
 
-<meta itemprop="keywords" content="Deploy,AlertManager,Prometheus," /><meta name="twitter:card" content="summary"/>
+<meta itemprop="keywords" content="Deploy,AlertManager,Prometheus," />
+<meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="监控架构 - 那些年我们举报的神马"/>
 <meta name="twitter:description" content="创业 先帝创业未半而中道崩殂，今三分天下…… 因为没有及时收到告警导致整体垮掉而被领导责罚就是这个样子啦，所以小兵挂掉需要及时获知消息用于及时作"/>
 
@@ -128,7 +129,7 @@
         <div class="post-category">
             <a href="/categories/monitoring/"> Monitoring </a>
             </div>
-          <span class="more-meta"> 2929 words </span>
+          <span class="more-meta"> 2702 words </span>
           <span class="more-meta"> 6 mins read </span>
         <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
       </div>
@@ -166,7 +167,7 @@
   </div>
 </div>
   <div class="post-outdated">
-    <div class="hint">
+    <div class="warn">
       <p>[NOTE] Updated <span class="timeago" datetime="2020-01-20T00:00:00" title="January 20, 2020">January 20, 2020</span>. This article may have outdated content or subject matter.</p>
     </div>
   </div>
@@ -212,25 +213,25 @@
 <p>根据 5W1H 攻略思考该怎么写一条告警规则</p>
 </blockquote>
 <ul>
-<li><input disabled="" type="checkbox">告警能否判断集群状态
+<li><input disabled="" type="checkbox"> 告警能否判断集群状态
 <ul>
 <li>告警是否能帮助解决或预防问题</li>
 <li>在 POC 的时候，是否能(非精准)提醒集群瓶颈在哪里</li>
 </ul>
 </li>
-<li><input disabled="" type="checkbox">告警能否有效的被执行
+<li><input disabled="" type="checkbox"> 告警能否有效的被执行
 <ul>
 <li>可以设置多条规则监控同一个服务 // 单服务挂掉有多条告警，告警监控服务的不同路线</li>
 <li>当告警条件全部成功后，再进行优化、精准告警</li>
 </ul>
 </li>
-<li><input disabled="" type="checkbox">告警误报的影响是什么
+<li><input disabled="" type="checkbox"> 告警误报的影响是什么
 <ul>
 <li>告警可以误报，但是不可以不告警  // 结果出现有狼来了效应，产生怠慢消极状态</li>
 <li>在整体集群垮掉的时候，告警要暂时关闭 // 过多的重复告警，影响现有问题解决</li>
 </ul>
 </li>
-<li><input disabled="" type="checkbox">我们还缺少那些告警判断</li>
+<li><input disabled="" type="checkbox"> 我们还缺少那些告警判断</li>
 </ul>
 <h3 id="主机监测">主机监测</h3>
 <blockquote>
@@ -238,12 +239,12 @@
 监控数据来源于 <a href="https://raw.githubusercontent.com/BigerCAP/tidb-ops/master/Media/node.json" title="Github Grafana node_exporter.json">node_exporter.json</a></p>
 </blockquote>
 <ul>
-<li><input disabled="" type="checkbox">主机状态监测
+<li><input disabled="" type="checkbox"> 主机状态监测
 <ul>
 <li>主机探活机制</li>
 </ul>
 </li>
-<li><input disabled="" type="checkbox">主机资源监测
+<li><input disabled="" type="checkbox"> 主机资源监测
 <ul>
 <li>CPU
 <ul>
@@ -434,8 +435,8 @@
 </span><span class="lnt">2
 </span></code></pre></td>
 <td class="lntd">
-<pre class="chroma"><code class="language-YAML" data-lang="YAML"><span class="k">rule_files</span><span class="p">:</span><span class="w">
-</span><span class="w"></span><span class="w">  </span>- <span class="s1">&#39;test.lablels.yml&#39;</span><span class="w">
+<pre class="chroma"><code class="language-YAML" data-lang="YAML"><span class="nt">rule_files</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="s1">&#39;test.lablels.yml&#39;</span><span class="w">
 </span></code></pre></td></tr></table>
 </div>
 </div></li>
@@ -508,66 +509,66 @@
 </span><span class="lnt">60
 </span></code></pre></td>
 <td class="lntd">
-<pre class="chroma"><code class="language-YAML" data-lang="YAML"><span class="k">groups</span><span class="p">:</span><span class="w">
-</span><span class="w"></span>- <span class="k">name</span><span class="p">:</span><span class="w"> </span>alert.rules<span class="w">      </span>//<span class="w"> </span>文件根，一般默认声明为文件名或该分组<span class="w">
-</span><span class="w">  </span><span class="k">rules</span><span class="p">:</span><span class="w">
-</span><span class="w"></span><span class="w">  </span>- <span class="k">alert</span><span class="p">:</span><span class="w"> </span>NODE_disk_readonly<span class="w">  </span>//<span class="w"> </span>告警名称，全局唯一<span class="w">
-</span><span class="w">    </span><span class="k">expr</span><span class="p">:</span><span class="w"> </span>node_filesystem_readonly{fstype=~<span class="s2">&#34;(ext.|xfs)&#34;</span>}<span class="w">  </span>&gt;<span class="w"> </span><span class="m">1</span><span class="w">  </span>//<span class="w"> </span>监控磁盘是否为只读状态<span class="w">
-</span><span class="w">    </span><span class="k">for</span><span class="p">:</span><span class="w"> </span>1m<span class="w">
-</span><span class="w">    </span><span class="k">labels</span><span class="p">:</span><span class="w">
-</span><span class="w"></span><span class="w">      </span><span class="k">env</span><span class="p">:</span><span class="w"> </span>test-cluster<span class="w">  </span>//<span class="w"> </span>声明集群变量<span class="w">
-</span><span class="w">      </span><span class="k">level</span><span class="p">:</span><span class="w"> </span>emergency<span class="w">   </span>//<span class="w"> </span>声明告警等级<span class="w">
-</span><span class="w">      </span><span class="k">service</span><span class="p">:</span><span class="w"> </span>OS<span class="w">        </span>//<span class="w"> </span>声明服务组件<span class="w">
-</span><span class="w">      </span><span class="k">channels</span><span class="p">:</span><span class="w"> </span>alerts<span class="w">   </span>//<span class="w"> </span>声明接受告警的<span class="w"> </span>slack<span class="w"> </span>channel<span class="w">
-</span><span class="w">      </span><span class="k">expr</span><span class="p">:</span><span class="w"> </span>node_filesystem_readonly{fstype=~<span class="s2">&#34;(ext.|xfs)&#34;</span>}<span class="w">  </span>&gt;<span class="w"> </span><span class="m">1</span><span class="w">
-</span><span class="w">    </span><span class="k">annotations</span><span class="p">:</span><span class="w">
-</span><span class="w"></span><span class="w">      </span><span class="k">description</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;alert:{{ $labels.expr }} instance:
-</span><span class="s1">        {{ $labels.instance }} values: {{ $value }}&#39;</span><span class="w">  </span>//<span class="w"> </span>最终告警内容信息拼接<span class="w">
-</span><span class="w">      </span><span class="k">value</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;{{ $value }}&#39;</span><span class="w">
-</span><span class="w">      </span><span class="k">summary</span><span class="p">:</span><span class="w"> </span>disk<span class="w"> </span>readonly<span class="w">      </span>//<span class="w"> </span>根据接受者不同，此处可能是告警<span class="w"> </span>title<span class="w"> </span>或者告警描述<span class="w">
+<pre class="chroma"><code class="language-YAML" data-lang="YAML"><span class="nt">groups</span><span class="p">:</span><span class="w">
+</span><span class="w"></span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">alert.rules      // 文件根，一般默认声明为文件名或该分组</span><span class="w">
+</span><span class="w">  </span><span class="nt">rules</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">alert</span><span class="p">:</span><span class="w"> </span><span class="l">NODE_disk_readonly  // 告警名称，全局唯一</span><span class="w">
+</span><span class="w">    </span><span class="nt">expr</span><span class="p">:</span><span class="w"> </span><span class="l">node_filesystem_readonly{fstype=~&#34;(ext.|xfs)&#34;}  &gt; 1  // 监控磁盘是否为只读状态</span><span class="w">
+</span><span class="w">    </span><span class="nt">for</span><span class="p">:</span><span class="w"> </span><span class="l">1m</span><span class="w">
+</span><span class="w">    </span><span class="nt">labels</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span><span class="nt">env</span><span class="p">:</span><span class="w"> </span><span class="l">test-cluster  // 声明集群变量</span><span class="w">
+</span><span class="w">      </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="l">emergency   // 声明告警等级</span><span class="w">
+</span><span class="w">      </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l">OS        // 声明服务组件</span><span class="w">
+</span><span class="w">      </span><span class="nt">channels</span><span class="p">:</span><span class="w"> </span><span class="l">alerts   // 声明接受告警的 slack channel</span><span class="w">
+</span><span class="w">      </span><span class="nt">expr</span><span class="p">:</span><span class="w"> </span><span class="l">node_filesystem_readonly{fstype=~&#34;(ext.|xfs)&#34;}  &gt; 1</span><span class="w">
+</span><span class="w">    </span><span class="nt">annotations</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;alert:{{ $labels.expr }} instance:
+</span><span class="s1">        {{ $labels.instance }} values: {{ $value }}&#39;</span><span class="w">  </span><span class="l">// 最终告警内容信息拼接</span><span class="w">
+</span><span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;{{ $value }}&#39;</span><span class="w">
+</span><span class="w">      </span><span class="nt">summary</span><span class="p">:</span><span class="w"> </span><span class="l">disk readonly      // 根据接受者不同，此处可能是告警 title 或者告警描述</span><span class="w">
 </span><span class="w">
-</span><span class="w">  </span>- <span class="k">alert</span><span class="p">:</span><span class="w"> </span>TiDB_memery_abnormal<span class="w">
-</span><span class="w">    </span><span class="k">expr</span><span class="p">:</span><span class="w"> </span>go_memstats_heap_inuse_bytes{job=<span class="s2">&#34;tidb&#34;</span>}<span class="w"> </span>&gt;<span class="w"> </span><span class="m">1e+10</span><span class="w">
-</span><span class="w">    </span><span class="k">for</span><span class="p">:</span><span class="w"> </span>1m<span class="w">
-</span><span class="w">    </span><span class="k">labels</span><span class="p">:</span><span class="w">
-</span><span class="w"></span><span class="w">      </span><span class="k">env</span><span class="p">:</span><span class="w"> </span>test-cluster<span class="w">
-</span><span class="w">      </span><span class="k">level</span><span class="p">:</span><span class="w"> </span>warning<span class="w">
-</span><span class="w">      </span><span class="k">service</span><span class="p">:</span><span class="w"> </span>TiDB<span class="w">
-</span><span class="w">      </span><span class="k">channels</span><span class="p">:</span><span class="w"> </span>alerts<span class="w">
-</span><span class="w">      </span><span class="k">expr</span><span class="p">:</span><span class="w"> </span>go_memstats_heap_inuse_bytes{job=<span class="s2">&#34;tidb&#34;</span>}<span class="w"> </span>&gt;<span class="w"> </span><span class="m">1e+10</span><span class="w">
-</span><span class="w">    </span><span class="k">annotations</span><span class="p">:</span><span class="w">
-</span><span class="w"></span><span class="w">      </span><span class="k">description: &#39;alert</span><span class="p">:</span><span class="w"> </span>{{<span class="w"> </span><span class="k">$labels.expr }}  values</span><span class="p">:</span><span class="w"> </span>{{<span class="w"> </span>$value<span class="w"> </span>}}<span class="s1">&#39;
-</span><span class="s1">      value: &#39;</span>{{<span class="w"> </span>$value<span class="w"> </span>}}<span class="s1">&#39;
-</span><span class="s1">      summary: TiDB mem heap is over 1GiB
-</span><span class="s1">
-</span><span class="s1">  - alert: PD_etcd_write_disk_latency
-</span><span class="s1">    expr: histogram_quantile(0.99, sum(rate(etcd_disk_wal_fsync_duration_seconds_bucket[1m])) by (instance,job,le) ) &gt; 1
-</span><span class="s1">    for: 1m
-</span><span class="s1">    labels:
-</span><span class="s1">      env: test-cluster
-</span><span class="s1">      level: emergency
-</span><span class="s1">      service: PD
-</span><span class="s1">      channels: alerts
-</span><span class="s1">      expr:  histogram_quantile(0.99, sum(rate(etcd_disk_wal_fsync_duration_seconds_bucket[1m])) by (instance,job,le) ) &gt; 1
-</span><span class="s1">    annotations:
-</span><span class="s1">      description: &#39;</span><span class="k">alert</span><span class="p">:</span><span class="w"> </span>{{<span class="w"> </span><span class="k">$labels.expr }} instance</span><span class="p">:</span><span class="w"> </span>{{<span class="w"> </span>$labels.instance<span class="w"> </span>}}<span class="w">   </span>values<span class="p">:</span>{{<span class="w"> </span>$value<span class="w"> </span>}}<span class="s1">&#39;
-</span><span class="s1">      value: &#39;</span>{{<span class="w"> </span>$value<span class="w"> </span>}}<span class="s1">&#39;
-</span><span class="s1">      summary: PD_etcd_write_disk_latency
-</span><span class="s1">
-</span><span class="s1">  - alert: TiKV_server_report_failure_msg_total
-</span><span class="s1">    expr:  sum(rate(tikv_server_report_failure_msg_total{type=&#34;unreachable&#34;}[10m])) BY (store_id) &gt; 0
-</span><span class="s1">    for: 1m
-</span><span class="s1">    labels:
-</span><span class="s1">      env: test-cluster
-</span><span class="s1">      level: critical
-</span><span class="s1">      service: TiKV
-</span><span class="s1">      channels: alerts
-</span><span class="s1">      color: 2eb886
-</span><span class="s1">      expr:  sum(rate(tikv_server_report_failure_msg_total{type=&#34;unreachable&#34;}[10m])) BY (store_id) &gt; 0
-</span><span class="s1">    annotations:
-</span><span class="s1">      description: &#39;</span><span class="k">alert</span><span class="p">:</span><span class="w"> </span>{{<span class="w"> </span><span class="k">$labels.expr }} instance</span><span class="p">:</span><span class="w"> </span>{{<span class="w"> </span><span class="k">$labels.instance }} values</span><span class="p">:</span><span class="w"> </span>{{<span class="w"> </span>$value<span class="w"> </span>}}<span class="s1">&#39;
-</span><span class="s1">      value: &#39;</span>{{<span class="w"> </span>$value<span class="w"> </span>}}&#39;<span class="w">
-</span><span class="w">      </span><span class="k">summary</span><span class="p">:</span><span class="w"> </span>TiKV<span class="w"> </span>server_report_failure_msg_total<span class="w"> </span>error<span class="w">
+</span><span class="w">  </span>- <span class="nt">alert</span><span class="p">:</span><span class="w"> </span><span class="l">TiDB_memery_abnormal</span><span class="w">
+</span><span class="w">    </span><span class="nt">expr</span><span class="p">:</span><span class="w"> </span><span class="l">go_memstats_heap_inuse_bytes{job=&#34;tidb&#34;} &gt; 1e+10</span><span class="w">
+</span><span class="w">    </span><span class="nt">for</span><span class="p">:</span><span class="w"> </span><span class="l">1m</span><span class="w">
+</span><span class="w">    </span><span class="nt">labels</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span><span class="nt">env</span><span class="p">:</span><span class="w"> </span><span class="l">test-cluster</span><span class="w">
+</span><span class="w">      </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="l">warning</span><span class="w">
+</span><span class="w">      </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l">TiDB</span><span class="w">
+</span><span class="w">      </span><span class="nt">channels</span><span class="p">:</span><span class="w"> </span><span class="l">alerts</span><span class="w">
+</span><span class="w">      </span><span class="nt">expr</span><span class="p">:</span><span class="w"> </span><span class="l">go_memstats_heap_inuse_bytes{job=&#34;tidb&#34;} &gt; 1e+10</span><span class="w">
+</span><span class="w">    </span><span class="nt">annotations</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span><span class="nt">description: &#39;alert</span><span class="p">:</span><span class="w"> </span>{{<span class="w"> </span><span class="nt">$labels.expr }}  values</span><span class="p">:</span><span class="w"> </span>{{<span class="w"> </span><span class="l">$value }}&#39;</span><span class="w">
+</span><span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;{{ $value }}&#39;</span><span class="w">
+</span><span class="w">      </span><span class="nt">summary</span><span class="p">:</span><span class="w"> </span><span class="l">TiDB mem heap is over 1GiB</span><span class="w">
+</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">alert</span><span class="p">:</span><span class="w"> </span><span class="l">PD_etcd_write_disk_latency</span><span class="w">
+</span><span class="w">    </span><span class="nt">expr</span><span class="p">:</span><span class="w"> </span><span class="l">histogram_quantile(0.99, sum(rate(etcd_disk_wal_fsync_duration_seconds_bucket[1m])) by (instance,job,le) ) &gt; 1</span><span class="w">
+</span><span class="w">    </span><span class="nt">for</span><span class="p">:</span><span class="w"> </span><span class="l">1m</span><span class="w">
+</span><span class="w">    </span><span class="nt">labels</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span><span class="nt">env</span><span class="p">:</span><span class="w"> </span><span class="l">test-cluster</span><span class="w">
+</span><span class="w">      </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="l">emergency</span><span class="w">
+</span><span class="w">      </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l">PD</span><span class="w">
+</span><span class="w">      </span><span class="nt">channels</span><span class="p">:</span><span class="w"> </span><span class="l">alerts</span><span class="w">
+</span><span class="w">      </span><span class="nt">expr</span><span class="p">:</span><span class="w">  </span><span class="l">histogram_quantile(0.99, sum(rate(etcd_disk_wal_fsync_duration_seconds_bucket[1m])) by (instance,job,le) ) &gt; 1</span><span class="w">
+</span><span class="w">    </span><span class="nt">annotations</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span><span class="nt">description: &#39;alert</span><span class="p">:</span><span class="w"> </span>{{<span class="w"> </span><span class="nt">$labels.expr }} instance</span><span class="p">:</span><span class="w"> </span>{{<span class="w"> </span><span class="l">$labels.instance }}   values:{{ $value }}&#39;</span><span class="w">
+</span><span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;{{ $value }}&#39;</span><span class="w">
+</span><span class="w">      </span><span class="nt">summary</span><span class="p">:</span><span class="w"> </span><span class="l">PD_etcd_write_disk_latency</span><span class="w">
+</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">alert</span><span class="p">:</span><span class="w"> </span><span class="l">TiKV_server_report_failure_msg_total</span><span class="w">
+</span><span class="w">    </span><span class="nt">expr</span><span class="p">:</span><span class="w">  </span><span class="l">sum(rate(tikv_server_report_failure_msg_total{type=&#34;unreachable&#34;}[10m])) BY (store_id) &gt; 0</span><span class="w">
+</span><span class="w">    </span><span class="nt">for</span><span class="p">:</span><span class="w"> </span><span class="l">1m</span><span class="w">
+</span><span class="w">    </span><span class="nt">labels</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span><span class="nt">env</span><span class="p">:</span><span class="w"> </span><span class="l">test-cluster</span><span class="w">
+</span><span class="w">      </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="l">critical</span><span class="w">
+</span><span class="w">      </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l">TiKV</span><span class="w">
+</span><span class="w">      </span><span class="nt">channels</span><span class="p">:</span><span class="w"> </span><span class="l">alerts</span><span class="w">
+</span><span class="w">      </span><span class="nt">color</span><span class="p">:</span><span class="w"> </span><span class="l">2eb886</span><span class="w">
+</span><span class="w">      </span><span class="nt">expr</span><span class="p">:</span><span class="w">  </span><span class="l">sum(rate(tikv_server_report_failure_msg_total{type=&#34;unreachable&#34;}[10m])) BY (store_id) &gt; 0</span><span class="w">
+</span><span class="w">    </span><span class="nt">annotations</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span><span class="nt">description: &#39;alert</span><span class="p">:</span><span class="w"> </span>{{<span class="w"> </span><span class="nt">$labels.expr }} instance</span><span class="p">:</span><span class="w"> </span>{{<span class="w"> </span><span class="nt">$labels.instance }} values</span><span class="p">:</span><span class="w"> </span>{{<span class="w"> </span><span class="l">$value }}&#39;</span><span class="w">
+</span><span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;{{ $value }}&#39;</span><span class="w">
+</span><span class="w">      </span><span class="nt">summary</span><span class="p">:</span><span class="w"> </span><span class="l">TiKV server_report_failure_msg_total error</span><span class="w">
 </span></code></pre></td></tr></table>
 </div>
 </div></li>
@@ -639,56 +640,56 @@
 </span><span class="lnt">50
 </span></code></pre></td>
 <td class="lntd">
-<pre class="chroma"><code class="language-YAML" data-lang="YAML"><span class="k">global</span><span class="p">:</span><span class="w">
-</span><span class="w"></span><span class="w">  </span><span class="k">slack_api_url</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;https://hooks.slack.com/services/T0666PYPM/B2E666BSBG/OQ7666666vMupZqTnb1234&#39;</span><span class="w">
+<pre class="chroma"><code class="language-YAML" data-lang="YAML"><span class="nt">global</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">slack_api_url</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;https://hooks.slack.com/services/T0666PYPM/B2E666BSBG/OQ7666666vMupZqTnb1234&#39;</span><span class="w">
 </span><span class="w">  </span><span class="c"># slack api 地址</span><span class="w">
-</span><span class="w"></span><span class="k">route</span><span class="p">:</span><span class="w">
-</span><span class="w"></span><span class="w">  </span><span class="k">receiver</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;alerts-test&#34;</span><span class="w">
-</span><span class="w">  </span><span class="k">group_by</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;env&#39;</span><span class="p">,</span><span class="s1">&#39;instance&#39;</span><span class="p">]</span><span class="w">
-</span><span class="w">  </span><span class="k">group_wait</span><span class="p">:</span><span class="w"> </span><span class="w">     </span>30s<span class="w">
-</span><span class="w">  </span><span class="k">group_interval</span><span class="p">:</span><span class="w"> </span><span class="w"> </span>3m<span class="w">
-</span><span class="w">  </span><span class="k">repeat_interval</span><span class="p">:</span><span class="w"> </span>3m<span class="w">
-</span><span class="w">  </span><span class="k">routes</span><span class="p">:</span><span class="w">
-</span><span class="w"></span><span class="w">  </span>- <span class="k">match</span><span class="p">:</span><span class="w">
-</span><span class="w"></span><span class="w">      </span><span class="k">env</span><span class="p">:</span><span class="w"> </span>test-cluster<span class="w">
-</span><span class="w">    </span><span class="k">receiver</span><span class="p">:</span><span class="w"> </span>alerts<span class="w">
-</span><span class="w">    </span><span class="k">continue</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
-</span><span class="w">  </span>- <span class="k">match</span><span class="p">:</span><span class="w">
-</span><span class="w"></span><span class="w">      </span><span class="k">env: test-cluster  #同时满足 env:test-cluster、severity:critical、server: TiKV、channels: alerts 才会发送到 receiver</span><span class="p">:</span><span class="w"> </span>labels-test<span class="w">
-</span><span class="w">      </span><span class="k">severity</span><span class="p">:</span><span class="w"> </span>critical<span class="w">
-</span><span class="w">      </span><span class="k">server</span><span class="p">:</span><span class="w"> </span>TiKV<span class="w">
-</span><span class="w">      </span><span class="k">channels</span><span class="p">:</span><span class="w"> </span>alerts<span class="w">
-</span><span class="w">    </span><span class="k">receiver</span><span class="p">:</span><span class="w"> </span>labels-test<span class="w">
+</span><span class="w"></span><span class="nt">route</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span><span class="nt">receiver</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;alerts-test&#34;</span><span class="w">
+</span><span class="w">  </span><span class="nt">group_by</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;env&#39;</span><span class="p">,</span><span class="s1">&#39;instance&#39;</span><span class="p">]</span><span class="w">
+</span><span class="w">  </span><span class="nt">group_wait</span><span class="p">:</span><span class="w">      </span><span class="l">30s</span><span class="w">
+</span><span class="w">  </span><span class="nt">group_interval</span><span class="p">:</span><span class="w">  </span><span class="l">3m</span><span class="w">
+</span><span class="w">  </span><span class="nt">repeat_interval</span><span class="p">:</span><span class="w"> </span><span class="l">3m</span><span class="w">
+</span><span class="w">  </span><span class="nt">routes</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">match</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span><span class="nt">env</span><span class="p">:</span><span class="w"> </span><span class="l">test-cluster</span><span class="w">
+</span><span class="w">    </span><span class="nt">receiver</span><span class="p">:</span><span class="w"> </span><span class="l">alerts</span><span class="w">
+</span><span class="w">    </span><span class="nt">continue</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">match</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span><span class="nt">env: test-cluster  #同时满足 env:test-cluster、severity:critical、server: TiKV、channels: alerts 才会发送到 receiver</span><span class="p">:</span><span class="w"> </span><span class="l">labels-test</span><span class="w">
+</span><span class="w">      </span><span class="nt">severity</span><span class="p">:</span><span class="w"> </span><span class="l">critical</span><span class="w">
+</span><span class="w">      </span><span class="nt">server</span><span class="p">:</span><span class="w"> </span><span class="l">TiKV</span><span class="w">
+</span><span class="w">      </span><span class="nt">channels</span><span class="p">:</span><span class="w"> </span><span class="l">alerts</span><span class="w">
+</span><span class="w">    </span><span class="nt">receiver</span><span class="p">:</span><span class="w"> </span><span class="l">labels-test</span><span class="w">
 </span><span class="w"></span><span class="c"># 默认 接收器</span><span class="w">
-</span><span class="w"></span><span class="k">receivers</span><span class="p">:</span><span class="w">
-</span><span class="w"></span>- <span class="k">name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;alerts-test&#39;</span><span class="w">
-</span><span class="w">  </span><span class="k">slack_configs</span><span class="p">:</span><span class="w">
-</span><span class="w"></span><span class="w">  </span>- <span class="k">channel</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;#alters-test&#39;</span><span class="w">
-</span><span class="w">    </span><span class="k">username</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;default&#39;</span><span class="w">
-</span><span class="w">    </span><span class="k">icon_emoji</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;😇&#39;</span><span class="w">
-</span><span class="w">    </span><span class="k">title</span><span class="p">:</span><span class="w"> </span><span class="w">  </span><span class="s1">&#39;{{.CommonAnnotations.summary}}&#39;</span><span class="w">
-</span><span class="w">    </span><span class="k">text</span><span class="p">:</span><span class="w"> </span><span class="w">   </span><span class="s1">&#39;in {{.CommonLabels.env}}: {{ .CommonLabels.alertname }}  {{ .CommonAnnotations.description }}&#39;</span><span class="w">
+</span><span class="w"></span><span class="nt">receivers</span><span class="p">:</span><span class="w">
+</span><span class="w"></span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;alerts-test&#39;</span><span class="w">
+</span><span class="w">  </span><span class="nt">slack_configs</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;#alters-test&#39;</span><span class="w">
+</span><span class="w">    </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;default&#39;</span><span class="w">
+</span><span class="w">    </span><span class="nt">icon_emoji</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;😇&#39;</span><span class="w">
+</span><span class="w">    </span><span class="nt">title</span><span class="p">:</span><span class="w">   </span><span class="s1">&#39;{{.CommonAnnotations.summary}}&#39;</span><span class="w">
+</span><span class="w">    </span><span class="nt">text</span><span class="p">:</span><span class="w">    </span><span class="s1">&#39;in {{.CommonLabels.env}}: {{ .CommonLabels.alertname }}  {{ .CommonAnnotations.description }}&#39;</span><span class="w">
 </span><span class="w"></span><span class="c"># 普通版</span><span class="w">
-</span><span class="w"></span>- <span class="k">name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;alerts&#39;</span><span class="w">
-</span><span class="w">  </span><span class="k">slack_configs</span><span class="p">:</span><span class="w">
-</span><span class="w"></span><span class="w">  </span>- <span class="k">channel</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;#long&#39;</span><span class="w">
-</span><span class="w">    </span><span class="k">username</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;alert&#39;</span><span class="w">
-</span><span class="w">    </span><span class="k">icon_emoji</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;:TiDB:&#39;</span><span class="w">
-</span><span class="w">    </span><span class="k">title</span><span class="p">:</span><span class="w"> </span><span class="w">  </span><span class="s1">&#39;{{.CommonAnnotations.summary}} : {{ .CommonLabels.level}}&#39;</span><span class="w">
-</span><span class="w">    </span><span class="k">text</span><span class="p">:</span><span class="w"> </span><span class="w">   </span><span class="s1">&#39;in {{.CommonLabels.env}}: {{ .GroupLabels.alertstat }} : {{ .CommonAnnotations.description }}&#39;</span><span class="w">
+</span><span class="w"></span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;alerts&#39;</span><span class="w">
+</span><span class="w">  </span><span class="nt">slack_configs</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;#long&#39;</span><span class="w">
+</span><span class="w">    </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;alert&#39;</span><span class="w">
+</span><span class="w">    </span><span class="nt">icon_emoji</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;:TiDB:&#39;</span><span class="w">
+</span><span class="w">    </span><span class="nt">title</span><span class="p">:</span><span class="w">   </span><span class="s1">&#39;{{.CommonAnnotations.summary}} : {{ .CommonLabels.level}}&#39;</span><span class="w">
+</span><span class="w">    </span><span class="nt">text</span><span class="p">:</span><span class="w">    </span><span class="s1">&#39;in {{.CommonLabels.env}}: {{ .GroupLabels.alertstat }} : {{ .CommonAnnotations.description }}&#39;</span><span class="w">
 </span><span class="w"></span><span class="c"># labels (参考 slack_api 与 slack_config)</span><span class="w">
-</span><span class="w"></span>- <span class="k">name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;labels-test&#39;</span><span class="w">
-</span><span class="w">  </span><span class="k">slack_configs</span><span class="p">:</span><span class="w">
-</span><span class="w"></span><span class="w">  </span>- <span class="k">channel</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;#{{.CommonLabels.channels}}&#39;</span><span class="w">
-</span><span class="w">    </span><span class="k">fallback</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;{{.CommonLabels.alertname}} : {{ .CommonAnnotations.summary }}&#39;</span><span class="w">
-</span><span class="w">    </span><span class="k">username</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;Robot&#39;</span><span class="w">
-</span><span class="w">    </span><span class="k">icon_emoji</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;😂&#39;</span><span class="w">
-</span><span class="w">    </span><span class="k">icon_url</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;http://www.tidb.cc&#39;</span><span class="w">
-</span><span class="w">    </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;#{{.CommonLabels.color}}&#39;</span><span class="w"> </span><span class="c">#改变 Slack 文本框颜色</span><span class="w">
-</span><span class="w">    </span><span class="k">title</span><span class="p">:</span><span class="w"> </span><span class="w"> </span><span class="s1">&#39;{{.CommonLabels.alertname}} : {{ .CommonAnnotations.summary }} : {{ .CommonLabels.server}} : {{ .CommonLabels.level}}&#39;</span><span class="w">
-</span><span class="w">    </span><span class="k">title_link</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;http://172.16.10.65:9090/alerts&#39;</span><span class="w">
-</span><span class="w">    </span><span class="k">text</span><span class="p">:</span><span class="w"> </span><span class="w">  </span><span class="s1">&#39;in {{.CommonLabels.env}} : {{ .CommonAnnotations.description }}&#39;</span><span class="w">
-</span><span class="w">    </span><span class="k">pretext</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;http://wiki.tidb.cc/{{.CommonLabels.srv}}/{{ .CommonLabels.alertname}}&#39;</span><span class="w">
+</span><span class="w"></span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;labels-test&#39;</span><span class="w">
+</span><span class="w">  </span><span class="nt">slack_configs</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;#{{.CommonLabels.channels}}&#39;</span><span class="w">
+</span><span class="w">    </span><span class="nt">fallback</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;{{.CommonLabels.alertname}} : {{ .CommonAnnotations.summary }}&#39;</span><span class="w">
+</span><span class="w">    </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;Robot&#39;</span><span class="w">
+</span><span class="w">    </span><span class="nt">icon_emoji</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;😂&#39;</span><span class="w">
+</span><span class="w">    </span><span class="nt">icon_url</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;http://www.tidb.cc&#39;</span><span class="w">
+</span><span class="w">    </span><span class="nt">color</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;#{{.CommonLabels.color}}&#39;</span><span class="w"> </span><span class="c">#改变 Slack 文本框颜色</span><span class="w">
+</span><span class="w">    </span><span class="nt">title</span><span class="p">:</span><span class="w">  </span><span class="s1">&#39;{{.CommonLabels.alertname}} : {{ .CommonAnnotations.summary }} : {{ .CommonLabels.server}} : {{ .CommonLabels.level}}&#39;</span><span class="w">
+</span><span class="w">    </span><span class="nt">title_link</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;http://172.16.10.65:9090/alerts&#39;</span><span class="w">
+</span><span class="w">    </span><span class="nt">text</span><span class="p">:</span><span class="w">   </span><span class="s1">&#39;in {{.CommonLabels.env}} : {{ .CommonAnnotations.description }}&#39;</span><span class="w">
+</span><span class="w">    </span><span class="nt">pretext</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;http://wiki.tidb.cc/{{.CommonLabels.srv}}/{{ .CommonLabels.alertname}}&#39;</span><span class="w">
 </span></code></pre></td></tr></table>
 </div>
 </div></li>

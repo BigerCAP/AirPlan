@@ -23,7 +23,7 @@
 
 
 
-<meta name="generator" content="Hugo 0.63.2 with theme even" />
+<meta name="generator" content="Hugo 0.78.2 with theme even" />
 
 
 <link rel="canonical" href="https://ap.tidb.cc/post/20200102-1-tidb-haproxy-real-ip/" />
@@ -46,13 +46,14 @@
 <meta property="article:modified_time" content="2020-01-10T00:00:00+08:00" />
 <meta itemprop="name" content="TiDB &amp; Haproxy / show processlist View real IP">
 <meta itemprop="description" content="0x00 - 背景 高可用性（英语：high availability，缩写为 HA）测试 failpoint 场景，需要在服务前面添加 load balance 组件；比如 F5、LVS、Haprox">
-<meta itemprop="datePublished" content="2020-01-02T00:00:00&#43;08:00" />
-<meta itemprop="dateModified" content="2020-01-10T00:00:00&#43;08:00" />
+<meta itemprop="datePublished" content="2020-01-02T00:00:00+08:00" />
+<meta itemprop="dateModified" content="2020-01-10T00:00:00+08:00" />
 <meta itemprop="wordCount" content="3114">
 
 
 
-<meta itemprop="keywords" content="TiDB,Haproxy,real server ip,load balance," /><meta name="twitter:card" content="summary"/>
+<meta itemprop="keywords" content="TiDB,Haproxy,real server ip,load balance," />
+<meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="TiDB &amp; Haproxy / show processlist View real IP"/>
 <meta name="twitter:description" content="0x00 - 背景 高可用性（英语：high availability，缩写为 HA）测试 failpoint 场景，需要在服务前面添加 load balance 组件；比如 F5、LVS、Haprox"/>
 
@@ -158,7 +159,7 @@
   </div>
 </div>
   <div class="post-outdated">
-    <div class="hint">
+    <div class="warn">
       <p>[NOTE] Updated <span class="timeago" datetime="2020-01-10T00:00:00" title="January 10, 2020">January 10, 2020</span>. This article may have outdated content or subject matter.</p>
     </div>
   </div>
@@ -175,24 +176,24 @@
 <thead>
 <tr>
 <th>机器</th>
-<th align="left">IP</th>
+<th style="text-align:left">IP</th>
 <th>备注</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>A</td>
-<td align="left">10.0.1.4</td>
+<td style="text-align:left">10.0.1.4</td>
 <td>部署 Haproxy、TiDB 4000 与 TiDB 4001</td>
 </tr>
 <tr>
 <td>A</td>
-<td align="left">10.0.1.4</td>
+<td style="text-align:left">10.0.1.4</td>
 <td>外网 IP 为 138.x.x.x</td>
 </tr>
 <tr>
 <td>B</td>
-<td align="left">42.x.x.x</td>
+<td style="text-align:left">42.x.x.x</td>
 <td>客户端所在机器</td>
 </tr>
 </tbody>
@@ -242,13 +243,13 @@
     <span class="n">contimeout</span> <span class="mi">5000</span>
     <span class="n">clitimeout</span> <span class="mi">50000</span>
     <span class="n">srvtimeout</span> <span class="mi">50000</span>
-    <span class="n">log</span> <span class="mf">127.0</span><span class="mf">.0</span><span class="mf">.1</span> <span class="n">local3</span>
+    <span class="n">log</span> <span class="mf">127.0.0.1</span> <span class="n">local3</span>
 
 <span class="n">listen</span> <span class="n">testip</span>
     <span class="nl">bind</span> <span class="p">:</span><span class="mi">3308</span>
     <span class="n">mode</span> <span class="n">tcp</span>
     <span class="n">balance</span> <span class="n">roundrobin</span>
-    <span class="n">server</span> <span class="n">tidb2</span> <span class="mf">10.0</span><span class="mf">.1</span><span class="mf">.4</span><span class="o">:</span><span class="mi">4001</span> <span class="n">weight</span> <span class="mi">1</span>
+    <span class="n">server</span> <span class="n">tidb2</span> <span class="mf">10.0.1.4</span><span class="o">:</span><span class="mi">4001</span> <span class="n">weight</span> <span class="mi">1</span>
 </code></pre></td></tr></table>
 </div>
 </div><p>使用 <code>./tidb-server -path /tmp/nodb -P 4001</code> 方式在本地启动一个 mocktikv TiDB-Server 服务；注：TiDB 启动后自带的 root 用户无法远程登陆，需要新建带密码用户才可在远程机器登陆。</p>
@@ -387,13 +388,13 @@ For more information about PROXY protocol please refer https://www.haproxy.org/d
     <span class="n">contimeout</span> <span class="mi">5000</span>
     <span class="n">clitimeout</span> <span class="mi">50000</span>
     <span class="n">srvtimeout</span> <span class="mi">50000</span>
-    <span class="n">log</span> <span class="mf">10.0</span><span class="mf">.1</span><span class="mf">.4</span> <span class="n">local3</span>
+    <span class="n">log</span> <span class="mf">10.0.1.4</span> <span class="n">local3</span>
 
 <span class="n">listen</span> <span class="n">web</span>
     <span class="nl">bind</span> <span class="p">:</span><span class="mi">3307</span>
     <span class="n">mode</span> <span class="n">tcp</span>
     <span class="n">balance</span> <span class="n">roundrobin</span>
-    <span class="n">server</span> <span class="n">tidb1</span> <span class="mf">10.0</span><span class="mf">.1</span><span class="mf">.4</span><span class="o">:</span><span class="mi">4000</span> <span class="n">send</span><span class="o">-</span><span class="n">proxy</span> <span class="n">weight</span> <span class="mi">1</span>
+    <span class="n">server</span> <span class="n">tidb1</span> <span class="mf">10.0.1.4</span><span class="o">:</span><span class="mi">4000</span> <span class="n">send</span><span class="o">-</span><span class="n">proxy</span> <span class="n">weight</span> <span class="mi">1</span>
 </code></pre></td></tr></table>
 </div>
 </div><p>Haproxy 配置文件中 global 与 defaults 与其他一般无二；重点在 real server 中的 <strong>send-proxy</strong> 参数信息；</p>
@@ -521,7 +522,7 @@ So I think its good to do this way.
     <span class="nl">bind</span> <span class="p">:</span><span class="mi">3307</span>
     <span class="n">mode</span> <span class="n">tcp</span>
     <span class="n">balance</span> <span class="n">roundrobin</span>
-    <span class="n">server</span> <span class="n">tidb1</span> <span class="mf">127.0</span><span class="mf">.0</span><span class="mf">.1</span><span class="o">:</span><span class="mi">4000</span> <span class="n">send</span><span class="o">-</span><span class="n">proxy</span> <span class="n">weight</span> <span class="mi">1</span>
+    <span class="n">server</span> <span class="n">tidb1</span> <span class="mf">127.0.0.1</span><span class="o">:</span><span class="mi">4000</span> <span class="n">send</span><span class="o">-</span><span class="n">proxy</span> <span class="n">weight</span> <span class="mi">1</span>
 </code></pre></td></tr></table>
 </div>
 </div><p>TiDB 使用命令启动 <code>./tidb-server --host 10.0.1.4 --proxy-protocol-networks &quot;10.0.2.0/24&quot;</code></p>
@@ -544,7 +545,7 @@ So I think its good to do this way.
     <span class="nl">bind</span> <span class="p">:</span><span class="mi">3307</span>
     <span class="n">mode</span> <span class="n">tcp</span>
     <span class="n">balance</span> <span class="n">roundrobin</span>
-    <span class="n">server</span> <span class="n">tidb1</span> <span class="mf">10.0</span><span class="mf">.1</span><span class="mf">.4</span><span class="o">:</span><span class="mi">4000</span> <span class="n">send</span><span class="o">-</span><span class="n">proxy</span> <span class="n">weight</span> <span class="mi">1</span>
+    <span class="n">server</span> <span class="n">tidb1</span> <span class="mf">10.0.1.4</span><span class="o">:</span><span class="mi">4000</span> <span class="n">send</span><span class="o">-</span><span class="n">proxy</span> <span class="n">weight</span> <span class="mi">1</span>
 </code></pre></td></tr></table>
 </div>
 </div><p>TiDB 使用该模式启动 <code>./tidb-server --host 10.0.1.4 --proxy-protocol-networks &quot;10.0.1.0/24&quot;</code></p>
@@ -570,7 +571,7 @@ So I think its good to do this way.
     <span class="nl">bind</span> <span class="p">:</span><span class="mi">3307</span>
     <span class="n">mode</span> <span class="n">tcp</span>
     <span class="n">balance</span> <span class="n">roundrobin</span>
-    <span class="n">server</span> <span class="n">tidb1</span> <span class="mf">10.0</span><span class="mf">.1</span><span class="mf">.4</span><span class="o">:</span><span class="mi">4000</span> <span class="n">send</span><span class="o">-</span><span class="n">proxy</span> <span class="n">weight</span> <span class="mi">1</span>
+    <span class="n">server</span> <span class="n">tidb1</span> <span class="mf">10.0.1.4</span><span class="o">:</span><span class="mi">4000</span> <span class="n">send</span><span class="o">-</span><span class="n">proxy</span> <span class="n">weight</span> <span class="mi">1</span>
 </code></pre></td></tr></table>
 </div>
 </div><p>TiDB 使用该模式启动 <code>./tidb-server --host 10.0.1.4</code></p>
@@ -593,7 +594,7 @@ So I think its good to do this way.
     <span class="nl">bind</span> <span class="p">:</span><span class="mi">3308</span>
     <span class="n">mode</span> <span class="n">tcp</span>
     <span class="n">balance</span> <span class="n">roundrobin</span>
-    <span class="n">server</span> <span class="n">tidb1</span> <span class="mf">10.0</span><span class="mf">.1</span><span class="mf">.4</span><span class="o">:</span><span class="mi">4001</span> <span class="n">weight</span> <span class="mi">1</span>
+    <span class="n">server</span> <span class="n">tidb1</span> <span class="mf">10.0.1.4</span><span class="o">:</span><span class="mi">4001</span> <span class="n">weight</span> <span class="mi">1</span>
 </code></pre></td></tr></table>
 </div>
 </div><p>TiDB 使用该模式启动 <code>./tidb-server --proxy-protocol-networks &quot;10.0.1.0/24&quot; -P 4001</code></p>
@@ -603,7 +604,7 @@ So I think its good to do this way.
 <pre class="chroma"><code><span class="lnt">1
 </span></code></pre></td>
 <td class="lntd">
-<pre class="chroma"><code class="language-c" data-lang="c"><span class="p">[</span><span class="mi">2020</span><span class="o">/</span><span class="mo">01</span><span class="o">/</span><span class="mi">09</span> <span class="mi">22</span><span class="o">:</span><span class="mo">02</span><span class="o">:</span><span class="mf">59.274</span> <span class="o">+</span><span class="mi">08</span><span class="o">:</span><span class="mo">00</span><span class="p">]</span> <span class="p">[</span><span class="n">ERROR</span><span class="p">]</span> <span class="p">[</span><span class="n">server</span><span class="p">.</span><span class="nl">go</span><span class="p">:</span><span class="mi">321</span><span class="p">]</span> <span class="p">[</span><span class="sa"></span><span class="s">&#34;</span><span class="s">PROXY protocol failed</span><span class="s">&#34;</span><span class="p">]</span> <span class="p">[</span><span class="n">error</span><span class="o">=</span><span class="sa"></span><span class="s">&#34;</span><span class="s">Header read timeout</span><span class="s">&#34;</span><span class="p">]</span> <span class="p">[</span><span class="n">stack</span><span class="o">=</span><span class="sa"></span><span class="s">&#34;</span><span class="s">github.com/pingcap/tidb/server.(*Server).Run</span><span class="se">\n</span><span class="se">\t</span><span class="s">/home/jenkins/workspace/build_tidb_master/go/src/github.com/pingcap/tidb/server/server.go:321</span><span class="se">\n</span><span class="s">main.runServer</span><span class="se">\n</span><span class="se">\t</span><span class="s">/home/jenkins/workspace/build_tidb_master/go/src/github.com/pingcap/tidb/tidb-server/main.go:568</span><span class="se">\n</span><span class="s">main.main</span><span class="se">\n</span><span class="se">\t</span><span class="s">/home/jenkins/workspace/build_tidb_master/go/src/github.com/pingcap/tidb/tidb-server/main.go:174</span><span class="se">\n</span><span class="s">runtime.main</span><span class="se">\n</span><span class="se">\t</span><span class="s">/usr/local/go/src/runtime/proc.go:200</span><span class="s">&#34;</span><span class="p">]</span>
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="p">[</span><span class="mi">2020</span><span class="o">/</span><span class="mo">01</span><span class="o">/</span><span class="mi">09</span> <span class="mi">22</span><span class="o">:</span><span class="mo">02</span><span class="o">:</span><span class="mf">59.274</span> <span class="o">+</span><span class="mi">08</span><span class="o">:</span><span class="mo">00</span><span class="p">]</span> <span class="p">[</span><span class="n">ERROR</span><span class="p">]</span> <span class="p">[</span><span class="n">server</span><span class="p">.</span><span class="nl">go</span><span class="p">:</span><span class="mi">321</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;PROXY protocol failed&#34;</span><span class="p">]</span> <span class="p">[</span><span class="n">error</span><span class="o">=</span><span class="s">&#34;Header read timeout&#34;</span><span class="p">]</span> <span class="p">[</span><span class="n">stack</span><span class="o">=</span><span class="s">&#34;github.com/pingcap/tidb/server.(*Server).Run</span><span class="se">\n\t</span><span class="s">/home/jenkins/workspace/build_tidb_master/go/src/github.com/pingcap/tidb/server/server.go:321</span><span class="se">\n</span><span class="s">main.runServer</span><span class="se">\n\t</span><span class="s">/home/jenkins/workspace/build_tidb_master/go/src/github.com/pingcap/tidb/tidb-server/main.go:568</span><span class="se">\n</span><span class="s">main.main</span><span class="se">\n\t</span><span class="s">/home/jenkins/workspace/build_tidb_master/go/src/github.com/pingcap/tidb/tidb-server/main.go:174</span><span class="se">\n</span><span class="s">runtime.main</span><span class="se">\n\t</span><span class="s">/usr/local/go/src/runtime/proc.go:200&#34;</span><span class="p">]</span>
 </code></pre></td></tr></table>
 </div>
 </div><h3 id="测试总结">测试总结</h3>

@@ -7,11 +7,7 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>TiDB - AirPlan</copyright>
-    <lastBuildDate>Sun, 08 Oct 2017 00:00:00 +0800</lastBuildDate>
-    
-	<atom:link href="https://ap.tidb.cc/tags/etcd-ctl/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Sun, 08 Oct 2017 00:00:00 +0800</lastBuildDate><atom:link href="https://ap.tidb.cc/tags/etcd-ctl/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>TiDB - Binlog 数据同步架构测试</title>
       <link>https://ap.tidb.cc/post/20171108-40-testing-binlog/</link>

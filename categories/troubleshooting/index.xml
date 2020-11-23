@@ -7,11 +7,7 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>TiDB - AirPlan</copyright>
-    <lastBuildDate>Thu, 02 Jul 2020 00:00:00 +0800</lastBuildDate>
-    
-	<atom:link href="https://ap.tidb.cc/categories/troubleshooting/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Thu, 02 Jul 2020 00:00:00 +0800</lastBuildDate><atom:link href="https://ap.tidb.cc/categories/troubleshooting/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>九死一生 - 运维小技巧</title>
       <link>https://ap.tidb.cc/post/20200703-27-tskill/</link>

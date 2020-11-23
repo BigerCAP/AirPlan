@@ -23,7 +23,7 @@
 
 
 
-<meta name="generator" content="Hugo 0.63.2 with theme even" />
+<meta name="generator" content="Hugo 0.78.2 with theme even" />
 
 
 <link rel="canonical" href="https://ap.tidb.cc/post/20170809-transfer.sh/" />
@@ -46,13 +46,14 @@
 <meta property="article:modified_time" content="2020-01-21T00:00:00+08:00" />
 <meta itemprop="name" content="Linux - Transfer.sh 一键文件服务器">
 <meta itemprop="description" content="0x00 起源 平常需要各种传输日志文件，TiDB 部署进程比较多，打包后可能超过 100MB（微信最大支持 100MB 附件传输），发送人和接受人不是同平台时，文件">
-<meta itemprop="datePublished" content="2017-08-09T00:00:00&#43;08:00" />
-<meta itemprop="dateModified" content="2020-01-21T00:00:00&#43;08:00" />
+<meta itemprop="datePublished" content="2017-08-09T00:00:00+08:00" />
+<meta itemprop="dateModified" content="2020-01-21T00:00:00+08:00" />
 <meta itemprop="wordCount" content="1236">
 
 
 
-<meta itemprop="keywords" content="Linux,Transfer,AirPlan," /><meta name="twitter:card" content="summary"/>
+<meta itemprop="keywords" content="Linux,Transfer,AirPlan," />
+<meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Linux - Transfer.sh 一键文件服务器"/>
 <meta name="twitter:description" content="0x00 起源 平常需要各种传输日志文件，TiDB 部署进程比较多，打包后可能超过 100MB（微信最大支持 100MB 附件传输），发送人和接受人不是同平台时，文件"/>
 
@@ -163,7 +164,7 @@
   </div>
 </div>
   <div class="post-outdated">
-    <div class="hint">
+    <div class="warn">
       <p>[NOTE] Updated <span class="timeago" datetime="2020-01-21T00:00:00" title="January 21, 2020">January 21, 2020</span>. This article may have outdated content or subject matter.</p>
     </div>
   </div>
@@ -471,7 +472,7 @@ Upload to virustotal:
 </span><span class="lnt">5
 </span></code></pre></td>
 <td class="lntd">
-<pre class="chroma"><code class="language-bash" data-lang="bash">transfer<span class="o">(</span><span class="o">)</span> <span class="o">{</span>
+<pre class="chroma"><code class="language-bash" data-lang="bash">transfer<span class="o">()</span> <span class="o">{</span>
     curl --progress-bar --upload-file <span class="nv">$1</span> https://transfer.sh/<span class="k">$(</span>basename <span class="nv">$1</span><span class="k">)</span> <span class="p">|</span> tee /dev/null<span class="p">;</span>
 <span class="o">}</span>
 

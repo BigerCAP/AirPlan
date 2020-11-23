@@ -7,11 +7,7 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>TiDB - AirPlan</copyright>
-    <lastBuildDate>Sat, 09 May 2020 00:00:00 +0800</lastBuildDate>
-    
-	<atom:link href="https://ap.tidb.cc/tags/paper/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Sat, 09 May 2020 00:00:00 +0800</lastBuildDate><atom:link href="https://ap.tidb.cc/tags/paper/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Raft 多数派选举策略</title>
       <link>https://ap.tidb.cc/look/20200509-19-raft/</link>

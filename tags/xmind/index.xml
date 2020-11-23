@@ -7,11 +7,7 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>TiDB - AirPlan</copyright>
-    <lastBuildDate>Fri, 01 Jan 2010 00:00:00 +0800</lastBuildDate>
-    
-	<atom:link href="https://ap.tidb.cc/tags/xmind/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Fri, 01 Jan 2010 00:00:00 +0800</lastBuildDate><atom:link href="https://ap.tidb.cc/tags/xmind/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>是软体啦 - 思维导图三体之 xmind</title>
       <link>https://ap.tidb.cc/post/20100101-mindmap-xmind/</link>

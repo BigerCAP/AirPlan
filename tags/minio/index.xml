@@ -7,11 +7,7 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>TiDB - AirPlan</copyright>
-    <lastBuildDate>Fri, 12 Jun 2020 00:00:00 +0800</lastBuildDate>
-    
-	<atom:link href="https://ap.tidb.cc/tags/minio/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Fri, 12 Jun 2020 00:00:00 +0800</lastBuildDate><atom:link href="https://ap.tidb.cc/tags/minio/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>软件测试 - S3 协议与 minio</title>
       <link>https://ap.tidb.cc/post/20200612-24-minio/</link>

@@ -7,11 +7,7 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>TiDB - AirPlan</copyright>
-    <lastBuildDate>Wed, 13 Mar 2019 00:00:00 +0800</lastBuildDate>
-    
-	<atom:link href="https://ap.tidb.cc/tags/numactl/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Wed, 13 Mar 2019 00:00:00 +0800</lastBuildDate><atom:link href="https://ap.tidb.cc/tags/numactl/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>系统调优 - numactl cpubind</title>
       <link>https://ap.tidb.cc/post/20190313-11-numactl/</link>

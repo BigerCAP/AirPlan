@@ -23,7 +23,7 @@
 
 
 
-<meta name="generator" content="Hugo 0.63.2 with theme even" />
+<meta name="generator" content="Hugo 0.78.2 with theme even" />
 
 
 <link rel="canonical" href="https://ap.tidb.cc/post/20180406-tidb-domain/" />
@@ -46,13 +46,14 @@
 <meta property="article:modified_time" content="2020-01-20T00:00:00+08:00" />
 <meta itemprop="name" content="测试域名代替 IP 部署 TiDB">
 <meta itemprop="description" content="0x00 假设 新建机房网络频繁变更或公司内部要求禁止使用 IP 做为服务启动监听（大公司规划时喜欢使用 hostname/server name &#43; domain 做为服务监听信息，配合公司内网 DNS 做跨地域运维">
-<meta itemprop="datePublished" content="2018-04-06T00:00:00&#43;08:00" />
-<meta itemprop="dateModified" content="2020-01-20T00:00:00&#43;08:00" />
+<meta itemprop="datePublished" content="2018-04-06T00:00:00+08:00" />
+<meta itemprop="dateModified" content="2020-01-20T00:00:00+08:00" />
 <meta itemprop="wordCount" content="1477">
 
 
 
-<meta itemprop="keywords" content="Deploy,Domain," /><meta name="twitter:card" content="summary"/>
+<meta itemprop="keywords" content="Deploy,Domain," />
+<meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="测试域名代替 IP 部署 TiDB"/>
 <meta name="twitter:description" content="0x00 假设 新建机房网络频繁变更或公司内部要求禁止使用 IP 做为服务启动监听（大公司规划时喜欢使用 hostname/server name &#43; domain 做为服务监听信息，配合公司内网 DNS 做跨地域运维"/>
 
@@ -140,7 +141,7 @@
     <nav id="TableOfContents">
   <ul>
     <li><a href="#0x00-假设">0x00 假设</a></li>
-    <li><a href="#0x01-场景问题">0x01 场景&问题</a>
+    <li><a href="#0x01-场景问题">0x01 场景&amp;问题</a>
       <ul>
         <li><a href="#部署架构">部署架构</a></li>
         <li><a href="#pd-启动参数调整">PD 启动参数调整</a></li>
@@ -158,7 +159,7 @@
   </div>
 </div>
   <div class="post-outdated">
-    <div class="hint">
+    <div class="warn">
       <p>[NOTE] Updated <span class="timeago" datetime="2020-01-20T00:00:00" title="January 20, 2020">January 20, 2020</span>. This article may have outdated content or subject matter.</p>
     </div>
   </div>
@@ -396,7 +397,7 @@
 
 /pd/6545739204143641259/leader
 
-pd1ȴ¦䇃͗http://pd.p.cc:2380<span class="s2">&#34;</span><span class="s2">http://pd.p.cc:2379
+pd1ȴ¦䇃͗http://pd.p.cc:2380<span class="s2">&#34;http://pd.p.cc:2379
 </span><span class="s2">
 </span><span class="s2">/pd/6545739204143641259/timestamp
 </span><span class="s2">&amp;»WI7
@@ -451,7 +452,7 @@ pd1ȴ¦䇃͗http://pd.p.cc:2380<span class="s2">&#34;</span><span class="s2">htt
 </span><span class="lnt">35
 </span></code></pre></td>
 <td class="lntd">
-<pre class="chroma"><code class="language-json" data-lang="json"><span class="p">[</span><span class="err">r</span><span class="err">o</span><span class="err">o</span><span class="err">t</span><span class="err">@</span><span class="err">D</span><span class="err">B</span> <span class="err">e</span><span class="err">t</span><span class="err">c</span><span class="err">d</span><span class="err">-</span><span class="err">v</span><span class="mf">3.1</span><span class="err">.</span><span class="mi">11</span><span class="err">-</span><span class="err">l</span><span class="err">i</span><span class="err">n</span><span class="err">u</span><span class="err">x</span><span class="err">-</span><span class="err">a</span><span class="err">m</span><span class="err">d</span><span class="mi">64</span><span class="p">]</span><span class="err">#</span> <span class="err">.</span><span class="err">/</span><span class="err">e</span><span class="err">t</span><span class="err">c</span><span class="err">d</span><span class="err">c</span><span class="err">t</span><span class="err">l</span>  <span class="err">-</span><span class="err">-</span><span class="err">e</span><span class="err">n</span><span class="err">d</span><span class="err">p</span><span class="err">o</span><span class="err">i</span><span class="err">n</span><span class="err">t</span><span class="err">s</span><span class="err">=</span><span class="mf">0.0</span><span class="err">.</span><span class="mf">0.0</span><span class="err">:</span><span class="mi">2379</span> <span class="err">g</span><span class="err">e</span><span class="err">t</span> <span class="err">-</span><span class="err">-</span><span class="err">p</span><span class="err">r</span><span class="err">e</span><span class="err">f</span><span class="err">i</span><span class="err">x</span><span class="err">=</span><span class="kc">true</span> <span class="err">/</span><span class="err">p</span><span class="err">d</span> <span class="err">-</span><span class="err">-</span><span class="err">w</span><span class="err">r</span><span class="err">i</span><span class="err">t</span><span class="err">e</span><span class="err">-</span><span class="err">o</span><span class="err">u</span><span class="err">t</span><span class="err">=</span><span class="s2">&#34;json&#34;</span>
+<pre class="chroma"><code class="language-json" data-lang="json"><span class="p">[</span><span class="err">root@DB</span> <span class="err">etcd-v</span><span class="mf">3.1</span><span class="err">.</span><span class="mi">11</span><span class="err">-linux-amd</span><span class="mi">64</span><span class="p">]</span><span class="err">#</span> <span class="err">./etcdctl</span>  <span class="err">--endpoints=</span><span class="mf">0.0</span><span class="err">.</span><span class="mf">0.0</span><span class="err">:</span><span class="mi">2379</span> <span class="err">get</span> <span class="err">--prefix=</span><span class="kc">true</span> <span class="err">/pd</span> <span class="err">--write-out=</span><span class="s2">&#34;json&#34;</span>
 
 <span class="p">{</span>
     <span class="nt">&#34;header&#34;</span><span class="p">:</span> <span class="p">{</span>
@@ -459,7 +460,7 @@ pd1ȴ¦䇃͗http://pd.p.cc:2380<span class="s2">&#34;</span><span class="s2">htt
         <span class="nt">&#34;member_id&#34;</span><span class="p">:</span> <span class="mi">6313215679864995000</span><span class="p">,</span> 
         <span class="nt">&#34;revision&#34;</span><span class="p">:</span> <span class="mi">366</span><span class="p">,</span> 
         <span class="nt">&#34;raft_term&#34;</span><span class="p">:</span> <span class="mi">2</span>
-    <span class="p">}</span><span class="p">,</span> 
+    <span class="p">},</span> 
     <span class="nt">&#34;kvs&#34;</span><span class="p">:</span> <span class="p">[</span>
         <span class="p">{</span>
             <span class="nt">&#34;key&#34;</span><span class="p">:</span> <span class="s2">&#34;L3BkLzY1NDU3MzkyMDQxNDM2NDEyNTkvbGVhZGVy&#34;</span><span class="p">,</span> 
@@ -468,14 +469,14 @@ pd1ȴ¦䇃͗http://pd.p.cc:2380<span class="s2">&#34;</span><span class="s2">htt
             <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> 
             <span class="nt">&#34;value&#34;</span><span class="p">:</span> <span class="s2">&#34;CgNwZDEQx/SdpuSGw85XGhRodHRwOi8vcGQucC5jYzoyMjM4MCIUaHR0cDovL3BkLnAuY2M6MjIzNzk=&#34;</span><span class="p">,</span> 
             <span class="nt">&#34;lease&#34;</span><span class="p">:</span> <span class="mi">8811119877456664000</span>
-        <span class="p">}</span><span class="p">,</span> 
+        <span class="p">},</span> 
         <span class="p">{</span>
             <span class="nt">&#34;key&#34;</span><span class="p">:</span> <span class="s2">&#34;L3BkLzY1NDU3MzkyMDQxNDM2NDEyNTkvdGltZXN0YW1w&#34;</span><span class="p">,</span> 
             <span class="nt">&#34;create_revision&#34;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> 
             <span class="nt">&#34;mod_revision&#34;</span><span class="p">:</span> <span class="mi">366</span><span class="p">,</span> 
             <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="mi">363</span><span class="p">,</span> 
             <span class="nt">&#34;value&#34;</span><span class="p">:</span> <span class="s2">&#34;FSaDMWkxK6c=&#34;</span>
-        <span class="p">}</span><span class="p">,</span> 
+        <span class="p">},</span> 
         <span class="p">{</span>
             <span class="nt">&#34;key&#34;</span><span class="p">:</span> <span class="s2">&#34;L3BkL2NsdXN0ZXJfaWQ=&#34;</span><span class="p">,</span> 
             <span class="nt">&#34;create_revision&#34;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> 
@@ -483,7 +484,7 @@ pd1ȴ¦䇃͗http://pd.p.cc:2380<span class="s2">&#34;</span><span class="s2">htt
             <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> 
             <span class="nt">&#34;value&#34;</span><span class="p">:</span> <span class="s2">&#34;WtcjIBdUcqs=&#34;</span>
         <span class="p">}</span>
-    <span class="p">]</span><span class="p">,</span> 
+    <span class="p">],</span> 
     <span class="nt">&#34;count&#34;</span><span class="p">:</span> <span class="mi">3</span>
 <span class="p">}</span>
 </code></pre></td></tr></table>
@@ -583,7 +584,7 @@ pd1ȴ¦䇃͗http://pd.p.cc:2380<span class="s2">&#34;</span><span class="s2">htt
 </span><span class="lnt">84
 </span></code></pre></td>
 <td class="lntd">
-<pre class="chroma"><code class="language-json" data-lang="json"><span class="p">[</span><span class="err">r</span><span class="err">o</span><span class="err">o</span><span class="err">t</span><span class="err">@</span><span class="err">D</span><span class="err">B</span> <span class="err">e</span><span class="err">t</span><span class="err">c</span><span class="err">d</span><span class="err">-</span><span class="err">v</span><span class="mf">3.1</span><span class="err">.</span><span class="mi">11</span><span class="err">-</span><span class="err">l</span><span class="err">i</span><span class="err">n</span><span class="err">u</span><span class="err">x</span><span class="err">-</span><span class="err">a</span><span class="err">m</span><span class="err">d</span><span class="mi">64</span><span class="p">]</span><span class="err">#</span> <span class="err">.</span><span class="err">/</span><span class="err">e</span><span class="err">t</span><span class="err">c</span><span class="err">d</span><span class="err">c</span><span class="err">t</span><span class="err">l</span>  <span class="err">-</span><span class="err">-</span><span class="err">e</span><span class="err">n</span><span class="err">d</span><span class="err">p</span><span class="err">o</span><span class="err">i</span><span class="err">n</span><span class="err">t</span><span class="err">s</span><span class="err">=</span><span class="mf">0.0</span><span class="err">.</span><span class="mf">0.0</span><span class="err">:</span><span class="mi">2379</span> <span class="err">g</span><span class="err">e</span><span class="err">t</span> <span class="err">-</span><span class="err">-</span><span class="err">p</span><span class="err">r</span><span class="err">e</span><span class="err">f</span><span class="err">i</span><span class="err">x</span><span class="err">=</span><span class="kc">true</span>  <span class="err">/</span><span class="err">p</span><span class="err">d</span> <span class="err">-</span><span class="err">-</span><span class="err">w</span><span class="err">r</span><span class="err">i</span><span class="err">t</span><span class="err">e</span><span class="err">-</span><span class="err">o</span><span class="err">u</span><span class="err">t</span><span class="err">=</span><span class="s2">&#34;json&#34;</span>
+<pre class="chroma"><code class="language-json" data-lang="json"><span class="p">[</span><span class="err">root@DB</span> <span class="err">etcd-v</span><span class="mf">3.1</span><span class="err">.</span><span class="mi">11</span><span class="err">-linux-amd</span><span class="mi">64</span><span class="p">]</span><span class="err">#</span> <span class="err">./etcdctl</span>  <span class="err">--endpoints=</span><span class="mf">0.0</span><span class="err">.</span><span class="mf">0.0</span><span class="err">:</span><span class="mi">2379</span> <span class="err">get</span> <span class="err">--prefix=</span><span class="kc">true</span>  <span class="err">/pd</span> <span class="err">--write-out=</span><span class="s2">&#34;json&#34;</span>
 
 <span class="p">{</span>
     <span class="nt">&#34;header&#34;</span><span class="p">:</span> <span class="p">{</span>
@@ -591,7 +592,7 @@ pd1ȴ¦䇃͗http://pd.p.cc:2380<span class="s2">&#34;</span><span class="s2">htt
         <span class="nt">&#34;member_id&#34;</span><span class="p">:</span> <span class="mi">6313215679864995000</span><span class="p">,</span> 
         <span class="nt">&#34;revision&#34;</span><span class="p">:</span> <span class="mi">934</span><span class="p">,</span> 
         <span class="nt">&#34;raft_term&#34;</span><span class="p">:</span> <span class="mi">2</span>
-    <span class="p">}</span><span class="p">,</span> 
+    <span class="p">},</span> 
     <span class="nt">&#34;kvs&#34;</span><span class="p">:</span> <span class="p">[</span>
         <span class="p">{</span>
             <span class="nt">&#34;key&#34;</span><span class="p">:</span> <span class="s2">&#34;L3BkLzY1NDU3MzkyMDQxNDM2NDEyNTkvYWxsb2NfaWQ=&#34;</span><span class="p">,</span> 
@@ -599,14 +600,14 @@ pd1ȴ¦䇃͗http://pd.p.cc:2380<span class="s2">&#34;</span><span class="s2">htt
             <span class="nt">&#34;mod_revision&#34;</span><span class="p">:</span> <span class="mi">693</span><span class="p">,</span> 
             <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> 
             <span class="nt">&#34;value&#34;</span><span class="p">:</span> <span class="s2">&#34;AAAAAAAAA+g=&#34;</span>
-        <span class="p">}</span><span class="p">,</span> 
+        <span class="p">},</span> 
         <span class="p">{</span>
             <span class="nt">&#34;key&#34;</span><span class="p">:</span> <span class="s2">&#34;L3BkLzY1NDU3MzkyMDQxNDM2NDEyNTkvY29uZmln&#34;</span><span class="p">,</span> 
             <span class="nt">&#34;create_revision&#34;</span><span class="p">:</span> <span class="mi">697</span><span class="p">,</span> 
             <span class="nt">&#34;mod_revision&#34;</span><span class="p">:</span> <span class="mi">697</span><span class="p">,</span> 
             <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> 
             <span class="nt">&#34;value&#34;</span><span class="p">:</span> <span class="s2">&#34;eyJjbGllbnQtdXJscyI6IiIsInBlZXItdXJscyI6IiIsImFkdmVydGlzZS1jbGllbnQtdXJscyI6IiIsImFkdmVydGlzZS1wZWVyLXVybHMiOiIiLCJuYW1lIjoiIiwiZGF0YS1kaXIiOiIiLCJpbml0aWFsLWNsdXN0ZXIiOiIiLCJpbml0aWFsLWNsdXN0ZXItc3RhdGUiOiIiLCJqb2luIjoiIiwibGVhc2UiOjAsImxvZyI6eyJsZXZlbCI6IiIsImZvcm1hdCI6IiIsImRpc2FibGUtdGltZXN0YW1wIjpmYWxzZSwiZmlsZSI6eyJmaWxlbmFtZSI6IiIsImxvZy1yb3RhdGUiOmZhbHNlLCJtYXgtc2l6ZSI6MCwibWF4LWRheXMiOjAsIm1heC1iYWNrdXBzIjowfX0sImxvZy1maWxlIjoiIiwibG9nLWxldmVsIjoiIiwidHNvLXNhdmUtaW50ZXJ2YWwiOiIwcyIsIm1ldHJpYyI6eyJqb2IiOiIiLCJhZGRyZXNzIjoiIiwiaW50ZXJ2YWwiOiIwcyJ9LCJzY2hlZHVsZSI6eyJtYXgtc25hcHNob3QtY291bnQiOjMsIm1heC1wZW5kaW5nLXBlZXItY291bnQiOjE2LCJtYXgtbWVyZ2UtcmVnaW9uLXNpemUiOjAsIm1heC1zdG9yZS1kb3duLXRpbWUiOiIxaDBtMHMiLCJsZWFkZXItc2NoZWR1bGUtbGltaXQiOjY0LCJyZWdpb24tc2NoZWR1bGUtbGltaXQiOjE2LCJyZXBsaWNhLXNjaGVkdWxlLWxpbWl0IjoyNCwibWVyZ2Utc2NoZWR1bGUtbGltaXQiOjIwLCJ0b2xlcmFudC1zaXplLXJhdGlvIjoyLjUsInNjaGVkdWxlcnMtdjIiOlt7InR5cGUiOiJiYWxhbmNlLXJlZ2lvbiIsImFyZ3MiOm51bGx9LHsidHlwZSI6ImJhbGFuY2UtbGVhZGVyIiwiYXJncyI6bnVsbH0seyJ0eXBlIjoiaG90LXJlZ2lvbiIsImFyZ3MiOm51bGx9LHsidHlwZSI6ImxhYmVsIiwiYXJncyI6bnVsbH1dfSwicmVwbGljYXRpb24iOnsibWF4LXJlcGxpY2FzIjoxLCJsb2NhdGlvbi1sYWJlbHMiOiIifSwibmFtZXNwYWNlIjp7fSwicXVvdGEtYmFja2VuZC1ieXRlcyI6IjAgQiIsImF1dG8tY29tcGFjdGlvbi1yZXRlbnRpb24iOjAsIlRpY2tJbnRlcnZhbCI6IjBzIiwiRWxlY3Rpb25JbnRlcnZhbCI6IjBzIiwic2VjdXJpdHkiOnsiY2FjZXJ0LXBhdGgiOiIiLCJjZXJ0LXBhdGgiOiIiLCJrZXktcGF0aCI6IiJ9LCJsYWJlbC1wcm9wZXJ0eSI6bnVsbCwiV2FybmluZ01zZ3MiOm51bGwsIm5hbWVzcGFjZS1jbGFzc2lmaWVyIjoiIn0=&#34;</span>
-        <span class="p">}</span><span class="p">,</span> 
+        <span class="p">},</span> 
         <span class="p">{</span>
             <span class="nt">&#34;key&#34;</span><span class="p">:</span> <span class="s2">&#34;L3BkLzY1NDU3MzkyMDQxNDM2NDEyNTkvbGVhZGVy&#34;</span><span class="p">,</span> 
             <span class="nt">&#34;create_revision&#34;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> 
@@ -614,49 +615,49 @@ pd1ȴ¦䇃͗http://pd.p.cc:2380<span class="s2">&#34;</span><span class="s2">htt
             <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> 
             <span class="nt">&#34;value&#34;</span><span class="p">:</span> <span class="s2">&#34;CgNwZDEQx/SdpuSGw85XGhRodHRwOi8vcGQucC5jYzoyMjM4MCIUaHR0cDovL3BkLnAuY2M6MjIzNzk=&#34;</span><span class="p">,</span> 
             <span class="nt">&#34;lease&#34;</span><span class="p">:</span> <span class="mi">8811119877456664000</span>
-        <span class="p">}</span><span class="p">,</span> 
+        <span class="p">},</span> 
         <span class="p">{</span>
             <span class="nt">&#34;key&#34;</span><span class="p">:</span> <span class="s2">&#34;L3BkLzY1NDU3MzkyMDQxNDM2NDEyNTkvcmFmdA==&#34;</span><span class="p">,</span> 
             <span class="nt">&#34;create_revision&#34;</span><span class="p">:</span> <span class="mi">694</span><span class="p">,</span> 
             <span class="nt">&#34;mod_revision&#34;</span><span class="p">:</span> <span class="mi">694</span><span class="p">,</span> 
             <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> 
             <span class="nt">&#34;value&#34;</span><span class="p">:</span> <span class="s2">&#34;CKvl0bqB5MjrWhAB&#34;</span>
-        <span class="p">}</span><span class="p">,</span> 
+        <span class="p">},</span> 
         <span class="p">{</span>
             <span class="nt">&#34;key&#34;</span><span class="p">:</span> <span class="s2">&#34;L3BkLzY1NDU3MzkyMDQxNDM2NDEyNTkvcmFmdC9yLzAwMDAwMDAwMDAwMDAwMDAwMDAy&#34;</span><span class="p">,</span> 
             <span class="nt">&#34;create_revision&#34;</span><span class="p">:</span> <span class="mi">694</span><span class="p">,</span> 
             <span class="nt">&#34;mod_revision&#34;</span><span class="p">:</span> <span class="mi">694</span><span class="p">,</span> 
             <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> 
             <span class="nt">&#34;value&#34;</span><span class="p">:</span> <span class="s2">&#34;CAIiBAgBEAEqBAgDEAE=&#34;</span>
-        <span class="p">}</span><span class="p">,</span> 
+        <span class="p">},</span> 
         <span class="p">{</span>
             <span class="nt">&#34;key&#34;</span><span class="p">:</span> <span class="s2">&#34;L3BkLzY1NDU3MzkyMDQxNDM2NDEyNTkvcmFmdC9zLzAwMDAwMDAwMDAwMDAwMDAwMDAx&#34;</span><span class="p">,</span> 
             <span class="nt">&#34;create_revision&#34;</span><span class="p">:</span> <span class="mi">694</span><span class="p">,</span> 
             <span class="nt">&#34;mod_revision&#34;</span><span class="p">:</span> <span class="mi">695</span><span class="p">,</span> 
             <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> 
             <span class="nt">&#34;value&#34;</span><span class="p">:</span> <span class="s2">&#34;CAESEjE3Mi4xNi4xMC42NToyMjE2MA==&#34;</span>
-        <span class="p">}</span><span class="p">,</span> 
+        <span class="p">},</span> 
         <span class="p">{</span>
             <span class="nt">&#34;key&#34;</span><span class="p">:</span> <span class="s2">&#34;L3BkLzY1NDU3MzkyMDQxNDM2NDEyNTkvcmFmdC9zLzAwMDAwMDAwMDAwMDAwMDAwMDA0&#34;</span><span class="p">,</span> 
             <span class="nt">&#34;create_revision&#34;</span><span class="p">:</span> <span class="mi">856</span><span class="p">,</span> 
             <span class="nt">&#34;mod_revision&#34;</span><span class="p">:</span> <span class="mi">856</span><span class="p">,</span> 
             <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> 
             <span class="nt">&#34;value&#34;</span><span class="p">:</span> <span class="s2">&#34;CAQSDWt2LnAuY2M6MjIxNjA=&#34;</span>
-        <span class="p">}</span><span class="p">,</span> 
+        <span class="p">},</span> 
         <span class="p">{</span>
             <span class="nt">&#34;key&#34;</span><span class="p">:</span> <span class="s2">&#34;L3BkLzY1NDU3MzkyMDQxNDM2NDEyNTkvcmFmdC9zdGF0dXMvcmFmdF9ib290c3RyYXBfdGltZQ==&#34;</span><span class="p">,</span> 
             <span class="nt">&#34;create_revision&#34;</span><span class="p">:</span> <span class="mi">694</span><span class="p">,</span> 
             <span class="nt">&#34;mod_revision&#34;</span><span class="p">:</span> <span class="mi">694</span><span class="p">,</span> 
             <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> 
             <span class="nt">&#34;value&#34;</span><span class="p">:</span> <span class="s2">&#34;FSaEFqfEqcU=&#34;</span>
-        <span class="p">}</span><span class="p">,</span> 
+        <span class="p">},</span> 
         <span class="p">{</span>
             <span class="nt">&#34;key&#34;</span><span class="p">:</span> <span class="s2">&#34;L3BkLzY1NDU3MzkyMDQxNDM2NDEyNTkvdGltZXN0YW1w&#34;</span><span class="p">,</span> 
             <span class="nt">&#34;create_revision&#34;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> 
             <span class="nt">&#34;mod_revision&#34;</span><span class="p">:</span> <span class="mi">934</span><span class="p">,</span> 
             <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="mi">926</span><span class="p">,</span> 
             <span class="nt">&#34;value&#34;</span><span class="p">:</span> <span class="s2">&#34;FSaEvjZofRE=&#34;</span>
-        <span class="p">}</span><span class="p">,</span> 
+        <span class="p">},</span> 
         <span class="p">{</span>
             <span class="nt">&#34;key&#34;</span><span class="p">:</span> <span class="s2">&#34;L3BkL2NsdXN0ZXJfaWQ=&#34;</span><span class="p">,</span> 
             <span class="nt">&#34;create_revision&#34;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> 
@@ -664,7 +665,7 @@ pd1ȴ¦䇃͗http://pd.p.cc:2380<span class="s2">&#34;</span><span class="s2">htt
             <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> 
             <span class="nt">&#34;value&#34;</span><span class="p">:</span> <span class="s2">&#34;WtcjIBdUcqs=&#34;</span>
         <span class="p">}</span>
-    <span class="p">]</span><span class="p">,</span> 
+    <span class="p">],</span> 
     <span class="nt">&#34;count&#34;</span><span class="p">:</span> <span class="mi">10</span>
 <span class="p">}</span>
 </code></pre></td></tr></table>
@@ -713,27 +714,27 @@ pd1ȴ¦䇃͗http://pd.p.cc:2380<span class="s2">&#34;</span><span class="s2">htt
 </span><span class="lnt">33
 </span></code></pre></td>
 <td class="lntd">
-<pre class="chroma"><code class="language-json" data-lang="json"><span class="p">[</span><span class="err">r</span><span class="err">o</span><span class="err">o</span><span class="err">t</span><span class="err">@</span><span class="err">D</span><span class="err">B</span> <span class="err">e</span><span class="err">t</span><span class="err">c</span><span class="err">d</span><span class="err">-</span><span class="err">v</span><span class="mf">3.1</span><span class="err">.</span><span class="mi">11</span><span class="err">-</span><span class="err">l</span><span class="err">i</span><span class="err">n</span><span class="err">u</span><span class="err">x</span><span class="err">-</span><span class="err">a</span><span class="err">m</span><span class="err">d</span><span class="mi">64</span><span class="p">]</span><span class="err">#</span> <span class="err">c</span><span class="err">u</span><span class="err">r</span><span class="err">l</span> <span class="err">h</span><span class="err">t</span><span class="err">t</span><span class="err">p</span><span class="err">:</span><span class="err">/</span><span class="err">/</span><span class="err">p</span><span class="err">d</span><span class="err">.</span><span class="err">p</span><span class="err">.</span><span class="err">c</span><span class="err">c</span><span class="err">:</span><span class="mi">2379</span><span class="err">/</span><span class="err">p</span><span class="err">d</span><span class="err">/</span><span class="err">a</span><span class="err">p</span><span class="err">i</span><span class="err">/</span><span class="err">v</span><span class="mi">1</span><span class="err">/</span><span class="err">s</span><span class="err">t</span><span class="err">o</span><span class="err">r</span><span class="err">e</span><span class="err">s</span>
+<pre class="chroma"><code class="language-json" data-lang="json"><span class="p">[</span><span class="err">root@DB</span> <span class="err">etcd-v</span><span class="mf">3.1</span><span class="err">.</span><span class="mi">11</span><span class="err">-linux-amd</span><span class="mi">64</span><span class="p">]</span><span class="err">#</span> <span class="err">curl</span> <span class="err">http://pd.p.cc:</span><span class="mi">2379</span><span class="err">/pd/api/v</span><span class="mi">1</span><span class="err">/stores</span>
 <span class="p">{</span>
   <span class="nt">&#34;count&#34;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
   <span class="nt">&#34;stores&#34;</span><span class="p">:</span> <span class="p">[</span>
     <span class="p">{</span>
       <span class="nt">&#34;store&#34;</span><span class="p">:</span> <span class="p">{</span>
         <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="nt">&#34;address&#34;</span><span class="p">:</span> <span class="s2">&#34;172.16.10.65:20160&#34;</span><span class="p">,</span> <span class="err">#</span> <span class="err">I</span><span class="err">P</span> <span class="err">注</span><span class="err">册</span>
+        <span class="nt">&#34;address&#34;</span><span class="p">:</span> <span class="s2">&#34;172.16.10.65:20160&#34;</span><span class="p">,</span> <span class="err">#</span> <span class="err">IP</span> <span class="err">注册</span>
         <span class="nt">&#34;state_name&#34;</span><span class="p">:</span> <span class="s2">&#34;Down&#34;</span>
-      <span class="p">}</span><span class="p">,</span>
+      <span class="p">},</span>
       <span class="nt">&#34;status&#34;</span><span class="p">:</span> <span class="p">{</span>
         <span class="nt">&#34;leader_weight&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
         <span class="nt">&#34;region_weight&#34;</span><span class="p">:</span> <span class="mi">1</span>
       <span class="p">}</span>
-    <span class="p">}</span><span class="p">,</span>
+    <span class="p">},</span>
     <span class="p">{</span>
       <span class="nt">&#34;store&#34;</span><span class="p">:</span> <span class="p">{</span>
         <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
-        <span class="nt">&#34;address&#34;</span><span class="p">:</span> <span class="s2">&#34;kv.p.cc:20160&#34;</span><span class="p">,</span> <span class="err">#</span> <span class="err">域</span><span class="err">名</span><span class="err">注</span><span class="err">册</span>
+        <span class="nt">&#34;address&#34;</span><span class="p">:</span> <span class="s2">&#34;kv.p.cc:20160&#34;</span><span class="p">,</span> <span class="err">#</span> <span class="err">域名注册</span>
         <span class="nt">&#34;state_name&#34;</span><span class="p">:</span> <span class="s2">&#34;Up&#34;</span>
-      <span class="p">}</span><span class="p">,</span>
+      <span class="p">},</span>
       <span class="nt">&#34;status&#34;</span><span class="p">:</span> <span class="p">{</span>
         <span class="nt">&#34;capacity&#34;</span><span class="p">:</span> <span class="s2">&#34;118 GiB&#34;</span><span class="p">,</span>
         <span class="nt">&#34;available&#34;</span><span class="p">:</span> <span class="s2">&#34;23 GiB&#34;</span><span class="p">,</span>

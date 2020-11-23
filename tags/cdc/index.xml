@@ -7,11 +7,7 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>TiDB - AirPlan</copyright>
-    <lastBuildDate>Mon, 01 Jun 2020 00:00:00 +0800</lastBuildDate>
-    
-	<atom:link href="https://ap.tidb.cc/tags/cdc/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Mon, 01 Jun 2020 00:00:00 +0800</lastBuildDate><atom:link href="https://ap.tidb.cc/tags/cdc/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>TiDB - CDC RC1 测试</title>
       <link>https://ap.tidb.cc/post/20200601-23-cdc-4.0rc1/</link>

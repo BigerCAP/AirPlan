@@ -23,7 +23,7 @@
 
 
 
-<meta name="generator" content="Hugo 0.63.2 with theme even" />
+<meta name="generator" content="Hugo 0.78.2 with theme even" />
 
 
 <link rel="canonical" href="https://ap.tidb.cc/post/20170607-prometheus-faq/" />
@@ -46,13 +46,14 @@
 <meta property="article:modified_time" content="2020-01-23T00:00:00+08:00" />
 <meta itemprop="name" content="监控架构 - TIDB 监控运维 FAQ">
 <meta itemprop="description" content="0x00 唠叨 遇见了、记下了，后面或许会遇见；经历过的事件只记下了标签、这里或许是个解答题 部分问题会因使用版本或场景解决方案不一，仅供参考 如有雷同 纯">
-<meta itemprop="datePublished" content="2017-06-07T00:00:00&#43;08:00" />
-<meta itemprop="dateModified" content="2020-01-23T00:00:00&#43;08:00" />
+<meta itemprop="datePublished" content="2017-06-07T00:00:00+08:00" />
+<meta itemprop="dateModified" content="2020-01-23T00:00:00+08:00" />
 <meta itemprop="wordCount" content="1846">
 
 
 
-<meta itemprop="keywords" content="Prometheus,Grafana,TiDB," /><meta name="twitter:card" content="summary"/>
+<meta itemprop="keywords" content="Prometheus,Grafana,TiDB," />
+<meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="监控架构 - TIDB 监控运维 FAQ"/>
 <meta name="twitter:description" content="0x00 唠叨 遇见了、记下了，后面或许会遇见；经历过的事件只记下了标签、这里或许是个解答题 部分问题会因使用版本或场景解决方案不一，仅供参考 如有雷同 纯"/>
 
@@ -158,7 +159,7 @@
   </div>
 </div>
   <div class="post-outdated">
-    <div class="hint">
+    <div class="warn">
       <p>[NOTE] Updated <span class="timeago" datetime="2020-01-23T00:00:00" title="January 23, 2020">January 23, 2020</span>. This article may have outdated content or subject matter.</p>
     </div>
   </div>
@@ -341,7 +342,7 @@ prometheus, version 2.2.0 <span class="o">(</span>branch: HEAD, revision: f63e7d
 <li>第二种方案：
 <ul>
 <li>人工修改 metric ，按个过滤掉所有已经被下线的节点信息</li>
-<li>histogram_quantile(0.99, sum(rate(tidb_server_handle_query_duration_seconds_bucket{instance!=&quot;6a5114505e5f_4000&rdquo;}[1m])) by (le, instance))</li>
+<li>histogram_quantile(0.99, sum(rate(tidb_server_handle_query_duration_seconds_bucket{instance!=&ldquo;6a5114505e5f_4000&rdquo;}[1m])) by (le, instance))</li>
 </ul>
 </li>
 <li>第三种方案：
@@ -445,12 +446,12 @@ prometheus, version 2.2.0 <span class="o">(</span>branch: HEAD, revision: f63e7d
 </span><span class="lnt">8
 </span></code></pre></td>
 <td class="lntd">
-<pre class="chroma"><code class="language-sql" data-lang="sql"><span class="o">#</span> <span class="n">sqlite3</span> <span class="err">{</span><span class="err">{</span><span class="n">deploy_dir</span><span class="err">}</span><span class="err">}</span><span class="o">/</span><span class="k">data</span><span class="p">.</span><span class="n">grafana</span><span class="o">/</span><span class="n">grafana</span><span class="p">.</span><span class="n">db</span>
+<pre class="chroma"><code class="language-sql" data-lang="sql"><span class="o">#</span> <span class="n">sqlite3</span> <span class="err">{{</span><span class="n">deploy_dir</span><span class="err">}}</span><span class="o">/</span><span class="k">data</span><span class="p">.</span><span class="n">grafana</span><span class="o">/</span><span class="n">grafana</span><span class="p">.</span><span class="n">db</span>
 
 <span class="n">sqlite</span><span class="o">&gt;</span> <span class="k">select</span> <span class="n">salt</span><span class="p">,</span> <span class="n">password</span> <span class="k">from</span> <span class="k">user</span><span class="p">;</span>
 <span class="n">pyaUhfDzYg</span><span class="o">|</span><span class="mi">54</span><span class="n">c7d1ce2eeaa6000bd84407d0f8ab4663dfa575e0a326bc70dc5cab4b864f6677b21879dbf5e33427c88f9160f744b625bf</span>
 
-<span class="n">sqlite</span><span class="o">&gt;</span> <span class="k">update</span> <span class="k">user</span> <span class="k">set</span> <span class="n">password</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="s1">59acf18b94d7eb0694c61e60ce44c110c7a683ac6a8f09580d626f90f4a242000746579358d77dd9e570e83fa24faa88a8a6</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">salt</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="s1">F3FAxVm33R</span><span class="s1">&#39;</span> <span class="k">where</span> <span class="n">login</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="s1">admin</span><span class="s1">&#39;</span><span class="p">;</span>
+<span class="n">sqlite</span><span class="o">&gt;</span> <span class="k">update</span> <span class="k">user</span> <span class="k">set</span> <span class="n">password</span> <span class="o">=</span> <span class="s1">&#39;59acf18b94d7eb0694c61e60ce44c110c7a683ac6a8f09580d626f90f4a242000746579358d77dd9e570e83fa24faa88a8a6&#39;</span><span class="p">,</span> <span class="n">salt</span> <span class="o">=</span> <span class="s1">&#39;F3FAxVm33R&#39;</span> <span class="k">where</span> <span class="n">login</span> <span class="o">=</span> <span class="s1">&#39;admin&#39;</span><span class="p">;</span>
 
 <span class="n">sqlite</span><span class="o">&gt;</span> <span class="p">.</span><span class="n">exit</span>
 </code></pre></td></tr></table>

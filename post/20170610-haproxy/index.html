@@ -23,7 +23,7 @@
 
 
 
-<meta name="generator" content="Hugo 0.63.2 with theme even" />
+<meta name="generator" content="Hugo 0.78.2 with theme even" />
 
 
 <link rel="canonical" href="https://ap.tidb.cc/post/20170610-haproxy/" />
@@ -46,13 +46,14 @@
 <meta property="article:modified_time" content="2020-01-20T00:00:00+08:00" />
 <meta itemprop="name" content="负载均衡 - HAProxy &amp; TiDB 配合食用">
 <meta itemprop="description" content="0x01 介绍 Haproxy 官网 百家饭内容，将测试环境的最终结果整理了下 0x02 功能 负载均衡：L4(TCP) 和 L7(HTTP/HTTPS) 两种模式，支持 RR(roundrobin) / 静态 RR / LC / IP Hash/ URI Hash/ URL_PARAM Hash/ HTTP_HEADER Hash 等丰富的">
-<meta itemprop="datePublished" content="2017-06-10T00:00:00&#43;08:00" />
-<meta itemprop="dateModified" content="2020-01-20T00:00:00&#43;08:00" />
-<meta itemprop="wordCount" content="1350">
+<meta itemprop="datePublished" content="2017-06-10T00:00:00+08:00" />
+<meta itemprop="dateModified" content="2020-01-20T00:00:00+08:00" />
+<meta itemprop="wordCount" content="1361">
 
 
 
-<meta itemprop="keywords" content="TiDB,HAProxy,AirPlan," /><meta name="twitter:card" content="summary"/>
+<meta itemprop="keywords" content="TiDB,HAProxy,AirPlan," />
+<meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="负载均衡 - HAProxy &amp; TiDB 配合食用"/>
 <meta name="twitter:description" content="0x01 介绍 Haproxy 官网 百家饭内容，将测试环境的最终结果整理了下 0x02 功能 负载均衡：L4(TCP) 和 L7(HTTP/HTTPS) 两种模式，支持 RR(roundrobin) / 静态 RR / LC / IP Hash/ URI Hash/ URL_PARAM Hash/ HTTP_HEADER Hash 等丰富的"/>
 
@@ -128,7 +129,7 @@
         <div class="post-category">
             <a href="/categories/software/"> software </a>
             </div>
-          <span class="more-meta"> 1350 words </span>
+          <span class="more-meta"> 1361 words </span>
           <span class="more-meta"> 3 mins read </span>
         <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
       </div>
@@ -157,7 +158,7 @@
   </div>
 </div>
   <div class="post-outdated">
-    <div class="hint">
+    <div class="warn">
       <p>[NOTE] Updated <span class="timeago" datetime="2020-01-20T00:00:00" title="January 20, 2020">January 20, 2020</span>. This article may have outdated content or subject matter.</p>
     </div>
   </div>
@@ -188,7 +189,7 @@
 <li>leastconn，表示最少连接者先处理，建议关注</li>
 <li>ource，表示根据请求源 IP，这个跟 Nginx 的 IP_hash 机制类似，我们用其作为解决 session 问题的一种方法，建议关注</li>
 <li>ri，表示根据请求的 URI</li>
-<li>rl_param，表示根据请求的 URl 参数&rsquo;balance url_param&rsquo; requires an URL parameter name</li>
+<li>rl_param，表示根据请求的 URl 参数&rsquo;balance url_param' requires an URL parameter name</li>
 <li>hdr(name)，表示根据 HTTP 请求头来锁定每一次 HTTP 请求</li>
 <li>rdp-cookie(name)，表示根据 cookie(name) 来锁定并哈希每一次 TCP 请求</li>
 </ul>
@@ -200,7 +201,7 @@
 <pre class="chroma"><code><span class="lnt">1
 </span></code></pre></td>
 <td class="lntd">
-<pre class="chroma"><code class="language-yaml" data-lang="yaml">server<span class="w"> </span>tidb<span class="m">-3</span><span class="w"> </span><span class="m">172.16</span><span class="m">.18</span><span class="m">.13</span><span class="p">:</span><span class="m">4000</span><span class="w"> </span>check<span class="w"> </span>port<span class="w"> </span><span class="m">4000</span><span class="w"> </span>inter<span class="w"> </span><span class="m">2000</span><span class="w"> </span>rise<span class="w"> </span><span class="m">2</span><span class="w"> </span>fall<span class="w"> </span><span class="m">3</span><span class="w">
+<pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="l">server tidb-3 172.16.18.13:4000 check port 4000 inter 2000 rise 2 fall 3</span><span class="w">
 </span></code></pre></td></tr></table>
 </div>
 </div><ul>

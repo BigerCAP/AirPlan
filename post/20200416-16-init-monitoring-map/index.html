@@ -23,7 +23,7 @@
 
 
 
-<meta name="generator" content="Hugo 0.63.2 with theme even" />
+<meta name="generator" content="Hugo 0.78.2 with theme even" />
 
 
 <link rel="canonical" href="https://ap.tidb.cc/post/20200416-16-init-monitoring-map/" />
@@ -46,13 +46,14 @@
 <meta property="article:modified_time" content="2020-04-16T00:00:00+08:00" />
 <meta itemprop="name" content="沙盘点将 - TiDB 监控知识初始化">
 <meta itemprop="description" content="0x00 点点滴滴 之前有篇文档是 纸上谈兵 - TiDB 性能调优，仅仅这篇文档无法承载想表达的豪言壮语，因此出现了一话三联内容，分别是 纸上谈兵（性能调优逻辑、S">
-<meta itemprop="datePublished" content="2020-04-16T00:00:00&#43;08:00" />
-<meta itemprop="dateModified" content="2020-04-16T00:00:00&#43;08:00" />
-<meta itemprop="wordCount" content="3374">
+<meta itemprop="datePublished" content="2020-04-16T00:00:00+08:00" />
+<meta itemprop="dateModified" content="2020-04-16T00:00:00+08:00" />
+<meta itemprop="wordCount" content="3375">
 
 
 
-<meta itemprop="keywords" content="TiDB,performance,monitoring," /><meta name="twitter:card" content="summary"/>
+<meta itemprop="keywords" content="TiDB,performance,monitoring," />
+<meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="沙盘点将 - TiDB 监控知识初始化"/>
 <meta name="twitter:description" content="0x00 点点滴滴 之前有篇文档是 纸上谈兵 - TiDB 性能调优，仅仅这篇文档无法承载想表达的豪言壮语，因此出现了一话三联内容，分别是 纸上谈兵（性能调优逻辑、S"/>
 
@@ -129,7 +130,7 @@
             <a href="/categories/tidb/"> TiDB </a>
             <a href="/categories/monitoring/"> monitoring </a>
             </div>
-          <span class="more-meta"> 3374 words </span>
+          <span class="more-meta"> 3375 words </span>
           <span class="more-meta"> 7 mins read </span>
         <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
       </div>
@@ -352,7 +353,7 @@
 <td class="lntd">
 <pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="c"># HELP tidb_server_handle_query_duration_seconds Bucketed histogram of processing time (s) of handled queries.</span><span class="w">
 </span><span class="w"></span><span class="c"># TYPE tidb_server_handle_query_duration_seconds histogram</span><span class="w">
-</span><span class="w"></span>tidb_server_handle_query_duration_seconds_bucket{sql_type=<span class="s2">&#34;Begin&#34;</span><span class="p">,</span>le=<span class="s2">&#34;0.0005&#34;</span>}<span class="w"> </span><span class="m">0</span><span class="w">
+</span><span class="w"></span><span class="l">tidb_server_handle_query_duration_seconds_bucket{sql_type=&#34;Begin&#34;,le=&#34;0.0005&#34;} 0</span><span class="w">
 </span></code></pre></td></tr></table>
 </div>
 </div></li>
