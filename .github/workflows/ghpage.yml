@@ -14,16 +14,16 @@ jobs:
       #   submodules: true
 
     - name: Hugo setup
-      uses: peaceiris/actions-hugo@v2.3.2
+      uses: peaceiris/actions-hugo@v2
       with:
-        hugo-version: '0.63.2'
+        hugo-version: '0.75.1'
         extended: true
 
     - name: Build
       run: hugo
 
     - name: Deploy
-      uses: peaceiris/actions-gh-pages@v2
+      uses: peaceiris/actions-gh-pages@v3
       env:
         ACTIONS_DEPLOY_KEY: ${{ secrets.ap }}
         PUBLISH_BRANCH: gh-pages
