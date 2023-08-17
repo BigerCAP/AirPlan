@@ -1,7 +1,7 @@
-baseURL = "https://ap.tidb.cc/"
+baseURL = "https://ap.biger.cc/"
 languageCode = "en"
 defaultContentLanguage = "en"                             # en / zh-cn / ... (This field determines which i18n file to use)
-title = "TiDB AirPlan - A biger solution"
+title = "AirPlan - A biger solution"
 preserveTaxonomyNames = true
 enableRobotsTXT = true
 enableEmoji = true
