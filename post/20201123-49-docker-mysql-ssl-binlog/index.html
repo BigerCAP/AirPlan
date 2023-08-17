@@ -1,369 +1,76 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>Docker - MySQL SSL &amp; Binlog - TiDB AirPlan - A biger solution</title>
-  <meta name="renderer" content="webkit" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-
-<meta http-equiv="Cache-Control" content="no-transform" />
-<meta http-equiv="Cache-Control" content="no-siteapp" />
-
-<meta name="theme-color" content="#f8f5ec" />
-<meta name="msapplication-navbutton-color" content="#f8f5ec">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
-
-
-<meta name="author" content="Jeff" /><meta name="description" content="0x00 init 测试要求：需要 MySQL 开启 SSL 与 ROW format Binlog 功能 0x01 Docker command // 忽略安装 docker-ce 步骤 搜索网络资料，使用以下命令方式启动：「Docker 指定 &amp;ndash;ssl=1 参数时，docker 内已" /><meta name="keywords" content="TiDB, AirPlan, TiDB OPS, tidb-operator, 2pc, raft, databases, mysql, htap" />
-
-
-
-
-
-
-<meta name="generator" content="Hugo 0.78.2 with theme even" />
-
-
-<link rel="canonical" href="https://ap.tidb.cc/post/20201123-49-docker-mysql-ssl-binlog/" />
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="manifest" href="/manifest.json">
-<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
-
-<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-<link href="/dist/even.04bd84cd.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
-
-
-<meta property="og:title" content="Docker - MySQL SSL &amp; Binlog" />
-<meta property="og:description" content="0x00 init 测试要求：需要 MySQL 开启 SSL 与 ROW format Binlog 功能 0x01 Docker command // 忽略安装 docker-ce 步骤 搜索网络资料，使用以下命令方式启动：「Docker 指定 &ndash;ssl=1 参数时，docker 内已" />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://ap.tidb.cc/post/20201123-49-docker-mysql-ssl-binlog/" />
-<meta property="article:published_time" content="2020-11-23T00:00:00+08:00" />
-<meta property="article:modified_time" content="2020-11-23T00:00:00+08:00" />
-<meta itemprop="name" content="Docker - MySQL SSL &amp; Binlog">
-<meta itemprop="description" content="0x00 init 测试要求：需要 MySQL 开启 SSL 与 ROW format Binlog 功能 0x01 Docker command // 忽略安装 docker-ce 步骤 搜索网络资料，使用以下命令方式启动：「Docker 指定 &ndash;ssl=1 参数时，docker 内已">
-<meta itemprop="datePublished" content="2020-11-23T00:00:00+08:00" />
-<meta itemprop="dateModified" content="2020-11-23T00:00:00+08:00" />
-<meta itemprop="wordCount" content="715">
-
-
-
-<meta itemprop="keywords" content="Linux,Docker," />
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Docker - MySQL SSL &amp; Binlog"/>
-<meta name="twitter:description" content="0x00 init 测试要求：需要 MySQL 开启 SSL 与 ROW format Binlog 功能 0x01 Docker command // 忽略安装 docker-ce 步骤 搜索网络资料，使用以下命令方式启动：「Docker 指定 &ndash;ssl=1 参数时，docker 内已"/>
-
-<!--[if lte IE 9]>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
-<![endif]-->
-
-<!--[if lt IE 9]>
-  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
-<![endif]-->
-
-</head>
-<body>
-  <div id="mobile-navbar" class="mobile-navbar">
-  <div class="mobile-header-logo">
-    <a href="/" class="logo">TiDB AirPlan</a>
-  </div>
-  <div class="mobile-navbar-icon">
-    <span></span>
-    <span></span>
-    <span></span>
-  </div>
-</div>
-<nav id="mobile-menu" class="mobile-menu slideout-menu">
-  <ul class="mobile-menu-list">
-    <a href="/post/">
-        <li class="mobile-menu-item">Blog</li>
-      </a><a href="/look/">
-        <li class="mobile-menu-item">Look</li>
-      </a><a href="/tags/">
-        <li class="mobile-menu-item">Tags</li>
-      </a><a href="/categories/">
-        <li class="mobile-menu-item">Categories</li>
-      </a><a href="/about/">
-        <li class="mobile-menu-item">About</li>
-      </a>
-  </ul>
-</nav>
-  <div class="container" id="mobile-panel">
-    <header id="header" class="header">
-        <div class="logo-wrapper">
-  <a href="/" class="logo">TiDB AirPlan</a>
-</div>
-
-<nav class="site-navbar">
-  <ul id="menu" class="menu">
-    <li class="menu-item">
-        <a class="menu-item-link" href="/post/">Blog</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/look/">Look</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/tags/">Tags</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/categories/">Categories</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/about/">About</a>
-      </li>
-  </ul>
-</nav>
-    </header>
-
-    <main id="main" class="main">
-      <div class="content-wrapper">
-        <div id="content" class="content">
-          <article class="post">
-    
-    <header class="post-header">
-      <h1 class="post-title">Docker - MySQL SSL &amp; Binlog</h1>
-
-      <div class="post-meta">
-        <span class="post-time"> 2020-11-23 </span>
-        <div class="post-category">
-            <a href="/categories/software/"> software </a>
-            </div>
-          <span class="more-meta"> 715 words </span>
-          <span class="more-meta"> 2 mins read </span>
-        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
-      </div>
-    </header>
-
-    <div class="post-toc" id="post-toc">
-  <h2 class="post-toc-title">Contents</h2>
-  <div class="post-toc-content">
-    <nav id="TableOfContents">
-  <ul>
-    <li><a href="#0x00-init">0x00 init</a></li>
-    <li><a href="#0x01-docker-command">0x01 Docker command</a></li>
-    <li><a href="#0x02-error">0x02 Error</a></li>
-  </ul>
-</nav>
-  </div>
-</div>
-    <div class="post-content">
-      <h2 id="0x00-init">0x00 init</h2>
-<p>测试要求：需要 MySQL 开启 SSL 与 ROW format Binlog 功能</p>
-<h2 id="0x01-docker-command">0x01 Docker command</h2>
-<p>// 忽略安装 docker-ce 步骤</p>
-<p>搜索网络资料，使用以下命令方式启动：「Docker 指定 &ndash;ssl=1 参数时，docker 内已经封装的 mysql_ssl_rsa_setup 会自动生成 TLS 证书，该证书不带有 SAN/CN 扩展属性 」、「参数中不支持使用 &ndash;tls-version=&ldquo;TLSv1,TLSv1.2&rdquo;，因为中间少 TLSv1.1」</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-shell" data-lang="shell">docker run --name TSQL <span class="se">\
-</span><span class="se"></span>    -v /home/tidb/TSQL:/var/lib/mysql <span class="se">\
-</span><span class="se"></span>    -e <span class="nv">MYSQL_ROOT_PASSWORD</span><span class="o">=</span>root -p 36:3306 <span class="se">\
-</span><span class="se"></span>    -d mysql:5.7 <span class="se">\
-</span><span class="se"></span>    --ssl<span class="o">=</span><span class="m">1</span> --tls-version <span class="s2">&#34;TLSv1.2&#34;</span> <span class="se">\
-</span><span class="se"></span>    --server-id<span class="o">=</span><span class="m">1</span> <span class="se">\
-</span><span class="se"></span>    --binlog-format<span class="o">=</span>ROW <span class="se">\
-</span><span class="se"></span>    --gtid-mode<span class="o">=</span>ON <span class="se">\
-</span><span class="se"></span>    --log-bin<span class="o">=</span>mysql-bin <span class="se">\
-</span><span class="se"></span>    --enforce-gtid-consistency<span class="o">=</span>ON
-</code></pre></td></tr></table>
-</div>
-</div><blockquote>
-<p>以下部分信息来源于 <a href="https://dev.mysql.com/doc/refman/5.7/en/using-encrypted-connections.html">MySQL 官网</a></p>
-</blockquote>
-<ul>
-<li>链接方式
-<ul>
-<li>创建 SSL 扩展属性用户，登录时默认检查 SSL 方式
-<ul>
-<li><code>CREATE USER 'remote_user'@'mysql_client_IP' IDENTIFIED BY 'password' REQUIRE X509;</code></li>
-</ul>
-</li>
-<li>mysql 链接时执行打开 SSL 方式链接
-<ul>
-<li>参考以下方案</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>使用 mysql client 链接验证「不同 client 参数不同」
-<ul>
-<li>mysql client 使用 <code>mysql --ssl=1 --ssl-mode=required --ssl-ca=ca.pem --ssl-cert=client-cert.pem --ssl-key=client-key.pem</code>
-<ul>
-<li>disable // 非 TLS 方式链接</li>
-<li>required // 如果服务器支持加密连接则加密连接；如果无法构建加密连接，则连接尝试非加密方式「取决用户是否强制加了 require x509 扩展」</li>
-<li>VERIFY_CA // 对照配置的 CA 证书验证服务器证书颁发机构(CA)证书。如果找不到有效的匹配 CA 证书，则连接尝试将失败。</li>
-<li>VERIFY_IDENTITY // 对照服务器发送给 Client 端的证书中的身份检查 Client 端用于连接到服务器的主机名来执行主机名身份验证</li>
-</ul>
-</li>
-<li>mariadb client 使用  <code>mysql --ssl=1 --ssl-ca=ca.pem --ssl-cert=client-cert.pem --ssl-key=client-key.pem</code>
-<ul>
-<li>木有 ssl-mode 参数</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<p>执行 <code>show variables like '%ssl%'</code> 查看 ssl 信息，执行 <code>\s</code> 获取链接信息。</p>
-<p>// have_ssl &amp; have_openssl 必须为 YES。</p>
-<p><img src="./20201123-mysql-binlog-ssl-1.png" alt="mysql binlog ssl"></p>
-<h2 id="0x02-error">0x02 Error</h2>
-<p>验证与第三方工具链接时，对方工具不认可 mysql setup ssl 工具生成的 TLS 证书；需要 Docker 指定 openssl 手动生成的 TLS 证书启动。</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-shell" data-lang="shell">docker run --name TSQL <span class="se">\
-</span><span class="se"></span>    -v /home/tidb/TSQL:/var/lib/mysql <span class="se">\
-</span><span class="se"></span>    -v /opt/ssl.bak:/etc/mysql/cert <span class="se">\
-</span><span class="se"></span>    -e <span class="nv">MYSQL_ROOT_PASSWORD</span><span class="o">=</span>root -p 142:3306 <span class="se">\
-</span><span class="se"></span>    -d mysql:5.7 <span class="se">\
-</span><span class="se"></span>    --ssl<span class="o">=</span><span class="m">1</span> --tls-version <span class="s2">&#34;TLSv1.2&#34;</span> <span class="se">\
-</span><span class="se"></span>    --server-id<span class="o">=</span><span class="m">1</span> <span class="se">\
-</span><span class="se"></span>    --binlog-format<span class="o">=</span>ROW <span class="se">\
-</span><span class="se"></span>    --gtid-mode<span class="o">=</span>ON <span class="se">\
-</span><span class="se"></span>    --log-bin<span class="o">=</span>mysql-bin <span class="se">\
-</span><span class="se"></span>    --enforce-gtid-consistency<span class="o">=</span>ON <span class="se">\
-</span><span class="se"></span>    --ssl-ca<span class="o">=</span><span class="s2">&#34;/etc/mysql/cert/root.crt&#34;</span> <span class="se">\
-</span><span class="se"></span>    --ssl-cert<span class="o">=</span><span class="s2">&#34;/etc/mysql/cert/server.crt&#34;</span> <span class="se">\
-</span><span class="se"></span>    --ssl-key<span class="o">=</span><span class="s2">&#34;/etc/mysql/cert/server.key1&#34;</span>
-</code></pre></td></tr></table>
-</div>
-</div><p>SSL 链接登陆检查时发现可以看到证书信息，但服务并没有启动 SSL 功能「使用  <code>\s</code> 查不到链接加密信息」。</p>
-<p><img src="./20201123-mysql-binlog-ssl-2.png" alt="mysql binlog ssl"></p>
-<p>随后在 <code>docker logs TSQL</code> 查看 MySQL 服务启动日志信息，看到以下问题</p>
-<p><code>2020-10-21T07:32:22.180801Z 0 [Warning] CA certificate /etc/mysql/cert/root.crt is self signed.</code></p>
-<p>参考<a href="https://askubuntu.com/questions/194074/enabling-ssl-in-mysql">网上资料</a>，需要将 openssl 1.0 以后版本生成的证书是二次转换。</p>
-<p><code>openssl rsa -in server-key.pem -out server-key.pem</code></p>
-<p><img src="./20201123-mysql-binlog-ssl-3.png" alt="mysql binlog ssl"></p>
-
-    </div>
-
-    <div class="post-copyright">
-  <p class="copyright-item">
-    <span class="item-title">Author</span>
-    <span class="item-content">Jeff</span>
-  </p>
-  <p class="copyright-item">
-    <span class="item-title">LastMod</span>
-    <span class="item-content">
-        2020-11-23
-        
-    </span>
-  </p>
-  
-  <p class="copyright-item">
-    <span class="item-title">License</span>
-    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span>
-  </p>
-</div>
-<footer class="post-footer">
-      <div class="post-tags">
-          <a href="/tags/linux/">Linux</a>
-          <a href="/tags/docker/">Docker</a>
-          </div>
-      <nav class="post-nav">
-        
-        <a class="next" href="/post/202007017-29-region-merge/">
-            <span class="next-text nav-default">TiDB - PD Region Merge 食草兽</span>
-            <span class="next-text nav-mobile">Next</span>
-            <i class="iconfont icon-right"></i>
-          </a>
-      </nav>
-    </footer>
-  </article>
-        </div>
-        
-
-  
-
-  
-
-      </div>
-    </main>
-
-    <footer id="footer" class="footer">
-      <div class="social-links">
-      <a href="https://github.com/BigerCAP/TiDB-AirPlan/issues" class="iconfont icon-github" title="github"></a>
-  <a href="https://ap.tidb.cc/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
-</div>
-
-<div class="copyright">
-  <span class="power-by">
-    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
-  </span>
-  <span class="division">|</span>
-  <span class="theme-info">
-    Theme - 
-    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
-  </span>
-
-  <div class="busuanzi-footer">
-    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
-      <span class="division">|</span>
-    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
-  </div>
-
-  <span class="copyright-year">
-    &copy; 
-    2017 - 
-    2020
-    <span class="heart">
-      <i class="iconfont icon-heart"></i>
-    </span>
-    <span class="author">TiDB - AirPlan</span>
-  </span>
-</div>
-    </footer>
-
-    <div class="back-to-top" id="back-to-top">
-      <i class="iconfont icon-up"></i>
-    </div>
-  </div>
-  
-  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js" integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js" integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin="anonymous"></script>
-  <script><!-- NOTE: timeago.js uses the language code format like "zh_CN" (underscore and case sensitive) -->
-    var languageCode = "en".replace(/-/g, '_').replace(/_(.*)/, function ($0, $1) {return $0.replace($1, $1.toUpperCase());});
-    timeago().render(document.querySelectorAll('.timeago'), languageCode);
-    timeago.cancel();  
-  </script>
-<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
-
-
-
-
-
-
-
-
-</body>
-</html>
+<!doctype html><html lang=en><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge,chrome=1"><title>Docker - MySQL SSL & Binlog - AirPlan - A biger solution</title><meta name=renderer content="webkit"><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta http-equiv=cache-control content="no-transform"><meta http-equiv=cache-control content="no-siteapp"><meta name=theme-color content="#f8f5ec"><meta name=msapplication-navbutton-color content="#f8f5ec"><meta name=apple-mobile-web-app-capable content="yes"><meta name=apple-mobile-web-app-status-bar-style content="#f8f5ec"><meta name=author content="Jeff"><meta name=description content="0x00 init 测试要求：需要 MySQL 开启 SSL 与 ROW format Binlog 功能 0x01 Docker command // 忽略安装 docker-ce 步骤 搜索网络资料，使用以下命令方式启动：「Docker 指定 &amp;ndash;ssl=1 参数时，docker 内已"><meta name=keywords content="TiDB,AirPlan,TiDB OPS,tidb-operator,2pc,raft,databases,mysql,htap"><meta name=generator content="Hugo 0.110.0 with theme even"><link rel=canonical href=https://ap.biger.cc/post/20201123-49-docker-mysql-ssl-binlog/><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/manifest.json><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><script async src=//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js></script>
+<link href=/dist/even.04bd84cd.min.css rel=stylesheet><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin=anonymous><meta property="og:title" content="Docker - MySQL SSL & Binlog"><meta property="og:description" content="0x00 init 测试要求：需要 MySQL 开启 SSL 与 ROW format Binlog 功能 0x01 Docker command // 忽略安装 docker-ce 步骤 搜索网络资料，使用以下命令方式启动：「Docker 指定 &ndash;ssl=1 参数时，docker 内已"><meta property="og:type" content="article"><meta property="og:url" content="https://ap.biger.cc/post/20201123-49-docker-mysql-ssl-binlog/"><meta property="article:section" content="post"><meta property="article:published_time" content="2020-11-23T00:00:00+08:00"><meta property="article:modified_time" content="2020-11-23T00:00:00+08:00"><meta itemprop=name content="Docker - MySQL SSL & Binlog"><meta itemprop=description content="0x00 init 测试要求：需要 MySQL 开启 SSL 与 ROW format Binlog 功能 0x01 Docker command // 忽略安装 docker-ce 步骤 搜索网络资料，使用以下命令方式启动：「Docker 指定 &ndash;ssl=1 参数时，docker 内已"><meta itemprop=datePublished content="2020-11-23T00:00:00+08:00"><meta itemprop=dateModified content="2020-11-23T00:00:00+08:00"><meta itemprop=wordCount content="715"><meta itemprop=keywords content="Linux,Docker,"><meta name=twitter:card content="summary"><meta name=twitter:title content="Docker - MySQL SSL & Binlog"><meta name=twitter:description content="0x00 init 测试要求：需要 MySQL 开启 SSL 与 ROW format Binlog 功能 0x01 Docker command // 忽略安装 docker-ce 步骤 搜索网络资料，使用以下命令方式启动：「Docker 指定 &ndash;ssl=1 参数时，docker 内已"><!--[if lte IE 9]><script src=https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js></script><![endif]--><!--[if lt IE 9]><script src=https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js></script>
+<script src=https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js></script><![endif]--></head><body><div id=mobile-navbar class=mobile-navbar><div class=mobile-header-logo><a href=/ class=logo>AirPlan</a></div><div class=mobile-navbar-icon><span></span>
+<span></span>
+<span></span></div></div><nav id=mobile-menu class="mobile-menu slideout-menu"><ul class=mobile-menu-list><a href=/post/><li class=mobile-menu-item>Blog</li></a><a href=/look/><li class=mobile-menu-item>Look</li></a><a href=/tags/><li class=mobile-menu-item>Tags</li></a><a href=/categories/><li class=mobile-menu-item>Categories</li></a><a href=/about/><li class=mobile-menu-item>About</li></a></ul></nav><div class=container id=mobile-panel><header id=header class=header><div class=logo-wrapper><a href=/ class=logo>AirPlan</a></div><nav class=site-navbar><ul id=menu class=menu><li class=menu-item><a class=menu-item-link href=/post/>Blog</a></li><li class=menu-item><a class=menu-item-link href=/look/>Look</a></li><li class=menu-item><a class=menu-item-link href=/tags/>Tags</a></li><li class=menu-item><a class=menu-item-link href=/categories/>Categories</a></li><li class=menu-item><a class=menu-item-link href=/about/>About</a></li></ul></nav></header><main id=main class=main><div class=content-wrapper><div id=content class=content><article class=post><header class=post-header><h1 class=post-title>Docker - MySQL SSL & Binlog</h1><div class=post-meta><span class=post-time>2020-11-23</span><div class=post-category><a href=/categories/software/>software</a></div><span class=more-meta>715 words</span>
+<span class=more-meta>2 mins read</span>
+<span id=busuanzi_container_page_pv class=more-meta><span id=busuanzi_value_page_pv><img src=/img/spinner.svg alt=spinner.svg></span> times read</span></div></header><div class=post-toc id=post-toc><h2 class=post-toc-title>Contents</h2><div class=post-toc-content><nav id=TableOfContents><ul><li><a href=#0x00-init>0x00 init</a></li><li><a href=#0x01-docker-command>0x01 Docker command</a></li><li><a href=#0x02-error>0x02 Error</a></li></ul></nav></div></div><div class=post-outdated><div class=warn><p>[NOTE] Updated <span class=timeago datetime=2020-11-23T00:00:00 title="November 23, 2020">November 23, 2020</span>. This article may have outdated content or subject matter.</p></div></div><div class=post-content><h2 id=0x00-init>0x00 init</h2><p>测试要求：需要 MySQL 开启 SSL 与 ROW format Binlog 功能</p><h2 id=0x01-docker-command>0x01 Docker command</h2><p>// 忽略安装 docker-ce 步骤</p><p>搜索网络资料，使用以下命令方式启动：「Docker 指定 &ndash;ssl=1 参数时，docker 内已经封装的 mysql_ssl_rsa_setup 会自动生成 TLS 证书，该证书不带有 SAN/CN 扩展属性 」、「参数中不支持使用 &ndash;tls-version=&ldquo;TLSv1,TLSv1.2&rdquo;，因为中间少 TLSv1.1」</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-shell data-lang=shell><span class=line><span class=cl>docker run --name TSQL <span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>    -v /home/tidb/TSQL:/var/lib/mysql <span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>    -e <span class=nv>MYSQL_ROOT_PASSWORD</span><span class=o>=</span>root -p 36:3306 <span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>    -d mysql:5.7 <span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>    --ssl<span class=o>=</span><span class=m>1</span> --tls-version <span class=s2>&#34;TLSv1.2&#34;</span> <span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>    --server-id<span class=o>=</span><span class=m>1</span> <span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>    --binlog-format<span class=o>=</span>ROW <span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>    --gtid-mode<span class=o>=</span>ON <span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>    --log-bin<span class=o>=</span>mysql-bin <span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>    --enforce-gtid-consistency<span class=o>=</span>ON
+</span></span></code></pre></td></tr></table></div></div><blockquote><p>以下部分信息来源于 <a href=https://dev.mysql.com/doc/refman/5.7/en/using-encrypted-connections.html>MySQL 官网</a></p></blockquote><ul><li>链接方式<ul><li>创建 SSL 扩展属性用户，登录时默认检查 SSL 方式<ul><li><code>CREATE USER 'remote_user'@'mysql_client_IP' IDENTIFIED BY 'password' REQUIRE X509;</code></li></ul></li><li>mysql 链接时执行打开 SSL 方式链接<ul><li>参考以下方案</li></ul></li></ul></li><li>使用 mysql client 链接验证「不同 client 参数不同」<ul><li>mysql client 使用 <code>mysql --ssl=1 --ssl-mode=required --ssl-ca=ca.pem --ssl-cert=client-cert.pem --ssl-key=client-key.pem</code><ul><li>disable // 非 TLS 方式链接</li><li>required // 如果服务器支持加密连接则加密连接；如果无法构建加密连接，则连接尝试非加密方式「取决用户是否强制加了 require x509 扩展」</li><li>VERIFY_CA // 对照配置的 CA 证书验证服务器证书颁发机构(CA)证书。如果找不到有效的匹配 CA 证书，则连接尝试将失败。</li><li>VERIFY_IDENTITY // 对照服务器发送给 Client 端的证书中的身份检查 Client 端用于连接到服务器的主机名来执行主机名身份验证</li></ul></li><li>mariadb client 使用 <code>mysql --ssl=1 --ssl-ca=ca.pem --ssl-cert=client-cert.pem --ssl-key=client-key.pem</code><ul><li>木有 ssl-mode 参数</li></ul></li></ul></li></ul><p>执行 <code>show variables like '%ssl%'</code> 查看 ssl 信息，执行 <code>\s</code> 获取链接信息。</p><p>// have_ssl & have_openssl 必须为 YES。</p><p><img src=./20201123-mysql-binlog-ssl-1.png alt="mysql binlog ssl"></p><h2 id=0x02-error>0x02 Error</h2><p>验证与第三方工具链接时，对方工具不认可 mysql setup ssl 工具生成的 TLS 证书；需要 Docker 指定 openssl 手动生成的 TLS 证书启动。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-shell data-lang=shell><span class=line><span class=cl>docker run --name TSQL <span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>    -v /home/tidb/TSQL:/var/lib/mysql <span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>    -v /opt/ssl.bak:/etc/mysql/cert <span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>    -e <span class=nv>MYSQL_ROOT_PASSWORD</span><span class=o>=</span>root -p 142:3306 <span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>    -d mysql:5.7 <span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>    --ssl<span class=o>=</span><span class=m>1</span> --tls-version <span class=s2>&#34;TLSv1.2&#34;</span> <span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>    --server-id<span class=o>=</span><span class=m>1</span> <span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>    --binlog-format<span class=o>=</span>ROW <span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>    --gtid-mode<span class=o>=</span>ON <span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>    --log-bin<span class=o>=</span>mysql-bin <span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>    --enforce-gtid-consistency<span class=o>=</span>ON <span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>    --ssl-ca<span class=o>=</span><span class=s2>&#34;/etc/mysql/cert/root.crt&#34;</span> <span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>    --ssl-cert<span class=o>=</span><span class=s2>&#34;/etc/mysql/cert/server.crt&#34;</span> <span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>    --ssl-key<span class=o>=</span><span class=s2>&#34;/etc/mysql/cert/server.key1&#34;</span>
+</span></span></code></pre></td></tr></table></div></div><p>SSL 链接登陆检查时发现可以看到证书信息，但服务并没有启动 SSL 功能「使用 <code>\s</code> 查不到链接加密信息」。</p><p><img src=./20201123-mysql-binlog-ssl-2.png alt="mysql binlog ssl"></p><p>随后在 <code>docker logs TSQL</code> 查看 MySQL 服务启动日志信息，看到以下问题</p><p><code>2020-10-21T07:32:22.180801Z 0 [Warning] CA certificate /etc/mysql/cert/root.crt is self signed.</code></p><p>参考<a href=https://askubuntu.com/questions/194074/enabling-ssl-in-mysql>网上资料</a>，需要将 openssl 1.0 以后版本生成的证书是二次转换。</p><p><code>openssl rsa -in server-key.pem -out server-key.pem</code></p><p><img src=./20201123-mysql-binlog-ssl-3.png alt="mysql binlog ssl"></p></div><div class=post-copyright><p class=copyright-item><span class=item-title>Author</span>
+<span class=item-content>Jeff</span></p><p class=copyright-item><span class=item-title>LastMod</span>
+<span class=item-content>2020-11-23</span></p><p class=copyright-item><span class=item-title>License</span>
+<span class=item-content><a rel="license noopener" href=https://creativecommons.org/licenses/by-nc-nd/4.0/ target=_blank>CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span></p></div><footer class=post-footer><div class=post-tags><a href=/tags/linux/>Linux</a>
+<a href=/tags/docker/>Docker</a></div><nav class=post-nav><a class=next href=/post/202007017-29-region-merge/><span class="next-text nav-default">TiDB - PD Region Merge 食草兽</span>
+<span class="next-text nav-mobile">Next</span>
+<i class="iconfont icon-right"></i></a></nav></footer></article></div></div></main><footer id=footer class=footer><div class=social-links><a href=https://github.com/BigerCAP/TiDB-AirPlan/issues class="iconfont icon-github" title=github></a>
+<a href=https://ap.biger.cc/index.xml type=application/rss+xml class="iconfont icon-rss" title=rss></a></div><div class=copyright><span class=power-by>Powered by <a class=hexo-link href=https://gohugo.io>Hugo</a></span>
+<span class=division>|</span>
+<span class=theme-info>Theme -
+<a class=theme-link href=https://github.com/olOwOlo/hugo-theme-even>Even</a></span><div class=busuanzi-footer><span id=busuanzi_container_site_pv>site pv: <span id=busuanzi_value_site_pv><img src=/img/spinner.svg alt=spinner.svg></span></span>
+<span class=division>|</span>
+<span id=busuanzi_container_site_uv>site uv: <span id=busuanzi_value_site_uv><img src=/img/spinner.svg alt=spinner.svg></span></span></div><span class=copyright-year>&copy;
+2017 -
+2023
+<span class=heart><i class="iconfont icon-heart"></i></span>
+<span class=author>DB - AirPlan</span></span></div></footer><div class=back-to-top id=back-to-top><i class="iconfont icon-up"></i></div></div><script src=https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin=anonymous></script>
+<script>var languageCode="en".replace(/-/g,"_").replace(/_(.*)/,function(e,t){return e.replace(t,t.toUpperCase())});timeago().render(document.querySelectorAll(".timeago"),languageCode),timeago.cancel()</script><script type=text/javascript src=/dist/even.26188efa.min.js></script></body></html>

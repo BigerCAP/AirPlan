@@ -1,360 +1,40 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>Product manager / 涉猎围观 - TiDB AirPlan - A biger solution</title>
-  <meta name="renderer" content="webkit" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-
-<meta http-equiv="Cache-Control" content="no-transform" />
-<meta http-equiv="Cache-Control" content="no-siteapp" />
-
-<meta name="theme-color" content="#f8f5ec" />
-<meta name="msapplication-navbutton-color" content="#f8f5ec">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
-
-
-<meta name="author" content="Jeff" /><meta name="description" content="0x00 inspired-启示录 douban link 产品是什么 产品经理职能定义 产品未来发展方向 平台打包 产品与用户之间的情感曲线 0x01 人人都是产品经理 douban link 0x02 交互式设计四" /><meta name="keywords" content="TiDB, AirPlan, TiDB OPS, tidb-operator, 2pc, raft, databases, mysql, htap" />
-
-
-
-
-
-
-<meta name="generator" content="Hugo 0.78.2 with theme even" />
-
-
-<link rel="canonical" href="https://ap.tidb.cc/look/20200606-23-inspired/" />
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="manifest" href="/manifest.json">
-<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
-
-<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-<link href="/dist/even.04bd84cd.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
-
-
-<meta property="og:title" content="Product manager / 涉猎围观" />
-<meta property="og:description" content="0x00 inspired-启示录 douban link 产品是什么 产品经理职能定义 产品未来发展方向 平台打包 产品与用户之间的情感曲线 0x01 人人都是产品经理 douban link 0x02 交互式设计四" />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://ap.tidb.cc/look/20200606-23-inspired/" />
-<meta property="article:published_time" content="2020-06-06T00:00:00+08:00" />
-<meta property="article:modified_time" content="2020-06-06T00:00:00+08:00" />
-<meta itemprop="name" content="Product manager / 涉猎围观">
-<meta itemprop="description" content="0x00 inspired-启示录 douban link 产品是什么 产品经理职能定义 产品未来发展方向 平台打包 产品与用户之间的情感曲线 0x01 人人都是产品经理 douban link 0x02 交互式设计四">
-<meta itemprop="datePublished" content="2020-06-06T00:00:00+08:00" />
-<meta itemprop="dateModified" content="2020-06-06T00:00:00+08:00" />
-<meta itemprop="wordCount" content="1172">
-
-
-
-<meta itemprop="keywords" content="Product manager,Book," />
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Product manager / 涉猎围观"/>
-<meta name="twitter:description" content="0x00 inspired-启示录 douban link 产品是什么 产品经理职能定义 产品未来发展方向 平台打包 产品与用户之间的情感曲线 0x01 人人都是产品经理 douban link 0x02 交互式设计四"/>
-
-<!--[if lte IE 9]>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
-<![endif]-->
-
-<!--[if lt IE 9]>
-  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
-<![endif]-->
-
-</head>
-<body>
-  <div id="mobile-navbar" class="mobile-navbar">
-  <div class="mobile-header-logo">
-    <a href="/" class="logo">TiDB AirPlan</a>
-  </div>
-  <div class="mobile-navbar-icon">
-    <span></span>
-    <span></span>
-    <span></span>
-  </div>
-</div>
-<nav id="mobile-menu" class="mobile-menu slideout-menu">
-  <ul class="mobile-menu-list">
-    <a href="/post/">
-        <li class="mobile-menu-item">Blog</li>
-      </a><a href="/look/">
-        <li class="mobile-menu-item">Look</li>
-      </a><a href="/tags/">
-        <li class="mobile-menu-item">Tags</li>
-      </a><a href="/categories/">
-        <li class="mobile-menu-item">Categories</li>
-      </a><a href="/about/">
-        <li class="mobile-menu-item">About</li>
-      </a>
-  </ul>
-</nav>
-  <div class="container" id="mobile-panel">
-    <header id="header" class="header">
-        <div class="logo-wrapper">
-  <a href="/" class="logo">TiDB AirPlan</a>
-</div>
-
-<nav class="site-navbar">
-  <ul id="menu" class="menu">
-    <li class="menu-item">
-        <a class="menu-item-link" href="/post/">Blog</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/look/">Look</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/tags/">Tags</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/categories/">Categories</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/about/">About</a>
-      </li>
-  </ul>
-</nav>
-    </header>
-
-    <main id="main" class="main">
-      <div class="content-wrapper">
-        <div id="content" class="content">
-          <article class="post">
-    
-    <header class="post-header">
-      <h1 class="post-title">Product manager / 涉猎围观</h1>
-
-      <div class="post-meta">
-        <span class="post-time"> 2020-06-06 </span>
-        <div class="post-category">
-            <a href="/categories/look/"> Look </a>
-            </div>
-          <span class="more-meta"> 1172 words </span>
-          <span class="more-meta"> 3 mins read </span>
-        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
-      </div>
-    </header>
-
-    <div class="post-toc" id="post-toc">
-  <h2 class="post-toc-title">Contents</h2>
-  <div class="post-toc-content">
-    <nav id="TableOfContents">
-  <ul>
-    <li><a href="#0x00-inspired-启示录">0x00 inspired-启示录</a></li>
-    <li><a href="#0x01-人人都是产品经理">0x01 人人都是产品经理</a></li>
-    <li><a href="#0x02-交互式设计四策略">0x02 交互式设计四策略</a></li>
-  </ul>
-</nav>
-  </div>
-</div>
-  <div class="post-outdated">
-    <div class="hint">
-      <p>[NOTE] Updated <span class="timeago" datetime="2020-06-06T00:00:00" title="June 6, 2020">June 6, 2020</span>. This article may have outdated content or subject matter.</p>
-    </div>
-  </div>
-    <div class="post-content">
-      <h2 id="0x00-inspired-启示录">0x00 inspired-启示录</h2>
-<blockquote>
-<p>douban <a href="https://book.douban.com/subject/5914587/">link</a></p>
-</blockquote>
-<p><img src="./inspired.jpg" alt="启示录 打造用户喜爱的产品"></p>
-<ol>
-<li>产品是什么</li>
-<li>产品经理职能定义</li>
-<li>产品未来发展方向
-<ul>
-<li>平台打包</li>
-</ul>
-</li>
-<li>产品与用户之间的情感曲线</li>
-</ol>
-<h2 id="0x01-人人都是产品经理">0x01 人人都是产品经理</h2>
-<blockquote>
-<p>douban <a href="https://book.douban.com/subject/27029547/">link</a></p>
-</blockquote>
-<p><img src="./renrenpm.jpg" alt="人人都是产品经理2.0">
-<img src="./renren-1.jpg" alt="人人都是产品经理2.0">
-<img src="./renren-2.jpg" alt="人人都是产品经理2.0">
-<img src="./renren-3.jpg" alt="人人都是产品经理2.0">
-<img src="./renren-4.jpg" alt="人人都是产品经理2.0">
-<img src="./renren-5.jpg" alt="人人都是产品经理2.0">
-<img src="./renren-6.jpg" alt="人人都是产品经理2.0">
-<img src="./renren-7.jpg" alt="人人都是产品经理2.0">
-<img src="./renren-8.jpg" alt="人人都是产品经理2.0">
-<img src="./renren-9.jpg" alt="人人都是产品经理2.0">
-<img src="./renren-10.jpg" alt="人人都是产品经理2.0">
-<img src="./renren-11.jpg" alt="人人都是产品经理2.0">
-<img src="./renren-12.jpg" alt="人人都是产品经理2.0"></p>
-<h2 id="0x02-交互式设计四策略">0x02 交互式设计四策略</h2>
-<blockquote>
-<p>douban <a href="https://book.douban.com/subject/5394309/">link</a></p>
-</blockquote>
-<p><img src="./jianyue.jpg" alt="Simple and Usable Web,Mobile,and Interaction Design - 交互式设计四策略"></p>
-<p>本书一直通过各种各样的小故事告诉读者应该怎么操作，作者说螃蟹很好吃，同时告诉读者应该怎么吃。<del>内容不长，也好理解，故事简短+散乱（前后依赖少的情景剧）。</del><br>
-20200609 done  // 以下内容不作为本书主题思想，仅作为提笔忘字训练记忆专用<br>
-PTAL 网络读者的 <a href="https://book.douban.com/annotation/18027260/">douban note</a></p>
-<ul>
-<li>四策略
-<ul>
-<li>删除 - 去掉不必要的</li>
-<li>组织 - 分组有意义的</li>
-<li>隐藏 - 隐藏不重要得</li>
-<li>转移 - 多设备间转移</li>
-</ul>
-</li>
-<li>三种用户
-<ul>
-<li>专家型用户：愿意探索你的产品或服务，并且会给你提出各种改进建议，少数 / 忽略专家型用户：他们追求主流用户根本不在乎的功能</li>
-<li>随意型用户：可能使用过类似的产品或服务，有兴趣使用更高级的产品，但却不愿意接触全新的东西，少数 / 也不要保持中立而过于在乎随意型用户：这类人数量有限，相对极端，他们的技术水平较好，而且比主流用户更具有忍耐力</li>
-<li>主流用户：他们自己不会因为你的技术而使用你的产品，使用你产品的目的是完成某项任务 / 主流用户占绝对的主体地位（产品目标群体），专家和随意型用户只是少数</li>
-</ul>
-</li>
-<li>展示
-<ul>
-<li>使用极其简约的 slogan
-<ul>
-<li>设计之前、推荐给客户时、需要<strong>对什么是简单的体验</strong>有一个认识（演讲者与对象之间的共识、标准、启示）</li>
-</ul>
-</li>
-<li>根据事实过程创造一个过程，程重点是：产品的使用场景（环境、时间、地点）、人物、故事情节（主观、客观）、讲用户能听得懂的语言（非专业术语）</li>
-<li>切割信息，快速让客户理解特点功能（创造开放式体验）；或者切割较长的事物，减少因外部中断带来的重新开始成本
-<ul>
-<li>最好带有高保真原型图或者初版实物原型，方便客户直接体验</li>
-<li>同时可建立信任关系</li>
-</ul>
-</li>
-<li>感情需求：想办法分析出用户的隐性感情需求，并用设计来实现和贯彻 // 与《启示录》中的感情曲线异曲同工
-<ul>
-<li>这有助于让客户更快融于所讲的故事，可以让 PM 更快了解客户心理动态</li>
-<li>简单意味着控制
-<ul>
-<li>从简单这个角度来看，最重要的是让用户感到自己在掌控一切。即产品不会出现客户处理不了的线程或者超出客户的预想范围</li>
-<li>让用户感觉简单的一个重要前提，是先搞清楚把什么工作交给计算，人负责情绪事态判断，计算机负责复杂的精确计算和存储工作</li>
-<li>降低学习负担、识别负担、相近功能测试负担、自动智能优化负担、去除分散注意力的元素</li>
-</ul>
-</li>
-<li>反复问自己“然后呢”，最终会发现用户的感情需求、合理需求，直到出具解决方案
-<ul>
-<li>“用户在做什么？” —— 描述用户从开始到结束一直在做什么，你应该对用户的行为而不是你的设计感兴趣</li>
-</ul>
-</li>
-<li>描述用户体验，你需要把它转换成一个故事，故事是描述认识的一种好方式</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>其他
-<ul>
-<li>清楚真正的问题所在，不是用户想要就给（主流用户 / 专家用户 / 随意用户）</li>
-<li>在正确的位置提供正确的内容。在错误的位置，放置再醒目的引导，用户也不会去看</li>
-<li>避免不必要的功能以及功能堆砌 // 别做多余的事情</li>
-<li>导航比搜索重要。只有在网站没有提供有效导航的情况想，用户才会使用搜索，搜索比浏览困难得多</li>
-</ul>
-</li>
-</ul>
-
-    </div>
-
-    <div class="post-copyright">
-  <p class="copyright-item">
-    <span class="item-title">Author</span>
-    <span class="item-content">Jeff</span>
-  </p>
-  <p class="copyright-item">
-    <span class="item-title">LastMod</span>
-    <span class="item-content">
-        2020-06-06
-        
-    </span>
-  </p>
-  
-  <p class="copyright-item">
-    <span class="item-title">License</span>
-    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span>
-  </p>
-</div>
-<footer class="post-footer">
-      <div class="post-tags">
-          <a href="/tags/product-manager/">Product manager</a>
-          <a href="/tags/book/">Book</a>
-          </div>
-      <nav class="post-nav">
-        
-        <a class="next" href="/look/20200509-19-raft/">
-            <span class="next-text nav-default">Raft 多数派选举策略</span>
-            <span class="next-text nav-mobile">Next</span>
-            <i class="iconfont icon-right"></i>
-          </a>
-      </nav>
-    </footer>
-  </article>
-        </div>
-        
-
-  
-
-  
-
-      </div>
-    </main>
-
-    <footer id="footer" class="footer">
-      <div class="social-links">
-      <a href="https://github.com/BigerCAP/TiDB-AirPlan/issues" class="iconfont icon-github" title="github"></a>
-  <a href="https://ap.tidb.cc/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
-</div>
-
-<div class="copyright">
-  <span class="power-by">
-    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
-  </span>
-  <span class="division">|</span>
-  <span class="theme-info">
-    Theme - 
-    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
-  </span>
-
-  <div class="busuanzi-footer">
-    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
-      <span class="division">|</span>
-    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
-  </div>
-
-  <span class="copyright-year">
-    &copy; 
-    2017 - 
-    2020
-    <span class="heart">
-      <i class="iconfont icon-heart"></i>
-    </span>
-    <span class="author">TiDB - AirPlan</span>
-  </span>
-</div>
-    </footer>
-
-    <div class="back-to-top" id="back-to-top">
-      <i class="iconfont icon-up"></i>
-    </div>
-  </div>
-  
-  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js" integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js" integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin="anonymous"></script>
-  <script><!-- NOTE: timeago.js uses the language code format like "zh_CN" (underscore and case sensitive) -->
-    var languageCode = "en".replace(/-/g, '_').replace(/_(.*)/, function ($0, $1) {return $0.replace($1, $1.toUpperCase());});
-    timeago().render(document.querySelectorAll('.timeago'), languageCode);
-    timeago.cancel();  
-  </script>
-<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
-
-
-
-
-
-
-
-
-</body>
-</html>
+<!doctype html><html lang=en><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge,chrome=1"><title>Product manager / 涉猎围观 - AirPlan - A biger solution</title><meta name=renderer content="webkit"><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta http-equiv=cache-control content="no-transform"><meta http-equiv=cache-control content="no-siteapp"><meta name=theme-color content="#f8f5ec"><meta name=msapplication-navbutton-color content="#f8f5ec"><meta name=apple-mobile-web-app-capable content="yes"><meta name=apple-mobile-web-app-status-bar-style content="#f8f5ec"><meta name=author content="Jeff"><meta name=description content="0x00 inspired-启示录 douban link 产品是什么 产品经理职能定义 产品未来发展方向 平台打包 产品与用户之间的情感曲线 0x01 人人都是产品经理 douban link 0x02 交互式设计四"><meta name=keywords content="TiDB,AirPlan,TiDB OPS,tidb-operator,2pc,raft,databases,mysql,htap"><meta name=generator content="Hugo 0.110.0 with theme even"><link rel=canonical href=https://ap.biger.cc/look/20200606-23-inspired/><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/manifest.json><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><script async src=//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js></script>
+<link href=/dist/even.04bd84cd.min.css rel=stylesheet><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin=anonymous><meta property="og:title" content="Product manager / 涉猎围观"><meta property="og:description" content="0x00 inspired-启示录 douban link 产品是什么 产品经理职能定义 产品未来发展方向 平台打包 产品与用户之间的情感曲线 0x01 人人都是产品经理 douban link 0x02 交互式设计四"><meta property="og:type" content="article"><meta property="og:url" content="https://ap.biger.cc/look/20200606-23-inspired/"><meta property="article:section" content="look"><meta property="article:published_time" content="2020-06-06T00:00:00+08:00"><meta property="article:modified_time" content="2020-06-06T00:00:00+08:00"><meta itemprop=name content="Product manager / 涉猎围观"><meta itemprop=description content="0x00 inspired-启示录 douban link 产品是什么 产品经理职能定义 产品未来发展方向 平台打包 产品与用户之间的情感曲线 0x01 人人都是产品经理 douban link 0x02 交互式设计四"><meta itemprop=datePublished content="2020-06-06T00:00:00+08:00"><meta itemprop=dateModified content="2020-06-06T00:00:00+08:00"><meta itemprop=wordCount content="1172"><meta itemprop=keywords content="Product manager,Book,"><meta name=twitter:card content="summary"><meta name=twitter:title content="Product manager / 涉猎围观"><meta name=twitter:description content="0x00 inspired-启示录 douban link 产品是什么 产品经理职能定义 产品未来发展方向 平台打包 产品与用户之间的情感曲线 0x01 人人都是产品经理 douban link 0x02 交互式设计四"><!--[if lte IE 9]><script src=https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js></script><![endif]--><!--[if lt IE 9]><script src=https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js></script>
+<script src=https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js></script><![endif]--></head><body><div id=mobile-navbar class=mobile-navbar><div class=mobile-header-logo><a href=/ class=logo>AirPlan</a></div><div class=mobile-navbar-icon><span></span>
+<span></span>
+<span></span></div></div><nav id=mobile-menu class="mobile-menu slideout-menu"><ul class=mobile-menu-list><a href=/post/><li class=mobile-menu-item>Blog</li></a><a href=/look/><li class=mobile-menu-item>Look</li></a><a href=/tags/><li class=mobile-menu-item>Tags</li></a><a href=/categories/><li class=mobile-menu-item>Categories</li></a><a href=/about/><li class=mobile-menu-item>About</li></a></ul></nav><div class=container id=mobile-panel><header id=header class=header><div class=logo-wrapper><a href=/ class=logo>AirPlan</a></div><nav class=site-navbar><ul id=menu class=menu><li class=menu-item><a class=menu-item-link href=/post/>Blog</a></li><li class=menu-item><a class=menu-item-link href=/look/>Look</a></li><li class=menu-item><a class=menu-item-link href=/tags/>Tags</a></li><li class=menu-item><a class=menu-item-link href=/categories/>Categories</a></li><li class=menu-item><a class=menu-item-link href=/about/>About</a></li></ul></nav></header><main id=main class=main><div class=content-wrapper><div id=content class=content><article class=post><header class=post-header><h1 class=post-title>Product manager / 涉猎围观</h1><div class=post-meta><span class=post-time>2020-06-06</span><div class=post-category><a href=/categories/look/>Look</a></div><span class=more-meta>1172 words</span>
+<span class=more-meta>3 mins read</span>
+<span id=busuanzi_container_page_pv class=more-meta><span id=busuanzi_value_page_pv><img src=/img/spinner.svg alt=spinner.svg></span> times read</span></div></header><div class=post-toc id=post-toc><h2 class=post-toc-title>Contents</h2><div class=post-toc-content><nav id=TableOfContents><ul><li><a href=#0x00-inspired-启示录>0x00 inspired-启示录</a></li><li><a href=#0x01-人人都是产品经理>0x01 人人都是产品经理</a></li><li><a href=#0x02-交互式设计四策略>0x02 交互式设计四策略</a></li></ul></nav></div></div><div class=post-outdated><div class=warn><p>[NOTE] Updated <span class=timeago datetime=2020-06-06T00:00:00 title="June 6, 2020">June 6, 2020</span>. This article may have outdated content or subject matter.</p></div></div><div class=post-content><h2 id=0x00-inspired-启示录>0x00 inspired-启示录</h2><blockquote><p>douban <a href=https://book.douban.com/subject/5914587/>link</a></p></blockquote><p><img src=./inspired.jpg alt="启示录 打造用户喜爱的产品"></p><ol><li>产品是什么</li><li>产品经理职能定义</li><li>产品未来发展方向<ul><li>平台打包</li></ul></li><li>产品与用户之间的情感曲线</li></ol><h2 id=0x01-人人都是产品经理>0x01 人人都是产品经理</h2><blockquote><p>douban <a href=https://book.douban.com/subject/27029547/>link</a></p></blockquote><p><img src=./renrenpm.jpg alt=人人都是产品经理2.0>
+<img src=./renren-1.jpg alt=人人都是产品经理2.0>
+<img src=./renren-2.jpg alt=人人都是产品经理2.0>
+<img src=./renren-3.jpg alt=人人都是产品经理2.0>
+<img src=./renren-4.jpg alt=人人都是产品经理2.0>
+<img src=./renren-5.jpg alt=人人都是产品经理2.0>
+<img src=./renren-6.jpg alt=人人都是产品经理2.0>
+<img src=./renren-7.jpg alt=人人都是产品经理2.0>
+<img src=./renren-8.jpg alt=人人都是产品经理2.0>
+<img src=./renren-9.jpg alt=人人都是产品经理2.0>
+<img src=./renren-10.jpg alt=人人都是产品经理2.0>
+<img src=./renren-11.jpg alt=人人都是产品经理2.0>
+<img src=./renren-12.jpg alt=人人都是产品经理2.0></p><h2 id=0x02-交互式设计四策略>0x02 交互式设计四策略</h2><blockquote><p>douban <a href=https://book.douban.com/subject/5394309/>link</a></p></blockquote><p><img src=./jianyue.jpg alt="Simple and Usable Web,Mobile,and Interaction Design - 交互式设计四策略"></p><p>本书一直通过各种各样的小故事告诉读者应该怎么操作，作者说螃蟹很好吃，同时告诉读者应该怎么吃。<del>内容不长，也好理解，故事简短+散乱（前后依赖少的情景剧）。</del><br>20200609 done // 以下内容不作为本书主题思想，仅作为提笔忘字训练记忆专用<br>PTAL 网络读者的 <a href=https://book.douban.com/annotation/18027260/>douban note</a></p><ul><li>四策略<ul><li>删除 - 去掉不必要的</li><li>组织 - 分组有意义的</li><li>隐藏 - 隐藏不重要得</li><li>转移 - 多设备间转移</li></ul></li><li>三种用户<ul><li>专家型用户：愿意探索你的产品或服务，并且会给你提出各种改进建议，少数 / 忽略专家型用户：他们追求主流用户根本不在乎的功能</li><li>随意型用户：可能使用过类似的产品或服务，有兴趣使用更高级的产品，但却不愿意接触全新的东西，少数 / 也不要保持中立而过于在乎随意型用户：这类人数量有限，相对极端，他们的技术水平较好，而且比主流用户更具有忍耐力</li><li>主流用户：他们自己不会因为你的技术而使用你的产品，使用你产品的目的是完成某项任务 / 主流用户占绝对的主体地位（产品目标群体），专家和随意型用户只是少数</li></ul></li><li>展示<ul><li>使用极其简约的 slogan<ul><li>设计之前、推荐给客户时、需要<strong>对什么是简单的体验</strong>有一个认识（演讲者与对象之间的共识、标准、启示）</li></ul></li><li>根据事实过程创造一个过程，程重点是：产品的使用场景（环境、时间、地点）、人物、故事情节（主观、客观）、讲用户能听得懂的语言（非专业术语）</li><li>切割信息，快速让客户理解特点功能（创造开放式体验）；或者切割较长的事物，减少因外部中断带来的重新开始成本<ul><li>最好带有高保真原型图或者初版实物原型，方便客户直接体验</li><li>同时可建立信任关系</li></ul></li><li>感情需求：想办法分析出用户的隐性感情需求，并用设计来实现和贯彻 // 与《启示录》中的感情曲线异曲同工<ul><li>这有助于让客户更快融于所讲的故事，可以让 PM 更快了解客户心理动态</li><li>简单意味着控制<ul><li>从简单这个角度来看，最重要的是让用户感到自己在掌控一切。即产品不会出现客户处理不了的线程或者超出客户的预想范围</li><li>让用户感觉简单的一个重要前提，是先搞清楚把什么工作交给计算，人负责情绪事态判断，计算机负责复杂的精确计算和存储工作</li><li>降低学习负担、识别负担、相近功能测试负担、自动智能优化负担、去除分散注意力的元素</li></ul></li><li>反复问自己“然后呢”，最终会发现用户的感情需求、合理需求，直到出具解决方案<ul><li>“用户在做什么？” —— 描述用户从开始到结束一直在做什么，你应该对用户的行为而不是你的设计感兴趣</li></ul></li><li>描述用户体验，你需要把它转换成一个故事，故事是描述认识的一种好方式</li></ul></li></ul></li><li>其他<ul><li>清楚真正的问题所在，不是用户想要就给（主流用户 / 专家用户 / 随意用户）</li><li>在正确的位置提供正确的内容。在错误的位置，放置再醒目的引导，用户也不会去看</li><li>避免不必要的功能以及功能堆砌 // 别做多余的事情</li><li>导航比搜索重要。只有在网站没有提供有效导航的情况想，用户才会使用搜索，搜索比浏览困难得多</li></ul></li></ul></div><div class=post-copyright><p class=copyright-item><span class=item-title>Author</span>
+<span class=item-content>Jeff</span></p><p class=copyright-item><span class=item-title>LastMod</span>
+<span class=item-content>2020-06-06</span></p><p class=copyright-item><span class=item-title>License</span>
+<span class=item-content><a rel="license noopener" href=https://creativecommons.org/licenses/by-nc-nd/4.0/ target=_blank>CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span></p></div><footer class=post-footer><div class=post-tags><a href=/tags/product-manager/>Product manager</a>
+<a href=/tags/book/>Book</a></div><nav class=post-nav><a class=next href=/look/20200509-19-raft/><span class="next-text nav-default">Raft 多数派选举策略</span>
+<span class="next-text nav-mobile">Next</span>
+<i class="iconfont icon-right"></i></a></nav></footer></article></div></div></main><footer id=footer class=footer><div class=social-links><a href=https://github.com/BigerCAP/TiDB-AirPlan/issues class="iconfont icon-github" title=github></a>
+<a href=https://ap.biger.cc/index.xml type=application/rss+xml class="iconfont icon-rss" title=rss></a></div><div class=copyright><span class=power-by>Powered by <a class=hexo-link href=https://gohugo.io>Hugo</a></span>
+<span class=division>|</span>
+<span class=theme-info>Theme -
+<a class=theme-link href=https://github.com/olOwOlo/hugo-theme-even>Even</a></span><div class=busuanzi-footer><span id=busuanzi_container_site_pv>site pv: <span id=busuanzi_value_site_pv><img src=/img/spinner.svg alt=spinner.svg></span></span>
+<span class=division>|</span>
+<span id=busuanzi_container_site_uv>site uv: <span id=busuanzi_value_site_uv><img src=/img/spinner.svg alt=spinner.svg></span></span></div><span class=copyright-year>&copy;
+2017 -
+2023
+<span class=heart><i class="iconfont icon-heart"></i></span>
+<span class=author>DB - AirPlan</span></span></div></footer><div class=back-to-top id=back-to-top><i class="iconfont icon-up"></i></div></div><script src=https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin=anonymous></script>
+<script>var languageCode="en".replace(/-/g,"_").replace(/_(.*)/,function(e,t){return e.replace(t,t.toUpperCase())});timeago().render(document.querySelectorAll(".timeago"),languageCode),timeago.cancel()</script><script type=text/javascript src=/dist/even.26188efa.min.js></script></body></html>

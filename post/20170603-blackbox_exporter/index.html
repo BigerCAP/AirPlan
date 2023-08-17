@@ -1,903 +1,494 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>监控架构 - Blackbox_exporter 主动探测端口服务状态 - TiDB AirPlan - A biger solution</title>
-  <meta name="renderer" content="webkit" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-
-<meta http-equiv="Cache-Control" content="no-transform" />
-<meta http-equiv="Cache-Control" content="no-siteapp" />
-
-<meta name="theme-color" content="#f8f5ec" />
-<meta name="msapplication-navbutton-color" content="#f8f5ec">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
-
-
-<meta name="author" content="Jeff" /><meta name="description" content="0x00 找个能监控组件端口是否存在的服务，并且可以将数据发送到 Prometheus ；blackbox export 是 Prometheus 家族一员，按照配置文件内容用于向目标主动探测 0x01 Deploy blackbox_exporter 是 Prometheus 官方" /><meta name="keywords" content="TiDB, AirPlan, TiDB OPS, tidb-operator, 2pc, raft, databases, mysql, htap" />
-
-
-
-
-
-
-<meta name="generator" content="Hugo 0.78.2 with theme even" />
-
-
-<link rel="canonical" href="https://ap.tidb.cc/post/20170603-blackbox_exporter/" />
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="manifest" href="/manifest.json">
-<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
-
-<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-<link href="/dist/even.04bd84cd.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
-
-
-<meta property="og:title" content="监控架构 - Blackbox_exporter 主动探测端口服务状态" />
-<meta property="og:description" content="0x00 找个能监控组件端口是否存在的服务，并且可以将数据发送到 Prometheus ；blackbox export 是 Prometheus 家族一员，按照配置文件内容用于向目标主动探测 0x01 Deploy blackbox_exporter 是 Prometheus 官方" />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://ap.tidb.cc/post/20170603-blackbox_exporter/" />
-<meta property="article:published_time" content="2017-06-03T00:00:00+08:00" />
-<meta property="article:modified_time" content="2020-01-20T00:00:00+08:00" />
-<meta itemprop="name" content="监控架构 - Blackbox_exporter 主动探测端口服务状态">
-<meta itemprop="description" content="0x00 找个能监控组件端口是否存在的服务，并且可以将数据发送到 Prometheus ；blackbox export 是 Prometheus 家族一员，按照配置文件内容用于向目标主动探测 0x01 Deploy blackbox_exporter 是 Prometheus 官方">
-<meta itemprop="datePublished" content="2017-06-03T00:00:00+08:00" />
-<meta itemprop="dateModified" content="2020-01-20T00:00:00+08:00" />
-<meta itemprop="wordCount" content="5937">
-
-
-
-<meta itemprop="keywords" content="Deploy,AlertManager,Prometheus,Blackbox," />
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="监控架构 - Blackbox_exporter 主动探测端口服务状态"/>
-<meta name="twitter:description" content="0x00 找个能监控组件端口是否存在的服务，并且可以将数据发送到 Prometheus ；blackbox export 是 Prometheus 家族一员，按照配置文件内容用于向目标主动探测 0x01 Deploy blackbox_exporter 是 Prometheus 官方"/>
-
-<!--[if lte IE 9]>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
-<![endif]-->
-
-<!--[if lt IE 9]>
-  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
-<![endif]-->
-
-</head>
-<body>
-  <div id="mobile-navbar" class="mobile-navbar">
-  <div class="mobile-header-logo">
-    <a href="/" class="logo">TiDB AirPlan</a>
-  </div>
-  <div class="mobile-navbar-icon">
-    <span></span>
-    <span></span>
-    <span></span>
-  </div>
-</div>
-<nav id="mobile-menu" class="mobile-menu slideout-menu">
-  <ul class="mobile-menu-list">
-    <a href="/post/">
-        <li class="mobile-menu-item">Blog</li>
-      </a><a href="/look/">
-        <li class="mobile-menu-item">Look</li>
-      </a><a href="/tags/">
-        <li class="mobile-menu-item">Tags</li>
-      </a><a href="/categories/">
-        <li class="mobile-menu-item">Categories</li>
-      </a><a href="/about/">
-        <li class="mobile-menu-item">About</li>
-      </a>
-  </ul>
-</nav>
-  <div class="container" id="mobile-panel">
-    <header id="header" class="header">
-        <div class="logo-wrapper">
-  <a href="/" class="logo">TiDB AirPlan</a>
-</div>
-
-<nav class="site-navbar">
-  <ul id="menu" class="menu">
-    <li class="menu-item">
-        <a class="menu-item-link" href="/post/">Blog</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/look/">Look</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/tags/">Tags</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/categories/">Categories</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/about/">About</a>
-      </li>
-  </ul>
-</nav>
-    </header>
-
-    <main id="main" class="main">
-      <div class="content-wrapper">
-        <div id="content" class="content">
-          <article class="post">
-    
-    <header class="post-header">
-      <h1 class="post-title">监控架构 - Blackbox_exporter 主动探测端口服务状态</h1>
-
-      <div class="post-meta">
-        <span class="post-time"> 2017-06-03 </span>
-        <div class="post-category">
-            <a href="/categories/monitoring/"> Monitoring </a>
-            </div>
-          <span class="more-meta"> 5937 words </span>
-          <span class="more-meta"> 12 mins read </span>
-        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
-      </div>
-    </header>
-
-    <div class="post-toc" id="post-toc">
-  <h2 class="post-toc-title">Contents</h2>
-  <div class="post-toc-content">
-    <nav id="TableOfContents">
-  <ul>
-    <li><a href="#0x00">0x00</a></li>
-    <li><a href="#0x01-deploy">0x01 Deploy</a>
-      <ul>
-        <li><a href="#blackboxyml-配置文件">blackbox.yml 配置文件</a></li>
-      </ul>
-    </li>
-    <li><a href="#0x02-功能测试">0x02 功能测试</a>
-      <ul>
-        <li><a href="#ping-测试">Ping 测试</a></li>
-        <li><a href="#tcp-测试">TCP 测试</a></li>
-        <li><a href="#http-测试">HTTP 测试</a></li>
-      </ul>
-    </li>
-    <li><a href="#0x03-告警测试">0x03 告警测试</a>
-      <ul>
-        <li><a href="#告警测试规则">告警测试规则</a></li>
-        <li><a href="#上报-prometheus">上报 Prometheus</a></li>
-        <li><a href="#grafana-展示">Grafana 展示</a></li>
-      </ul>
-    </li>
-  </ul>
-</nav>
-  </div>
-</div>
-  <div class="post-outdated">
-    <div class="warn">
-      <p>[NOTE] Updated <span class="timeago" datetime="2020-01-20T00:00:00" title="January 20, 2020">January 20, 2020</span>. This article may have outdated content or subject matter.</p>
-    </div>
-  </div>
-    <div class="post-content">
-      <h2 id="0x00">0x00</h2>
-<blockquote>
-<p>找个能监控组件端口是否存在的服务，并且可以将数据发送到 Prometheus ；blackbox export 是 Prometheus 家族一员，按照配置文件内容用于向目标主动探测</p>
-</blockquote>
-<h2 id="0x01-deploy">0x01 Deploy</h2>
-<ul>
-<li>
-<p><a href="https://github.com/prometheus/blackbox_exporter">blackbox_exporter</a> 是 Prometheus 官方提供的 exporter 之一，可以提供 http、dns、tcp、icmp 的监控数据采集</p>
-</li>
-<li>
-<p>Binary</p>
-<ul>
-<li><a href="https://github.com/prometheus/blackbox_exporter/releases">Release Download</a></li>
-<li><code>./bin/blackbox_exporter --web.listen-address=:9115 --log.level=info --config.file=conf/blackbox.yml</code></li>
-</ul>
-</li>
-<li>
-<p>Docker</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-bash" data-lang="bash">docker pull prom/blackbox-exporter
-docker run -d -p 9115:9115 --name blackbox_exporter -v <span class="sb">`</span><span class="nb">pwd</span><span class="sb">`</span>:/config blackbox_exporter --config.file<span class="o">=</span>/config/blackbox.yml
-</code></pre></td></tr></table>
-</div>
-</div></li>
-<li>
-<p>blackbox.yml template</p>
-<ul>
-<li>通过 blackbox.yml 定义模块详细信息</li>
-<li>在 Prometheus 配置文件中引用该模块以及配置被监控目标主机</li>
-</ul>
-</li>
-</ul>
-<h3 id="blackboxyml-配置文件">blackbox.yml 配置文件</h3>
-<blockquote>
-<p>如无特殊需求，使用默认配置文件即可
-<a href="https://github.com/prometheus/blackbox_exporter/blob/master/config/testdata/blackbox-good.yml">blackbox-good.yml</a> 官方配置文件案例</p>
-</blockquote>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span><span class="lnt">33
-</span><span class="lnt">34
-</span><span class="lnt">35
-</span><span class="lnt">36
-</span><span class="lnt">37
-</span><span class="lnt">38
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-YAML" data-lang="YAML"><span class="nt">modules</span><span class="p">:</span><span class="w">
-</span><span class="w">  </span><span class="nt">http_2xx</span><span class="p">:</span><span class="w">
-</span><span class="w">    </span><span class="nt">prober</span><span class="p">:</span><span class="w"> </span><span class="l">http</span><span class="w">
-</span><span class="w">    </span><span class="nt">http</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l">GET</span><span class="w">
-</span><span class="w">  </span><span class="nt">http_post_2xx</span><span class="p">:</span><span class="w">
-</span><span class="w">    </span><span class="nt">prober</span><span class="p">:</span><span class="w"> </span><span class="l">http</span><span class="w">
-</span><span class="w">    </span><span class="nt">http</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l">POST</span><span class="w">
-</span><span class="w">  </span><span class="nt">tcp_connect</span><span class="p">:</span><span class="w">
-</span><span class="w">    </span><span class="nt">prober</span><span class="p">:</span><span class="w"> </span><span class="l">tcp</span><span class="w">
-</span><span class="w">  </span><span class="nt">pop3s_banner</span><span class="p">:</span><span class="w">
-</span><span class="w">    </span><span class="nt">prober</span><span class="p">:</span><span class="w"> </span><span class="l">tcp</span><span class="w">
-</span><span class="w">    </span><span class="nt">tcp</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span><span class="nt">query_response</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">expect</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;^+OK&#34;</span><span class="w">
-</span><span class="w">      </span><span class="nt">tls</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
-</span><span class="w">      </span><span class="nt">tls_config</span><span class="p">:</span><span class="w">
-</span><span class="w">        </span><span class="nt">insecure_skip_verify</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
-</span><span class="w">  </span><span class="nt">ssh_banner</span><span class="p">:</span><span class="w">
-</span><span class="w">    </span><span class="nt">prober</span><span class="p">:</span><span class="w"> </span><span class="l">tcp</span><span class="w">
-</span><span class="w">    </span><span class="nt">tcp</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span><span class="nt">query_response</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">expect</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;^SSH-2.0-&#34;</span><span class="w">
-</span><span class="w">  </span><span class="nt">irc_banner</span><span class="p">:</span><span class="w">
-</span><span class="w">    </span><span class="nt">prober</span><span class="p">:</span><span class="w"> </span><span class="l">tcp</span><span class="w">
-</span><span class="w">    </span><span class="nt">tcp</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span><span class="nt">query_response</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">send</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;NICK prober&#34;</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">send</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;USER prober prober prober :prober&#34;</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">expect</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;PING :([^ ]+)&#34;</span><span class="w">
-</span><span class="w">        </span><span class="nt">send</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;PONG ${1}&#34;</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">expect</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;^:[^ ]+ 001&#34;</span><span class="w">
-</span><span class="w">  </span><span class="nt">icmp</span><span class="p">:</span><span class="w">
-</span><span class="w">    </span><span class="nt">prober</span><span class="p">:</span><span class="w"> </span><span class="l">icmp</span><span class="w">
-</span><span class="w">    </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l">5s</span><span class="w">
-</span><span class="w">    </span><span class="nt">icmp</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span><span class="nt">preferred_ip_protocol</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;ip4&#34;</span><span class="w">
-</span></code></pre></td></tr></table>
-</div>
-</div><h2 id="0x02-功能测试">0x02 功能测试</h2>
-<ul>
-<li>HTTP 测试
-<ul>
-<li>定义 Request Header 信息</li>
-<li>判断 Http status / Http Respones Header / Http Body 内容</li>
-</ul>
-</li>
-<li>TCP 测试
-<ul>
-<li>业务组件端口状态监听</li>
-<li>应用层协议定义与监听</li>
-</ul>
-</li>
-<li>ICMP 测试
-<ul>
-<li>主机探活机制</li>
-</ul>
-</li>
-</ul>
-<h3 id="ping-测试">Ping 测试</h3>
-<ul>
-<li>阅读 <a href="https://github.com/prometheus/blackbox_exporter/blob/master/prober/icmp.go">icmp.go</a> 了解 ICMP 模块工作</li>
-<li>以下内容引用 <a href="https://www.iamle.com/archives/2130.html">用 Prometheus 进行网络质量 Ping 监控</a></li>
-<li>相关代码块添加到 Prometheus 配置文件内</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span><span class="lnt">33
-</span><span class="lnt">34
-</span><span class="lnt">35
-</span><span class="lnt">36
-</span><span class="lnt">37
-</span><span class="lnt">38
-</span><span class="lnt">39
-</span><span class="lnt">40
-</span><span class="lnt">41
-</span><span class="lnt">42
-</span><span class="lnt">43
-</span><span class="lnt">44
-</span><span class="lnt">45
-</span><span class="lnt">46
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-YAML" data-lang="YAML"><span class="w">  </span>- <span class="nt">job_name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;ping_all&#39;</span><span class="w">
-</span><span class="w">    </span><span class="nt">scrape_interval</span><span class="p">:</span><span class="w"> </span><span class="l">5s</span><span class="w">
-</span><span class="w">    </span><span class="nt">metrics_path</span><span class="p">:</span><span class="w"> </span><span class="l">/probe</span><span class="w">
-</span><span class="w">    </span><span class="nt">params</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span><span class="nt">module</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="l">icmp] </span><span class="w"> </span><span class="c">#ping</span><span class="w">
-</span><span class="w">    </span><span class="nt">static_configs</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;219.150.32.132&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;219.148.204.66&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;183.59.4.178&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;202.96.209.5&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;202.100.4.15&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;219.146.0.253&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;222.173.113.3&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;61.139.2.69&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;61.128.114.133&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;202.98.234.35&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;202.100.64.68&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;202.100.100.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;221.232.129.35&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;222.88.19.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;222.190.127.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;202.96.96.68&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;202.101.103.54&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;61.140.99.11&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;202.96.161.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;202.103.224.74&#39;</span><span class="p">]</span><span class="w">
-</span><span class="w">        </span><span class="nt">labels</span><span class="p">:</span><span class="w">
-</span><span class="w">          </span><span class="nt">group</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;一线城市 - 电信网络监控&#39;</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;218.8.251.163&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;218.107.51.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;221.7.34.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;112.65.244.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;218.25.9.38&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;124.89.76.214&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;202.102.152.3&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;202.102.128.68&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;124.161.132.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;221.7.1.20&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;27.98.234.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;218.104.111.122&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;218.28.199.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;221.6.4.66&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;221.12.31.58&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;218.104.136.149&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;210.21.4.130&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;210.21.196.6&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;221.7.128.68&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;221.199.15.5&#39;</span><span class="p">]</span><span class="w">
-</span><span class="w">        </span><span class="nt">labels</span><span class="p">:</span><span class="w">
-</span><span class="w">          </span><span class="nt">group</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;一线城市 - 联通网络监控&#39;</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;211.137.241.34&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;211.136.192.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;218.203.160.194&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;117.131.0.22&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;211.137.32.178&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;117.136.25.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;211.137.191.26&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;211.137.180.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;211.137.106.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;218.202.152.130&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;211.139.73.34&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;223.77.0.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;211.138.16.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;221.131.143.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;211.140.10.2&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;211.143.195.255&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;183.238.55.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;218.204.216.65&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;211.138.245.180&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;211.138.56.1&#39;</span><span class="p">]</span><span class="w">
-</span><span class="w">        </span><span class="nt">labels</span><span class="p">:</span><span class="w">
-</span><span class="w">          </span><span class="nt">group</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;一线城市 - 移动网络监控&#39;</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;61.233.168.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;61.234.113.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;211.98.224.87&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;222.44.44.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;222.33.8.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;61.232.201.76&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;211.98.19.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;61.232.49.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;211.98.208.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;61.233.199.129&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;222.34.16.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;61.232.206.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;61.233.79.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;211.98.43.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;61.232.78.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;61.232.93.193&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;211.98.161.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;61.235.99.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;222.52.72.66&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;211.138.56.1&#39;</span><span class="p">]</span><span class="w">
-</span><span class="w">        </span><span class="nt">labels</span><span class="p">:</span><span class="w">
-</span><span class="w">          </span><span class="nt">group</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;一线城市 - 铁通网络监控&#39;</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;219.150.32.132&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;219.153.32.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;219.149.6.99&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;220.189.218.45&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;123.172.77.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;202.103.124.34&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;222.172.200.68&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;202.100.64.68&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;222.93.201.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;222.191.255.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;202.101.224.68&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;222.85.179.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;220.178.79.2&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;59.49.12.97&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;222.223.255.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;219.148.172.97&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;219.132.199.49&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;14.120.0.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;222.223.29.5&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;222.173.222.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;202.101.107.55&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;222.74.58.29&#39;</span><span class="p">]</span><span class="w">
-</span><span class="w">        </span><span class="nt">labels</span><span class="p">:</span><span class="w">
-</span><span class="w">          </span><span class="nt">group</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;二线城市 - 电信网络监控&#39;</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;60.24.4.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;221.5.203.86&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;202.96.86.18&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;221.12.33.227&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;202.99.96.68&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;58.20.127.238&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;221.3.131.11&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;124.152.0.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;221.3.131.11&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;221.6.96.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;220.248.192.13&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;221.13.28.234&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;211.91.88.129&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;202.99.192.66&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;202.99.160.68&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;202.99.224.68&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;58.252.65.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;221.4.141.254&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;60.2.17.49&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;202.102.154.3&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;36.249.127.25&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;202.99.224.8&#39;</span><span class="p">]</span><span class="w">
-</span><span class="w">        </span><span class="nt">labels</span><span class="p">:</span><span class="w">
-</span><span class="w">          </span><span class="nt">group</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;二线城市 - 联通网络监控&#39;</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;211.137.160.5&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;218.201.17.2&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;211.140.192.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;211.140.35.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;211.141.66.209&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;211.138.225.2&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;111.17.191.25&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;218.203.160.195&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;211.103.55.51&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;211.103.114.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;183.217.255.254&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;211.139.2.18&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;211.138.180.2&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;211.142.12.2&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;111.11.85.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;211.138.91.2&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;218.204.173.197&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;183.233.223.25&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;211.143.60.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;120.192.167.2&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;218.207.133.3&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;120.193.138.1&#39;</span><span class="p">]</span><span class="w">
-</span><span class="w">        </span><span class="nt">labels</span><span class="p">:</span><span class="w">
-</span><span class="w">          </span><span class="nt">group</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;二线城市 - 移动网络监控&#39;</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;61.234.70.2&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;211.98.114.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;61.232.157.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;61.234.186.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;61.235.225.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;211.98.71.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;211.98.72.7&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;123.81.2.9&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;211.98.44.65&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;222.45.86.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;222.49.82.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;211.98.108.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;222.48.116.17&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;211.98.149.117&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;61.235.145.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;222.39.142.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;110.211.253.9&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;222.50.104.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;61.234.76.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;61.232.53.113&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;61.234.196.185&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;222.39.156.1&#39;</span><span class="p">]</span><span class="w">
-</span><span class="w">        </span><span class="nt">labels</span><span class="p">:</span><span class="w">
-</span><span class="w">          </span><span class="nt">group</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;二线城市 - 铁通网络监控&#39;</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;166.111.8.28&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;202.112.26.34&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;202.114.240.6&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;202.116.160.33&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;211.65.207.170&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;218.26.226.100&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;222.221.252.162&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;202.38.64.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;202.201.48.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;202.118.176.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;121.193.138.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;222.23.245.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;58.195.136.3&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;202.118.1.28&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;59.77.229.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;121.48.177.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;121.250.214.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;59.75.177.1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;59.75.112.254&#39;</span><span class="p">]</span><span class="w">
-</span><span class="w">        </span><span class="nt">labels</span><span class="p">:</span><span class="w">
-</span><span class="w">          </span><span class="nt">group</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;教育网络监控&#39;</span><span class="w">
-</span><span class="w">    </span><span class="nt">relabel_configs</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">source_labels</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="l">__address__]</span><span class="w">
-</span><span class="w">        </span><span class="nt">regex</span><span class="p">:</span><span class="w"> </span><span class="l">(.*)(:80)?</span><span class="w">
-</span><span class="w">        </span><span class="nt">target_label</span><span class="p">:</span><span class="w"> </span><span class="l">__param_target</span><span class="w">
-</span><span class="w">        </span><span class="nt">replacement</span><span class="p">:</span><span class="w"> </span><span class="l">${1}</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">source_labels</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="l">__param_target]</span><span class="w">
-</span><span class="w">        </span><span class="nt">regex</span><span class="p">:</span><span class="w"> </span><span class="l">(.*)</span><span class="w">
-</span><span class="w">        </span><span class="nt">target_label</span><span class="p">:</span><span class="w"> </span><span class="l">ping</span><span class="w">
-</span><span class="w">        </span><span class="nt">replacement</span><span class="p">:</span><span class="w"> </span><span class="l">${1}</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">source_labels</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
-</span><span class="w">        </span><span class="nt">regex</span><span class="p">:</span><span class="w"> </span><span class="l">.*</span><span class="w">
-</span><span class="w">        </span><span class="nt">target_label</span><span class="p">:</span><span class="w"> </span><span class="l">__address__</span><span class="w">
-</span><span class="w">        </span><span class="nt">replacement</span><span class="p">:</span><span class="w"> </span><span class="m">172.16.10.65</span><span class="p">:</span><span class="m">9115</span><span class="w">  </span><span class="c"># Blackbox exporter.</span><span class="w">
-</span></code></pre></td></tr></table>
-</div>
-</div><h3 id="tcp-测试">TCP 测试</h3>
-<ul>
-<li>阅读 <a href="https://github.com/prometheus/blackbox_exporter/blob/master/prober/tcp_test.go">tcp_test.go</a> 了解 TCP 工作</li>
-<li>监听 TiDB TiKV PD 的业务端口地址，用来判断服务是否在线</li>
-<li>相关代码块添加到 Prometheus 文件内</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-YAML" data-lang="YAML">- <span class="nt">job_name</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;port_test&#34;</span><span class="w">
-</span><span class="w">  </span><span class="nt">scrape_interval</span><span class="p">:</span><span class="w"> </span><span class="l">30s</span><span class="w">
-</span><span class="w">  </span><span class="nt">metrics_path</span><span class="p">:</span><span class="w"> </span><span class="l">/probe</span><span class="w">
-</span><span class="w">  </span><span class="nt">params</span><span class="p">:</span><span class="w">
-</span><span class="w">    </span><span class="nt">module</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="l">tcp_connect]</span><span class="w">
-</span><span class="w">  </span><span class="nt">static_configs</span><span class="p">:</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;172.16.10.64:2379&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;172.16.10.65:2379&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;172.16.10.66:2379&#39;</span><span class="p">]</span><span class="w">
-</span><span class="w">    </span><span class="nt">labels</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span><span class="nt">group</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;pd&#39;</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;172.16.10.64:4000&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;172.16.10.65:4000&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;172.16.10.66:4000&#39;</span><span class="p">]</span><span class="w">
-</span><span class="w">    </span><span class="nt">labels</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span><span class="nt">group</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;tidb&#39;</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;172.16.10.67:20160&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;172.16.10.68:20160&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;172.16.10.69:20160&#39;</span><span class="p">]</span><span class="w">
-</span><span class="w">    </span><span class="nt">labels</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span><span class="nt">group</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;tikv&#39;</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;172.16.10.64:9100&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;172.16.10.65:9100&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;172.16.10.66:9100&#39;</span><span class="p">,</span><span class="s1">&#39;172.16.10.67:9100&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;172.16.10.68:9100&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;172.16.10.69:9100&#39;</span><span class="p">]</span><span class="w">
-</span><span class="w">    </span><span class="nt">labels</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span><span class="nt">group</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;node-export&#39;</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;172.16.10.67:3000&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;172.16.10.67:9091&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;172.16.10.67:9090&#39;</span><span class="p">]</span><span class="w">
-</span><span class="w">    </span><span class="nt">labels</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span><span class="nt">group</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;monitor&#39;</span><span class="w">
-</span><span class="w">  </span><span class="nt">relabel_configs</span><span class="p">:</span><span class="w">
-</span><span class="w">    </span>- <span class="nt">source_labels</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="l">__address__]</span><span class="w">
-</span><span class="w">      </span><span class="nt">target_label</span><span class="p">:</span><span class="w"> </span><span class="l">__param_target</span><span class="w">
-</span><span class="w">    </span>- <span class="nt">source_labels</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="l">__param_target]</span><span class="w">
-</span><span class="w">      </span><span class="nt">target_label</span><span class="p">:</span><span class="w"> </span><span class="l">instance</span><span class="w">
-</span><span class="w">    </span>- <span class="nt">target_label</span><span class="p">:</span><span class="w"> </span><span class="l">__address__</span><span class="w">
-</span><span class="w">      </span><span class="nt">replacement</span><span class="p">:</span><span class="w"> </span><span class="m">172.16.10.65</span><span class="p">:</span><span class="m">9115</span><span class="w">  </span><span class="c"># Blackbox 地址</span><span class="w">
-</span></code></pre></td></tr></table>
-</div>
-</div><h3 id="http-测试">HTTP 测试</h3>
-<ul>
-<li><a href="https://github.com/prometheus/blackbox_exporter/blob/master/prober/http_test.go">http_test.go</a></li>
-<li>相关代码块添加到 Prometheus 文件内</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-YAML" data-lang="YAML"><span class="w">  </span>- <span class="nt">job_name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;http_2xx&#39;</span><span class="w">
-</span><span class="w">    </span><span class="nt">scrape_interval</span><span class="p">:</span><span class="w"> </span><span class="l">5s</span><span class="w">
-</span><span class="w">    </span><span class="nt">metrics_path</span><span class="p">:</span><span class="w"> </span><span class="l">/probe</span><span class="w">
-</span><span class="w">    </span><span class="nt">params</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span><span class="nt">module</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="l">http_2xx]</span><span class="w">
-</span><span class="w">    </span><span class="nt">static_configs</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">targets</span><span class="p">:</span><span class="w">
-</span><span class="w">        </span>- <span class="s1">&#39;www.baidu.com&#39;</span><span class="w">
-</span><span class="w">        </span>- <span class="s1">&#39;www.pingcap.com&#39;</span><span class="w">
-</span><span class="w">        </span>- <span class="s1">&#39;http://172.16.10.65:2379/metrics&#39;</span><span class="w">
-</span><span class="w">    </span><span class="nt">relabel_configs</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">source_labels</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="l">__address__]</span><span class="w">
-</span><span class="w">        </span><span class="nt">target_label</span><span class="p">:</span><span class="w"> </span><span class="l">__param_target</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">source_labels</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="l">__param_target]</span><span class="w">
-</span><span class="w">        </span><span class="nt">target_label</span><span class="p">:</span><span class="w"> </span><span class="l">instance</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">target_label</span><span class="p">:</span><span class="w"> </span><span class="l">__address__</span><span class="w">
-</span><span class="w">        </span><span class="nt">replacement</span><span class="p">:</span><span class="w"> </span><span class="m">172.16.10.65</span><span class="p">:</span><span class="m">9115</span><span class="w">
-</span></code></pre></td></tr></table>
-</div>
-</div><h2 id="0x03-告警测试">0x03 告警测试</h2>
-<ul>
-<li>
-<p>通过 <code>http://172.16.10.65:9115/probe?target=prometheus.io&amp;module=http_2xx&amp;debug=true</code> 方式可观察监听过程</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span><span class="lnt">33
-</span><span class="lnt">34
-</span><span class="lnt">35
-</span><span class="lnt">36
-</span><span class="lnt">37
-</span><span class="lnt">38
-</span><span class="lnt">39
-</span><span class="lnt">40
-</span><span class="lnt">41
-</span><span class="lnt">42
-</span><span class="lnt">43
-</span><span class="lnt">44
-</span><span class="lnt">45
-</span><span class="lnt">46
-</span><span class="lnt">47
-</span><span class="lnt">48
-</span><span class="lnt">49
-</span><span class="lnt">50
-</span><span class="lnt">51
-</span><span class="lnt">52
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-fallback" data-lang="fallback">Logs for the probe:
-ts=2018-04-13T03:47:36.354717876Z caller=main.go:116 module=http_2xx target=prometheus.io level=info msg=&#34;Beginning probe&#34; probe=http timeout_seconds=9.5
-ts=2018-04-13T03:47:36.354917698Z caller=utils.go:42 module=http_2xx target=prometheus.io level=info msg=&#34;Resolving target address&#34; preferred_ip_protocol=ip6
-ts=2018-04-13T03:47:36.403356427Z caller=utils.go:65 module=http_2xx target=prometheus.io level=info msg=&#34;Resolved target address&#34; ip=2400:cb00:2048:1::6818:783c
-ts=2018-04-13T03:47:36.40345284Z caller=http.go:282 module=http_2xx target=prometheus.io level=info msg=&#34;Making HTTP request&#34; url=http://[2400:cb00:2048:1::6818:783c] host=prometheus.io
-ts=2018-04-13T03:47:36.414825723Z caller=http.go:297 module=http_2xx target=prometheus.io level=error msg=&#34;Error for HTTP request&#34; err=&#34;Get http://[2400:cb00:2048:1::6818:783c]: dial tcp [2400:cb00:2048:1::6818:783c]:80: connect: network is unreachable&#34;
-ts=2018-04-13T03:47:36.426234543Z caller=http.go:354 module=http_2xx target=prometheus.io level=info msg=&#34;Response timings for roundtrip&#34; roundtrip=0 start=2018-04-13T11:47:36.414648186+08:00 dnsDone=2018-04-13T11:47:36.414648186+08:00 connectDone=2018-04-13T11:47:36.414794718+08:00 gotConn=0001-01-01T00:00:00Z responseStart=0001-01-01T00:00:00Z end=2018-04-13T11:47:36.414814678+08:00
-ts=2018-04-13T03:47:36.426339526Z caller=main.go:129 module=http_2xx target=prometheus.io level=error msg=&#34;Probe failed&#34; duration_seconds=0.071537196
-
-Metrics that would have been returned:
-# HELP probe_dns_lookup_time_seconds Returns the time taken for probe dns lookup in seconds
-# TYPE probe_dns_lookup_time_seconds gauge
-probe_dns_lookup_time_seconds 0.048474718
-# HELP probe_duration_seconds Returns how long the probe took to complete in seconds
-# TYPE probe_duration_seconds gauge
-probe_duration_seconds 0.071537196
-# HELP probe_failed_due_to_regex Indicates if probe failed due to regex
-# TYPE probe_failed_due_to_regex gauge
-probe_failed_due_to_regex 0
-# HELP probe_http_content_length Length of http content response
-# TYPE probe_http_content_length gauge
-probe_http_content_length 0
-# HELP probe_http_duration_seconds Duration of http request by phase, summed over all redirects
-# TYPE probe_http_duration_seconds gauge
-probe_http_duration_seconds{phase=&#34;connect&#34;} 0
-probe_http_duration_seconds{phase=&#34;processing&#34;} 0
-probe_http_duration_seconds{phase=&#34;resolve&#34;} 0.048474718
-probe_http_duration_seconds{phase=&#34;tls&#34;} 0
-probe_http_duration_seconds{phase=&#34;transfer&#34;} 0
-# HELP probe_http_redirects The number of redirects
-# TYPE probe_http_redirects gauge
-probe_http_redirects 0
-# HELP probe_http_ssl Indicates if SSL was used for the final redirect
-# TYPE probe_http_ssl gauge
-probe_http_ssl 0
-# HELP probe_http_status_code Response HTTP status code
-# TYPE probe_http_status_code gauge
-probe_http_status_code 0
-# HELP probe_http_version Returns the version of HTTP of the probe response
-# TYPE probe_http_version gauge
-probe_http_version 0
-# HELP probe_ip_protocol Specifies whether probe ip protocol is IP4 or IP6
-# TYPE probe_ip_protocol gauge
-probe_ip_protocol 6
-# HELP probe_success Displays whether or not the probe was a success
-# TYPE probe_success gauge
-probe_success 0
-
-Module configuration:
-prober: http
-http:
-  method: GET
-</code></pre></td></tr></table>
-</div>
-</div></li>
-</ul>
-<h3 id="告警测试规则">告警测试规则</h3>
-<ul>
-<li>
-<p>判断 probe_success metric 结果值，达到告警效果</p>
-<ul>
-<li>成功 == 1</li>
-<li>失败 == 0</li>
-</ul>
-</li>
-<li>
-<p>创建 <code>port.rules.yml</code> 文件，写入以下告警规则</p>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span><span class="lnt">33
-</span><span class="lnt">34
-</span><span class="lnt">35
-</span><span class="lnt">36
-</span><span class="lnt">37
-</span><span class="lnt">38
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="w">  </span>- <span class="nt">alert</span><span class="p">:</span><span class="w"> </span><span class="l">TiDB_is_Down</span><span class="w">
-</span><span class="w">    </span><span class="nt">expr</span><span class="p">:</span><span class="w"> </span><span class="l">probe_success{group=&#34;tidb&#34;} == 0</span><span class="w">
-</span><span class="w">    </span><span class="nt">for</span><span class="p">:</span><span class="w"> </span><span class="l">3m</span><span class="w">
-</span><span class="w">    </span><span class="nt">labels</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span><span class="nt">env</span><span class="p">:</span><span class="w"> </span><span class="l">test-cluster</span><span class="w">
-</span><span class="w">      </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="l">port</span><span class="w">
-</span><span class="w">      </span><span class="nt">expr</span><span class="p">:</span><span class="w"> </span><span class="l">probe_success{group=&#34;tidb&#34;} == 0</span><span class="w">
-</span><span class="w">    </span><span class="nt">annotations</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;alert:{{ $labels.expr }} instance:
-</span><span class="s1">        {{ $labels.instance }} values: {{ $value }}&#39;</span><span class="w">
-</span><span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;{{ $value }}&#39;</span><span class="w">
-</span><span class="w">      </span><span class="nt">summary</span><span class="p">:</span><span class="w"> </span><span class="l">TiDB_is_Down</span><span class="w">
-</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">alert</span><span class="p">:</span><span class="w"> </span><span class="l">TiKV_is_Down</span><span class="w">
-</span><span class="w">    </span><span class="nt">expr</span><span class="p">:</span><span class="w"> </span><span class="l">probe_success{group=&#34;tikv&#34;} == 0</span><span class="w">
-</span><span class="w">    </span><span class="nt">for</span><span class="p">:</span><span class="w"> </span><span class="l">3m</span><span class="w">
-</span><span class="w">    </span><span class="nt">labels</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span><span class="nt">env</span><span class="p">:</span><span class="w"> </span><span class="l">test-cluster</span><span class="w">
-</span><span class="w">      </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="l">port</span><span class="w">
-</span><span class="w">      </span><span class="nt">expr</span><span class="p">:</span><span class="w"> </span><span class="l">probe_success{group=&#34;tikv&#34;} == 0</span><span class="w">
-</span><span class="w">    </span><span class="nt">annotations</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;alert:{{ $labels.expr }} instance:
-</span><span class="s1">        {{ $labels.instance }} values: {{ $value }}&#39;</span><span class="w">
-</span><span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;{{ $value }}&#39;</span><span class="w">
-</span><span class="w">      </span><span class="nt">summary</span><span class="p">:</span><span class="w"> </span><span class="l">TiKV_is_Down</span><span class="w">
-</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">alert</span><span class="p">:</span><span class="w"> </span><span class="l">PD_is_Down</span><span class="w">
-</span><span class="w">    </span><span class="nt">expr</span><span class="p">:</span><span class="w"> </span><span class="l">probe_success{group=&#34;pd&#34;} == 0</span><span class="w">
-</span><span class="w">    </span><span class="nt">for</span><span class="p">:</span><span class="w"> </span><span class="l">3m</span><span class="w">
-</span><span class="w">    </span><span class="nt">labels</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span><span class="nt">env</span><span class="p">:</span><span class="w"> </span><span class="l">test-cluster</span><span class="w">
-</span><span class="w">      </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="l">port</span><span class="w">
-</span><span class="w">      </span><span class="nt">expr</span><span class="p">:</span><span class="w"> </span><span class="l">probe_success{group=&#34;pd&#34;} == 0</span><span class="w">
-</span><span class="w">    </span><span class="nt">annotations</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;alert:{{ $labels.expr }} instance:
-</span><span class="s1">        {{ $labels.instance }} values: {{ $value }}&#39;</span><span class="w">
-</span><span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;{{ $value }}&#39;</span><span class="w">
-</span><span class="w">      </span><span class="nt">summary</span><span class="p">:</span><span class="w"> </span><span class="l">PD_is_Down</span><span class="w">
-</span></code></pre></td></tr></table>
-</div>
-</div><h3 id="上报-prometheus">上报 Prometheus</h3>
-<ul>
-<li>Prometheus 配置文件中添加 <code>port.rules.yml</code> 字段，修改完成后重启生效
-<ul>
-<li>如果 Prometheus 已经引入 Alertmanger 服务，Prometheus 监控到端口 down 掉后会触发告警</li>
-</ul>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span><span class="lnt">8
-</span><span class="lnt">9
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">rule_files</span><span class="p">:</span><span class="w">
-</span><span class="w">  </span>- <span class="s1">&#39;node.rules.yml&#39;</span><span class="w">
-</span><span class="w">  </span>- <span class="s1">&#39;blacker.rules.yml&#39;</span><span class="w">
-</span><span class="w">  </span>- <span class="s1">&#39;bypass.rules.yml&#39;</span><span class="w">
-</span><span class="w">  </span>- <span class="s1">&#39;pd.rules.yml&#39;</span><span class="w">
-</span><span class="w">  </span>- <span class="s1">&#39;tidb.rules.yml&#39;</span><span class="w">
-</span><span class="w">  </span>- <span class="s1">&#39;tikv.rules.yml&#39;</span><span class="w">
-</span><span class="w">  </span>- <span class="s1">&#39;binlog.rules.yml&#39;</span><span class="w">
-</span><span class="w">  </span>- <span class="s1">&#39;port.rules.yml&#39;</span><span class="w"> </span><span class="c"># 端口监测告警规则文件</span><span class="w">
-</span></code></pre></td></tr></table>
-</div>
-</div><h3 id="grafana-展示">Grafana 展示</h3>
-<ul>
-<li>部署 Grafana 服务
-<ul>
-<li>下载 <a href="https://grafana.com/grafana/download">Grafana</a></li>
-<li>部署 <a href="http://docs.grafana.org/installation/rpm/">Grafana</a></li>
-</ul>
-</li>
-<li>利用以下 metrics 构建页面
-<ul>
-<li>probe_success</li>
-<li>probe_duration_seconds</li>
-</ul>
-</li>
-</ul>
-
-    </div>
-
-    <div class="post-copyright">
-  <p class="copyright-item">
-    <span class="item-title">Author</span>
-    <span class="item-content">Jeff</span>
-  </p>
-  <p class="copyright-item">
-    <span class="item-title">LastMod</span>
-    <span class="item-content">
-        2020-01-20
-        
-    </span>
-  </p>
-  
-  <p class="copyright-item">
-    <span class="item-title">License</span>
-    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span>
-  </p>
-</div>
-<footer class="post-footer">
-      <div class="post-tags">
-          <a href="/tags/deploy/">Deploy</a>
-          <a href="/tags/alertmanager/">AlertManager</a>
-          <a href="/tags/prometheus/">Prometheus</a>
-          <a href="/tags/blackbox/">Blackbox</a>
-          </div>
-      <nav class="post-nav">
-        <a class="prev" href="/post/20170604-alertmanager/">
-            <i class="iconfont icon-left"></i>
-            <span class="prev-text nav-default">监控架构 - 专业打小报告好多年</span>
-            <span class="prev-text nav-mobile">Prev</span>
-          </a>
-        <a class="next" href="/post/20170602-node_exporter/">
-            <span class="next-text nav-default">监控架构 - Node_exporter 系统监控组件</span>
-            <span class="next-text nav-mobile">Next</span>
-            <i class="iconfont icon-right"></i>
-          </a>
-      </nav>
-    </footer>
-  </article>
-        </div>
-        
-
-  
-
-  
-
-      </div>
-    </main>
-
-    <footer id="footer" class="footer">
-      <div class="social-links">
-      <a href="https://github.com/BigerCAP/TiDB-AirPlan/issues" class="iconfont icon-github" title="github"></a>
-  <a href="https://ap.tidb.cc/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
-</div>
-
-<div class="copyright">
-  <span class="power-by">
-    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
-  </span>
-  <span class="division">|</span>
-  <span class="theme-info">
-    Theme - 
-    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
-  </span>
-
-  <div class="busuanzi-footer">
-    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
-      <span class="division">|</span>
-    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
-  </div>
-
-  <span class="copyright-year">
-    &copy; 
-    2017 - 
-    2020
-    <span class="heart">
-      <i class="iconfont icon-heart"></i>
-    </span>
-    <span class="author">TiDB - AirPlan</span>
-  </span>
-</div>
-    </footer>
-
-    <div class="back-to-top" id="back-to-top">
-      <i class="iconfont icon-up"></i>
-    </div>
-  </div>
-  
-  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js" integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js" integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin="anonymous"></script>
-  <script><!-- NOTE: timeago.js uses the language code format like "zh_CN" (underscore and case sensitive) -->
-    var languageCode = "en".replace(/-/g, '_').replace(/_(.*)/, function ($0, $1) {return $0.replace($1, $1.toUpperCase());});
-    timeago().render(document.querySelectorAll('.timeago'), languageCode);
-    timeago.cancel();  
-  </script>
-<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
-
-
-
-
-
-
-
-
-</body>
-</html>
+<!doctype html><html lang=en><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge,chrome=1"><title>监控架构 - Blackbox_exporter 主动探测端口服务状态 - AirPlan - A biger solution</title><meta name=renderer content="webkit"><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta http-equiv=cache-control content="no-transform"><meta http-equiv=cache-control content="no-siteapp"><meta name=theme-color content="#f8f5ec"><meta name=msapplication-navbutton-color content="#f8f5ec"><meta name=apple-mobile-web-app-capable content="yes"><meta name=apple-mobile-web-app-status-bar-style content="#f8f5ec"><meta name=author content="Jeff"><meta name=description content="0x00 找个能监控组件端口是否存在的服务，并且可以将数据发送到 Prometheus ；blackbox export 是 Prometheus 家族一员，按照配置文件内容用于向目标主动探测 0x01 Deploy blackbox_exporter 是 Prometheus 官方"><meta name=keywords content="TiDB,AirPlan,TiDB OPS,tidb-operator,2pc,raft,databases,mysql,htap"><meta name=generator content="Hugo 0.110.0 with theme even"><link rel=canonical href=https://ap.biger.cc/post/20170603-blackbox_exporter/><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/manifest.json><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><script async src=//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js></script>
+<link href=/dist/even.04bd84cd.min.css rel=stylesheet><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin=anonymous><meta property="og:title" content="监控架构 - Blackbox_exporter 主动探测端口服务状态"><meta property="og:description" content="0x00 找个能监控组件端口是否存在的服务，并且可以将数据发送到 Prometheus ；blackbox export 是 Prometheus 家族一员，按照配置文件内容用于向目标主动探测 0x01 Deploy blackbox_exporter 是 Prometheus 官方"><meta property="og:type" content="article"><meta property="og:url" content="https://ap.biger.cc/post/20170603-blackbox_exporter/"><meta property="article:section" content="post"><meta property="article:published_time" content="2017-06-03T00:00:00+08:00"><meta property="article:modified_time" content="2020-01-20T00:00:00+08:00"><meta itemprop=name content="监控架构 - Blackbox_exporter 主动探测端口服务状态"><meta itemprop=description content="0x00 找个能监控组件端口是否存在的服务，并且可以将数据发送到 Prometheus ；blackbox export 是 Prometheus 家族一员，按照配置文件内容用于向目标主动探测 0x01 Deploy blackbox_exporter 是 Prometheus 官方"><meta itemprop=datePublished content="2017-06-03T00:00:00+08:00"><meta itemprop=dateModified content="2020-01-20T00:00:00+08:00"><meta itemprop=wordCount content="1791"><meta itemprop=keywords content="Deploy,AlertManager,Prometheus,Blackbox,"><meta name=twitter:card content="summary"><meta name=twitter:title content="监控架构 - Blackbox_exporter 主动探测端口服务状态"><meta name=twitter:description content="0x00 找个能监控组件端口是否存在的服务，并且可以将数据发送到 Prometheus ；blackbox export 是 Prometheus 家族一员，按照配置文件内容用于向目标主动探测 0x01 Deploy blackbox_exporter 是 Prometheus 官方"><!--[if lte IE 9]><script src=https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js></script><![endif]--><!--[if lt IE 9]><script src=https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js></script>
+<script src=https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js></script><![endif]--></head><body><div id=mobile-navbar class=mobile-navbar><div class=mobile-header-logo><a href=/ class=logo>AirPlan</a></div><div class=mobile-navbar-icon><span></span>
+<span></span>
+<span></span></div></div><nav id=mobile-menu class="mobile-menu slideout-menu"><ul class=mobile-menu-list><a href=/post/><li class=mobile-menu-item>Blog</li></a><a href=/look/><li class=mobile-menu-item>Look</li></a><a href=/tags/><li class=mobile-menu-item>Tags</li></a><a href=/categories/><li class=mobile-menu-item>Categories</li></a><a href=/about/><li class=mobile-menu-item>About</li></a></ul></nav><div class=container id=mobile-panel><header id=header class=header><div class=logo-wrapper><a href=/ class=logo>AirPlan</a></div><nav class=site-navbar><ul id=menu class=menu><li class=menu-item><a class=menu-item-link href=/post/>Blog</a></li><li class=menu-item><a class=menu-item-link href=/look/>Look</a></li><li class=menu-item><a class=menu-item-link href=/tags/>Tags</a></li><li class=menu-item><a class=menu-item-link href=/categories/>Categories</a></li><li class=menu-item><a class=menu-item-link href=/about/>About</a></li></ul></nav></header><main id=main class=main><div class=content-wrapper><div id=content class=content><article class=post><header class=post-header><h1 class=post-title>监控架构 - Blackbox_exporter 主动探测端口服务状态</h1><div class=post-meta><span class=post-time>2017-06-03</span><div class=post-category><a href=/categories/monitoring/>Monitoring</a></div><span class=more-meta>1791 words</span>
+<span class=more-meta>4 mins read</span>
+<span id=busuanzi_container_page_pv class=more-meta><span id=busuanzi_value_page_pv><img src=/img/spinner.svg alt=spinner.svg></span> times read</span></div></header><div class=post-toc id=post-toc><h2 class=post-toc-title>Contents</h2><div class=post-toc-content><nav id=TableOfContents><ul><li><a href=#0x00>0x00</a></li><li><a href=#0x01-deploy>0x01 Deploy</a><ul><li><a href=#blackboxyml-配置文件>blackbox.yml 配置文件</a></li></ul></li><li><a href=#0x02-功能测试>0x02 功能测试</a><ul><li><a href=#ping-测试>Ping 测试</a></li><li><a href=#tcp-测试>TCP 测试</a></li><li><a href=#http-测试>HTTP 测试</a></li></ul></li><li><a href=#0x03-告警测试>0x03 告警测试</a><ul><li><a href=#告警测试规则>告警测试规则</a></li><li><a href=#上报-prometheus>上报 Prometheus</a></li><li><a href=#grafana-展示>Grafana 展示</a></li></ul></li></ul></nav></div></div><div class=post-outdated><div class=warn><p>[NOTE] Updated <span class=timeago datetime=2020-01-20T00:00:00 title="January 20, 2020">January 20, 2020</span>. This article may have outdated content or subject matter.</p></div></div><div class=post-content><h2 id=0x00>0x00</h2><blockquote><p>找个能监控组件端口是否存在的服务，并且可以将数据发送到 Prometheus ；blackbox export 是 Prometheus 家族一员，按照配置文件内容用于向目标主动探测</p></blockquote><h2 id=0x01-deploy>0x01 Deploy</h2><ul><li><p><a href=https://github.com/prometheus/blackbox_exporter>blackbox_exporter</a> 是 Prometheus 官方提供的 exporter 之一，可以提供 http、dns、tcp、icmp 的监控数据采集</p></li><li><p>Binary</p><ul><li><a href=https://github.com/prometheus/blackbox_exporter/releases>Release Download</a></li><li><code>./bin/blackbox_exporter --web.listen-address=:9115 --log.level=info --config.file=conf/blackbox.yml</code></li></ul></li><li><p>Docker</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>docker pull prom/blackbox-exporter
+</span></span><span class=line><span class=cl>docker run -d -p 9115:9115 --name blackbox_exporter -v <span class=sb>`</span><span class=nb>pwd</span><span class=sb>`</span>:/config blackbox_exporter --config.file<span class=o>=</span>/config/blackbox.yml
+</span></span></code></pre></td></tr></table></div></div></li><li><p>blackbox.yml template</p><ul><li>通过 blackbox.yml 定义模块详细信息</li><li>在 Prometheus 配置文件中引用该模块以及配置被监控目标主机</li></ul></li></ul><h3 id=blackboxyml-配置文件>blackbox.yml 配置文件</h3><blockquote><p>如无特殊需求，使用默认配置文件即可
+<a href=https://github.com/prometheus/blackbox_exporter/blob/master/config/testdata/blackbox-good.yml>blackbox-good.yml</a> 官方配置文件案例</p></blockquote><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-YAML data-lang=YAML><span class=line><span class=cl><span class=nt>modules</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>http_2xx</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>prober</span><span class=p>:</span><span class=w> </span><span class=l>http</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>http</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>method</span><span class=p>:</span><span class=w> </span><span class=l>GET</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>http_post_2xx</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>prober</span><span class=p>:</span><span class=w> </span><span class=l>http</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>http</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>method</span><span class=p>:</span><span class=w> </span><span class=l>POST</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>tcp_connect</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>prober</span><span class=p>:</span><span class=w> </span><span class=l>tcp</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>pop3s_banner</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>prober</span><span class=p>:</span><span class=w> </span><span class=l>tcp</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>tcp</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>query_response</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=nt>expect</span><span class=p>:</span><span class=w> </span><span class=s2>&#34;^+OK&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>tls</span><span class=p>:</span><span class=w> </span><span class=kc>true</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>tls_config</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=nt>insecure_skip_verify</span><span class=p>:</span><span class=w> </span><span class=kc>false</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>ssh_banner</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>prober</span><span class=p>:</span><span class=w> </span><span class=l>tcp</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>tcp</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>query_response</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=nt>expect</span><span class=p>:</span><span class=w> </span><span class=s2>&#34;^SSH-2.0-&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>irc_banner</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>prober</span><span class=p>:</span><span class=w> </span><span class=l>tcp</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>tcp</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>query_response</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=nt>send</span><span class=p>:</span><span class=w> </span><span class=s2>&#34;NICK prober&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=nt>send</span><span class=p>:</span><span class=w> </span><span class=s2>&#34;USER prober prober prober :prober&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=nt>expect</span><span class=p>:</span><span class=w> </span><span class=s2>&#34;PING :([^ ]+)&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=nt>send</span><span class=p>:</span><span class=w> </span><span class=s2>&#34;PONG ${1}&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=nt>expect</span><span class=p>:</span><span class=w> </span><span class=s2>&#34;^:[^ ]+ 001&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>icmp</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>prober</span><span class=p>:</span><span class=w> </span><span class=l>icmp</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>timeout</span><span class=p>:</span><span class=w> </span><span class=l>5s</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>icmp</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>preferred_ip_protocol</span><span class=p>:</span><span class=w> </span><span class=s2>&#34;ip4&#34;</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><h2 id=0x02-功能测试>0x02 功能测试</h2><ul><li>HTTP 测试<ul><li>定义 Request Header 信息</li><li>判断 Http status / Http Respones Header / Http Body 内容</li></ul></li><li>TCP 测试<ul><li>业务组件端口状态监听</li><li>应用层协议定义与监听</li></ul></li><li>ICMP 测试<ul><li>主机探活机制</li></ul></li></ul><h3 id=ping-测试>Ping 测试</h3><ul><li>阅读 <a href=https://github.com/prometheus/blackbox_exporter/blob/master/prober/icmp.go>icmp.go</a> 了解 ICMP 模块工作</li><li>以下内容引用 <a href=https://www.iamle.com/archives/2130.html>用 Prometheus 进行网络质量 Ping 监控</a></li><li>相关代码块添加到 Prometheus 配置文件内</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-YAML data-lang=YAML><span class=line><span class=cl><span class=w>  </span>- <span class=nt>job_name</span><span class=p>:</span><span class=w> </span><span class=s1>&#39;ping_all&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>scrape_interval</span><span class=p>:</span><span class=w> </span><span class=l>5s</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>metrics_path</span><span class=p>:</span><span class=w> </span><span class=l>/probe</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>params</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>module</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=l>icmp] </span><span class=w> </span><span class=c>#ping</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>static_configs</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=nt>targets</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s1>&#39;219.150.32.132&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;219.148.204.66&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;183.59.4.178&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;202.96.209.5&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;202.100.4.15&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;219.146.0.253&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;222.173.113.3&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;61.139.2.69&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;61.128.114.133&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;202.98.234.35&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;202.100.64.68&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;202.100.100.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;221.232.129.35&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;222.88.19.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;222.190.127.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;202.96.96.68&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;202.101.103.54&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;61.140.99.11&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;202.96.161.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;202.103.224.74&#39;</span><span class=p>]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=nt>labels</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>          </span><span class=nt>group</span><span class=p>:</span><span class=w> </span><span class=s1>&#39;一线城市 - 电信网络监控&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=nt>targets</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s1>&#39;218.8.251.163&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;218.107.51.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;221.7.34.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;112.65.244.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;218.25.9.38&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;124.89.76.214&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;202.102.152.3&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;202.102.128.68&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;124.161.132.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;221.7.1.20&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;27.98.234.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;218.104.111.122&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;218.28.199.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;221.6.4.66&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;221.12.31.58&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;218.104.136.149&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;210.21.4.130&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;210.21.196.6&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;221.7.128.68&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;221.199.15.5&#39;</span><span class=p>]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=nt>labels</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>          </span><span class=nt>group</span><span class=p>:</span><span class=w> </span><span class=s1>&#39;一线城市 - 联通网络监控&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=nt>targets</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s1>&#39;211.137.241.34&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;211.136.192.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;218.203.160.194&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;117.131.0.22&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;211.137.32.178&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;117.136.25.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;211.137.191.26&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;211.137.180.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;211.137.106.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;218.202.152.130&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;211.139.73.34&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;223.77.0.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;211.138.16.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;221.131.143.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;211.140.10.2&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;211.143.195.255&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;183.238.55.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;218.204.216.65&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;211.138.245.180&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;211.138.56.1&#39;</span><span class=p>]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=nt>labels</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>          </span><span class=nt>group</span><span class=p>:</span><span class=w> </span><span class=s1>&#39;一线城市 - 移动网络监控&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=nt>targets</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s1>&#39;61.233.168.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;61.234.113.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;211.98.224.87&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;222.44.44.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;222.33.8.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;61.232.201.76&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;211.98.19.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;61.232.49.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;211.98.208.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;61.233.199.129&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;222.34.16.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;61.232.206.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;61.233.79.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;211.98.43.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;61.232.78.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;61.232.93.193&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;211.98.161.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;61.235.99.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;222.52.72.66&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;211.138.56.1&#39;</span><span class=p>]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=nt>labels</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>          </span><span class=nt>group</span><span class=p>:</span><span class=w> </span><span class=s1>&#39;一线城市 - 铁通网络监控&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=nt>targets</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s1>&#39;219.150.32.132&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;219.153.32.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;219.149.6.99&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;220.189.218.45&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;123.172.77.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;202.103.124.34&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;222.172.200.68&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;202.100.64.68&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;222.93.201.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;222.191.255.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;202.101.224.68&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;222.85.179.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;220.178.79.2&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;59.49.12.97&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;222.223.255.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;219.148.172.97&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;219.132.199.49&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;14.120.0.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;222.223.29.5&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;222.173.222.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;202.101.107.55&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;222.74.58.29&#39;</span><span class=p>]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=nt>labels</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>          </span><span class=nt>group</span><span class=p>:</span><span class=w> </span><span class=s1>&#39;二线城市 - 电信网络监控&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=nt>targets</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s1>&#39;60.24.4.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;221.5.203.86&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;202.96.86.18&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;221.12.33.227&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;202.99.96.68&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;58.20.127.238&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;221.3.131.11&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;124.152.0.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;221.3.131.11&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;221.6.96.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;220.248.192.13&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;221.13.28.234&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;211.91.88.129&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;202.99.192.66&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;202.99.160.68&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;202.99.224.68&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;58.252.65.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;221.4.141.254&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;60.2.17.49&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;202.102.154.3&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;36.249.127.25&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;202.99.224.8&#39;</span><span class=p>]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=nt>labels</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>          </span><span class=nt>group</span><span class=p>:</span><span class=w> </span><span class=s1>&#39;二线城市 - 联通网络监控&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=nt>targets</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s1>&#39;211.137.160.5&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;218.201.17.2&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;211.140.192.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;211.140.35.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;211.141.66.209&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;211.138.225.2&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;111.17.191.25&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;218.203.160.195&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;211.103.55.51&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;211.103.114.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;183.217.255.254&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;211.139.2.18&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;211.138.180.2&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;211.142.12.2&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;111.11.85.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;211.138.91.2&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;218.204.173.197&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;183.233.223.25&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;211.143.60.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;120.192.167.2&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;218.207.133.3&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;120.193.138.1&#39;</span><span class=p>]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=nt>labels</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>          </span><span class=nt>group</span><span class=p>:</span><span class=w> </span><span class=s1>&#39;二线城市 - 移动网络监控&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=nt>targets</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s1>&#39;61.234.70.2&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;211.98.114.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;61.232.157.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;61.234.186.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;61.235.225.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;211.98.71.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;211.98.72.7&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;123.81.2.9&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;211.98.44.65&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;222.45.86.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;222.49.82.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;211.98.108.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;222.48.116.17&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;211.98.149.117&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;61.235.145.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;222.39.142.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;110.211.253.9&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;222.50.104.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;61.234.76.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;61.232.53.113&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;61.234.196.185&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;222.39.156.1&#39;</span><span class=p>]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=nt>labels</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>          </span><span class=nt>group</span><span class=p>:</span><span class=w> </span><span class=s1>&#39;二线城市 - 铁通网络监控&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=nt>targets</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s1>&#39;166.111.8.28&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;202.112.26.34&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;202.114.240.6&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;202.116.160.33&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;211.65.207.170&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;218.26.226.100&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;222.221.252.162&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;202.38.64.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;202.201.48.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;202.118.176.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;121.193.138.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;222.23.245.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;58.195.136.3&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;202.118.1.28&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;59.77.229.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;121.48.177.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;121.250.214.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;59.75.177.1&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;59.75.112.254&#39;</span><span class=p>]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=nt>labels</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>          </span><span class=nt>group</span><span class=p>:</span><span class=w> </span><span class=s1>&#39;教育网络监控&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>relabel_configs</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=nt>source_labels</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=l>__address__]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=nt>regex</span><span class=p>:</span><span class=w> </span><span class=l>(.*)(:80)?</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=nt>target_label</span><span class=p>:</span><span class=w> </span><span class=l>__param_target</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=nt>replacement</span><span class=p>:</span><span class=w> </span><span class=l>${1}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=nt>source_labels</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=l>__param_target]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=nt>regex</span><span class=p>:</span><span class=w> </span><span class=l>(.*)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=nt>target_label</span><span class=p>:</span><span class=w> </span><span class=l>ping</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=nt>replacement</span><span class=p>:</span><span class=w> </span><span class=l>${1}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=nt>source_labels</span><span class=p>:</span><span class=w> </span><span class=p>[]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=nt>regex</span><span class=p>:</span><span class=w> </span><span class=l>.*</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=nt>target_label</span><span class=p>:</span><span class=w> </span><span class=l>__address__</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=nt>replacement</span><span class=p>:</span><span class=w> </span><span class=m>172.16.10.65</span><span class=p>:</span><span class=m>9115</span><span class=w>  </span><span class=c># Blackbox exporter.</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><h3 id=tcp-测试>TCP 测试</h3><ul><li>阅读 <a href=https://github.com/prometheus/blackbox_exporter/blob/master/prober/tcp_test.go>tcp_test.go</a> 了解 TCP 工作</li><li>监听 TiDB TiKV PD 的业务端口地址，用来判断服务是否在线</li><li>相关代码块添加到 Prometheus 文件内</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-YAML data-lang=YAML><span class=line><span class=cl>- <span class=nt>job_name</span><span class=p>:</span><span class=w> </span><span class=s2>&#34;port_test&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>scrape_interval</span><span class=p>:</span><span class=w> </span><span class=l>30s</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>metrics_path</span><span class=p>:</span><span class=w> </span><span class=l>/probe</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>params</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>module</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=l>tcp_connect]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>static_configs</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=nt>targets</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s1>&#39;172.16.10.64:2379&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;172.16.10.65:2379&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;172.16.10.66:2379&#39;</span><span class=p>]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>labels</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>group</span><span class=p>:</span><span class=w> </span><span class=s1>&#39;pd&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=nt>targets</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s1>&#39;172.16.10.64:4000&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;172.16.10.65:4000&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;172.16.10.66:4000&#39;</span><span class=p>]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>labels</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>group</span><span class=p>:</span><span class=w> </span><span class=s1>&#39;tidb&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=nt>targets</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s1>&#39;172.16.10.67:20160&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;172.16.10.68:20160&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;172.16.10.69:20160&#39;</span><span class=p>]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>labels</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>group</span><span class=p>:</span><span class=w> </span><span class=s1>&#39;tikv&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=nt>targets</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s1>&#39;172.16.10.64:9100&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;172.16.10.65:9100&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;172.16.10.66:9100&#39;</span><span class=p>,</span><span class=s1>&#39;172.16.10.67:9100&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;172.16.10.68:9100&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;172.16.10.69:9100&#39;</span><span class=p>]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>labels</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>group</span><span class=p>:</span><span class=w> </span><span class=s1>&#39;node-export&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=nt>targets</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=s1>&#39;172.16.10.67:3000&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;172.16.10.67:9091&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;172.16.10.67:9090&#39;</span><span class=p>]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>labels</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>group</span><span class=p>:</span><span class=w> </span><span class=s1>&#39;monitor&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>relabel_configs</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span>- <span class=nt>source_labels</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=l>__address__]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>target_label</span><span class=p>:</span><span class=w> </span><span class=l>__param_target</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span>- <span class=nt>source_labels</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=l>__param_target]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>target_label</span><span class=p>:</span><span class=w> </span><span class=l>instance</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span>- <span class=nt>target_label</span><span class=p>:</span><span class=w> </span><span class=l>__address__</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>replacement</span><span class=p>:</span><span class=w> </span><span class=m>172.16.10.65</span><span class=p>:</span><span class=m>9115</span><span class=w>  </span><span class=c># Blackbox 地址</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><h3 id=http-测试>HTTP 测试</h3><ul><li><a href=https://github.com/prometheus/blackbox_exporter/blob/master/prober/http_test.go>http_test.go</a></li><li>相关代码块添加到 Prometheus 文件内</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-YAML data-lang=YAML><span class=line><span class=cl><span class=w>  </span>- <span class=nt>job_name</span><span class=p>:</span><span class=w> </span><span class=s1>&#39;http_2xx&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>scrape_interval</span><span class=p>:</span><span class=w> </span><span class=l>5s</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>metrics_path</span><span class=p>:</span><span class=w> </span><span class=l>/probe</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>params</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>module</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=l>http_2xx]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>static_configs</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=nt>targets</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span>- <span class=s1>&#39;www.baidu.com&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span>- <span class=s1>&#39;www.pingcap.com&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span>- <span class=s1>&#39;http://172.16.10.65:2379/metrics&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>relabel_configs</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=nt>source_labels</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=l>__address__]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=nt>target_label</span><span class=p>:</span><span class=w> </span><span class=l>__param_target</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=nt>source_labels</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=l>__param_target]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=nt>target_label</span><span class=p>:</span><span class=w> </span><span class=l>instance</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=nt>target_label</span><span class=p>:</span><span class=w> </span><span class=l>__address__</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=nt>replacement</span><span class=p>:</span><span class=w> </span><span class=m>172.16.10.65</span><span class=p>:</span><span class=m>9115</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><h2 id=0x03-告警测试>0x03 告警测试</h2><ul><li><p>通过 <code>http://172.16.10.65:9115/probe?target=prometheus.io&module=http_2xx&debug=true</code> 方式可观察监听过程</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>Logs for the probe:
+</span></span><span class=line><span class=cl>ts=2018-04-13T03:47:36.354717876Z caller=main.go:116 module=http_2xx target=prometheus.io level=info msg=&#34;Beginning probe&#34; probe=http timeout_seconds=9.5
+</span></span><span class=line><span class=cl>ts=2018-04-13T03:47:36.354917698Z caller=utils.go:42 module=http_2xx target=prometheus.io level=info msg=&#34;Resolving target address&#34; preferred_ip_protocol=ip6
+</span></span><span class=line><span class=cl>ts=2018-04-13T03:47:36.403356427Z caller=utils.go:65 module=http_2xx target=prometheus.io level=info msg=&#34;Resolved target address&#34; ip=2400:cb00:2048:1::6818:783c
+</span></span><span class=line><span class=cl>ts=2018-04-13T03:47:36.40345284Z caller=http.go:282 module=http_2xx target=prometheus.io level=info msg=&#34;Making HTTP request&#34; url=http://[2400:cb00:2048:1::6818:783c] host=prometheus.io
+</span></span><span class=line><span class=cl>ts=2018-04-13T03:47:36.414825723Z caller=http.go:297 module=http_2xx target=prometheus.io level=error msg=&#34;Error for HTTP request&#34; err=&#34;Get http://[2400:cb00:2048:1::6818:783c]: dial tcp [2400:cb00:2048:1::6818:783c]:80: connect: network is unreachable&#34;
+</span></span><span class=line><span class=cl>ts=2018-04-13T03:47:36.426234543Z caller=http.go:354 module=http_2xx target=prometheus.io level=info msg=&#34;Response timings for roundtrip&#34; roundtrip=0 start=2018-04-13T11:47:36.414648186+08:00 dnsDone=2018-04-13T11:47:36.414648186+08:00 connectDone=2018-04-13T11:47:36.414794718+08:00 gotConn=0001-01-01T00:00:00Z responseStart=0001-01-01T00:00:00Z end=2018-04-13T11:47:36.414814678+08:00
+</span></span><span class=line><span class=cl>ts=2018-04-13T03:47:36.426339526Z caller=main.go:129 module=http_2xx target=prometheus.io level=error msg=&#34;Probe failed&#34; duration_seconds=0.071537196
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>Metrics that would have been returned:
+</span></span><span class=line><span class=cl># HELP probe_dns_lookup_time_seconds Returns the time taken for probe dns lookup in seconds
+</span></span><span class=line><span class=cl># TYPE probe_dns_lookup_time_seconds gauge
+</span></span><span class=line><span class=cl>probe_dns_lookup_time_seconds 0.048474718
+</span></span><span class=line><span class=cl># HELP probe_duration_seconds Returns how long the probe took to complete in seconds
+</span></span><span class=line><span class=cl># TYPE probe_duration_seconds gauge
+</span></span><span class=line><span class=cl>probe_duration_seconds 0.071537196
+</span></span><span class=line><span class=cl># HELP probe_failed_due_to_regex Indicates if probe failed due to regex
+</span></span><span class=line><span class=cl># TYPE probe_failed_due_to_regex gauge
+</span></span><span class=line><span class=cl>probe_failed_due_to_regex 0
+</span></span><span class=line><span class=cl># HELP probe_http_content_length Length of http content response
+</span></span><span class=line><span class=cl># TYPE probe_http_content_length gauge
+</span></span><span class=line><span class=cl>probe_http_content_length 0
+</span></span><span class=line><span class=cl># HELP probe_http_duration_seconds Duration of http request by phase, summed over all redirects
+</span></span><span class=line><span class=cl># TYPE probe_http_duration_seconds gauge
+</span></span><span class=line><span class=cl>probe_http_duration_seconds{phase=&#34;connect&#34;} 0
+</span></span><span class=line><span class=cl>probe_http_duration_seconds{phase=&#34;processing&#34;} 0
+</span></span><span class=line><span class=cl>probe_http_duration_seconds{phase=&#34;resolve&#34;} 0.048474718
+</span></span><span class=line><span class=cl>probe_http_duration_seconds{phase=&#34;tls&#34;} 0
+</span></span><span class=line><span class=cl>probe_http_duration_seconds{phase=&#34;transfer&#34;} 0
+</span></span><span class=line><span class=cl># HELP probe_http_redirects The number of redirects
+</span></span><span class=line><span class=cl># TYPE probe_http_redirects gauge
+</span></span><span class=line><span class=cl>probe_http_redirects 0
+</span></span><span class=line><span class=cl># HELP probe_http_ssl Indicates if SSL was used for the final redirect
+</span></span><span class=line><span class=cl># TYPE probe_http_ssl gauge
+</span></span><span class=line><span class=cl>probe_http_ssl 0
+</span></span><span class=line><span class=cl># HELP probe_http_status_code Response HTTP status code
+</span></span><span class=line><span class=cl># TYPE probe_http_status_code gauge
+</span></span><span class=line><span class=cl>probe_http_status_code 0
+</span></span><span class=line><span class=cl># HELP probe_http_version Returns the version of HTTP of the probe response
+</span></span><span class=line><span class=cl># TYPE probe_http_version gauge
+</span></span><span class=line><span class=cl>probe_http_version 0
+</span></span><span class=line><span class=cl># HELP probe_ip_protocol Specifies whether probe ip protocol is IP4 or IP6
+</span></span><span class=line><span class=cl># TYPE probe_ip_protocol gauge
+</span></span><span class=line><span class=cl>probe_ip_protocol 6
+</span></span><span class=line><span class=cl># HELP probe_success Displays whether or not the probe was a success
+</span></span><span class=line><span class=cl># TYPE probe_success gauge
+</span></span><span class=line><span class=cl>probe_success 0
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>Module configuration:
+</span></span><span class=line><span class=cl>prober: http
+</span></span><span class=line><span class=cl>http:
+</span></span><span class=line><span class=cl>  method: GET
+</span></span></code></pre></td></tr></table></div></div></li></ul><h3 id=告警测试规则>告警测试规则</h3><ul><li><p>判断 probe_success metric 结果值，达到告警效果</p><ul><li>成功 == 1</li><li>失败 == 0</li></ul></li><li><p>创建 <code>port.rules.yml</code> 文件，写入以下告警规则</p></li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-yaml data-lang=yaml><span class=line><span class=cl><span class=w>  </span>- <span class=nt>alert</span><span class=p>:</span><span class=w> </span><span class=l>TiDB_is_Down</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>expr</span><span class=p>:</span><span class=w> </span><span class=l>probe_success{group=&#34;tidb&#34;} == 0</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>for</span><span class=p>:</span><span class=w> </span><span class=l>3m</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>labels</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>env</span><span class=p>:</span><span class=w> </span><span class=l>test-cluster</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>level</span><span class=p>:</span><span class=w> </span><span class=l>port</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>expr</span><span class=p>:</span><span class=w> </span><span class=l>probe_success{group=&#34;tidb&#34;} == 0</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>annotations</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>description</span><span class=p>:</span><span class=w> </span><span class=s1>&#39;alert:{{ $labels.expr }} instance:
+</span></span></span><span class=line><span class=cl><span class=s1>        {{ $labels.instance }} values: {{ $value }}&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>value</span><span class=p>:</span><span class=w> </span><span class=s1>&#39;{{ $value }}&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>summary</span><span class=p>:</span><span class=w> </span><span class=l>TiDB_is_Down</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=nt>alert</span><span class=p>:</span><span class=w> </span><span class=l>TiKV_is_Down</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>expr</span><span class=p>:</span><span class=w> </span><span class=l>probe_success{group=&#34;tikv&#34;} == 0</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>for</span><span class=p>:</span><span class=w> </span><span class=l>3m</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>labels</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>env</span><span class=p>:</span><span class=w> </span><span class=l>test-cluster</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>level</span><span class=p>:</span><span class=w> </span><span class=l>port</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>expr</span><span class=p>:</span><span class=w> </span><span class=l>probe_success{group=&#34;tikv&#34;} == 0</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>annotations</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>description</span><span class=p>:</span><span class=w> </span><span class=s1>&#39;alert:{{ $labels.expr }} instance:
+</span></span></span><span class=line><span class=cl><span class=s1>        {{ $labels.instance }} values: {{ $value }}&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>value</span><span class=p>:</span><span class=w> </span><span class=s1>&#39;{{ $value }}&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>summary</span><span class=p>:</span><span class=w> </span><span class=l>TiKV_is_Down</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=nt>alert</span><span class=p>:</span><span class=w> </span><span class=l>PD_is_Down</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>expr</span><span class=p>:</span><span class=w> </span><span class=l>probe_success{group=&#34;pd&#34;} == 0</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>for</span><span class=p>:</span><span class=w> </span><span class=l>3m</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>labels</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>env</span><span class=p>:</span><span class=w> </span><span class=l>test-cluster</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>level</span><span class=p>:</span><span class=w> </span><span class=l>port</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>expr</span><span class=p>:</span><span class=w> </span><span class=l>probe_success{group=&#34;pd&#34;} == 0</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>annotations</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>description</span><span class=p>:</span><span class=w> </span><span class=s1>&#39;alert:{{ $labels.expr }} instance:
+</span></span></span><span class=line><span class=cl><span class=s1>        {{ $labels.instance }} values: {{ $value }}&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>value</span><span class=p>:</span><span class=w> </span><span class=s1>&#39;{{ $value }}&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>summary</span><span class=p>:</span><span class=w> </span><span class=l>PD_is_Down</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><h3 id=上报-prometheus>上报 Prometheus</h3><ul><li>Prometheus 配置文件中添加 <code>port.rules.yml</code> 字段，修改完成后重启生效<ul><li>如果 Prometheus 已经引入 Alertmanger 服务，Prometheus 监控到端口 down 掉后会触发告警</li></ul></li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-yaml data-lang=yaml><span class=line><span class=cl><span class=nt>rule_files</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=s1>&#39;node.rules.yml&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=s1>&#39;blacker.rules.yml&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=s1>&#39;bypass.rules.yml&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=s1>&#39;pd.rules.yml&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=s1>&#39;tidb.rules.yml&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=s1>&#39;tikv.rules.yml&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=s1>&#39;binlog.rules.yml&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=s1>&#39;port.rules.yml&#39;</span><span class=w> </span><span class=c># 端口监测告警规则文件</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><h3 id=grafana-展示>Grafana 展示</h3><ul><li>部署 Grafana 服务<ul><li>下载 <a href=https://grafana.com/grafana/download>Grafana</a></li><li>部署 <a href=http://docs.grafana.org/installation/rpm/>Grafana</a></li></ul></li><li>利用以下 metrics 构建页面<ul><li>probe_success</li><li>probe_duration_seconds</li></ul></li></ul></div><div class=post-copyright><p class=copyright-item><span class=item-title>Author</span>
+<span class=item-content>Jeff</span></p><p class=copyright-item><span class=item-title>LastMod</span>
+<span class=item-content>2020-01-20</span></p><p class=copyright-item><span class=item-title>License</span>
+<span class=item-content><a rel="license noopener" href=https://creativecommons.org/licenses/by-nc-nd/4.0/ target=_blank>CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span></p></div><footer class=post-footer><div class=post-tags><a href=/tags/deploy/>Deploy</a>
+<a href=/tags/alertmanager/>AlertManager</a>
+<a href=/tags/prometheus/>Prometheus</a>
+<a href=/tags/blackbox/>Blackbox</a></div><nav class=post-nav><a class=prev href=/post/20170604-alertmanager/><i class="iconfont icon-left"></i>
+<span class="prev-text nav-default">监控架构 - 专业打小报告好多年</span>
+<span class="prev-text nav-mobile">Prev</span></a>
+<a class=next href=/post/20170602-node_exporter/><span class="next-text nav-default">监控架构 - Node_exporter 系统监控组件</span>
+<span class="next-text nav-mobile">Next</span>
+<i class="iconfont icon-right"></i></a></nav></footer></article></div></div></main><footer id=footer class=footer><div class=social-links><a href=https://github.com/BigerCAP/TiDB-AirPlan/issues class="iconfont icon-github" title=github></a>
+<a href=https://ap.biger.cc/index.xml type=application/rss+xml class="iconfont icon-rss" title=rss></a></div><div class=copyright><span class=power-by>Powered by <a class=hexo-link href=https://gohugo.io>Hugo</a></span>
+<span class=division>|</span>
+<span class=theme-info>Theme -
+<a class=theme-link href=https://github.com/olOwOlo/hugo-theme-even>Even</a></span><div class=busuanzi-footer><span id=busuanzi_container_site_pv>site pv: <span id=busuanzi_value_site_pv><img src=/img/spinner.svg alt=spinner.svg></span></span>
+<span class=division>|</span>
+<span id=busuanzi_container_site_uv>site uv: <span id=busuanzi_value_site_uv><img src=/img/spinner.svg alt=spinner.svg></span></span></div><span class=copyright-year>&copy;
+2017 -
+2023
+<span class=heart><i class="iconfont icon-heart"></i></span>
+<span class=author>DB - AirPlan</span></span></div></footer><div class=back-to-top id=back-to-top><i class="iconfont icon-up"></i></div></div><script src=https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin=anonymous></script>
+<script>var languageCode="en".replace(/-/g,"_").replace(/_(.*)/,function(e,t){return e.replace(t,t.toUpperCase())});timeago().render(document.querySelectorAll(".timeago"),languageCode),timeago.cancel()</script><script type=text/javascript src=/dist/even.26188efa.min.js></script></body></html>

@@ -1,349 +1,48 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>Linux - OOM &gt; out of memory - TiDB AirPlan - A biger solution</title>
-  <meta name="renderer" content="webkit" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-
-<meta http-equiv="Cache-Control" content="no-transform" />
-<meta http-equiv="Cache-Control" content="no-siteapp" />
-
-<meta name="theme-color" content="#f8f5ec" />
-<meta name="msapplication-navbutton-color" content="#f8f5ec">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
-
-
-<meta name="author" content="Jeff" /><meta name="description" content="0x00 开头 测试机器环境配置比较低，使用 TiDB Join 表连接查询时偶尔会出现重启现象，按照官方指导查看问题原因说时 TiDB-server OOM 了，那么 OOM 是什么呢？为什么 OOM 啊？怎么才" /><meta name="keywords" content="TiDB, AirPlan, TiDB OPS, tidb-operator, 2pc, raft, databases, mysql, htap" />
-
-
-
-
-
-
-<meta name="generator" content="Hugo 0.78.2 with theme even" />
-
-
-<link rel="canonical" href="https://ap.tidb.cc/post/20171119-46-linux-oom-killer/" />
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="manifest" href="/manifest.json">
-<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
-
-<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-<link href="/dist/even.04bd84cd.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
-
-
-<meta property="og:title" content="Linux - OOM &gt; out of memory" />
-<meta property="og:description" content="0x00 开头 测试机器环境配置比较低，使用 TiDB Join 表连接查询时偶尔会出现重启现象，按照官方指导查看问题原因说时 TiDB-server OOM 了，那么 OOM 是什么呢？为什么 OOM 啊？怎么才" />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://ap.tidb.cc/post/20171119-46-linux-oom-killer/" />
-<meta property="article:published_time" content="2017-11-19T00:00:00+08:00" />
-<meta property="article:modified_time" content="2018-05-22T00:00:00+08:00" />
-<meta itemprop="name" content="Linux - OOM &gt; out of memory">
-<meta itemprop="description" content="0x00 开头 测试机器环境配置比较低，使用 TiDB Join 表连接查询时偶尔会出现重启现象，按照官方指导查看问题原因说时 TiDB-server OOM 了，那么 OOM 是什么呢？为什么 OOM 啊？怎么才">
-<meta itemprop="datePublished" content="2017-11-19T00:00:00+08:00" />
-<meta itemprop="dateModified" content="2018-05-22T00:00:00+08:00" />
-<meta itemprop="wordCount" content="1676">
-
-
-
-<meta itemprop="keywords" content="Linux,TiDB,OOM," />
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Linux - OOM &gt; out of memory"/>
-<meta name="twitter:description" content="0x00 开头 测试机器环境配置比较低，使用 TiDB Join 表连接查询时偶尔会出现重启现象，按照官方指导查看问题原因说时 TiDB-server OOM 了，那么 OOM 是什么呢？为什么 OOM 啊？怎么才"/>
-
-<!--[if lte IE 9]>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
-<![endif]-->
-
-<!--[if lt IE 9]>
-  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
-<![endif]-->
-
-</head>
-<body>
-  <div id="mobile-navbar" class="mobile-navbar">
-  <div class="mobile-header-logo">
-    <a href="/" class="logo">TiDB AirPlan</a>
-  </div>
-  <div class="mobile-navbar-icon">
-    <span></span>
-    <span></span>
-    <span></span>
-  </div>
-</div>
-<nav id="mobile-menu" class="mobile-menu slideout-menu">
-  <ul class="mobile-menu-list">
-    <a href="/post/">
-        <li class="mobile-menu-item">Blog</li>
-      </a><a href="/look/">
-        <li class="mobile-menu-item">Look</li>
-      </a><a href="/tags/">
-        <li class="mobile-menu-item">Tags</li>
-      </a><a href="/categories/">
-        <li class="mobile-menu-item">Categories</li>
-      </a><a href="/about/">
-        <li class="mobile-menu-item">About</li>
-      </a>
-  </ul>
-</nav>
-  <div class="container" id="mobile-panel">
-    <header id="header" class="header">
-        <div class="logo-wrapper">
-  <a href="/" class="logo">TiDB AirPlan</a>
-</div>
-
-<nav class="site-navbar">
-  <ul id="menu" class="menu">
-    <li class="menu-item">
-        <a class="menu-item-link" href="/post/">Blog</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/look/">Look</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/tags/">Tags</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/categories/">Categories</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/about/">About</a>
-      </li>
-  </ul>
-</nav>
-    </header>
-
-    <main id="main" class="main">
-      <div class="content-wrapper">
-        <div id="content" class="content">
-          <article class="post">
-    
-    <header class="post-header">
-      <h1 class="post-title">Linux - OOM &gt; out of memory</h1>
-
-      <div class="post-meta">
-        <span class="post-time"> 2017-11-19 </span>
-        <div class="post-category">
-            <a href="/categories/troubleshooting/"> Troubleshooting </a>
-            </div>
-          <span class="more-meta"> 1676 words </span>
-          <span class="more-meta"> 4 mins read </span>
-        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
-      </div>
-    </header>
-
-    <div class="post-toc" id="post-toc">
-  <h2 class="post-toc-title">Contents</h2>
-  <div class="post-toc-content">
-    <nav id="TableOfContents">
-  <ul>
-    <li><a href="#0x00-开头">0x00 开头</a></li>
-    <li><a href="#0x01-现象">0x01 现象</a></li>
-    <li><a href="#0x02-原因">0x02 原因</a></li>
-    <li><a href="#0x03-oom">0x03 OOM</a></li>
-  </ul>
-</nav>
-  </div>
-</div>
-  <div class="post-outdated">
-    <div class="warn">
-      <p>[NOTE] Updated <span class="timeago" datetime="2018-05-22T00:00:00" title="May 22, 2018">May 22, 2018</span>. This article may have outdated content or subject matter.</p>
-    </div>
-  </div>
-    <div class="post-content">
-      <h2 id="0x00-开头">0x00 开头</h2>
-<p>测试机器环境配置比较低，使用 TiDB Join 表连接查询时偶尔会出现重启现象，按照官方指导查看问题原因说时 TiDB-server OOM 了，那么 OOM 是什么呢？为什么 OOM 啊？怎么才能避免 OOM 呢？<br>
-思考这个现象的时候在网上搜到了一些内容，在本文总结下（<del>从其他家复制到自己家</del>）</p>
-<h2 id="0x01-现象">0x01 现象</h2>
-<p>TiDB-server 运行在一个 8U 8G 的虚拟机上，有时候 BDA 写出一些神奇的 SQL 在 TiDB-server 上运行的会导致内存瞬间上涨；根据需要查询的数据量级，可能会瞬间导致内存爆炸然后触发 TiDB-server 重启。<br>
-通过以下三种方式交叉验证 TiDB-server 是否是 OOM：</p>
-<ol>
-<li>内存在用状态可以在监控上看到一个上涨趋势，位置在 <code>TiDB-dashboard &gt; server &gt; memory</code> 查看，出现重启的现象就是内存瞬间上涨然后出现断崖式下降。</li>
-<li>链接 TiDB-server 的 mysql 客户端会出现一条信息返回 <code>ERROR 2013 (HY000): Lost connection to MySQL server during query</code></li>
-<li>使用 root 用户登录 Linux 系统，然后执行 <code>dmesg -T | grep -i oom</code> 命令，查看是否有相应信息返回
-<ul>
-<li>dmesg 记录了硬件启动后自检信息、kernel 系统运行信息</li>
-</ul>
-</li>
-</ol>
-<h2 id="0x02-原因">0x02 原因</h2>
-<p>TiDB-server 相比 mysql ，木有临时物理表、木有中间数据转存磁盘。所以当 client 发起请求从 TiDB 获取大量数据时，TiDB 需要从 TiKV 获取数据然后在 TiDB-server 内存中做计算，此处的计算会造成写放大，然后内存爆炸导致触发 Linux OOM 机制。</p>
-<p>这个现象影响程度不定，如果是在线联机服务遇见这种情况就是日了🐶啦，如果是测试或者内部人员使用还好，大家重新执行个查询就好了。该现象木有啥完美解决方案，可以考虑找个超大内存机器部署 TiDB-server 、或者让 DBA 处理数据时缩小范围（不明所以）。</p>
-<h2 id="0x03-oom">0x03 OOM</h2>
-<blockquote>
-<p>linux OOM killer（Out Of Memory killer）这个东西会在系统内存耗尽的情况下跳出来，选择性的干掉一些进程以求释放一些内存（<del>不负责的个人经验：这把刀杀的是压死骆驼的最后一根稻草，并不是捅刀子最多的人</del>）<br>
-Linux 下每个进程都有个 OOM 权重，在 <code>/proc/&lt;pid&gt;/oom_adj</code> 里面，权重是 -17 ~~ +15<br>
-同时 OOM killer 会计算一个叫 score 的东东 <code>/proc/&lt;pid&gt;/oom_score</code> ，天黑闭眼之后用来确定要被杀的人；这个值是系统收集 进程的内存消耗量（计算时：父进程会承包所有子进程的内存占用）、CPU 时间 (utime + stime)、生存时间 (uptime - start time)、oom_adj 综合计算之后的结果<br>
-消耗内存越多分越高，存活时间越长分越低 == “损失最少的工作，释放最大的内存同时不伤及无辜的用了很大内存的进程，并且杀掉的进程数尽量少”</p>
-</blockquote>
-<p>友好方式人工控制降低被杀几率，辣么就是控制进程的权重，比如这样调整 <code>echo -17 &gt; /proc/$PID/oom_adj</code> “源码说 -17 可以禁止进程被 OOM，15 会最大几率被打死”</p>
-<p>还有个不那么友好的方案：</p>
-<ul>
-<li>修改参数 <code>/proc/sys/vm/overcommit_memory</code> 可以控制进程对内存过量使用的应对策略
-<ul>
-<li><code>overcommit_memory=0</code> 允许进程轻微过量使用内存，但对于瞬间大容量内存占用请求则不允许【默认值】
-<ul>
-<li>单次申请的内存大小不能超过 【free memory + free swap + pagecache 大小 + SLAB 中可回收的部分】，否则本次申请失败。</li>
-</ul>
-</li>
-<li><code>overcommit_memory=1</code> 永远允许进程 overcommit</li>
-<li><code>overcommit_memory=2</code> 永远禁止 overcommit</li>
-</ul>
-</li>
-</ul>
-<blockquote>
-<p>本段内容复制于 <a href="http://linuxperf.com/?p=102">LINUX MEMORY OVERCOMMIT</a></p>
-</blockquote>
-<p>overcommit 还有个延伸内容，那就是怎么判断什么是 overcommit？Linux 内核设置了个内存阈值开关，超过开关后直接干掉。所以配置成 overvcommit 时注意修改参数 <code>/proc/meminfo</code></p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># grep -i commit /proc/meminfo</span>
-CommitLimit:     <span class="m">5967744</span> kB
-Committed_AS:    <span class="m">5363236</span> kB
-</code></pre></td></tr></table>
-</div>
-</div><p>CommitLimit 就是 overcommit 的阈值，申请的内存总数超过 CommitLimit 的话就算是 overcommit。<br>
-这个阈值是如何计算出来的呢？它既不是物理内存的大小，也不是 free memory 的大小，它是通过内核参数 vm.overcommit_ratio 或 vm.overcommit_kbytes 间接设置的，公式如：<code>CommitLimit = (Physical RAM * vm.overcommit_ratio / 100) + Swap</code></p>
-<p>vm.overcommit_ratio 是内核参数，缺省值是 50，表示物理内存的 50%。如果你不想使用比率，也可以直接指定内存的字节数大小，通过另一个内核参数 vm.overcommit_kbytes 即可.
+<!doctype html><html lang=en><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge,chrome=1"><title>Linux - OOM > out of memory - AirPlan - A biger solution</title><meta name=renderer content="webkit"><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta http-equiv=cache-control content="no-transform"><meta http-equiv=cache-control content="no-siteapp"><meta name=theme-color content="#f8f5ec"><meta name=msapplication-navbutton-color content="#f8f5ec"><meta name=apple-mobile-web-app-capable content="yes"><meta name=apple-mobile-web-app-status-bar-style content="#f8f5ec"><meta name=author content="Jeff"><meta name=description content="0x00 开头 测试机器环境配置比较低，使用 TiDB Join 表连接查询时偶尔会出现重启现象，按照官方指导查看问题原因说时 TiDB-server OOM 了，那么 OOM 是什么呢？为什么 OOM 啊？怎么才"><meta name=keywords content="TiDB,AirPlan,TiDB OPS,tidb-operator,2pc,raft,databases,mysql,htap"><meta name=generator content="Hugo 0.110.0 with theme even"><link rel=canonical href=https://ap.biger.cc/post/20171119-46-linux-oom-killer/><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/manifest.json><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><script async src=//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js></script>
+<link href=/dist/even.04bd84cd.min.css rel=stylesheet><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin=anonymous><meta property="og:title" content="Linux - OOM > out of memory"><meta property="og:description" content="0x00 开头 测试机器环境配置比较低，使用 TiDB Join 表连接查询时偶尔会出现重启现象，按照官方指导查看问题原因说时 TiDB-server OOM 了，那么 OOM 是什么呢？为什么 OOM 啊？怎么才"><meta property="og:type" content="article"><meta property="og:url" content="https://ap.biger.cc/post/20171119-46-linux-oom-killer/"><meta property="article:section" content="post"><meta property="article:published_time" content="2017-11-19T00:00:00+08:00"><meta property="article:modified_time" content="2018-05-22T00:00:00+08:00"><meta itemprop=name content="Linux - OOM > out of memory"><meta itemprop=description content="0x00 开头 测试机器环境配置比较低，使用 TiDB Join 表连接查询时偶尔会出现重启现象，按照官方指导查看问题原因说时 TiDB-server OOM 了，那么 OOM 是什么呢？为什么 OOM 啊？怎么才"><meta itemprop=datePublished content="2017-11-19T00:00:00+08:00"><meta itemprop=dateModified content="2018-05-22T00:00:00+08:00"><meta itemprop=wordCount content="1676"><meta itemprop=keywords content="Linux,TiDB,OOM,"><meta name=twitter:card content="summary"><meta name=twitter:title content="Linux - OOM > out of memory"><meta name=twitter:description content="0x00 开头 测试机器环境配置比较低，使用 TiDB Join 表连接查询时偶尔会出现重启现象，按照官方指导查看问题原因说时 TiDB-server OOM 了，那么 OOM 是什么呢？为什么 OOM 啊？怎么才"><!--[if lte IE 9]><script src=https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js></script><![endif]--><!--[if lt IE 9]><script src=https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js></script>
+<script src=https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js></script><![endif]--></head><body><div id=mobile-navbar class=mobile-navbar><div class=mobile-header-logo><a href=/ class=logo>AirPlan</a></div><div class=mobile-navbar-icon><span></span>
+<span></span>
+<span></span></div></div><nav id=mobile-menu class="mobile-menu slideout-menu"><ul class=mobile-menu-list><a href=/post/><li class=mobile-menu-item>Blog</li></a><a href=/look/><li class=mobile-menu-item>Look</li></a><a href=/tags/><li class=mobile-menu-item>Tags</li></a><a href=/categories/><li class=mobile-menu-item>Categories</li></a><a href=/about/><li class=mobile-menu-item>About</li></a></ul></nav><div class=container id=mobile-panel><header id=header class=header><div class=logo-wrapper><a href=/ class=logo>AirPlan</a></div><nav class=site-navbar><ul id=menu class=menu><li class=menu-item><a class=menu-item-link href=/post/>Blog</a></li><li class=menu-item><a class=menu-item-link href=/look/>Look</a></li><li class=menu-item><a class=menu-item-link href=/tags/>Tags</a></li><li class=menu-item><a class=menu-item-link href=/categories/>Categories</a></li><li class=menu-item><a class=menu-item-link href=/about/>About</a></li></ul></nav></header><main id=main class=main><div class=content-wrapper><div id=content class=content><article class=post><header class=post-header><h1 class=post-title>Linux - OOM > out of memory</h1><div class=post-meta><span class=post-time>2017-11-19</span><div class=post-category><a href=/categories/troubleshooting/>Troubleshooting</a></div><span class=more-meta>1676 words</span>
+<span class=more-meta>4 mins read</span>
+<span id=busuanzi_container_page_pv class=more-meta><span id=busuanzi_value_page_pv><img src=/img/spinner.svg alt=spinner.svg></span> times read</span></div></header><div class=post-toc id=post-toc><h2 class=post-toc-title>Contents</h2><div class=post-toc-content><nav id=TableOfContents><ul><li><a href=#0x00-开头>0x00 开头</a></li><li><a href=#0x01-现象>0x01 现象</a></li><li><a href=#0x02-原因>0x02 原因</a></li><li><a href=#0x03-oom>0x03 OOM</a></li></ul></nav></div></div><div class=post-outdated><div class=warn><p>[NOTE] Updated <span class=timeago datetime=2018-05-22T00:00:00 title="May 22, 2018">May 22, 2018</span>. This article may have outdated content or subject matter.</p></div></div><div class=post-content><h2 id=0x00-开头>0x00 开头</h2><p>测试机器环境配置比较低，使用 TiDB Join 表连接查询时偶尔会出现重启现象，按照官方指导查看问题原因说时 TiDB-server OOM 了，那么 OOM 是什么呢？为什么 OOM 啊？怎么才能避免 OOM 呢？<br>思考这个现象的时候在网上搜到了一些内容，在本文总结下（<del>从其他家复制到自己家</del>）</p><h2 id=0x01-现象>0x01 现象</h2><p>TiDB-server 运行在一个 8U 8G 的虚拟机上，有时候 BDA 写出一些神奇的 SQL 在 TiDB-server 上运行的会导致内存瞬间上涨；根据需要查询的数据量级，可能会瞬间导致内存爆炸然后触发 TiDB-server 重启。<br>通过以下三种方式交叉验证 TiDB-server 是否是 OOM：</p><ol><li>内存在用状态可以在监控上看到一个上涨趋势，位置在 <code>TiDB-dashboard > server > memory</code> 查看，出现重启的现象就是内存瞬间上涨然后出现断崖式下降。</li><li>链接 TiDB-server 的 mysql 客户端会出现一条信息返回 <code>ERROR 2013 (HY000): Lost connection to MySQL server during query</code></li><li>使用 root 用户登录 Linux 系统，然后执行 <code>dmesg -T | grep -i oom</code> 命令，查看是否有相应信息返回<ul><li>dmesg 记录了硬件启动后自检信息、kernel 系统运行信息</li></ul></li></ol><h2 id=0x02-原因>0x02 原因</h2><p>TiDB-server 相比 mysql ，木有临时物理表、木有中间数据转存磁盘。所以当 client 发起请求从 TiDB 获取大量数据时，TiDB 需要从 TiKV 获取数据然后在 TiDB-server 内存中做计算，此处的计算会造成写放大，然后内存爆炸导致触发 Linux OOM 机制。</p><p>这个现象影响程度不定，如果是在线联机服务遇见这种情况就是日了🐶啦，如果是测试或者内部人员使用还好，大家重新执行个查询就好了。该现象木有啥完美解决方案，可以考虑找个超大内存机器部署 TiDB-server 、或者让 DBA 处理数据时缩小范围（不明所以）。</p><h2 id=0x03-oom>0x03 OOM</h2><blockquote><p>linux OOM killer（Out Of Memory killer）这个东西会在系统内存耗尽的情况下跳出来，选择性的干掉一些进程以求释放一些内存（<del>不负责的个人经验：这把刀杀的是压死骆驼的最后一根稻草，并不是捅刀子最多的人</del>）<br>Linux 下每个进程都有个 OOM 权重，在 <code>/proc/&lt;pid>/oom_adj</code> 里面，权重是 -17 ~~ +15<br>同时 OOM killer 会计算一个叫 score 的东东 <code>/proc/&lt;pid>/oom_score</code> ，天黑闭眼之后用来确定要被杀的人；这个值是系统收集 进程的内存消耗量（计算时：父进程会承包所有子进程的内存占用）、CPU 时间 (utime + stime)、生存时间 (uptime - start time)、oom_adj 综合计算之后的结果<br>消耗内存越多分越高，存活时间越长分越低 == “损失最少的工作，释放最大的内存同时不伤及无辜的用了很大内存的进程，并且杀掉的进程数尽量少”</p></blockquote><p>友好方式人工控制降低被杀几率，辣么就是控制进程的权重，比如这样调整 <code>echo -17 > /proc/$PID/oom_adj</code> “源码说 -17 可以禁止进程被 OOM，15 会最大几率被打死”</p><p>还有个不那么友好的方案：</p><ul><li>修改参数 <code>/proc/sys/vm/overcommit_memory</code> 可以控制进程对内存过量使用的应对策略<ul><li><code>overcommit_memory=0</code> 允许进程轻微过量使用内存，但对于瞬间大容量内存占用请求则不允许【默认值】<ul><li>单次申请的内存大小不能超过 【free memory + free swap + pagecache 大小 + SLAB 中可回收的部分】，否则本次申请失败。</li></ul></li><li><code>overcommit_memory=1</code> 永远允许进程 overcommit</li><li><code>overcommit_memory=2</code> 永远禁止 overcommit</li></ul></li></ul><blockquote><p>本段内容复制于 <a href="http://linuxperf.com/?p=102">LINUX MEMORY OVERCOMMIT</a></p></blockquote><p>overcommit 还有个延伸内容，那就是怎么判断什么是 overcommit？Linux 内核设置了个内存阈值开关，超过开关后直接干掉。所以配置成 overvcommit 时注意修改参数 <code>/proc/meminfo</code></p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-shell data-lang=shell><span class=line><span class=cl><span class=c1># grep -i commit /proc/meminfo</span>
+</span></span><span class=line><span class=cl>CommitLimit:     <span class=m>5967744</span> kB
+</span></span><span class=line><span class=cl>Committed_AS:    <span class=m>5363236</span> kB
+</span></span></code></pre></td></tr></table></div></div><p>CommitLimit 就是 overcommit 的阈值，申请的内存总数超过 CommitLimit 的话就算是 overcommit。<br>这个阈值是如何计算出来的呢？它既不是物理内存的大小，也不是 free memory 的大小，它是通过内核参数 vm.overcommit_ratio 或 vm.overcommit_kbytes 间接设置的，公式如：<code>CommitLimit = (Physical RAM * vm.overcommit_ratio / 100) + Swap</code></p><p>vm.overcommit_ratio 是内核参数，缺省值是 50，表示物理内存的 50%。如果你不想使用比率，也可以直接指定内存的字节数大小，通过另一个内核参数 vm.overcommit_kbytes 即可.
 如果使用了 huge pages，那么需要从物理内存中减去，公式变成：<code>CommitLimit = ([total RAM] – [total huge TLB RAM]) * vm.overcommit_ratio / 100 + swap</code>
-参见 <a href="https://access.redhat.com/solutions/665023">https://access.redhat.com/solutions/665023</a></p>
-<p>/proc/meminfo 中的 Committed_AS 表示所有进程已经申请的内存总大小，（注意是已经申请的，不是已经分配的），如果 Committed_AS 超过 CommitLimit 就表示发生了 overcommit，超出越多表示 overcommit 越严重。Committed_AS 的含义换一种说法就是，如果要绝对保证不发生 OOM (out of memory) 需要多少物理内存。</p>
-<p>查看内存使用状况的常用工具 sar -r ，输出结果中有两个与 overcommit 有关，kbcommit 和 %commit</p>
-<ul>
-<li>kbcommit 对应 / proc/meminfo 中的 Committed_AS</li>
-<li>%commit 的计算公式并没有采用 CommitLimit 作分母，而是 Committed_AS/(MemTotal+SwapTotal)，意思是_内存申请_占_物理内存与交换区之和_的百分比</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-shell" data-lang="shell">$ sar -r
-
-05:00:01 PM kbmemfree kbmemused  %memused kbbuffers  kbcached  kbcommit   %commit  kbactive   kbinact   kbdirty
-05:10:01 PM    <span class="m">160576</span>   <span class="m">3648460</span>     95.78         <span class="m">0</span>   <span class="m">1846212</span>   <span class="m">4939368</span>     62.74   <span class="m">1390292</span>   <span class="m">1854880</span>         <span class="m">4</span>
-</code></pre></td></tr></table>
-</div>
-</div><p>课外阅读 <a href="https://www.oracle.com/technical-resources/articles/it-infrastructure/dev-oom-killer.html">How to Configure the Linux Out-of-Memory Killer</a></p>
-
-    </div>
-
-    <div class="post-copyright">
-  <p class="copyright-item">
-    <span class="item-title">Author</span>
-    <span class="item-content">Jeff</span>
-  </p>
-  <p class="copyright-item">
-    <span class="item-title">LastMod</span>
-    <span class="item-content">
-        2018-05-22
-        
-    </span>
-  </p>
-  
-  <p class="copyright-item">
-    <span class="item-title">License</span>
-    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span>
-  </p>
-</div>
-<footer class="post-footer">
-      <div class="post-tags">
-          <a href="/tags/linux/">Linux</a>
-          <a href="/tags/tidb/">TiDB</a>
-          <a href="/tags/oom/">OOM</a>
-          </div>
-      <nav class="post-nav">
-        <a class="prev" href="/post/20180323-systemd-syncer/">
-            <i class="iconfont icon-left"></i>
-            <span class="prev-text nav-default">Linux - Systemd &amp; Syncer 相爱相杀</span>
-            <span class="prev-text nav-mobile">Prev</span>
-          </a>
-        <a class="next" href="/post/20171108-40-testing-binlog/">
-            <span class="next-text nav-default">TiDB - Binlog 数据同步架构测试</span>
-            <span class="next-text nav-mobile">Next</span>
-            <i class="iconfont icon-right"></i>
-          </a>
-      </nav>
-    </footer>
-  </article>
-        </div>
-        
-
-  
-
-  
-
-      </div>
-    </main>
-
-    <footer id="footer" class="footer">
-      <div class="social-links">
-      <a href="https://github.com/BigerCAP/TiDB-AirPlan/issues" class="iconfont icon-github" title="github"></a>
-  <a href="https://ap.tidb.cc/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
-</div>
-
-<div class="copyright">
-  <span class="power-by">
-    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
-  </span>
-  <span class="division">|</span>
-  <span class="theme-info">
-    Theme - 
-    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
-  </span>
-
-  <div class="busuanzi-footer">
-    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
-      <span class="division">|</span>
-    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
-  </div>
-
-  <span class="copyright-year">
-    &copy; 
-    2017 - 
-    2020
-    <span class="heart">
-      <i class="iconfont icon-heart"></i>
-    </span>
-    <span class="author">TiDB - AirPlan</span>
-  </span>
-</div>
-    </footer>
-
-    <div class="back-to-top" id="back-to-top">
-      <i class="iconfont icon-up"></i>
-    </div>
-  </div>
-  
-  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js" integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js" integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin="anonymous"></script>
-  <script><!-- NOTE: timeago.js uses the language code format like "zh_CN" (underscore and case sensitive) -->
-    var languageCode = "en".replace(/-/g, '_').replace(/_(.*)/, function ($0, $1) {return $0.replace($1, $1.toUpperCase());});
-    timeago().render(document.querySelectorAll('.timeago'), languageCode);
-    timeago.cancel();  
-  </script>
-<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
-
-
-
-
-
-
-
-
-</body>
-</html>
+参见 <a href=https://access.redhat.com/solutions/665023>https://access.redhat.com/solutions/665023</a></p><p>/proc/meminfo 中的 Committed_AS 表示所有进程已经申请的内存总大小，（注意是已经申请的，不是已经分配的），如果 Committed_AS 超过 CommitLimit 就表示发生了 overcommit，超出越多表示 overcommit 越严重。Committed_AS 的含义换一种说法就是，如果要绝对保证不发生 OOM (out of memory) 需要多少物理内存。</p><p>查看内存使用状况的常用工具 sar -r ，输出结果中有两个与 overcommit 有关，kbcommit 和 %commit</p><ul><li>kbcommit 对应 / proc/meminfo 中的 Committed_AS</li><li>%commit 的计算公式并没有采用 CommitLimit 作分母，而是 Committed_AS/(MemTotal+SwapTotal)，意思是_内存申请_占_物理内存与交换区之和_的百分比</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-shell data-lang=shell><span class=line><span class=cl>$ sar -r
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>05:00:01 PM kbmemfree kbmemused  %memused kbbuffers  kbcached  kbcommit   %commit  kbactive   kbinact   kbdirty
+</span></span><span class=line><span class=cl>05:10:01 PM    <span class=m>160576</span>   <span class=m>3648460</span>     95.78         <span class=m>0</span>   <span class=m>1846212</span>   <span class=m>4939368</span>     62.74   <span class=m>1390292</span>   <span class=m>1854880</span>         <span class=m>4</span>
+</span></span></code></pre></td></tr></table></div></div><p>课外阅读 <a href=https://www.oracle.com/technical-resources/articles/it-infrastructure/dev-oom-killer.html>How to Configure the Linux Out-of-Memory Killer</a></p></div><div class=post-copyright><p class=copyright-item><span class=item-title>Author</span>
+<span class=item-content>Jeff</span></p><p class=copyright-item><span class=item-title>LastMod</span>
+<span class=item-content>2018-05-22</span></p><p class=copyright-item><span class=item-title>License</span>
+<span class=item-content><a rel="license noopener" href=https://creativecommons.org/licenses/by-nc-nd/4.0/ target=_blank>CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span></p></div><footer class=post-footer><div class=post-tags><a href=/tags/linux/>Linux</a>
+<a href=/tags/tidb/>TiDB</a>
+<a href=/tags/oom/>OOM</a></div><nav class=post-nav><a class=prev href=/post/20180323-systemd-syncer/><i class="iconfont icon-left"></i>
+<span class="prev-text nav-default">Linux - Systemd & Syncer 相爱相杀</span>
+<span class="prev-text nav-mobile">Prev</span></a>
+<a class=next href=/post/20171108-40-testing-binlog/><span class="next-text nav-default">TiDB - Binlog 数据同步架构测试</span>
+<span class="next-text nav-mobile">Next</span>
+<i class="iconfont icon-right"></i></a></nav></footer></article></div></div></main><footer id=footer class=footer><div class=social-links><a href=https://github.com/BigerCAP/TiDB-AirPlan/issues class="iconfont icon-github" title=github></a>
+<a href=https://ap.biger.cc/index.xml type=application/rss+xml class="iconfont icon-rss" title=rss></a></div><div class=copyright><span class=power-by>Powered by <a class=hexo-link href=https://gohugo.io>Hugo</a></span>
+<span class=division>|</span>
+<span class=theme-info>Theme -
+<a class=theme-link href=https://github.com/olOwOlo/hugo-theme-even>Even</a></span><div class=busuanzi-footer><span id=busuanzi_container_site_pv>site pv: <span id=busuanzi_value_site_pv><img src=/img/spinner.svg alt=spinner.svg></span></span>
+<span class=division>|</span>
+<span id=busuanzi_container_site_uv>site uv: <span id=busuanzi_value_site_uv><img src=/img/spinner.svg alt=spinner.svg></span></span></div><span class=copyright-year>&copy;
+2017 -
+2023
+<span class=heart><i class="iconfont icon-heart"></i></span>
+<span class=author>DB - AirPlan</span></span></div></footer><div class=back-to-top id=back-to-top><i class="iconfont icon-up"></i></div></div><script src=https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin=anonymous></script>
+<script>var languageCode="en".replace(/-/g,"_").replace(/_(.*)/,function(e,t){return e.replace(t,t.toUpperCase())});timeago().render(document.querySelectorAll(".timeago"),languageCode),timeago.cancel()</script><script type=text/javascript src=/dist/even.26188efa.min.js></script></body></html>

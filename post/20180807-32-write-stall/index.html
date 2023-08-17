@@ -1,432 +1,109 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>School - TiKV write stall - TiDB AirPlan - A biger solution</title>
-  <meta name="renderer" content="webkit" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-
-<meta http-equiv="Cache-Control" content="no-transform" />
-<meta http-equiv="Cache-Control" content="no-siteapp" />
-
-<meta name="theme-color" content="#f8f5ec" />
-<meta name="msapplication-navbutton-color" content="#f8f5ec">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
-
-
-<meta name="author" content="Jeff" /><meta name="description" content="0x00 告警 TiDB 与 TiKV 出现大量 backoff；触发 backoff 告警阈值 相应时间段 tidb kv error 监控趋势升高 相应时间段 tikv thread cpu / apply cpu 监控趋势升高 1 2 3 4 5 6 7 8 9 10 11 12 13 14" /><meta name="keywords" content="TiDB, AirPlan, TiDB OPS, tidb-operator, 2pc, raft, databases, mysql, htap" />
-
-
-
-
-
-
-<meta name="generator" content="Hugo 0.78.2 with theme even" />
-
-
-<link rel="canonical" href="https://ap.tidb.cc/post/20180807-32-write-stall/" />
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="manifest" href="/manifest.json">
-<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
-
-<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-<link href="/dist/even.04bd84cd.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
-
-
-<meta property="og:title" content="School - TiKV write stall" />
-<meta property="og:description" content="0x00 告警 TiDB 与 TiKV 出现大量 backoff；触发 backoff 告警阈值 相应时间段 tidb kv error 监控趋势升高 相应时间段 tikv thread cpu / apply cpu 监控趋势升高 1 2 3 4 5 6 7 8 9 10 11 12 13 14" />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://ap.tidb.cc/post/20180807-32-write-stall/" />
-<meta property="article:published_time" content="2018-08-07T00:00:00+08:00" />
-<meta property="article:modified_time" content="2018-08-07T00:00:00+08:00" />
-<meta itemprop="name" content="School - TiKV write stall">
-<meta itemprop="description" content="0x00 告警 TiDB 与 TiKV 出现大量 backoff；触发 backoff 告警阈值 相应时间段 tidb kv error 监控趋势升高 相应时间段 tikv thread cpu / apply cpu 监控趋势升高 1 2 3 4 5 6 7 8 9 10 11 12 13 14">
-<meta itemprop="datePublished" content="2018-08-07T00:00:00+08:00" />
-<meta itemprop="dateModified" content="2018-08-07T00:00:00+08:00" />
-<meta itemprop="wordCount" content="605">
-
-
-
-<meta itemprop="keywords" content="TiDB 2.0,server is busy,write stall," />
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="School - TiKV write stall"/>
-<meta name="twitter:description" content="0x00 告警 TiDB 与 TiKV 出现大量 backoff；触发 backoff 告警阈值 相应时间段 tidb kv error 监控趋势升高 相应时间段 tikv thread cpu / apply cpu 监控趋势升高 1 2 3 4 5 6 7 8 9 10 11 12 13 14"/>
-
-<!--[if lte IE 9]>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
-<![endif]-->
-
-<!--[if lt IE 9]>
-  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
-<![endif]-->
-
-</head>
-<body>
-  <div id="mobile-navbar" class="mobile-navbar">
-  <div class="mobile-header-logo">
-    <a href="/" class="logo">TiDB AirPlan</a>
-  </div>
-  <div class="mobile-navbar-icon">
-    <span></span>
-    <span></span>
-    <span></span>
-  </div>
-</div>
-<nav id="mobile-menu" class="mobile-menu slideout-menu">
-  <ul class="mobile-menu-list">
-    <a href="/post/">
-        <li class="mobile-menu-item">Blog</li>
-      </a><a href="/look/">
-        <li class="mobile-menu-item">Look</li>
-      </a><a href="/tags/">
-        <li class="mobile-menu-item">Tags</li>
-      </a><a href="/categories/">
-        <li class="mobile-menu-item">Categories</li>
-      </a><a href="/about/">
-        <li class="mobile-menu-item">About</li>
-      </a>
-  </ul>
-</nav>
-  <div class="container" id="mobile-panel">
-    <header id="header" class="header">
-        <div class="logo-wrapper">
-  <a href="/" class="logo">TiDB AirPlan</a>
-</div>
-
-<nav class="site-navbar">
-  <ul id="menu" class="menu">
-    <li class="menu-item">
-        <a class="menu-item-link" href="/post/">Blog</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/look/">Look</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/tags/">Tags</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/categories/">Categories</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/about/">About</a>
-      </li>
-  </ul>
-</nav>
-    </header>
-
-    <main id="main" class="main">
-      <div class="content-wrapper">
-        <div id="content" class="content">
-          <article class="post">
-    
-    <header class="post-header">
-      <h1 class="post-title">School - TiKV write stall</h1>
-
-      <div class="post-meta">
-        <span class="post-time"> 2018-08-07 </span>
-        <div class="post-category">
-            <a href="/categories/troubleshooting/"> troubleshooting </a>
-            </div>
-          <span class="more-meta"> 605 words </span>
-          <span class="more-meta"> 2 mins read </span>
-        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
-      </div>
-    </header>
-
-    <div class="post-toc" id="post-toc">
-  <h2 class="post-toc-title">Contents</h2>
-  <div class="post-toc-content">
-    <nav id="TableOfContents">
-  <ul>
-    <li><a href="#0x00-告警">0x00 告警</a></li>
-    <li><a href="#0x01-监控">0x01 监控</a>
-      <ul>
-        <li><a href="#二次确认">二次确认</a></li>
-        <li><a href="#排查思路图">排查思路图</a></li>
-      </ul>
-    </li>
-    <li><a href="#0x02-原因">0x02 原因</a></li>
-  </ul>
-</nav>
-  </div>
-</div>
-  <div class="post-outdated">
-    <div class="warn">
-      <p>[NOTE] Updated <span class="timeago" datetime="2018-08-07T00:00:00" title="August 7, 2018">August 7, 2018</span>. This article may have outdated content or subject matter.</p>
-    </div>
-  </div>
-    <div class="post-content">
-      <h2 id="0x00-告警">0x00 告警</h2>
-<ul>
-<li>TiDB 与 TiKV 出现大量 backoff；触发 backoff 告警阈值
-<ul>
-<li>相应时间段 tidb kv error 监控趋势升高</li>
-<li>相应时间段 tikv thread cpu / apply cpu 监控趋势升高</li>
-</ul>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-json" data-lang="json"><span class="p">[</span><span class="err">FIRING:</span><span class="mi">1</span><span class="p">]</span> <span class="err">TiDB_tikvclient_region_err_total</span> <span class="err">tidb</span> <span class="mi">1-1-1-9</span><span class="err">_</span><span class="mi">4000</span> <span class="err">tidb</span> <span class="err">stale_epoch</span> <span class="err">(tidb</span> <span class="err">increase(</span> <span class="err">tidb_tikvclient_region_err_total</span><span class="p">[</span><span class="mi">10</span><span class="err">m</span><span class="p">]</span> <span class="err">)</span>  <span class="err">&gt;</span> <span class="mi">6000</span> <span class="err">emergency</span> <span class="err">prometheus)</span>
-<span class="err">cluster:</span> <span class="err">tidb,</span> <span class="err">instance:</span> <span class="mi">1-1-1-9</span><span class="err">_</span><span class="mi">4000</span><span class="err">,</span> <span class="err">values:</span><span class="mf">7059.979666666667</span> <span class="err">TiDB</span> <span class="err">tikvclient_backoff_count</span> <span class="err">error</span> <span class="mf">7059.979666666667</span>
-<span class="err">Alerts</span> <span class="err">Firing:</span>
-<span class="err">Labels:</span>
- <span class="err">-</span> <span class="err">alertname</span> <span class="err">=</span> <span class="err">TiDB_tikvclient_region_err_total</span>
- <span class="err">-</span> <span class="err">cluster</span> <span class="err">=</span> <span class="err">tidb</span>
- <span class="err">-</span> <span class="err">env</span> <span class="err">=</span> <span class="err">tidb</span>
- <span class="err">-</span> <span class="err">expr</span> <span class="err">=</span> <span class="err">increase(</span> <span class="err">tidb_tikvclient_region_err_total</span><span class="p">[</span><span class="mi">10</span><span class="err">m</span><span class="p">]</span> <span class="err">)</span>  <span class="err">&gt;</span> <span class="mi">6000</span>
- <span class="err">-</span> <span class="err">instance</span> <span class="err">=</span> <span class="mi">1-1-1-9</span><span class="err">_</span><span class="mi">4000</span>
- <span class="err">-</span> <span class="err">job</span> <span class="err">=</span> <span class="err">tidb</span>
- <span class="err">-</span> <span class="err">level</span> <span class="err">=</span> <span class="err">emergency</span>
- <span class="err">-</span> <span class="err">monitor</span> <span class="err">=</span> <span class="err">prometheus</span>
- <span class="err">-</span> <span class="err">type</span> <span class="err">=</span> <span class="err">stale_epoch</span>
-<span class="err">Annotations:</span>
- <span class="err">-</span> <span class="err">description</span> <span class="err">=</span> <span class="err">cluster:</span> <span class="err">tidb,</span> <span class="err">instance:</span> <span class="mi">1-1-1-9</span><span class="err">_</span><span class="mi">4000</span><span class="err">,</span> <span class="err">values:</span><span class="mf">7059.979666666667</span>
- <span class="err">-</span> <span class="err">summary</span> <span class="err">=</span> <span class="err">TiDB</span> <span class="err">tikvclient_backoff_count</span> <span class="err">error</span>
- <span class="err">-</span> <span class="err">value</span> <span class="err">=</span> <span class="mf">7059.979666666667</span>
-<span class="err">Source:</span> <span class="err">http://</span><span class="mf">1.1</span><span class="err">.</span><span class="mf">1.9</span><span class="err">:</span><span class="mi">9090</span><span class="err">/graph?g</span><span class="mi">0</span><span class="err">.expr=increase%</span><span class="mi">28</span><span class="err">tidb_tikvclient_region_err_total%</span><span class="mi">5</span><span class="err">B</span><span class="mi">10</span><span class="err">m%</span><span class="mi">5</span><span class="err">D%</span><span class="mi">29</span><span class="err">+%</span><span class="mf">3E+6000</span><span class="err">&amp;g</span><span class="mi">0</span><span class="err">.tab=</span><span class="mi">1</span>
-</code></pre></td></tr></table>
-</div>
-</div><h2 id="0x01-监控">0x01 监控</h2>
-<blockquote>
-<p>如不确定趋势为正常状态，请采用划分时间对比方式评估，然后合理进行怀疑</p>
-</blockquote>
-<p><img src="./lock-resolve.png" alt="锁冲突" title="ap.tidb.cc">
-<img src="./serverisbusy.png" alt="server is busy" title="ap.tidb.cc"></p>
-<p><img src="./schdule-latch.png" alt="schedule latch duration" title="ap.tidb.cc"></p>
-<p><img src="./append.png" alt="append log" title="ap.tidb.cc">
-<img src="./ioutil.png" alt="io util" title="ap.tidb.cc"></p>
-<p><img src="./compaction.png" alt="compaction sst" title="ap.tidb.cc">
-<img src="./stall.png" alt="write stall" title="ap.tidb.cc"></p>
-<h3 id="二次确认">二次确认</h3>
-<ul>
-<li>{{tikv_deploy_dir}}/db/LOG 日志内搜索 <code>Stalling writes</code> 关键词</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-fallback" data-lang="fallback">2018/08/06-00:18:17.562487 7f23db1ff700 [WARN] [/home/jenkins/.cargo/git/checkouts/rust-rocksdb-82ef6e5337b3fbe6/9a1c83c/librocksdb_sys/rocksdb/db/column_family.cc:696] [write] Stalling writes because we have 21 level-0 files rate 13421772
-2018/08/06-00:18:17.562509 7f23db1ff700 [/home/jenkins/.cargo/git/checkouts/rust-rocksdb-82ef6e5337b3fbe6/9a1c83c/librocksdb_sys/rocksdb/db/external_sst_file_ingestion_job.cc:231] [AddFile] External SST file /data1/deploy1/data/snap/rev_514666_37_190_write.sst.clone was ingested in L0 with path /data1/deploy1/data/db/23352686.sst (global_seqno=0)
-</code></pre></td></tr></table>
-</div>
-</div><h3 id="排查思路图">排查思路图</h3>
-<p><img src="./mind-stall.png" alt="排查 write stall 思维导图" title="ap.tidb.cc"></p>
-<h2 id="0x02-原因">0x02 原因</h2>
-<ul>
-<li>
-<p>Write stall</p>
-<ul>
-<li>RocksDB L0 层的文件数量超过流控阈值，默认超过 20 * region 会减缓该节点写入，超过 36 个会停止该节点写入</li>
-<li>L0 层文件的减少需要 compaction 操作，将 L0 文件合并排序后写入到 L1 层「粗略计算需要 region-size * 2 的 IOPS（读、压缩、写入）」</li>
-<li>2.0 版本 compaction 是单线程工作；会出现 写入速度过快、compaction 跟不上或者磁盘跟不上的场景</li>
-</ul>
-</li>
-<li>
-<p>临时解决方案 1</p>
-<ul>
-<li>
-<p>确定<strong>磁盘</strong>是否还有 IOPS 余量，如果无余量请扩容 TiKV 集群机器</p>
-</li>
-<li>
-<p>调整 <code>[rocksdb.writecf]</code> 和 <code>[rocksdb.defaultcf]</code> 以下参数</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span><span class="lnt">8
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-toml" data-lang="toml"><span class="c"># level0-file-num-compaction-trigger = 4</span>
-<span class="c"># 达到 4 个文件开始 compaction</span>
-
-<span class="c"># level0-slowdown-writes-trigger = 20</span>
-<span class="c"># 达到 20 个文件，放慢写入速度</span>
-
-<span class="c"># level0-stop-writes-trigger = 36</span>
-<span class="c"># 达到 36 个文件，停止写入</span>
-</code></pre></td></tr></table>
-</div>
-</div></li>
-</ul>
-</li>
-</ul>
-<blockquote>
-<p>Update: 3.0 以后版本加入 <code>max-sub-compaction = 2</code> 参数，加快 compaction sst 动作</p>
-</blockquote>
-<ul>
-<li>临时解决方案 2
-<ul>
-<li>
-<p>RocksDB 总 7 层，L0 - L1 未开启压缩</p>
-</li>
-<li>
-<p>将 L0 与 L1 修改为 lz4 压缩算法；如不熟悉请勿操作</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span><span class="lnt">8
-</span><span class="lnt">9
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-toml" data-lang="toml"><span class="c"># compression-per-level = [&#34;no&#34;, &#34;no&#34;, &#34;lz4&#34;, &#34;lz4&#34;, &#34;lz4&#34;, &#34;zstd&#34;, &#34;zstd&#34;]</span>
-<span class="c">## Compression method (if any) is used to compress a block.</span>
-<span class="c">##   no:     kNoCompression</span>
-<span class="c">##   snappy: kSnappyCompression</span>
-<span class="c">##   zlib:   kZlibCompression</span>
-<span class="c">##   bzip2:  kBZip2Compression</span>
-<span class="c">##   lz4:    kLZ4Compression</span>
-<span class="c">##   lz4hc:  kLZ4HCCompression</span>
-<span class="c">##   zstd:   kZSTD</span>
-</code></pre></td></tr></table>
-</div>
-</div></li>
-</ul>
-</li>
-</ul>
-
-    </div>
-
-    <div class="post-copyright">
-  <p class="copyright-item">
-    <span class="item-title">Author</span>
-    <span class="item-content">Jeff</span>
-  </p>
-  <p class="copyright-item">
-    <span class="item-title">LastMod</span>
-    <span class="item-content">
-        2018-08-07
-        
-    </span>
-  </p>
-  
-  <p class="copyright-item">
-    <span class="item-title">License</span>
-    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span>
-  </p>
-</div>
-<footer class="post-footer">
-      <div class="post-tags">
-          <a href="/tags/tidb-2.0/">TiDB 2.0</a>
-          <a href="/tags/server-is-busy/">server is busy</a>
-          <a href="/tags/write-stall/">write stall</a>
-          </div>
-      <nav class="post-nav">
-        <a class="prev" href="/post/20190116-3-ddl-history/">
-            <i class="iconfont icon-left"></i>
-            <span class="prev-text nav-default">School - TiDB table info &amp; DDL history</span>
-            <span class="prev-text nav-mobile">Prev</span>
-          </a>
-        <a class="next" href="/post/20180803-31-select-hash/">
-            <span class="next-text nav-default">School - TiDB 根据 PK 查询不到数据</span>
-            <span class="next-text nav-mobile">Next</span>
-            <i class="iconfont icon-right"></i>
-          </a>
-      </nav>
-    </footer>
-  </article>
-        </div>
-        
-
-  
-
-  
-
-      </div>
-    </main>
-
-    <footer id="footer" class="footer">
-      <div class="social-links">
-      <a href="https://github.com/BigerCAP/TiDB-AirPlan/issues" class="iconfont icon-github" title="github"></a>
-  <a href="https://ap.tidb.cc/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
-</div>
-
-<div class="copyright">
-  <span class="power-by">
-    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
-  </span>
-  <span class="division">|</span>
-  <span class="theme-info">
-    Theme - 
-    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
-  </span>
-
-  <div class="busuanzi-footer">
-    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
-      <span class="division">|</span>
-    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
-  </div>
-
-  <span class="copyright-year">
-    &copy; 
-    2017 - 
-    2020
-    <span class="heart">
-      <i class="iconfont icon-heart"></i>
-    </span>
-    <span class="author">TiDB - AirPlan</span>
-  </span>
-</div>
-    </footer>
-
-    <div class="back-to-top" id="back-to-top">
-      <i class="iconfont icon-up"></i>
-    </div>
-  </div>
-  
-  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js" integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js" integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin="anonymous"></script>
-  <script><!-- NOTE: timeago.js uses the language code format like "zh_CN" (underscore and case sensitive) -->
-    var languageCode = "en".replace(/-/g, '_').replace(/_(.*)/, function ($0, $1) {return $0.replace($1, $1.toUpperCase());});
-    timeago().render(document.querySelectorAll('.timeago'), languageCode);
-    timeago.cancel();  
-  </script>
-<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
-
-
-
-
-
-
-
-
-</body>
-</html>
+<!doctype html><html lang=en><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge,chrome=1"><title>School - TiKV write stall - AirPlan - A biger solution</title><meta name=renderer content="webkit"><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta http-equiv=cache-control content="no-transform"><meta http-equiv=cache-control content="no-siteapp"><meta name=theme-color content="#f8f5ec"><meta name=msapplication-navbutton-color content="#f8f5ec"><meta name=apple-mobile-web-app-capable content="yes"><meta name=apple-mobile-web-app-status-bar-style content="#f8f5ec"><meta name=author content="Jeff"><meta name=description content="0x00 告警 TiDB 与 TiKV 出现大量 backoff；触发 backoff 告警阈值 相应时间段 tidb kv error 监控趋势升高 相应时间段 tikv thread cpu / apply cpu 监控趋势升高 1 2 3 4 5 6 7 8 9 10 11 12 13 14"><meta name=keywords content="TiDB,AirPlan,TiDB OPS,tidb-operator,2pc,raft,databases,mysql,htap"><meta name=generator content="Hugo 0.110.0 with theme even"><link rel=canonical href=https://ap.biger.cc/post/20180807-32-write-stall/><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/manifest.json><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><script async src=//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js></script>
+<link href=/dist/even.04bd84cd.min.css rel=stylesheet><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin=anonymous><meta property="og:title" content="School - TiKV write stall"><meta property="og:description" content="0x00 告警 TiDB 与 TiKV 出现大量 backoff；触发 backoff 告警阈值 相应时间段 tidb kv error 监控趋势升高 相应时间段 tikv thread cpu / apply cpu 监控趋势升高 1 2 3 4 5 6 7 8 9 10 11 12 13 14"><meta property="og:type" content="article"><meta property="og:url" content="https://ap.biger.cc/post/20180807-32-write-stall/"><meta property="article:section" content="post"><meta property="article:published_time" content="2018-08-07T00:00:00+08:00"><meta property="article:modified_time" content="2018-08-07T00:00:00+08:00"><meta itemprop=name content="School - TiKV write stall"><meta itemprop=description content="0x00 告警 TiDB 与 TiKV 出现大量 backoff；触发 backoff 告警阈值 相应时间段 tidb kv error 监控趋势升高 相应时间段 tikv thread cpu / apply cpu 监控趋势升高 1 2 3 4 5 6 7 8 9 10 11 12 13 14"><meta itemprop=datePublished content="2018-08-07T00:00:00+08:00"><meta itemprop=dateModified content="2018-08-07T00:00:00+08:00"><meta itemprop=wordCount content="605"><meta itemprop=keywords content="TiDB 2.0,server is busy,write stall,"><meta name=twitter:card content="summary"><meta name=twitter:title content="School - TiKV write stall"><meta name=twitter:description content="0x00 告警 TiDB 与 TiKV 出现大量 backoff；触发 backoff 告警阈值 相应时间段 tidb kv error 监控趋势升高 相应时间段 tikv thread cpu / apply cpu 监控趋势升高 1 2 3 4 5 6 7 8 9 10 11 12 13 14"><!--[if lte IE 9]><script src=https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js></script><![endif]--><!--[if lt IE 9]><script src=https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js></script>
+<script src=https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js></script><![endif]--></head><body><div id=mobile-navbar class=mobile-navbar><div class=mobile-header-logo><a href=/ class=logo>AirPlan</a></div><div class=mobile-navbar-icon><span></span>
+<span></span>
+<span></span></div></div><nav id=mobile-menu class="mobile-menu slideout-menu"><ul class=mobile-menu-list><a href=/post/><li class=mobile-menu-item>Blog</li></a><a href=/look/><li class=mobile-menu-item>Look</li></a><a href=/tags/><li class=mobile-menu-item>Tags</li></a><a href=/categories/><li class=mobile-menu-item>Categories</li></a><a href=/about/><li class=mobile-menu-item>About</li></a></ul></nav><div class=container id=mobile-panel><header id=header class=header><div class=logo-wrapper><a href=/ class=logo>AirPlan</a></div><nav class=site-navbar><ul id=menu class=menu><li class=menu-item><a class=menu-item-link href=/post/>Blog</a></li><li class=menu-item><a class=menu-item-link href=/look/>Look</a></li><li class=menu-item><a class=menu-item-link href=/tags/>Tags</a></li><li class=menu-item><a class=menu-item-link href=/categories/>Categories</a></li><li class=menu-item><a class=menu-item-link href=/about/>About</a></li></ul></nav></header><main id=main class=main><div class=content-wrapper><div id=content class=content><article class=post><header class=post-header><h1 class=post-title>School - TiKV write stall</h1><div class=post-meta><span class=post-time>2018-08-07</span><div class=post-category><a href=/categories/troubleshooting/>troubleshooting</a></div><span class=more-meta>605 words</span>
+<span class=more-meta>2 mins read</span>
+<span id=busuanzi_container_page_pv class=more-meta><span id=busuanzi_value_page_pv><img src=/img/spinner.svg alt=spinner.svg></span> times read</span></div></header><div class=post-toc id=post-toc><h2 class=post-toc-title>Contents</h2><div class=post-toc-content><nav id=TableOfContents><ul><li><a href=#0x00-告警>0x00 告警</a></li><li><a href=#0x01-监控>0x01 监控</a><ul><li><a href=#二次确认>二次确认</a></li><li><a href=#排查思路图>排查思路图</a></li></ul></li><li><a href=#0x02-原因>0x02 原因</a></li></ul></nav></div></div><div class=post-outdated><div class=warn><p>[NOTE] Updated <span class=timeago datetime=2018-08-07T00:00:00 title="August 7, 2018">August 7, 2018</span>. This article may have outdated content or subject matter.</p></div></div><div class=post-content><h2 id=0x00-告警>0x00 告警</h2><ul><li>TiDB 与 TiKV 出现大量 backoff；触发 backoff 告警阈值<ul><li>相应时间段 tidb kv error 监控趋势升高</li><li>相应时间段 tikv thread cpu / apply cpu 监控趋势升高</li></ul></li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-json data-lang=json><span class=line><span class=cl><span class=p>[</span><span class=err>FIRING:</span><span class=mi>1</span><span class=p>]</span> <span class=err>TiDB_tikvclient_region_err_total</span> <span class=err>tidb</span> <span class=mi>1-1-1-9</span><span class=err>_</span><span class=mi>4000</span> <span class=err>tidb</span> <span class=err>stale_epoch</span> <span class=err>(tidb</span> <span class=err>increase(</span> <span class=err>tidb_tikvclient_region_err_total</span><span class=p>[</span><span class=mi>10</span><span class=err>m</span><span class=p>]</span> <span class=err>)</span>  <span class=err>&gt;</span> <span class=mi>6000</span> <span class=err>emergency</span> <span class=err>prometheus)</span>
+</span></span><span class=line><span class=cl><span class=err>cluster:</span> <span class=err>tidb,</span> <span class=err>instance:</span> <span class=mi>1-1-1-9</span><span class=err>_</span><span class=mi>4000</span><span class=err>,</span> <span class=err>values:</span><span class=mf>7059.979666666667</span> <span class=err>TiDB</span> <span class=err>tikvclient_backoff_count</span> <span class=err>error</span> <span class=mf>7059.979666666667</span>
+</span></span><span class=line><span class=cl><span class=err>Alerts</span> <span class=err>Firing:</span>
+</span></span><span class=line><span class=cl><span class=err>Labels:</span>
+</span></span><span class=line><span class=cl> <span class=err>-</span> <span class=err>alertname</span> <span class=err>=</span> <span class=err>TiDB_tikvclient_region_err_total</span>
+</span></span><span class=line><span class=cl> <span class=err>-</span> <span class=err>cluster</span> <span class=err>=</span> <span class=err>tidb</span>
+</span></span><span class=line><span class=cl> <span class=err>-</span> <span class=err>env</span> <span class=err>=</span> <span class=err>tidb</span>
+</span></span><span class=line><span class=cl> <span class=err>-</span> <span class=err>expr</span> <span class=err>=</span> <span class=err>increase(</span> <span class=err>tidb_tikvclient_region_err_total</span><span class=p>[</span><span class=mi>10</span><span class=err>m</span><span class=p>]</span> <span class=err>)</span>  <span class=err>&gt;</span> <span class=mi>6000</span>
+</span></span><span class=line><span class=cl> <span class=err>-</span> <span class=err>instance</span> <span class=err>=</span> <span class=mi>1-1-1-9</span><span class=err>_</span><span class=mi>4000</span>
+</span></span><span class=line><span class=cl> <span class=err>-</span> <span class=err>job</span> <span class=err>=</span> <span class=err>tidb</span>
+</span></span><span class=line><span class=cl> <span class=err>-</span> <span class=err>level</span> <span class=err>=</span> <span class=err>emergency</span>
+</span></span><span class=line><span class=cl> <span class=err>-</span> <span class=err>monitor</span> <span class=err>=</span> <span class=err>prometheus</span>
+</span></span><span class=line><span class=cl> <span class=err>-</span> <span class=err>type</span> <span class=err>=</span> <span class=err>stale_epoch</span>
+</span></span><span class=line><span class=cl><span class=err>Annotations:</span>
+</span></span><span class=line><span class=cl> <span class=err>-</span> <span class=err>description</span> <span class=err>=</span> <span class=err>cluster:</span> <span class=err>tidb,</span> <span class=err>instance:</span> <span class=mi>1-1-1-9</span><span class=err>_</span><span class=mi>4000</span><span class=err>,</span> <span class=err>values:</span><span class=mf>7059.979666666667</span>
+</span></span><span class=line><span class=cl> <span class=err>-</span> <span class=err>summary</span> <span class=err>=</span> <span class=err>TiDB</span> <span class=err>tikvclient_backoff_count</span> <span class=err>error</span>
+</span></span><span class=line><span class=cl> <span class=err>-</span> <span class=err>value</span> <span class=err>=</span> <span class=mf>7059.979666666667</span>
+</span></span><span class=line><span class=cl><span class=err>Source:</span> <span class=err>http:</span><span class=c1>//1.1.1.9:9090/graph?g0.expr=increase%28tidb_tikvclient_region_err_total%5B10m%5D%29+%3E+6000&amp;g0.tab=1
+</span></span></span></code></pre></td></tr></table></div></div><h2 id=0x01-监控>0x01 监控</h2><blockquote><p>如不确定趋势为正常状态，请采用划分时间对比方式评估，然后合理进行怀疑</p></blockquote><p><img src=./lock-resolve.png alt=锁冲突 title=ap.tidb.cc>
+<img src=./serverisbusy.png alt="server is busy" title=ap.tidb.cc></p><p><img src=./schdule-latch.png alt="schedule latch duration" title=ap.tidb.cc></p><p><img src=./append.png alt="append log" title=ap.tidb.cc>
+<img src=./ioutil.png alt="io util" title=ap.tidb.cc></p><p><img src=./compaction.png alt="compaction sst" title=ap.tidb.cc>
+<img src=./stall.png alt="write stall" title=ap.tidb.cc></p><h3 id=二次确认>二次确认</h3><ul><li>{{tikv_deploy_dir}}/db/LOG 日志内搜索 <code>Stalling writes</code> 关键词</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>2018/08/06-00:18:17.562487 7f23db1ff700 [WARN] [/home/jenkins/.cargo/git/checkouts/rust-rocksdb-82ef6e5337b3fbe6/9a1c83c/librocksdb_sys/rocksdb/db/column_family.cc:696] [write] Stalling writes because we have 21 level-0 files rate 13421772
+</span></span><span class=line><span class=cl>2018/08/06-00:18:17.562509 7f23db1ff700 [/home/jenkins/.cargo/git/checkouts/rust-rocksdb-82ef6e5337b3fbe6/9a1c83c/librocksdb_sys/rocksdb/db/external_sst_file_ingestion_job.cc:231] [AddFile] External SST file /data1/deploy1/data/snap/rev_514666_37_190_write.sst.clone was ingested in L0 with path /data1/deploy1/data/db/23352686.sst (global_seqno=0)
+</span></span></code></pre></td></tr></table></div></div><h3 id=排查思路图>排查思路图</h3><p><img src=./mind-stall.png alt="排查 write stall 思维导图" title=ap.tidb.cc></p><h2 id=0x02-原因>0x02 原因</h2><ul><li><p>Write stall</p><ul><li>RocksDB L0 层的文件数量超过流控阈值，默认超过 20 * region 会减缓该节点写入，超过 36 个会停止该节点写入</li><li>L0 层文件的减少需要 compaction 操作，将 L0 文件合并排序后写入到 L1 层「粗略计算需要 region-size * 2 的 IOPS（读、压缩、写入）」</li><li>2.0 版本 compaction 是单线程工作；会出现 写入速度过快、compaction 跟不上或者磁盘跟不上的场景</li></ul></li><li><p>临时解决方案 1</p><ul><li><p>确定<strong>磁盘</strong>是否还有 IOPS 余量，如果无余量请扩容 TiKV 集群机器</p></li><li><p>调整 <code>[rocksdb.writecf]</code> 和 <code>[rocksdb.defaultcf]</code> 以下参数</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-toml data-lang=toml><span class=line><span class=cl><span class=c># level0-file-num-compaction-trigger = 4</span>
+</span></span><span class=line><span class=cl><span class=c># 达到 4 个文件开始 compaction</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c># level0-slowdown-writes-trigger = 20</span>
+</span></span><span class=line><span class=cl><span class=c># 达到 20 个文件，放慢写入速度</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c># level0-stop-writes-trigger = 36</span>
+</span></span><span class=line><span class=cl><span class=c># 达到 36 个文件，停止写入</span>
+</span></span></code></pre></td></tr></table></div></div></li></ul></li></ul><blockquote><p>Update: 3.0 以后版本加入 <code>max-sub-compaction = 2</code> 参数，加快 compaction sst 动作</p></blockquote><ul><li>临时解决方案 2<ul><li><p>RocksDB 总 7 层，L0 - L1 未开启压缩</p></li><li><p>将 L0 与 L1 修改为 lz4 压缩算法；如不熟悉请勿操作</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-toml data-lang=toml><span class=line><span class=cl><span class=c># compression-per-level = [&#34;no&#34;, &#34;no&#34;, &#34;lz4&#34;, &#34;lz4&#34;, &#34;lz4&#34;, &#34;zstd&#34;, &#34;zstd&#34;]</span>
+</span></span><span class=line><span class=cl><span class=c>## Compression method (if any) is used to compress a block.</span>
+</span></span><span class=line><span class=cl><span class=c>##   no:     kNoCompression</span>
+</span></span><span class=line><span class=cl><span class=c>##   snappy: kSnappyCompression</span>
+</span></span><span class=line><span class=cl><span class=c>##   zlib:   kZlibCompression</span>
+</span></span><span class=line><span class=cl><span class=c>##   bzip2:  kBZip2Compression</span>
+</span></span><span class=line><span class=cl><span class=c>##   lz4:    kLZ4Compression</span>
+</span></span><span class=line><span class=cl><span class=c>##   lz4hc:  kLZ4HCCompression</span>
+</span></span><span class=line><span class=cl><span class=c>##   zstd:   kZSTD</span>
+</span></span></code></pre></td></tr></table></div></div></li></ul></li></ul></div><div class=post-copyright><p class=copyright-item><span class=item-title>Author</span>
+<span class=item-content>Jeff</span></p><p class=copyright-item><span class=item-title>LastMod</span>
+<span class=item-content>2018-08-07</span></p><p class=copyright-item><span class=item-title>License</span>
+<span class=item-content><a rel="license noopener" href=https://creativecommons.org/licenses/by-nc-nd/4.0/ target=_blank>CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span></p></div><footer class=post-footer><div class=post-tags><a href=/tags/tidb-2.0/>TiDB 2.0</a>
+<a href=/tags/server-is-busy/>server is busy</a>
+<a href=/tags/write-stall/>write stall</a></div><nav class=post-nav><a class=prev href=/post/20190116-3-ddl-history/><i class="iconfont icon-left"></i>
+<span class="prev-text nav-default">School - TiDB table info & DDL history</span>
+<span class="prev-text nav-mobile">Prev</span></a>
+<a class=next href=/post/20180803-31-select-hash/><span class="next-text nav-default">School - TiDB 根据 PK 查询不到数据</span>
+<span class="next-text nav-mobile">Next</span>
+<i class="iconfont icon-right"></i></a></nav></footer></article></div></div></main><footer id=footer class=footer><div class=social-links><a href=https://github.com/BigerCAP/TiDB-AirPlan/issues class="iconfont icon-github" title=github></a>
+<a href=https://ap.biger.cc/index.xml type=application/rss+xml class="iconfont icon-rss" title=rss></a></div><div class=copyright><span class=power-by>Powered by <a class=hexo-link href=https://gohugo.io>Hugo</a></span>
+<span class=division>|</span>
+<span class=theme-info>Theme -
+<a class=theme-link href=https://github.com/olOwOlo/hugo-theme-even>Even</a></span><div class=busuanzi-footer><span id=busuanzi_container_site_pv>site pv: <span id=busuanzi_value_site_pv><img src=/img/spinner.svg alt=spinner.svg></span></span>
+<span class=division>|</span>
+<span id=busuanzi_container_site_uv>site uv: <span id=busuanzi_value_site_uv><img src=/img/spinner.svg alt=spinner.svg></span></span></div><span class=copyright-year>&copy;
+2017 -
+2023
+<span class=heart><i class="iconfont icon-heart"></i></span>
+<span class=author>DB - AirPlan</span></span></div></footer><div class=back-to-top id=back-to-top><i class="iconfont icon-up"></i></div></div><script src=https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin=anonymous></script>
+<script>var languageCode="en".replace(/-/g,"_").replace(/_(.*)/,function(e,t){return e.replace(t,t.toUpperCase())});timeago().render(document.querySelectorAll(".timeago"),languageCode),timeago.cancel()</script><script type=text/javascript src=/dist/even.26188efa.min.js></script></body></html>

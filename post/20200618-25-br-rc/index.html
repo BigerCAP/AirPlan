@@ -1,838 +1,331 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>TiDB - Backup/Restore 测试 - TiDB AirPlan - A biger solution</title>
-  <meta name="renderer" content="webkit" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-
-<meta http-equiv="Cache-Control" content="no-transform" />
-<meta http-equiv="Cache-Control" content="no-siteapp" />
-
-<meta name="theme-color" content="#f8f5ec" />
-<meta name="msapplication-navbutton-color" content="#f8f5ec">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
-
-
-<meta name="author" content="Jeff" /><meta name="description" content="0x00 BR Backup &amp;amp; Restore（以下简称 BR）是 TiDB 分布式备份恢复的命令行工具，用于对 TiDB 集群进行数据备份和恢复。相比 mydumper/loader，B" /><meta name="keywords" content="TiDB, AirPlan, TiDB OPS, tidb-operator, 2pc, raft, databases, mysql, htap" />
-
-
-
-
-
-
-<meta name="generator" content="Hugo 0.78.2 with theme even" />
-
-
-<link rel="canonical" href="https://ap.tidb.cc/post/20200618-25-br-rc/" />
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="manifest" href="/manifest.json">
-<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
-
-<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-<link href="/dist/even.04bd84cd.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
-
-
-<meta property="og:title" content="TiDB - Backup/Restore 测试" />
-<meta property="og:description" content="0x00 BR Backup &amp; Restore（以下简称 BR）是 TiDB 分布式备份恢复的命令行工具，用于对 TiDB 集群进行数据备份和恢复。相比 mydumper/loader，B" />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://ap.tidb.cc/post/20200618-25-br-rc/" />
-<meta property="article:published_time" content="2020-06-17T00:00:00+08:00" />
-<meta property="article:modified_time" content="2020-06-18T00:00:00+08:00" />
-<meta itemprop="name" content="TiDB - Backup/Restore 测试">
-<meta itemprop="description" content="0x00 BR Backup &amp; Restore（以下简称 BR）是 TiDB 分布式备份恢复的命令行工具，用于对 TiDB 集群进行数据备份和恢复。相比 mydumper/loader，B">
-<meta itemprop="datePublished" content="2020-06-17T00:00:00+08:00" />
-<meta itemprop="dateModified" content="2020-06-18T00:00:00+08:00" />
-<meta itemprop="wordCount" content="3232">
-
-
-
-<meta itemprop="keywords" content="AirPlan,BR," />
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="TiDB - Backup/Restore 测试"/>
-<meta name="twitter:description" content="0x00 BR Backup &amp; Restore（以下简称 BR）是 TiDB 分布式备份恢复的命令行工具，用于对 TiDB 集群进行数据备份和恢复。相比 mydumper/loader，B"/>
-
-<!--[if lte IE 9]>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
-<![endif]-->
-
-<!--[if lt IE 9]>
-  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
-<![endif]-->
-
-</head>
-<body>
-  <div id="mobile-navbar" class="mobile-navbar">
-  <div class="mobile-header-logo">
-    <a href="/" class="logo">TiDB AirPlan</a>
-  </div>
-  <div class="mobile-navbar-icon">
-    <span></span>
-    <span></span>
-    <span></span>
-  </div>
-</div>
-<nav id="mobile-menu" class="mobile-menu slideout-menu">
-  <ul class="mobile-menu-list">
-    <a href="/post/">
-        <li class="mobile-menu-item">Blog</li>
-      </a><a href="/look/">
-        <li class="mobile-menu-item">Look</li>
-      </a><a href="/tags/">
-        <li class="mobile-menu-item">Tags</li>
-      </a><a href="/categories/">
-        <li class="mobile-menu-item">Categories</li>
-      </a><a href="/about/">
-        <li class="mobile-menu-item">About</li>
-      </a>
-  </ul>
-</nav>
-  <div class="container" id="mobile-panel">
-    <header id="header" class="header">
-        <div class="logo-wrapper">
-  <a href="/" class="logo">TiDB AirPlan</a>
-</div>
-
-<nav class="site-navbar">
-  <ul id="menu" class="menu">
-    <li class="menu-item">
-        <a class="menu-item-link" href="/post/">Blog</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/look/">Look</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/tags/">Tags</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/categories/">Categories</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/about/">About</a>
-      </li>
-  </ul>
-</nav>
-    </header>
-
-    <main id="main" class="main">
-      <div class="content-wrapper">
-        <div id="content" class="content">
-          <article class="post">
-    
-    <header class="post-header">
-      <h1 class="post-title">TiDB - Backup/Restore 测试</h1>
-
-      <div class="post-meta">
-        <span class="post-time"> 2020-06-17 </span>
-        <div class="post-category">
-            <a href="/categories/tidb/"> TiDB </a>
-            </div>
-          <span class="more-meta"> 3232 words </span>
-          <span class="more-meta"> 7 mins read </span>
-        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
-      </div>
-    </header>
-
-    <div class="post-toc" id="post-toc">
-  <h2 class="post-toc-title">Contents</h2>
-  <div class="post-toc-content">
-    <nav id="TableOfContents">
-  <ul>
-    <li><a href="#0x00-br">0x00 BR</a></li>
-    <li><a href="#0x01-思考">0x01 思考</a></li>
-    <li><a href="#0x02-backupmeta">0x02 backupmeta</a>
-      <ul>
-        <li><a href="#sst-file">SST file</a></li>
-        <li><a href="#schema">schema</a></li>
-        <li><a href="#checkpoint">checkpoint</a></li>
-        <li><a href="#checksum">checksum</a></li>
-      </ul>
-    </li>
-    <li><a href="#0x03-测试">0x03 测试</a>
-      <ul>
-        <li><a href="#local-br">local BR</a></li>
-        <li><a href="#s3-br">S3 BR</a></li>
-      </ul>
-    </li>
-    <li><a href="#faq">FAQ</a></li>
-  </ul>
-</nav>
-  </div>
-</div>
-  <div class="post-outdated">
-    <div class="hint">
-      <p>[NOTE] Updated <span class="timeago" datetime="2020-06-18T00:00:00" title="June 18, 2020">June 18, 2020</span>. This article may have outdated content or subject matter.</p>
-    </div>
-  </div>
-    <div class="post-content">
-      <h2 id="0x00-br">0x00 BR</h2>
-<blockquote>
-<p>Backup &amp; Restore（以下简称 BR）是 TiDB 分布式备份恢复的命令行工具，用于对 TiDB 集群进行数据备份和恢复。相比 mydumper/loader，BR 更适合大数据量的场景。本文档介绍了 BR 的使用限制、工作原理、命令行描述、备份恢复用例以及最佳实践。<br>
-以上内容复制于 <a href="https://docs.pingcap.com/zh/tidb/dev/backup-and-restore-tool" title="PingCAP 官网文档-使用 BR 进行备份与恢复">PingCAP 官网文档-使用 BR 进行备份与恢复</a><br>
-提前详细阅读 <a href="https://docs.pingcap.com/zh/tidb/dev/backup-and-restore-faq">PingCAP 官网文档-Backup &amp; Restore 常见问题</a></p>
-<ul>
-<li>详细阅读官网文档中的<strong>使用限制</strong>后再进行使用</li>
-<li>详细阅读官网文档中的<strong>使用限制</strong>后再进行使用</li>
-<li>详细阅读官网文档中的<strong>使用限制</strong>后再进行使用</li>
-</ul>
-</blockquote>
-<p>时空穿梭，书接上文：上文 《软件测试 - S3 协议与 minio》是为了搭建一套 S3 协议存储，该存储相比自己搭建一套 NFS 要方便的多。<br>
-BR 支持三种存储（本地存储、NFS、S3 存储），本次主要测试了本地存储备份恢复、S3 存储备份恢复；此处 NFS 备份恢复与 S3 备份恢复逻辑是一样的。</p>
-<blockquote>
-<p>本文中测试为 2020 年 6 月版本，该工具目前处于飞速迭代期，不对后续功能做预测。</p>
-</blockquote>
-<h2 id="0x01-思考">0x01 思考</h2>
-<p><img src="./br-arch.png" alt="br 架构"></p>
-<ul>
-<li>看图（文章）识字，猜测下运行思路：
-<ol>
-<li>BR 向 PD 发送 backup / restore 指令</li>
-<li>PD 获取当前 TSO 信息（<strong>backupmeta</strong> 文件中的断点记录）</li>
-<li>BR 向 TiDB httpapi 获取 database/table schema 信息（记录在<strong>backupmeta</strong> 文件中，还原时使用）
-<ul>
-<li>参见 <a href="https://github.com/pingcap/tidb/blob/master/docs/tidb_http_api.md">tidb_http_api</a> ：<code>curl http://{TiDBIP}:10080/schema/{db}/{table}</code></li>
-</ul>
-</li>
-<li>TiKV 收到 backup 指令；获取目标 schema 所辖 kv range 的所有 sst 文件（输出到 本地存储 / 网络存储）
-<ul>
-<li>TiKV 原生自带 S3 / NFS 等接口；无需安装第三方工具外挂到 tikv-server</li>
-<li>每个 TiKV 自身发起 backup / restore 动作，并发操作减少总任务时长；单个 TiKV 数据量足够少，总备份时间相应会变短</li>
-<li>TiKV 数据备份支持流控，通过 BR 参数传递</li>
-</ul>
-</li>
-<li>存储场景使用区别：
-<ol>
-<li>本地存储：backup 备份至每个 tikv-server 服务器本地，<strong>restore 时每台机器都必须有全量备份数据</strong>；好处是磁盘 IOPS 最大化使用，网络 IO 主机内使用。</li>
-<li>网络存储：backup 备份时传输至网络存储服务器「提前预算足够大的空间」，restore 时从网络空间下载对应数据到每个 tikv-server 节点；磁盘 IOPS 局限单台服务器能力、网络 IO 跨主机使用。</li>
-</ol>
-</li>
-</ol>
-</li>
-</ul>
-<h2 id="0x02-backupmeta">0x02 backupmeta</h2>
-<blockquote>
-<p>默认文件内容为二进制编码不可以编辑，打开时提示 <code>&quot;backupmeta&quot; may be a binary file.  See it anyway?</code></p>
-</blockquote>
-<ul>
-<li>使用 <code>./br validate decode -s local:///tmp/tmpuserbackup</code> 将 backupmeta 二进制文件解码为 backupmeta.json 文件（该文件与 backupmeta 同级目录）
-<ul>
-<li>backupmeta.json 文件内容为超长的一句话 JSON；key 信息保留，value 内容被 base64 编码</li>
-</ul>
-</li>
-<li>使用 <code>./br validate encode -s</code> 可以将 backupmeta.json 编码为 backupmeta 二进制文件</li>
-<li><strong>以上操作出现失误将会导致数据还原出现问题</strong>
-<ul>
-<li>操作上可以实现 backup database A ，restore database B 的场景；</li>
-<li>「schema 信息在每个表上都有，需要全部修改」</li>
-</ul>
-</li>
-</ul>
-<h3 id="sst-file">SST file</h3>
-<blockquote>
-<p>SST (Sorted Sequence Table)</p>
-</blockquote>
-<ul>
-<li>本次 backup 任务所有的 SST 文件信息，下面是其中一部分内容
-<ul>
-<li>restore 时会按照 backupmeta 文件内容进行恢复</li>
-<li>目标数据目录中相比 backupmeta 信息中缺少文件，提示 <code>The specified key does not exist.</code> 或者 <code>permission denied: download sst failed;</code></li>
-<li>目标数据目录中相比 backupmeta 信息中多余文件，不做操作</li>
-</ul>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-json" data-lang="json"><span class="p">{</span>
-    <span class="nt">&#34;name&#34;</span><span class="p">:</span><span class="s2">&#34;2476_46_23_80992061af3e5194c3f28a5b79d486c5e9db2feda1afb3f84b4ca229ddce9932_write.sst&#34;</span><span class="p">,</span>
-    <span class="nt">&#34;sha256&#34;</span><span class="p">:</span><span class="s2">&#34;AXCDqiNxpPxx4MmWz/nHwqy1N8kcRxc1HKgcDV3gnkI=&#34;</span><span class="p">,</span>
-    <span class="nt">&#34;start_key&#34;</span><span class="p">:</span><span class="s2">&#34;dIAAAAAAAAAxX3IAAAAAAAAAAA==&#34;</span><span class="p">,</span>
-    <span class="nt">&#34;end_key&#34;</span><span class="p">:</span><span class="s2">&#34;dIAAAAAAAAAxX3L//////////wA=&#34;</span><span class="p">,</span>
-    <span class="nt">&#34;end_version&#34;</span><span class="p">:</span><span class="mi">417071760901406802</span><span class="p">,</span>
-    <span class="nt">&#34;crc64xor&#34;</span><span class="p">:</span><span class="mi">12503741000804331466</span><span class="p">,</span>
-    <span class="nt">&#34;total_kvs&#34;</span><span class="p">:</span><span class="mi">50</span><span class="p">,</span>
-    <span class="nt">&#34;total_bytes&#34;</span><span class="p">:</span><span class="mi">6216</span><span class="p">,</span>
-    <span class="nt">&#34;cf&#34;</span><span class="p">:</span><span class="s2">&#34;write&#34;</span><span class="p">,</span>
-    <span class="nt">&#34;size&#34;</span><span class="p">:</span><span class="mi">6475</span>
-<span class="p">}</span>
-</code></pre></td></tr></table>
-</div>
-</div><h3 id="schema">schema</h3>
-<ul>
-<li>本次 backup 任务所有的 schema 信息「以下仅展示部分信息」</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-json" data-lang="json"><span class="s2">&#34;schemas&#34;</span><span class="err">:</span><span class="p">[{</span><span class="nt">&#34;db&#34;</span><span class="p">:</span><span class="s2">&#34;eyJpZCI6NDUsImRiX25hbWUiOnsiTyI6InRwY2MtMiIsIkwiOiJ0cGNjLTIifSwiY2hhcnNldCI6InV0ZjhtYjQiLCJjb2xsYXRlIjoidXRmOG1iNF9iaW4iLCJzdGF0ZSI6NX0=&#34;</span><span class="p">,</span>
-</code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>schema 解码后的信息</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-json" data-lang="json"><span class="p">{</span>
-    <span class="nt">&#34;id&#34;</span><span class="p">:</span><span class="mi">45</span><span class="p">,</span>            <span class="err">//</span> <span class="err">schema</span> <span class="err">id</span>
-    <span class="nt">&#34;db_name&#34;</span><span class="p">:{</span>
-        <span class="nt">&#34;O&#34;</span><span class="p">:</span><span class="s2">&#34;tpcc-2&#34;</span><span class="p">,</span>  <span class="err">//</span> <span class="err">代表</span> <span class="err">create</span> <span class="err">database</span> <span class="err">时原始字段信息</span>
-        <span class="nt">&#34;L&#34;</span><span class="p">:</span><span class="s2">&#34;tpcc-2&#34;</span>   <span class="err">//</span> <span class="err">程序转换为小写后的信息</span>
-    <span class="p">},</span>
-    <span class="nt">&#34;charset&#34;</span><span class="p">:</span><span class="s2">&#34;utf8mb4&#34;</span><span class="p">,</span>
-    <span class="nt">&#34;collate&#34;</span><span class="p">:</span><span class="s2">&#34;utf8mb4_bin&#34;</span><span class="p">,</span>
-    <span class="nt">&#34;state&#34;</span><span class="p">:</span><span class="mi">5</span>
-<span class="p">}</span>
-</code></pre></td></tr></table>
-</div>
-</div><h3 id="checkpoint">checkpoint</h3>
-<ul>
-<li>获取 backupmeta 文件中的 起始时间、结束时间
-<ul>
-<li>全量与增量备份注意事项：按照严格准确的全量数据 end-version 来指定为增量备份 start-ts</li>
-<li>如果指定非精准 start-ts，出现数据重叠部分有 DDL 动作，可能会造成数据异常</li>
-</ul>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-s" data-lang="s"><span class="n">./br</span> <span class="n">validate</span> <span class="n">decode</span>  <span class="o">-</span><span class="n">s</span> <span class="n">local</span><span class="o">:///</span><span class="n">tmp</span><span class="o">/</span><span class="n">tmpuserbackup</span>  <span class="o">--</span><span class="n">field</span><span class="o">=</span><span class="s">&#34;start-version&#34;</span>
-<span class="n">Detial</span> <span class="n">BR</span> <span class="n">log</span> <span class="n">in</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">br.log.2020</span><span class="m">-06-02</span><span class="n">T09.19.46</span><span class="m">+0800</span>
-<span class="m">0</span>
-<span class="o">//</span> 该场景为全量备份，获取 <span class="n">start</span><span class="o">-</span><span class="n">version</span>；即该次备份数据起始位置；全量备份默认起始位置为 <span class="m">0</span>
-
-<span class="n">./br</span> <span class="n">validate</span> <span class="n">decode</span>  <span class="o">-</span><span class="n">s</span> <span class="n">local</span><span class="o">:///</span><span class="n">tmp</span><span class="o">/</span><span class="n">tmpuserbackup</span>  <span class="o">--</span><span class="n">field</span><span class="o">=</span><span class="s">&#34;end-version&#34;</span>
-<span class="n">Detial</span> <span class="n">BR</span> <span class="n">log</span> <span class="n">in</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">br.log.2020</span><span class="m">-06-02</span><span class="n">T09.19.52</span><span class="m">+0800</span>
-<span class="m">417071760901406802</span>
-<span class="o">//</span> 该场景为全量备份，获取 <span class="n">end</span><span class="o">-</span><span class="n">version</span>；即该次备份数据结束位置
-
-<span class="n">./br</span> <span class="n">validate</span> <span class="n">decode</span>  <span class="o">-</span><span class="n">s</span> <span class="n">local</span><span class="o">:///</span><span class="n">tmp</span><span class="o">/</span><span class="n">tmpuserbackup</span><span class="o">-</span><span class="n">zl</span><span class="m">-2</span>  <span class="o">--</span><span class="n">field</span><span class="o">=</span><span class="s">&#34;start-version&#34;</span>
-<span class="n">Detial</span> <span class="n">BR</span> <span class="n">log</span> <span class="n">in</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">br.log.2020</span><span class="m">-06-02</span><span class="n">T09.20.07</span><span class="m">+0800</span>
-<span class="m">417071732760248335</span>
-<span class="o">//</span> 增量备份：此处 <span class="n">start</span><span class="o">-</span><span class="n">version</span> 与全量场景 <span class="n">end</span><span class="o">-</span><span class="n">version</span> 理应一一对应「此处不对应是因为 <span class="n">start</span><span class="o">-</span><span class="n">version</span> 为手动指定」，正确操作姿势详情见 <span class="n">[PingCAP</span> 官网<span class="o">-</span>增量备份<span class="nf">]</span><span class="p">(</span><span class="n">https</span><span class="o">://</span><span class="n">docs.pingcap.com</span><span class="o">/</span><span class="n">zh</span><span class="o">/</span><span class="n">tidb</span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">backup</span><span class="o">-</span><span class="n">and</span><span class="o">-</span><span class="n">restore</span><span class="o">-</span><span class="n">tool</span><span class="c1">#%E5%A2%9E%E9%87%8F%E5%A4%87%E4%BB%BD)</span>
-
-<span class="n">./br</span> <span class="n">validate</span> <span class="n">decode</span>  <span class="o">-</span><span class="n">s</span> <span class="n">local</span><span class="o">:///</span><span class="n">tmp</span><span class="o">/</span><span class="n">tmpuserbackup</span><span class="o">-</span><span class="n">zl</span><span class="m">-2</span>  <span class="o">--</span><span class="n">field</span><span class="o">=</span><span class="s">&#34;end-version&#34;</span>
-<span class="n">Detial</span> <span class="n">BR</span> <span class="n">log</span> <span class="n">in</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">br.log.2020</span><span class="m">-06-02</span><span class="n">T09.20.01</span><span class="m">+0800</span>
-<span class="m">417071840829112353</span>
-<span class="o">//</span> 增量备份：增量备份结束时间
-</code></pre></td></tr></table>
-</div>
-</div><h3 id="checksum">checksum</h3>
-<ul>
-<li>本地备份场景注意事项；以下是 checksum 检查不完整 bakckup 数据目录的报错
-<ul>
-<li>将所有的 backup 数据收集到一台机器，得到一份全量备份数据</li>
-<li>然后将全量备份数据复制到每台 tikv-server 机器，此时才可以进行 restore 操作</li>
-</ul>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-s" data-lang="s"> <span class="n">./br</span> <span class="n">validate</span> <span class="n">checksum</span> <span class="o">--</span><span class="n">pd</span> <span class="m">172.16.4.51</span><span class="o">:</span><span class="m">14379</span>  <span class="o">--</span><span class="n">storage</span> <span class="s">&#34;local:///data3/tmpuser/full/full&#34;</span>  
-<span class="n">Detial</span> <span class="n">BR</span> <span class="n">log</span> <span class="n">in</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">br.log.2020</span><span class="m">-06-02</span><span class="n">T11.21.18</span><span class="m">+0800</span>
-<span class="n">Error</span><span class="o">:</span> <span class="n">open</span> <span class="o">/</span><span class="n">data3</span><span class="o">/</span><span class="n">tmpuser</span><span class="o">/</span><span class="n">full</span><span class="o">/</span><span class="n">full</span><span class="o">/</span><span class="m">1644</span><span class="n">_58401_49_1970ce6c62b57fa0ad6226e45738144e10c519941f21cd1b7d14d5d255997975_default.sst</span><span class="o">:</span> <span class="n">no</span> <span class="n">such</span> <span class="n">file</span> <span class="n">or</span> <span class="n">directory</span>
-</code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>备份数据目录包含子目录，且子目录可能为增量备份</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-s" data-lang="s"> <span class="n">./br</span> <span class="n">validate</span> <span class="n">checksum</span> <span class="o">--</span><span class="n">storage</span> <span class="s">&#34;s3://full/full/zl-2/?endpoint=http://172.16.4.51:99&#34;</span>
-<span class="n">Detial</span> <span class="n">BR</span> <span class="n">log</span> <span class="n">in</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">br.log.2020</span><span class="m">-06-02</span><span class="n">T17.20.55</span><span class="m">+0800</span>
-<span class="n">Error</span><span class="o">:</span> <span class="n">NoSuchKey</span><span class="o">:</span> <span class="n">The</span> <span class="n">specified</span> <span class="n">key</span> <span class="n">does</span> <span class="n">not</span> <span class="n">exist.</span>
-        <span class="n">status</span> <span class="n">code</span><span class="o">:</span> <span class="m">404</span><span class="p">,</span> <span class="n">request</span> <span class="n">id</span><span class="o">:</span> <span class="m">1614</span><span class="n">AF9CB410A291</span><span class="p">,</span> <span class="n">host</span> <span class="n">id</span><span class="o">:</span>
-</code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>备份数据检测完整；可以进行数据恢复</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-S" data-lang="S"><span class="n">./br</span> <span class="n">validate</span> <span class="n">checksum</span> <span class="o">--</span><span class="n">storage</span> <span class="s">&#34;s3://full/full/zl-2/?endpoint=http://172.16.4.51:99&#34;</span>
-<span class="n">Detial</span> <span class="n">BR</span> <span class="n">log</span> <span class="n">in</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">br.log.2020</span><span class="m">-06-02</span><span class="n">T17.21.51</span><span class="m">+0800</span>
-<span class="n">backup</span> <span class="n">data</span> <span class="n">checksum</span> <span class="n">succeed</span><span class="o">!</span>
-
-<span class="n">./br</span> <span class="n">validate</span> <span class="n">checksum</span> <span class="o">--</span><span class="n">pd</span> <span class="m">172.16.4.51</span><span class="o">:</span><span class="m">14379</span>  <span class="o">--</span><span class="n">storage</span> <span class="s">&#34;local:///data3/tmpuser/full/full&#34;</span>  
-<span class="n">Detial</span> <span class="n">BR</span> <span class="n">log</span> <span class="n">in</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">br.log.2020</span><span class="m">-06-02</span><span class="n">T11.18.32</span><span class="m">+0800</span>
-<span class="n">backup</span> <span class="n">data</span> <span class="n">checksum</span> <span class="n">succeed</span><span class="o">!</span>
-</code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>backupmeta 已存在目录中，该目录无法创建备份；</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-s" data-lang="s"><span class="n">./br</span> <span class="n">backup</span> <span class="n">table</span>  <span class="o">--</span><span class="n">pd</span> <span class="m">172.16.4.51</span><span class="o">:</span><span class="m">14379</span> <span class="o">--</span><span class="n">db</span> <span class="n">tpcc</span> <span class="o">--</span><span class="n">table</span> <span class="n">order_line</span> <span class="o">--</span><span class="n">storage</span> <span class="s">&#34;local:///tmp/tmpuserbackup&#34;</span>  <span class="o">--</span><span class="n">log</span><span class="o">-</span><span class="n">file</span> <span class="n">backupfull.log</span><span class="m">-2</span>
-<span class="n">Detial</span> <span class="n">BR</span> <span class="n">log</span> <span class="n">in</span> <span class="n">backupfull.log</span><span class="m">-2</span>
-<span class="n">Error</span><span class="o">:</span> <span class="n">backup</span> <span class="n">meta</span> <span class="n">exists</span><span class="p">,</span> <span class="n">may</span> <span class="n">be</span> <span class="n">some</span> <span class="n">backup</span> <span class="n">files</span> <span class="n">in</span> <span class="n">the</span> <span class="n">path</span> <span class="n">already</span>
-</code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>该目录中已有 SST 文件不影响创建备份操作「不检测目录是否为空」，如果备份 SST 文件与已有文件重名会停止备份
-<ul>
-<li>文件名带有 storeid_regionid_schemaid_key 信息，动态数据重名几率较小</li>
-</ul>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-s" data-lang="s"><span class="n">./br</span> <span class="n">backup</span> <span class="n">table</span>  <span class="o">--</span><span class="n">pd</span> <span class="m">172.16.4.51</span><span class="o">:</span><span class="m">14379</span> <span class="o">--</span><span class="n">db</span> <span class="n">tpcc</span> <span class="o">--</span><span class="n">table</span> <span class="n">order_line</span> <span class="o">--</span><span class="n">storage</span> <span class="s">&#34;local:///tmp/tmpuserbackup-2&#34;</span>  <span class="o">--</span><span class="n">log</span><span class="o">-</span><span class="n">file</span> <span class="n">backupfull.log</span><span class="m">-2</span>
-<span class="n">Detial</span> <span class="n">BR</span> <span class="n">log</span> <span class="n">in</span> <span class="n">backupfull.log</span><span class="m">-2</span>
-<span class="n">Table</span> <span class="n">backup</span> <span class="o">&lt;</span><span class="n">..............................................................................................................................................................................................</span><span class="o">&gt;</span> <span class="m">0.00</span>%<span class="n">Error</span><span class="o">:</span> <span class="n">msg</span><span class="o">:</span><span class="s">&#34;Io(Custom { kind: AlreadyExists, error: \&#34;[1_112_45_393d3575060c0d616300c1199ef1c015784fdd3d13e950a6251007bbcbaf2c06_write.sst] is already exists in /tmp/tmpuserbackup-2\&#34; })&#34;</span>
-</code></pre></td></tr></table>
-</div>
-</div><h2 id="0x03-测试">0x03 测试</h2>
-<blockquote>
-<p>BR 使用简单、快捷，填充参数增加文章长度；</p>
-</blockquote>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span><span class="lnt">33
-</span><span class="lnt">34
-</span><span class="lnt">35
-</span><span class="lnt">36
-</span><span class="lnt">37
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-s" data-lang="s"><span class="n">br</span> <span class="n">is</span> <span class="n">a</span> <span class="n">TiDB</span><span class="o">/</span><span class="n">TiKV</span> <span class="n">cluster</span> <span class="n">backup</span> <span class="n">restore</span> <span class="n">tool.</span>
-
-<span class="n">Usage</span><span class="o">:</span>
-  <span class="n">br</span> <span class="n">[command]</span>
-
-<span class="n">Available</span> <span class="n">Commands</span><span class="o">:</span>
-  <span class="n">backup</span>      <span class="n">backup</span> <span class="n">a</span> <span class="n">TiDB</span><span class="o">/</span><span class="n">TiKV</span> <span class="n">cluster</span>
-  <span class="n">help</span>        <span class="n">Help</span> <span class="n">about</span> <span class="n">any</span> <span class="n">command</span>
-  <span class="n">restore</span>     <span class="n">restore</span> <span class="n">a</span> <span class="n">TiDB</span><span class="o">/</span><span class="n">TiKV</span> <span class="n">cluster</span>
-
-<span class="n">Flags</span><span class="o">:</span>
-      <span class="o">--</span><span class="n">ca</span> <span class="n">string</span>                     <span class="n">CA</span> <span class="n">certificate</span> <span class="n">path</span> <span class="n">for</span> <span class="n">TLS</span> <span class="n">connection</span>
-      <span class="o">--</span><span class="n">cert</span> <span class="n">string</span>                   <span class="n">Certificate</span> <span class="n">path</span> <span class="n">for</span> <span class="n">TLS</span> <span class="n">connection</span>
-      <span class="o">--</span><span class="n">checksum</span>                      <span class="n">Run</span> <span class="n">checksum</span> <span class="n">at</span> <span class="n">end</span> <span class="n">of</span> <span class="nf">task </span><span class="p">(</span><span class="n">default</span> <span class="n">true</span><span class="p">)</span>
-      <span class="o">--</span><span class="n">gcs.credentials</span><span class="o">-</span><span class="n">file</span> <span class="nf">string   </span><span class="p">(</span><span class="n">experimental</span><span class="p">)</span> <span class="n">Set</span> <span class="n">the</span> <span class="n">GCS</span> <span class="n">credentials</span> <span class="n">file</span> <span class="n">path</span>
-      <span class="o">--</span><span class="n">gcs.endpoint</span> <span class="nf">string           </span><span class="p">(</span><span class="n">experimental</span><span class="p">)</span> <span class="n">Set</span> <span class="n">the</span> <span class="n">GCS</span> <span class="n">endpoint</span> <span class="n">URL</span>
-      <span class="o">--</span><span class="n">gcs.predefined</span><span class="o">-</span><span class="n">acl</span> <span class="nf">string     </span><span class="p">(</span><span class="n">experimental</span><span class="p">)</span> <span class="n">Specify</span> <span class="n">the</span> <span class="n">GCS</span> <span class="n">predefined</span> <span class="n">acl</span> <span class="n">for</span> <span class="n">objects</span>
-      <span class="o">--</span><span class="n">gcs.storage</span><span class="o">-</span><span class="n">class</span> <span class="nf">string      </span><span class="p">(</span><span class="n">experimental</span><span class="p">)</span> <span class="n">Specify</span> <span class="n">the</span> <span class="n">GCS</span> <span class="n">storage</span> <span class="n">class</span> <span class="n">for</span> <span class="n">objects</span>
-  <span class="o">-</span><span class="n">h</span><span class="p">,</span> <span class="o">--</span><span class="n">help</span>                          <span class="n">help</span> <span class="n">for</span> <span class="n">br</span>
-      <span class="o">--</span><span class="n">key</span> <span class="n">string</span>                    <span class="n">Private</span> <span class="n">key</span> <span class="n">path</span> <span class="n">for</span> <span class="n">TLS</span> <span class="n">connection</span>
-      <span class="o">--</span><span class="n">log</span><span class="o">-</span><span class="n">file</span> <span class="n">string</span>               <span class="n">Set</span> <span class="n">the</span> <span class="n">log</span> <span class="n">file</span> <span class="n">path.</span> <span class="n">If</span> <span class="n">not</span> <span class="n">set</span><span class="p">,</span> <span class="n">logs</span> <span class="n">will</span> <span class="n">output</span> <span class="n">to</span> <span class="n">temp</span> <span class="nf">file </span><span class="p">(</span><span class="n">default</span> <span class="s">&#34;/tmp/br.log.2020-07-02T14.25.25+0800&#34;</span><span class="p">)</span>
-  <span class="o">-</span><span class="n">L</span><span class="p">,</span> <span class="o">--</span><span class="n">log</span><span class="o">-</span><span class="n">level</span> <span class="n">string</span>              <span class="n">Set</span> <span class="n">the</span> <span class="n">log</span> <span class="nf">level </span><span class="p">(</span><span class="n">default</span> <span class="s">&#34;info&#34;</span><span class="p">)</span>
-  <span class="o">-</span><span class="n">u</span><span class="p">,</span> <span class="o">--</span><span class="n">pd</span> <span class="n">strings</span>                    <span class="n">PD</span> <span class="nf">address </span><span class="p">(</span><span class="n">default</span> <span class="n">[127.0.0.1</span><span class="o">:</span><span class="m">2379</span><span class="n">]</span><span class="p">)</span>
-      <span class="o">--</span><span class="n">ratelimit</span> <span class="n">uint</span>                <span class="n">The</span> <span class="n">rate</span> <span class="n">limit</span> <span class="n">of</span> <span class="n">the</span> <span class="n">task</span><span class="p">,</span> <span class="n">MB</span><span class="o">/</span><span class="n">s</span> <span class="n">per</span> <span class="n">node</span>
-      <span class="o">--</span><span class="n">s3.acl</span> <span class="nf">string                 </span><span class="p">(</span><span class="n">experimental</span><span class="p">)</span> <span class="n">Set</span> <span class="n">the</span> <span class="n">S3</span> <span class="n">canned</span> <span class="n">ACLs</span><span class="p">,</span> <span class="n">e.g.</span> <span class="n">authenticated</span><span class="o">-</span><span class="n">read</span>
-      <span class="o">--</span><span class="n">s3.endpoint</span> <span class="nf">string            </span><span class="p">(</span><span class="n">experimental</span><span class="p">)</span> <span class="n">Set</span> <span class="n">the</span> <span class="n">S3</span> <span class="n">endpoint</span> <span class="n">URL</span><span class="p">,</span> <span class="n">please</span> <span class="n">specify</span> <span class="n">the</span> <span class="n">http</span> <span class="n">or</span> <span class="n">https</span> <span class="n">scheme</span> <span class="n">explicitly</span>
-      <span class="o">--</span><span class="n">s3.provider</span> <span class="nf">string            </span><span class="p">(</span><span class="n">experimental</span><span class="p">)</span> <span class="n">Set</span> <span class="n">the</span> <span class="n">S3</span> <span class="n">provider</span><span class="p">,</span> <span class="n">e.g.</span> <span class="n">aws</span><span class="p">,</span> <span class="n">alibaba</span><span class="p">,</span> <span class="n">ceph</span>
-      <span class="o">--</span><span class="n">s3.region</span> <span class="nf">string              </span><span class="p">(</span><span class="n">experimental</span><span class="p">)</span> <span class="n">Set</span> <span class="n">the</span> <span class="n">S3</span> <span class="n">region</span><span class="p">,</span> <span class="n">e.g.</span> <span class="n">us</span><span class="o">-</span><span class="n">east</span><span class="m">-1</span>
-      <span class="o">--</span><span class="n">s3.sse</span> <span class="n">string</span>                 <span class="n">Set</span> <span class="n">S3</span> <span class="n">server</span><span class="o">-</span><span class="n">side</span> <span class="n">encryption</span><span class="p">,</span> <span class="n">e.g.</span> <span class="n">aws</span><span class="o">:</span><span class="n">kms</span>
-      <span class="o">--</span><span class="n">s3.sse</span><span class="o">-</span><span class="n">kms</span><span class="o">-</span><span class="n">key</span><span class="o">-</span><span class="n">id</span> <span class="n">string</span>      <span class="n">KMS</span> <span class="n">CMK</span> <span class="n">key</span> <span class="n">id</span> <span class="n">to</span> <span class="n">use</span> <span class="n">with</span> <span class="n">S3</span> <span class="n">server</span><span class="o">-</span><span class="n">side</span> <span class="n">encryption.Leave</span> <span class="n">empty</span> <span class="n">to</span> <span class="n">use</span> <span class="n">S3</span> <span class="n">owned</span> <span class="n">key.</span>
-      <span class="o">--</span><span class="n">s3.storage</span><span class="o">-</span><span class="n">class</span> <span class="nf">string       </span><span class="p">(</span><span class="n">experimental</span><span class="p">)</span> <span class="n">Set</span> <span class="n">the</span> <span class="n">S3</span> <span class="n">storage</span> <span class="n">class</span><span class="p">,</span> <span class="n">e.g.</span> <span class="n">STANDARD</span>
-  <span class="o">-</span><span class="n">c</span><span class="p">,</span> <span class="o">--</span><span class="n">send</span><span class="o">-</span><span class="n">credentials</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">tikv</span>      <span class="n">Whether</span> <span class="n">send</span> <span class="n">credentials</span> <span class="n">to</span> <span class="nf">tikv </span><span class="p">(</span><span class="n">default</span> <span class="n">true</span><span class="p">)</span>
-      <span class="o">--</span><span class="n">status</span><span class="o">-</span><span class="n">addr</span> <span class="n">string</span>            <span class="n">Set</span> <span class="n">the</span> <span class="n">HTTP</span> <span class="n">listening</span> <span class="n">address</span> <span class="n">for</span> <span class="n">the</span> <span class="n">status</span> <span class="n">report</span> <span class="n">service.</span> <span class="n">Set</span> <span class="n">to</span> <span class="n">empty</span> <span class="n">string</span> <span class="n">to</span> <span class="n">disable</span>
-  <span class="o">-</span><span class="n">s</span><span class="p">,</span> <span class="o">--</span><span class="n">storage</span> <span class="n">string</span>                <span class="n">specify</span> <span class="n">the</span> <span class="n">url</span> <span class="n">where</span> <span class="n">backup</span> <span class="n">storage</span><span class="p">,</span> <span class="n">eg</span><span class="p">,</span> <span class="s">&#34;s3://bucket/path/prefix&#34;</span>
-  <span class="o">-</span><span class="n">V</span><span class="p">,</span> <span class="o">--</span><span class="n">version</span>                       <span class="n">Display</span> <span class="n">version</span> <span class="n">information</span> <span class="n">about</span> <span class="n">BR</span>
-
-<span class="n">Use</span> <span class="s">&#34;br [command] --help&#34;</span> <span class="n">for</span> <span class="n">more</span> <span class="n">information</span> <span class="n">about</span> <span class="n">a</span> <span class="n">command.</span>
-</code></pre></td></tr></table>
-</div>
-</div><blockquote>
-<p>以下内容请移步参观官网详细文档 <a href="https://docs.pingcap.com/zh/tidb/dev/backup-and-restore-tool" title="PingCAP 官网文档-使用 BR 进行备份与恢复">PingCAP 官网文档-使用 BR 进行备份与恢复</a></p>
-</blockquote>
-<h3 id="local-br">local BR</h3>
-<ul>
-<li>备份数据到本地存储「提前准备好全量数据备份的磁盘空间（如果需要本地恢复的话）」</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span><span class="lnt">8
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-s" data-lang="s"><span class="n">./br</span> <span class="n">backup</span> <span class="n">table</span>  <span class="o">--</span><span class="n">pd</span> <span class="m">172.16.4.51</span><span class="o">:</span><span class="m">14379</span> <span class="o">--</span><span class="n">db</span> <span class="n">tpcc</span> <span class="o">--</span><span class="n">table</span> <span class="n">history</span> <span class="o">--</span><span class="n">storage</span> <span class="s">&#34;local:///tmp/tmpuserbackup-3&#34;</span>  <span class="o">--</span><span class="n">log</span><span class="o">-</span><span class="n">file</span> <span class="n">backupfull.log</span><span class="m">-2</span>
-<span class="n">Detial</span> <span class="n">BR</span> <span class="n">log</span> <span class="n">in</span> <span class="n">backupfull.log</span><span class="m">-2</span>
-<span class="n">Table</span> <span class="n">backup</span> <span class="o">&lt;--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------&gt;</span> <span class="m">100.00</span><span class="o">%
-</span><span class="o">Checksum &lt;------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------&gt; 100.00%</span>
-<span class="p">{</span><span class="s">&#34;level&#34;</span><span class="o">:</span><span class="s">&#34;warn&#34;</span><span class="p">,</span><span class="s">&#34;ts&#34;</span><span class="o">:</span><span class="s">&#34;2020-06-01T15:59:34.671+0800&#34;</span><span class="p">,</span><span class="s">&#34;caller&#34;</span><span class="o">:</span><span class="s">&#34;clientv3/retry_interceptor.go:61&#34;</span><span class="p">,</span><span class="s">&#34;msg&#34;</span><span class="o">:</span><span class="s">&#34;retrying of unary invoker failed&#34;</span><span class="p">,</span><span class="s">&#34;target&#34;</span><span class="o">:</span><span class="s">&#34;endpoint://client-3be8bd38-4e9e-4166-a102-afcab137eee9/172.16.4.51:14379&#34;</span><span class="p">,</span><span class="s">&#34;attempt&#34;</span><span class="o">:</span><span class="m">0</span><span class="p">,</span><span class="s">&#34;error&#34;</span><span class="o">:</span><span class="s">&#34;rpc error: code = Canceled desc = grpc: the client connection is closing&#34;</span><span class="p">}</span>
-<span class="p">{</span><span class="s">&#34;level&#34;</span><span class="o">:</span><span class="s">&#34;warn&#34;</span><span class="p">,</span><span class="s">&#34;ts&#34;</span><span class="o">:</span><span class="s">&#34;2020-06-01T15:59:34.697+0800&#34;</span><span class="p">,</span><span class="s">&#34;caller&#34;</span><span class="o">:</span><span class="s">&#34;clientv3/retry_interceptor.go:61&#34;</span><span class="p">,</span><span class="s">&#34;msg&#34;</span><span class="o">:</span><span class="s">&#34;retrying of unary invoker failed&#34;</span><span class="p">,</span><span class="s">&#34;target&#34;</span><span class="o">:</span><span class="s">&#34;endpoint://client-3be8bd38-4e9e-4166-a102-afcab137eee9/172.16.4.51:14379&#34;</span><span class="p">,</span><span class="s">&#34;attempt&#34;</span><span class="o">:</span><span class="m">1</span><span class="p">,</span><span class="s">&#34;error&#34;</span><span class="o">:</span><span class="s">&#34;rpc error: code = Canceled desc = grpc: the client connection is closing&#34;</span><span class="p">}</span>
-<span class="p">{</span><span class="s">&#34;level&#34;</span><span class="o">:</span><span class="s">&#34;warn&#34;</span><span class="p">,</span><span class="s">&#34;ts&#34;</span><span class="o">:</span><span class="s">&#34;2020-06-01T15:59:34.723+0800&#34;</span><span class="p">,</span><span class="s">&#34;caller&#34;</span><span class="o">:</span><span class="s">&#34;clientv3/retry_interceptor.go:61&#34;</span><span class="p">,</span><span class="s">&#34;msg&#34;</span><span class="o">:</span><span class="s">&#34;retrying of unary invoker failed&#34;</span><span class="p">,</span><span class="s">&#34;target&#34;</span><span class="o">:</span><span class="s">&#34;endpoint://client-3be8bd38-4e9e-4166-a102-afcab137eee9/172.16.4.51:14379&#34;</span><span class="p">,</span><span class="s">&#34;attempt&#34;</span><span class="o">:</span><span class="m">2</span><span class="p">,</span><span class="s">&#34;error&#34;</span><span class="o">:</span><span class="s">&#34;rpc error: code = Canceled desc = grpc: the client connection is closing&#34;</span><span class="p">}</span>
-<span class="n">[2020</span><span class="o">/</span><span class="m">06</span><span class="o">/</span><span class="m">01</span> <span class="m">15</span><span class="o">:</span><span class="m">59</span><span class="o">:</span><span class="m">37.355</span> <span class="m">+08</span><span class="o">:</span><span class="m">00</span><span class="n">]</span> <span class="n">[INFO]</span> <span class="n">[collector.go</span><span class="o">:</span><span class="m">58</span><span class="n">]</span> <span class="n">[</span><span class="s">&#34;Table backup Success summary: total backup ranges: 3, total success: 3, total failed: 0, total take(s): 24.02, total kv: 53717061, total size(MB): 2859.38, avg speed(MB/s): 119.02&#34;</span><span class="n">]</span> <span class="n">[</span><span class="s">&#34;backup checksum&#34;</span><span class="o">=</span><span class="m">3.148382555</span><span class="n">s]</span> <span class="n">[</span><span class="s">&#34;backup fast checksum&#34;</span><span class="o">=</span><span class="m">634.588</span>µ<span class="n">s]</span> <span class="n">[</span><span class="s">&#34;backup total regions&#34;</span><span class="o">=</span><span class="m">62</span><span class="n">]</span>
-</code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>permission denied
-<ul>
-<li><strong>首先检查每个 tikv-server 主机上是否有全量数据</strong></li>
-<li>然后检查 br -s 指定的数据目录是否正确，<strong>每个 tikv 节点路径必须一致</strong></li>
-<li>然后检查<strong>目录权限是否被 tikv-server 运行用户可读</strong></li>
-</ul>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-s" data-lang="s"><span class="n">./br</span> <span class="n">restore</span> <span class="n">full</span> <span class="o">--</span><span class="n">pd</span> <span class="m">172.16.4.51</span><span class="o">:</span><span class="m">14379</span>  <span class="o">--</span><span class="n">storage</span> <span class="s">&#34;local:///data3/tmpuser/full/full&#34;</span>  <span class="o">--</span><span class="n">status</span><span class="o">-</span><span class="n">addr</span> <span class="m">172.16.4.51</span><span class="o">:</span><span class="m">18880</span>
-<span class="n">Detial</span> <span class="n">BR</span> <span class="n">log</span> <span class="n">in</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">br.log.2020</span><span class="m">-06-02</span><span class="n">T11.30.48</span><span class="m">+0800</span>
-<span class="n">Full</span> <span class="n">restore</span> <span class="o">&lt;--------</span><span class="m">-.</span><span class="n">................................................................................................................................................................................</span><span class="o">&gt;</span> <span class="m">4.74</span>%<span class="n">Error</span><span class="o">:</span> <span class="n">permission</span> <span class="n">denied</span><span class="o">:</span> <span class="n">download</span> <span class="n">sst</span> <span class="n">failed</span><span class="p">;</span> <span class="n">permission</span> <span class="n">denied</span><span class="o">:</span> <span class="n">download</span> <span class="n">sst</span> <span class="n">failed</span><span class="p">;</span> <span class="n">permission</span> <span class="n">denied</span><span class="o">:</span> <span class="n">download</span> <span class="n">sst</span> <span class="n">failed</span><span class="p">;</span> <span class="n">permission</span> <span class="n">denied</span><span class="o">:</span> <span class="n">download</span> <span class="n">sst</span> <span class="n">failed</span><span class="p">;</span> <span class="n">permission</span> <span class="n">denied</span><span class="o">:</span> <span class="n">download</span> <span class="n">sst</span> <span class="n">failed</span><span class="p">;</span> <span class="n">permission</span> <span class="n">denied</span><span class="o">:</span> <span class="n">download</span> <span class="n">sst</span> <span class="n">failed</span><span class="p">;</span> <span class="n">permission</span> <span class="n">denied</span><span class="o">:</span> <span class="n">download</span> <span class="n">sst</span> <span class="n">failed</span><span class="p">;</span> <span class="n">permission</span> <span class="n">denied</span><span class="o">:</span> <span class="n">download</span> <span class="n">sst</span> <span class="n">failed</span>
-</code></pre></td></tr></table>
-</div>
-</div><h3 id="s3-br">S3 BR</h3>
-<ul>
-<li>备份数据到网络存储
-<ul>
-<li>export AWS_ACCESS_KEY_ID=minioadmin</li>
-<li>export AWS_SECRET_ACCESS_KEY=minioadmin</li>
-</ul>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-s" data-lang="s"> <span class="n">./br</span> <span class="n">backup</span> <span class="n">db</span> <span class="o">--</span><span class="n">db</span> <span class="n">br</span> <span class="o">--</span><span class="n">pd</span> <span class="m">172.16.4.51</span><span class="o">:</span><span class="m">14379</span>  <span class="o">--</span><span class="n">storage</span> <span class="s">&#34;s3://br-order-line/?endpoint=http://172.16.4.51:99&#34;</span>
-<span class="n">Detial</span> <span class="n">BR</span> <span class="n">log</span> <span class="n">in</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">br.log.2020</span><span class="m">-06-02</span><span class="n">T17.32.47</span><span class="m">+0800</span>
-<span class="n">Database</span> <span class="n">backup</span> <span class="o">&lt;----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------&gt;</span> <span class="m">100.00</span><span class="o">%
-</span><span class="o">Checksum &lt;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------&gt; 100.00%</span>
-<span class="n">[2020</span><span class="o">/</span><span class="m">06</span><span class="o">/</span><span class="m">02</span> <span class="m">17</span><span class="o">:</span><span class="m">39</span><span class="o">:</span><span class="m">37.879</span> <span class="m">+08</span><span class="o">:</span><span class="m">00</span><span class="n">]</span> <span class="n">[INFO]</span> <span class="n">[collector.go</span><span class="o">:</span><span class="m">58</span><span class="n">]</span> <span class="n">[</span><span class="s">&#34;Database backup Success summary: total backup ranges: 20, total success: 20, total failed: 0, total take(s): 366.26, total kv: 1390969552, total size(MB): 128968.74, avg speed(MB/s): 352.12&#34;</span><span class="n">]</span> <span class="n">[</span><span class="s">&#34;backup checksum&#34;</span><span class="o">=</span><span class="m">44.411943312</span><span class="n">s]</span> <span class="n">[</span><span class="s">&#34;backup fast checksum&#34;</span><span class="o">=</span><span class="m">5.160845</span><span class="n">ms]</span> <span class="n">[</span><span class="s">&#34;backup total regions&#34;</span><span class="o">=</span><span class="m">2402</span><span class="n">]</span>
-</code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>从网络存储恢复数据
-<ul>
-<li>export AWS_ACCESS_KEY_ID=minioadmin</li>
-<li>export AWS_SECRET_ACCESS_KEY=minioadmin</li>
-</ul>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-s" data-lang="s"> <span class="n">./br</span> <span class="n">restore</span> <span class="n">full</span> <span class="o">--</span><span class="n">pd</span> <span class="m">172.16.4.51</span><span class="o">:</span><span class="m">14379</span>  <span class="o">--</span><span class="n">storage</span> <span class="s">&#34;s3://full/full/full/?endpoint=http://172.16.4.51:99&#34;</span> <span class="o">--</span><span class="n">status</span><span class="o">-</span><span class="n">addr</span> <span class="m">172.16.4.51</span><span class="o">:</span><span class="m">18880</span>
-<span class="n">Detial</span> <span class="n">BR</span> <span class="n">log</span> <span class="n">in</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">br.log.2020</span><span class="m">-06-02</span><span class="n">T17.13.34</span><span class="m">+0800</span>
-<span class="n">Full</span> <span class="n">restore</span> <span class="o">&lt;-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------&gt;</span> <span class="m">100.00</span><span class="o">%
-</span><span class="o">Checksum &lt;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------&gt; 100.00%</span>
-<span class="n">[2020</span><span class="o">/</span><span class="m">06</span><span class="o">/</span><span class="m">02</span> <span class="m">17</span><span class="o">:</span><span class="m">15</span><span class="o">:</span><span class="m">38.093</span> <span class="m">+08</span><span class="o">:</span><span class="m">00</span><span class="n">]</span> <span class="n">[INFO]</span> <span class="n">[collector.go</span><span class="o">:</span><span class="m">58</span><span class="n">]</span> <span class="n">[</span><span class="s">&#34;Full restore Success summary: total restore files: 866, total success: 866, total failed: 0, total take(s): 84.16, total kv: 501863655, total size(MB): 38876.69, avg speed(MB/s): 461.96&#34;</span><span class="n">]</span> <span class="n">[</span><span class="s">&#34;split region&#34;</span><span class="o">=</span><span class="m">12.75036978</span><span class="n">s]</span> <span class="n">[</span><span class="s">&#34;restore checksum&#34;</span><span class="o">=</span><span class="m">16.45494056</span><span class="n">s]</span> <span class="n">[</span><span class="s">&#34;restore ranges&#34;</span><span class="o">=</span><span class="m">822</span><span class="n">]</span>
-
-</code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>手动提前创建好 S3/backup 信息；backup == S3 目录</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-s" data-lang="s"> <span class="n">./br</span> <span class="n">backup</span> <span class="n">db</span> <span class="o">--</span><span class="n">db</span> <span class="n">br</span> <span class="o">--</span><span class="n">pd</span> <span class="m">172.16.4.51</span><span class="o">:</span><span class="m">14379</span>  <span class="o">--</span><span class="n">storage</span> <span class="s">&#34;s3://br-order-line/?endpoint=http://172.16.4.51:99&#34;</span>
-<span class="n">Detial</span> <span class="n">BR</span> <span class="n">log</span> <span class="n">in</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">br.log.2020</span><span class="m">-06-02</span><span class="n">T17.32.11</span><span class="m">+0800</span>
-<span class="n">Error</span><span class="o">:</span> <span class="n">Bucket</span> <span class="n">br</span><span class="o">-</span><span class="n">order</span><span class="o">-</span><span class="n">line</span> <span class="n">is</span> <span class="n">not</span> <span class="n">accessible</span><span class="o">:</span> <span class="n">NotFound</span><span class="o">:</span> <span class="n">Not</span> <span class="n">Found</span>
-        <span class="n">status</span> <span class="n">code</span><span class="o">:</span> <span class="m">404</span><span class="p">,</span> <span class="n">request</span> <span class="n">id</span><span class="o">:</span> <span class="m">1614</span><span class="n">B03A0CD600B5</span><span class="p">,</span> <span class="n">host</span> <span class="n">id</span><span class="o">:</span>
-</code></pre></td></tr></table>
-</div>
-</div><h2 id="faq">FAQ</h2>
-<p>数据一边大量写入，一边做增量备份；BR 是怎么控制结束时间的呢？「有奖问答」</p>
-<ul>
-<li>贴一段 BR 运行日志</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-s" data-lang="s"><span class="n">[2020</span><span class="o">/</span><span class="m">06</span><span class="o">/</span><span class="m">01</span> <span class="m">16</span><span class="o">:</span><span class="m">15</span><span class="o">:</span><span class="m">38.439</span> <span class="m">+08</span><span class="o">:</span><span class="m">00</span><span class="n">]</span> <span class="n">[INFO]</span> <span class="n">[coprocessor.go</span><span class="o">:</span><span class="m">870</span><span class="n">]</span> <span class="n">[</span><span class="s">&#34;[TIME_COP_PROCESS] resp_time:303.5223ms txnStartTS:417070892274155527 region_id:148 store_addr:172.16.4.52:15160 kv_process_ms:301 scan_total_write:145255 scan_processed_write:145254 scan_total_data:145254 scan_processed_data:145254 scan_total_lock:1 scan_processed_lock:0&#34;</span><span class="n">]</span>
-<span class="n">[2020</span><span class="o">/</span><span class="m">06</span><span class="o">/</span><span class="m">01</span> <span class="m">16</span><span class="o">:</span><span class="m">15</span><span class="o">:</span><span class="m">54.730</span> <span class="m">+08</span><span class="o">:</span><span class="m">00</span><span class="n">]</span> <span class="n">[INFO]</span> <span class="n">[schema.go</span><span class="o">:</span><span class="m">94</span><span class="n">]</span> <span class="n">[</span><span class="s">&#34;table checksum finished&#34;</span><span class="n">]</span> <span class="n">[table</span><span class="o">=</span><span class="n">`tpcc`.`order_line`]</span> <span class="n">[Crc64Xor</span><span class="o">=</span><span class="m">18378085887538976218</span><span class="n">]</span> <span class="n">[TotalKvs</span><span class="o">=</span><span class="m">369955866</span><span class="n">]</span> <span class="n">[TotalBytes</span><span class="o">=</span><span class="m">30627398952</span><span class="n">]</span> <span class="n">[take</span><span class="o">=</span><span class="m">16.601811036</span><span class="n">s]</span>
-<span class="n">[2020</span><span class="o">/</span><span class="m">06</span><span class="o">/</span><span class="m">01</span> <span class="m">16</span><span class="o">:</span><span class="m">15</span><span class="o">:</span><span class="m">54.730</span> <span class="m">+08</span><span class="o">:</span><span class="m">00</span><span class="n">]</span> <span class="n">[INFO]</span> <span class="n">[schema.go</span><span class="o">:</span><span class="m">107</span><span class="n">]</span> <span class="n">[</span><span class="s">&#34;backup checksum&#34;</span><span class="n">]</span> <span class="n">[take</span><span class="o">=</span><span class="m">16.602038025</span><span class="n">s]</span>
-<span class="n">[2020</span><span class="o">/</span><span class="m">06</span><span class="o">/</span><span class="m">01</span> <span class="m">16</span><span class="o">:</span><span class="m">15</span><span class="o">:</span><span class="m">54.734</span> <span class="m">+08</span><span class="o">:</span><span class="m">00</span><span class="n">]</span> <span class="n">[INFO]</span> <span class="n">[client.go</span><span class="o">:</span><span class="m">895</span><span class="n">]</span> <span class="n">[</span><span class="s">&#34;fast checksum calculated&#34;</span><span class="n">]</span> <span class="n">[db</span><span class="o">=</span><span class="n">tpcc]</span> <span class="n">[table</span><span class="o">=</span><span class="n">warehouse]</span>
-<span class="n">[2020</span><span class="o">/</span><span class="m">06</span><span class="o">/</span><span class="m">01</span> <span class="m">16</span><span class="o">:</span><span class="m">15</span><span class="o">:</span><span class="m">54.734</span> <span class="m">+08</span><span class="o">:</span><span class="m">00</span><span class="n">]</span> <span class="n">[INFO]</span> <span class="n">[client.go</span><span class="o">:</span><span class="m">895</span><span class="n">]</span> <span class="n">[</span><span class="s">&#34;fast checksum calculated&#34;</span><span class="n">]</span> <span class="n">[db</span><span class="o">=</span><span class="n">tpcc]</span> <span class="n">[table</span><span class="o">=</span><span class="n">district]</span>
-<span class="n">[2020</span><span class="o">/</span><span class="m">06</span><span class="o">/</span><span class="m">01</span> <span class="m">16</span><span class="o">:</span><span class="m">15</span><span class="o">:</span><span class="m">54.735</span> <span class="m">+08</span><span class="o">:</span><span class="m">00</span><span class="n">]</span> <span class="n">[INFO]</span> <span class="n">[client.go</span><span class="o">:</span><span class="m">895</span><span class="n">]</span> <span class="n">[</span><span class="s">&#34;fast checksum calculated&#34;</span><span class="n">]</span> <span class="n">[db</span><span class="o">=</span><span class="n">tpcc]</span> <span class="n">[table</span><span class="o">=</span><span class="n">item]</span>
-<span class="n">[2020</span><span class="o">/</span><span class="m">06</span><span class="o">/</span><span class="m">01</span> <span class="m">16</span><span class="o">:</span><span class="m">15</span><span class="o">:</span><span class="m">54.735</span> <span class="m">+08</span><span class="o">:</span><span class="m">00</span><span class="n">]</span> <span class="n">[INFO]</span> <span class="n">[client.go</span><span class="o">:</span><span class="m">895</span><span class="n">]</span> <span class="n">[</span><span class="s">&#34;fast checksum calculated&#34;</span><span class="n">]</span> <span class="n">[db</span><span class="o">=</span><span class="n">tpcc]</span> <span class="n">[table</span><span class="o">=</span><span class="n">new_order]</span>
-<span class="n">[2020</span><span class="o">/</span><span class="m">06</span><span class="o">/</span><span class="m">01</span> <span class="m">16</span><span class="o">:</span><span class="m">15</span><span class="o">:</span><span class="m">54.735</span> <span class="m">+08</span><span class="o">:</span><span class="m">00</span><span class="n">]</span> <span class="n">[INFO]</span> <span class="n">[client.go</span><span class="o">:</span><span class="m">895</span><span class="n">]</span> <span class="n">[</span><span class="s">&#34;fast checksum calculated&#34;</span><span class="n">]</span> <span class="n">[db</span><span class="o">=</span><span class="n">tpcc]</span> <span class="n">[table</span><span class="o">=</span><span class="n">customer]</span>
-<span class="n">[2020</span><span class="o">/</span><span class="m">06</span><span class="o">/</span><span class="m">01</span> <span class="m">16</span><span class="o">:</span><span class="m">15</span><span class="o">:</span><span class="m">54.736</span> <span class="m">+08</span><span class="o">:</span><span class="m">00</span><span class="n">]</span> <span class="n">[INFO]</span> <span class="n">[client.go</span><span class="o">:</span><span class="m">895</span><span class="n">]</span> <span class="n">[</span><span class="s">&#34;fast checksum calculated&#34;</span><span class="n">]</span> <span class="n">[db</span><span class="o">=</span><span class="n">tpcc]</span> <span class="n">[table</span><span class="o">=</span><span class="n">stock]</span>
-<span class="n">[2020</span><span class="o">/</span><span class="m">06</span><span class="o">/</span><span class="m">01</span> <span class="m">16</span><span class="o">:</span><span class="m">15</span><span class="o">:</span><span class="m">54.736</span> <span class="m">+08</span><span class="o">:</span><span class="m">00</span><span class="n">]</span> <span class="n">[INFO]</span> <span class="n">[client.go</span><span class="o">:</span><span class="m">895</span><span class="n">]</span> <span class="n">[</span><span class="s">&#34;fast checksum calculated&#34;</span><span class="n">]</span> <span class="n">[db</span><span class="o">=</span><span class="n">tpcc]</span> <span class="n">[table</span><span class="o">=</span><span class="n">history]</span>
-<span class="n">[2020</span><span class="o">/</span><span class="m">06</span><span class="o">/</span><span class="m">01</span> <span class="m">16</span><span class="o">:</span><span class="m">15</span><span class="o">:</span><span class="m">54.736</span> <span class="m">+08</span><span class="o">:</span><span class="m">00</span><span class="n">]</span> <span class="n">[INFO]</span> <span class="n">[client.go</span><span class="o">:</span><span class="m">895</span><span class="n">]</span> <span class="n">[</span><span class="s">&#34;fast checksum calculated&#34;</span><span class="n">]</span> <span class="n">[db</span><span class="o">=</span><span class="n">tpcc]</span> <span class="n">[table</span><span class="o">=</span><span class="n">orders]</span>
-<span class="n">[2020</span><span class="o">/</span><span class="m">06</span><span class="o">/</span><span class="m">01</span> <span class="m">16</span><span class="o">:</span><span class="m">15</span><span class="o">:</span><span class="m">54.737</span> <span class="m">+08</span><span class="o">:</span><span class="m">00</span><span class="n">]</span> <span class="n">[INFO]</span> <span class="n">[client.go</span><span class="o">:</span><span class="m">895</span><span class="n">]</span> <span class="n">[</span><span class="s">&#34;fast checksum calculated&#34;</span><span class="n">]</span> <span class="n">[db</span><span class="o">=</span><span class="n">tpcc]</span> <span class="n">[table</span><span class="o">=</span><span class="n">order_line]</span>
-<span class="n">[2020</span><span class="o">/</span><span class="m">06</span><span class="o">/</span><span class="m">01</span> <span class="m">16</span><span class="o">:</span><span class="m">15</span><span class="o">:</span><span class="m">54.737</span> <span class="m">+08</span><span class="o">:</span><span class="m">00</span><span class="n">]</span> <span class="n">[INFO]</span> <span class="n">[client.go</span><span class="o">:</span><span class="m">841</span><span class="n">]</span> <span class="n">[</span><span class="s">&#34;fast checksum success&#34;</span><span class="n">]</span> <span class="n">[database</span><span class="o">=</span><span class="n">tpcc]</span> <span class="n">[table</span><span class="o">=</span><span class="n">warehouse]</span>
-<span class="n">[2020</span><span class="o">/</span><span class="m">06</span><span class="o">/</span><span class="m">01</span> <span class="m">16</span><span class="o">:</span><span class="m">15</span><span class="o">:</span><span class="m">54.737</span> <span class="m">+08</span><span class="o">:</span><span class="m">00</span><span class="n">]</span> <span class="n">[INFO]</span> <span class="n">[client.go</span><span class="o">:</span><span class="m">841</span><span class="n">]</span> <span class="n">[</span><span class="s">&#34;fast checksum success&#34;</span><span class="n">]</span> <span class="n">[database</span><span class="o">=</span><span class="n">tpcc]</span> <span class="n">[table</span><span class="o">=</span><span class="n">district]</span>
-<span class="n">[2020</span><span class="o">/</span><span class="m">06</span><span class="o">/</span><span class="m">01</span> <span class="m">16</span><span class="o">:</span><span class="m">15</span><span class="o">:</span><span class="m">54.737</span> <span class="m">+08</span><span class="o">:</span><span class="m">00</span><span class="n">]</span> <span class="n">[INFO]</span> <span class="n">[client.go</span><span class="o">:</span><span class="m">841</span><span class="n">]</span> <span class="n">[</span><span class="s">&#34;fast checksum success&#34;</span><span class="n">]</span> <span class="n">[database</span><span class="o">=</span><span class="n">tpcc]</span> <span class="n">[table</span><span class="o">=</span><span class="n">item]</span>
-<span class="n">[2020</span><span class="o">/</span><span class="m">06</span><span class="o">/</span><span class="m">01</span> <span class="m">16</span><span class="o">:</span><span class="m">15</span><span class="o">:</span><span class="m">54.737</span> <span class="m">+08</span><span class="o">:</span><span class="m">00</span><span class="n">]</span> <span class="n">[INFO]</span> <span class="n">[client.go</span><span class="o">:</span><span class="m">841</span><span class="n">]</span> <span class="n">[</span><span class="s">&#34;fast checksum success&#34;</span><span class="n">]</span> <span class="n">[database</span><span class="o">=</span><span class="n">tpcc]</span> <span class="n">[table</span><span class="o">=</span><span class="n">new_order]</span>
-<span class="n">[2020</span><span class="o">/</span><span class="m">06</span><span class="o">/</span><span class="m">01</span> <span class="m">16</span><span class="o">:</span><span class="m">15</span><span class="o">:</span><span class="m">54.738</span> <span class="m">+08</span><span class="o">:</span><span class="m">00</span><span class="n">]</span> <span class="n">[INFO]</span> <span class="n">[client.go</span><span class="o">:</span><span class="m">841</span><span class="n">]</span> <span class="n">[</span><span class="s">&#34;fast checksum success&#34;</span><span class="n">]</span> <span class="n">[database</span><span class="o">=</span><span class="n">tpcc]</span> <span class="n">[table</span><span class="o">=</span><span class="n">customer]</span>
-<span class="n">[2020</span><span class="o">/</span><span class="m">06</span><span class="o">/</span><span class="m">01</span> <span class="m">16</span><span class="o">:</span><span class="m">15</span><span class="o">:</span><span class="m">54.739</span> <span class="m">+08</span><span class="o">:</span><span class="m">00</span><span class="n">]</span> <span class="n">[INFO]</span> <span class="n">[client.go</span><span class="o">:</span><span class="m">841</span><span class="n">]</span> <span class="n">[</span><span class="s">&#34;fast checksum success&#34;</span><span class="n">]</span> <span class="n">[database</span><span class="o">=</span><span class="n">tpcc]</span> <span class="n">[table</span><span class="o">=</span><span class="n">stock]</span>
-<span class="n">[2020</span><span class="o">/</span><span class="m">06</span><span class="o">/</span><span class="m">01</span> <span class="m">16</span><span class="o">:</span><span class="m">15</span><span class="o">:</span><span class="m">54.739</span> <span class="m">+08</span><span class="o">:</span><span class="m">00</span><span class="n">]</span> <span class="n">[INFO]</span> <span class="n">[client.go</span><span class="o">:</span><span class="m">841</span><span class="n">]</span> <span class="n">[</span><span class="s">&#34;fast checksum success&#34;</span><span class="n">]</span> <span class="n">[database</span><span class="o">=</span><span class="n">tpcc]</span> <span class="n">[table</span><span class="o">=</span><span class="n">history]</span>
-<span class="n">[2020</span><span class="o">/</span><span class="m">06</span><span class="o">/</span><span class="m">01</span> <span class="m">16</span><span class="o">:</span><span class="m">15</span><span class="o">:</span><span class="m">54.740</span> <span class="m">+08</span><span class="o">:</span><span class="m">00</span><span class="n">]</span> <span class="n">[INFO]</span> <span class="n">[client.go</span><span class="o">:</span><span class="m">841</span><span class="n">]</span> <span class="n">[</span><span class="s">&#34;fast checksum success&#34;</span><span class="n">]</span> <span class="n">[database</span><span class="o">=</span><span class="n">tpcc]</span> <span class="n">[table</span><span class="o">=</span><span class="n">orders]</span>
-<span class="n">[2020</span><span class="o">/</span><span class="m">06</span><span class="o">/</span><span class="m">01</span> <span class="m">16</span><span class="o">:</span><span class="m">15</span><span class="o">:</span><span class="m">54.740</span> <span class="m">+08</span><span class="o">:</span><span class="m">00</span><span class="n">]</span> <span class="n">[INFO]</span> <span class="n">[client.go</span><span class="o">:</span><span class="m">841</span><span class="n">]</span> <span class="n">[</span><span class="s">&#34;fast checksum success&#34;</span><span class="n">]</span> <span class="n">[database</span><span class="o">=</span><span class="n">tpcc]</span> <span class="n">[table</span><span class="o">=</span><span class="n">order_line]</span>
-<span class="n">[2020</span><span class="o">/</span><span class="m">06</span><span class="o">/</span><span class="m">01</span> <span class="m">16</span><span class="o">:</span><span class="m">15</span><span class="o">:</span><span class="m">54.741</span> <span class="m">+08</span><span class="o">:</span><span class="m">00</span><span class="n">]</span> <span class="n">[INFO]</span> <span class="n">[client.go</span><span class="o">:</span><span class="m">168</span><span class="n">]</span> <span class="n">[</span><span class="s">&#34;save backup meta&#34;</span><span class="n">]</span> <span class="n">[path</span><span class="o">=</span><span class="n">local</span><span class="o">:///</span><span class="n">tmp</span><span class="o">/</span><span class="n">tmpuserbackup]</span> <span class="n">[jobs</span><span class="o">=</span><span class="m">0</span><span class="n">]</span>
-<span class="n">[2020</span><span class="o">/</span><span class="m">06</span><span class="o">/</span><span class="m">01</span> <span class="m">16</span><span class="o">:</span><span class="m">15</span><span class="o">:</span><span class="m">54.743</span> <span class="m">+08</span><span class="o">:</span><span class="m">00</span><span class="n">]</span> <span class="n">[INFO]</span> <span class="n">[ddl.go</span><span class="o">:</span><span class="m">407</span><span class="n">]</span> <span class="n">[</span><span class="s">&#34;[ddl] DDL closed&#34;</span><span class="n">]</span> <span class="n">[ID</span><span class="o">=</span><span class="m">85890430-0</span><span class="n">b99</span><span class="m">-4322-8908-9</span><span class="n">a6412da4ad8]</span> <span class="n">[</span><span class="s">&#34;take time&#34;</span><span class="o">=</span><span class="m">788.052</span>µ<span class="n">s]</span>
-<span class="n">[2020</span><span class="o">/</span><span class="m">06</span><span class="o">/</span><span class="m">01</span> <span class="m">16</span><span class="o">:</span><span class="m">15</span><span class="o">:</span><span class="m">54.743</span> <span class="m">+08</span><span class="o">:</span><span class="m">00</span><span class="n">]</span> <span class="n">[INFO]</span> <span class="n">[ddl.go</span><span class="o">:</span><span class="m">301</span><span class="n">]</span> <span class="n">[</span><span class="s">&#34;[ddl] stop DDL&#34;</span><span class="n">]</span> <span class="n">[ID</span><span class="o">=</span><span class="m">85890430-0</span><span class="n">b99</span><span class="m">-4322-8908-9</span><span class="n">a6412da4ad8]</span>
-<span class="n">[2020</span><span class="o">/</span><span class="m">06</span><span class="o">/</span><span class="m">01</span> <span class="m">16</span><span class="o">:</span><span class="m">15</span><span class="o">:</span><span class="m">54.744</span> <span class="m">+08</span><span class="o">:</span><span class="m">00</span><span class="n">]</span> <span class="n">[INFO]</span> <span class="n">[domain.go</span><span class="o">:</span><span class="m">607</span><span class="n">]</span> <span class="n">[</span><span class="s">&#34;domain closed&#34;</span><span class="n">]</span> <span class="n">[</span><span class="s">&#34;take time&#34;</span><span class="o">=</span><span class="m">1.996407</span><span class="n">ms]</span>
-<span class="n">[2020</span><span class="o">/</span><span class="m">06</span><span class="o">/</span><span class="m">01</span> <span class="m">16</span><span class="o">:</span><span class="m">15</span><span class="o">:</span><span class="m">54.745</span> <span class="m">+08</span><span class="o">:</span><span class="m">00</span><span class="n">]</span> <span class="n">[INFO]</span> <span class="n">[collector.go</span><span class="o">:</span><span class="m">59</span><span class="n">]</span> <span class="n">[</span><span class="s">&#34;Database backup Success summary: total backup ranges: 19, total success: 19, total failed: 0, total take(s): 145.77, total kv: 498155202, total size(MB): 38602.90, avg speed(MB/s): 264.83&#34;</span><span class="n">]</span> <span class="n">[</span><span class="s">&#34;backup fast checksum&#34;</span><span class="o">=</span><span class="m">6.338075</span><span class="n">ms]</span> <span class="n">[</span><span class="s">&#34;backup checksum&#34;</span><span class="o">=</span><span class="m">16.602056489</span><span class="n">s]</span> <span class="n">[</span><span class="s">&#34;backup total regions&#34;</span><span class="o">=</span><span class="m">812</span><span class="n">]</span>
-</code></pre></td></tr></table>
-</div>
-</div>
-    </div>
-
-    <div class="post-copyright">
-  <p class="copyright-item">
-    <span class="item-title">Author</span>
-    <span class="item-content">Jeff</span>
-  </p>
-  <p class="copyright-item">
-    <span class="item-title">LastMod</span>
-    <span class="item-content">
-        2020-06-18
-        
-    </span>
-  </p>
-  
-  <p class="copyright-item">
-    <span class="item-title">License</span>
-    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span>
-  </p>
-</div>
-<footer class="post-footer">
-      <div class="post-tags">
-          <a href="/tags/airplan/">AirPlan</a>
-          <a href="/tags/br/">BR</a>
-          </div>
-      <nav class="post-nav">
-        <a class="prev" href="/post/20200703-27-tskill/">
-            <i class="iconfont icon-left"></i>
-            <span class="prev-text nav-default">九死一生 - 运维小技巧</span>
-            <span class="prev-text nav-mobile">Prev</span>
-          </a>
-        <a class="next" href="/post/20200612-24-minio/">
-            <span class="next-text nav-default">软件测试 - S3 协议与 minio</span>
-            <span class="next-text nav-mobile">Next</span>
-            <i class="iconfont icon-right"></i>
-          </a>
-      </nav>
-    </footer>
-  </article>
-        </div>
-        
-
-  
-
-  
-
-      </div>
-    </main>
-
-    <footer id="footer" class="footer">
-      <div class="social-links">
-      <a href="https://github.com/BigerCAP/TiDB-AirPlan/issues" class="iconfont icon-github" title="github"></a>
-  <a href="https://ap.tidb.cc/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
-</div>
-
-<div class="copyright">
-  <span class="power-by">
-    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
-  </span>
-  <span class="division">|</span>
-  <span class="theme-info">
-    Theme - 
-    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
-  </span>
-
-  <div class="busuanzi-footer">
-    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
-      <span class="division">|</span>
-    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
-  </div>
-
-  <span class="copyright-year">
-    &copy; 
-    2017 - 
-    2020
-    <span class="heart">
-      <i class="iconfont icon-heart"></i>
-    </span>
-    <span class="author">TiDB - AirPlan</span>
-  </span>
-</div>
-    </footer>
-
-    <div class="back-to-top" id="back-to-top">
-      <i class="iconfont icon-up"></i>
-    </div>
-  </div>
-  
-  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js" integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js" integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin="anonymous"></script>
-  <script><!-- NOTE: timeago.js uses the language code format like "zh_CN" (underscore and case sensitive) -->
-    var languageCode = "en".replace(/-/g, '_').replace(/_(.*)/, function ($0, $1) {return $0.replace($1, $1.toUpperCase());});
-    timeago().render(document.querySelectorAll('.timeago'), languageCode);
-    timeago.cancel();  
-  </script>
-<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
-
-
-
-
-
-
-
-
-</body>
-</html>
+<!doctype html><html lang=en><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge,chrome=1"><title>TiDB - Backup/Restore 测试 - AirPlan - A biger solution</title><meta name=renderer content="webkit"><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta http-equiv=cache-control content="no-transform"><meta http-equiv=cache-control content="no-siteapp"><meta name=theme-color content="#f8f5ec"><meta name=msapplication-navbutton-color content="#f8f5ec"><meta name=apple-mobile-web-app-capable content="yes"><meta name=apple-mobile-web-app-status-bar-style content="#f8f5ec"><meta name=author content="Jeff"><meta name=description content="0x00 BR Backup &amp;amp; Restore（以下简称 BR）是 TiDB 分布式备份恢复的命令行工具，用于对 TiDB 集群进行数据备份和恢复。相比 mydumper/loader，B"><meta name=keywords content="TiDB,AirPlan,TiDB OPS,tidb-operator,2pc,raft,databases,mysql,htap"><meta name=generator content="Hugo 0.110.0 with theme even"><link rel=canonical href=https://ap.biger.cc/post/20200618-25-br-rc/><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/manifest.json><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><script async src=//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js></script>
+<link href=/dist/even.04bd84cd.min.css rel=stylesheet><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin=anonymous><meta property="og:title" content="TiDB - Backup/Restore 测试"><meta property="og:description" content="0x00 BR Backup & Restore（以下简称 BR）是 TiDB 分布式备份恢复的命令行工具，用于对 TiDB 集群进行数据备份和恢复。相比 mydumper/loader，B"><meta property="og:type" content="article"><meta property="og:url" content="https://ap.biger.cc/post/20200618-25-br-rc/"><meta property="article:section" content="post"><meta property="article:published_time" content="2020-06-17T00:00:00+08:00"><meta property="article:modified_time" content="2020-06-18T00:00:00+08:00"><meta itemprop=name content="TiDB - Backup/Restore 测试"><meta itemprop=description content="0x00 BR Backup & Restore（以下简称 BR）是 TiDB 分布式备份恢复的命令行工具，用于对 TiDB 集群进行数据备份和恢复。相比 mydumper/loader，B"><meta itemprop=datePublished content="2020-06-17T00:00:00+08:00"><meta itemprop=dateModified content="2020-06-18T00:00:00+08:00"><meta itemprop=wordCount content="3231"><meta itemprop=keywords content="AirPlan,BR,"><meta name=twitter:card content="summary"><meta name=twitter:title content="TiDB - Backup/Restore 测试"><meta name=twitter:description content="0x00 BR Backup & Restore（以下简称 BR）是 TiDB 分布式备份恢复的命令行工具，用于对 TiDB 集群进行数据备份和恢复。相比 mydumper/loader，B"><!--[if lte IE 9]><script src=https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js></script><![endif]--><!--[if lt IE 9]><script src=https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js></script>
+<script src=https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js></script><![endif]--></head><body><div id=mobile-navbar class=mobile-navbar><div class=mobile-header-logo><a href=/ class=logo>AirPlan</a></div><div class=mobile-navbar-icon><span></span>
+<span></span>
+<span></span></div></div><nav id=mobile-menu class="mobile-menu slideout-menu"><ul class=mobile-menu-list><a href=/post/><li class=mobile-menu-item>Blog</li></a><a href=/look/><li class=mobile-menu-item>Look</li></a><a href=/tags/><li class=mobile-menu-item>Tags</li></a><a href=/categories/><li class=mobile-menu-item>Categories</li></a><a href=/about/><li class=mobile-menu-item>About</li></a></ul></nav><div class=container id=mobile-panel><header id=header class=header><div class=logo-wrapper><a href=/ class=logo>AirPlan</a></div><nav class=site-navbar><ul id=menu class=menu><li class=menu-item><a class=menu-item-link href=/post/>Blog</a></li><li class=menu-item><a class=menu-item-link href=/look/>Look</a></li><li class=menu-item><a class=menu-item-link href=/tags/>Tags</a></li><li class=menu-item><a class=menu-item-link href=/categories/>Categories</a></li><li class=menu-item><a class=menu-item-link href=/about/>About</a></li></ul></nav></header><main id=main class=main><div class=content-wrapper><div id=content class=content><article class=post><header class=post-header><h1 class=post-title>TiDB - Backup/Restore 测试</h1><div class=post-meta><span class=post-time>2020-06-17</span><div class=post-category><a href=/categories/tidb/>TiDB</a></div><span class=more-meta>3231 words</span>
+<span class=more-meta>7 mins read</span>
+<span id=busuanzi_container_page_pv class=more-meta><span id=busuanzi_value_page_pv><img src=/img/spinner.svg alt=spinner.svg></span> times read</span></div></header><div class=post-toc id=post-toc><h2 class=post-toc-title>Contents</h2><div class=post-toc-content><nav id=TableOfContents><ul><li><a href=#0x00-br>0x00 BR</a></li><li><a href=#0x01-思考>0x01 思考</a></li><li><a href=#0x02-backupmeta>0x02 backupmeta</a><ul><li><a href=#sst-file>SST file</a></li><li><a href=#schema>schema</a></li><li><a href=#checkpoint>checkpoint</a></li><li><a href=#checksum>checksum</a></li></ul></li><li><a href=#0x03-测试>0x03 测试</a><ul><li><a href=#local-br>local BR</a></li><li><a href=#s3-br>S3 BR</a></li></ul></li><li><a href=#faq>FAQ</a></li></ul></nav></div></div><div class=post-outdated><div class=warn><p>[NOTE] Updated <span class=timeago datetime=2020-06-18T00:00:00 title="June 18, 2020">June 18, 2020</span>. This article may have outdated content or subject matter.</p></div></div><div class=post-content><h2 id=0x00-br>0x00 BR</h2><blockquote><p>Backup & Restore（以下简称 BR）是 TiDB 分布式备份恢复的命令行工具，用于对 TiDB 集群进行数据备份和恢复。相比 mydumper/loader，BR 更适合大数据量的场景。本文档介绍了 BR 的使用限制、工作原理、命令行描述、备份恢复用例以及最佳实践。<br>以上内容复制于 <a href=https://docs.pingcap.com/zh/tidb/dev/backup-and-restore-tool title="PingCAP 官网文档-使用 BR 进行备份与恢复">PingCAP 官网文档-使用 BR 进行备份与恢复</a><br>提前详细阅读 <a href=https://docs.pingcap.com/zh/tidb/dev/backup-and-restore-faq>PingCAP 官网文档-Backup & Restore 常见问题</a></p><ul><li>详细阅读官网文档中的<strong>使用限制</strong>后再进行使用</li><li>详细阅读官网文档中的<strong>使用限制</strong>后再进行使用</li><li>详细阅读官网文档中的<strong>使用限制</strong>后再进行使用</li></ul></blockquote><p>时空穿梭，书接上文：上文 《软件测试 - S3 协议与 minio》是为了搭建一套 S3 协议存储，该存储相比自己搭建一套 NFS 要方便的多。<br>BR 支持三种存储（本地存储、NFS、S3 存储），本次主要测试了本地存储备份恢复、S3 存储备份恢复；此处 NFS 备份恢复与 S3 备份恢复逻辑是一样的。</p><blockquote><p>本文中测试为 2020 年 6 月版本，该工具目前处于飞速迭代期，不对后续功能做预测。</p></blockquote><h2 id=0x01-思考>0x01 思考</h2><p><img src=./br-arch.png alt="br 架构"></p><ul><li>看图（文章）识字，猜测下运行思路：<ol><li>BR 向 PD 发送 backup / restore 指令</li><li>PD 获取当前 TSO 信息（<strong>backupmeta</strong> 文件中的断点记录）</li><li>BR 向 TiDB httpapi 获取 database/table schema 信息（记录在<strong>backupmeta</strong> 文件中，还原时使用）<ul><li>参见 <a href=https://github.com/pingcap/tidb/blob/master/docs/tidb_http_api.md>tidb_http_api</a> ：<code>curl http://{TiDBIP}:10080/schema/{db}/{table}</code></li></ul></li><li>TiKV 收到 backup 指令；获取目标 schema 所辖 kv range 的所有 sst 文件（输出到 本地存储 / 网络存储）<ul><li>TiKV 原生自带 S3 / NFS 等接口；无需安装第三方工具外挂到 tikv-server</li><li>每个 TiKV 自身发起 backup / restore 动作，并发操作减少总任务时长；单个 TiKV 数据量足够少，总备份时间相应会变短</li><li>TiKV 数据备份支持流控，通过 BR 参数传递</li></ul></li><li>存储场景使用区别：<ol><li>本地存储：backup 备份至每个 tikv-server 服务器本地，<strong>restore 时每台机器都必须有全量备份数据</strong>；好处是磁盘 IOPS 最大化使用，网络 IO 主机内使用。</li><li>网络存储：backup 备份时传输至网络存储服务器「提前预算足够大的空间」，restore 时从网络空间下载对应数据到每个 tikv-server 节点；磁盘 IOPS 局限单台服务器能力、网络 IO 跨主机使用。</li></ol></li></ol></li></ul><h2 id=0x02-backupmeta>0x02 backupmeta</h2><blockquote><p>默认文件内容为二进制编码不可以编辑，打开时提示 <code>"backupmeta" may be a binary file. See it anyway?</code></p></blockquote><ul><li>使用 <code>./br validate decode -s local:///tmp/tmpuserbackup</code> 将 backupmeta 二进制文件解码为 backupmeta.json 文件（该文件与 backupmeta 同级目录）<ul><li>backupmeta.json 文件内容为超长的一句话 JSON；key 信息保留，value 内容被 base64 编码</li></ul></li><li>使用 <code>./br validate encode -s</code> 可以将 backupmeta.json 编码为 backupmeta 二进制文件</li><li><strong>以上操作出现失误将会导致数据还原出现问题</strong><ul><li>操作上可以实现 backup database A ，restore database B 的场景；</li><li>「schema 信息在每个表上都有，需要全部修改」</li></ul></li></ul><h3 id=sst-file>SST file</h3><blockquote><p>SST (Sorted Sequence Table)</p></blockquote><ul><li>本次 backup 任务所有的 SST 文件信息，下面是其中一部分内容<ul><li>restore 时会按照 backupmeta 文件内容进行恢复</li><li>目标数据目录中相比 backupmeta 信息中缺少文件，提示 <code>The specified key does not exist.</code> 或者 <code>permission denied: download sst failed;</code></li><li>目标数据目录中相比 backupmeta 信息中多余文件，不做操作</li></ul></li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-json data-lang=json><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;name&#34;</span><span class=p>:</span><span class=s2>&#34;2476_46_23_80992061af3e5194c3f28a5b79d486c5e9db2feda1afb3f84b4ca229ddce9932_write.sst&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;sha256&#34;</span><span class=p>:</span><span class=s2>&#34;AXCDqiNxpPxx4MmWz/nHwqy1N8kcRxc1HKgcDV3gnkI=&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;start_key&#34;</span><span class=p>:</span><span class=s2>&#34;dIAAAAAAAAAxX3IAAAAAAAAAAA==&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;end_key&#34;</span><span class=p>:</span><span class=s2>&#34;dIAAAAAAAAAxX3L//////////wA=&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;end_version&#34;</span><span class=p>:</span><span class=mi>417071760901406802</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;crc64xor&#34;</span><span class=p>:</span><span class=mi>12503741000804331466</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;total_kvs&#34;</span><span class=p>:</span><span class=mi>50</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;total_bytes&#34;</span><span class=p>:</span><span class=mi>6216</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;cf&#34;</span><span class=p>:</span><span class=s2>&#34;write&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;size&#34;</span><span class=p>:</span><span class=mi>6475</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=schema>schema</h3><ul><li>本次 backup 任务所有的 schema 信息「以下仅展示部分信息」</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-json data-lang=json><span class=line><span class=cl><span class=s2>&#34;schemas&#34;</span><span class=err>:</span><span class=p>[{</span><span class=nt>&#34;db&#34;</span><span class=p>:</span><span class=s2>&#34;eyJpZCI6NDUsImRiX25hbWUiOnsiTyI6InRwY2MtMiIsIkwiOiJ0cGNjLTIifSwiY2hhcnNldCI6InV0ZjhtYjQiLCJjb2xsYXRlIjoidXRmOG1iNF9iaW4iLCJzdGF0ZSI6NX0=&#34;</span><span class=p>,</span>
+</span></span></code></pre></td></tr></table></div></div><ul><li>schema 解码后的信息</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-json data-lang=json><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;id&#34;</span><span class=p>:</span><span class=mi>45</span><span class=p>,</span>            <span class=c1>// schema id
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=nt>&#34;db_name&#34;</span><span class=p>:{</span>
+</span></span><span class=line><span class=cl>        <span class=nt>&#34;O&#34;</span><span class=p>:</span><span class=s2>&#34;tpcc-2&#34;</span><span class=p>,</span>  <span class=c1>// 代表 create database 时原始字段信息
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=nt>&#34;L&#34;</span><span class=p>:</span><span class=s2>&#34;tpcc-2&#34;</span>   <span class=c1>// 程序转换为小写后的信息
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=p>},</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;charset&#34;</span><span class=p>:</span><span class=s2>&#34;utf8mb4&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;collate&#34;</span><span class=p>:</span><span class=s2>&#34;utf8mb4_bin&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;state&#34;</span><span class=p>:</span><span class=mi>5</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=checkpoint>checkpoint</h3><ul><li>获取 backupmeta 文件中的 起始时间、结束时间<ul><li>全量与增量备份注意事项：按照严格准确的全量数据 end-version 来指定为增量备份 start-ts</li><li>如果指定非精准 start-ts，出现数据重叠部分有 DDL 动作，可能会造成数据异常</li></ul></li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-s data-lang=s><span class=line><span class=cl><span class=n>./br</span> <span class=n>validate</span> <span class=n>decode</span>  <span class=o>-</span><span class=n>s</span> <span class=n>local</span><span class=o>:///</span><span class=n>tmp</span><span class=o>/</span><span class=n>tmpuserbackup</span>  <span class=o>--</span><span class=n>field</span><span class=o>=</span><span class=s>&#34;start-version&#34;</span>
+</span></span><span class=line><span class=cl><span class=n>Detial</span> <span class=n>BR</span> <span class=n>log</span> <span class=n>in</span> <span class=o>/</span><span class=n>tmp</span><span class=o>/</span><span class=n>br.log.2020</span><span class=m>-06-02</span><span class=n>T09.19.46</span><span class=m>+0800</span>
+</span></span><span class=line><span class=cl><span class=m>0</span>
+</span></span><span class=line><span class=cl><span class=o>//</span> 该场景为全量备份，获取 <span class=n>start</span><span class=o>-</span><span class=n>version</span>；即该次备份数据起始位置；全量备份默认起始位置为 <span class=m>0</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>./br</span> <span class=n>validate</span> <span class=n>decode</span>  <span class=o>-</span><span class=n>s</span> <span class=n>local</span><span class=o>:///</span><span class=n>tmp</span><span class=o>/</span><span class=n>tmpuserbackup</span>  <span class=o>--</span><span class=n>field</span><span class=o>=</span><span class=s>&#34;end-version&#34;</span>
+</span></span><span class=line><span class=cl><span class=n>Detial</span> <span class=n>BR</span> <span class=n>log</span> <span class=n>in</span> <span class=o>/</span><span class=n>tmp</span><span class=o>/</span><span class=n>br.log.2020</span><span class=m>-06-02</span><span class=n>T09.19.52</span><span class=m>+0800</span>
+</span></span><span class=line><span class=cl><span class=m>417071760901406802</span>
+</span></span><span class=line><span class=cl><span class=o>//</span> 该场景为全量备份，获取 <span class=n>end</span><span class=o>-</span><span class=n>version</span>；即该次备份数据结束位置
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>./br</span> <span class=n>validate</span> <span class=n>decode</span>  <span class=o>-</span><span class=n>s</span> <span class=n>local</span><span class=o>:///</span><span class=n>tmp</span><span class=o>/</span><span class=n>tmpuserbackup</span><span class=o>-</span><span class=n>zl</span><span class=m>-2</span>  <span class=o>--</span><span class=n>field</span><span class=o>=</span><span class=s>&#34;start-version&#34;</span>
+</span></span><span class=line><span class=cl><span class=n>Detial</span> <span class=n>BR</span> <span class=n>log</span> <span class=n>in</span> <span class=o>/</span><span class=n>tmp</span><span class=o>/</span><span class=n>br.log.2020</span><span class=m>-06-02</span><span class=n>T09.20.07</span><span class=m>+0800</span>
+</span></span><span class=line><span class=cl><span class=m>417071732760248335</span>
+</span></span><span class=line><span class=cl><span class=o>//</span> 增量备份：此处 <span class=n>start</span><span class=o>-</span><span class=n>version</span> 与全量场景 <span class=n>end</span><span class=o>-</span><span class=n>version</span> 理应一一对应「此处不对应是因为 <span class=n>start</span><span class=o>-</span><span class=n>version</span> 为手动指定」，正确操作姿势详情见 <span class=n>[PingCAP</span> 官网<span class=o>-</span>增量备份<span class=nf>]</span><span class=p>(</span><span class=n>https</span><span class=o>://</span><span class=n>docs.pingcap.com</span><span class=o>/</span><span class=n>zh</span><span class=o>/</span><span class=n>tidb</span><span class=o>/</span><span class=n>dev</span><span class=o>/</span><span class=n>backup</span><span class=o>-</span><span class=n>and</span><span class=o>-</span><span class=n>restore</span><span class=o>-</span><span class=n>tool</span><span class=c1>#%E5%A2%9E%E9%87%8F%E5%A4%87%E4%BB%BD)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>./br</span> <span class=n>validate</span> <span class=n>decode</span>  <span class=o>-</span><span class=n>s</span> <span class=n>local</span><span class=o>:///</span><span class=n>tmp</span><span class=o>/</span><span class=n>tmpuserbackup</span><span class=o>-</span><span class=n>zl</span><span class=m>-2</span>  <span class=o>--</span><span class=n>field</span><span class=o>=</span><span class=s>&#34;end-version&#34;</span>
+</span></span><span class=line><span class=cl><span class=n>Detial</span> <span class=n>BR</span> <span class=n>log</span> <span class=n>in</span> <span class=o>/</span><span class=n>tmp</span><span class=o>/</span><span class=n>br.log.2020</span><span class=m>-06-02</span><span class=n>T09.20.01</span><span class=m>+0800</span>
+</span></span><span class=line><span class=cl><span class=m>417071840829112353</span>
+</span></span><span class=line><span class=cl><span class=o>//</span> 增量备份：增量备份结束时间
+</span></span></code></pre></td></tr></table></div></div><h3 id=checksum>checksum</h3><ul><li>本地备份场景注意事项；以下是 checksum 检查不完整 bakckup 数据目录的报错<ul><li>将所有的 backup 数据收集到一台机器，得到一份全量备份数据</li><li>然后将全量备份数据复制到每台 tikv-server 机器，此时才可以进行 restore 操作</li></ul></li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-s data-lang=s><span class=line><span class=cl> <span class=n>./br</span> <span class=n>validate</span> <span class=n>checksum</span> <span class=o>--</span><span class=n>pd</span> <span class=m>172.16.4.51</span><span class=o>:</span><span class=m>14379</span>  <span class=o>--</span><span class=n>storage</span> <span class=s>&#34;local:///data3/tmpuser/full/full&#34;</span>  
+</span></span><span class=line><span class=cl><span class=n>Detial</span> <span class=n>BR</span> <span class=n>log</span> <span class=n>in</span> <span class=o>/</span><span class=n>tmp</span><span class=o>/</span><span class=n>br.log.2020</span><span class=m>-06-02</span><span class=n>T11.21.18</span><span class=m>+0800</span>
+</span></span><span class=line><span class=cl><span class=n>Error</span><span class=o>:</span> <span class=n>open</span> <span class=o>/</span><span class=n>data3</span><span class=o>/</span><span class=n>tmpuser</span><span class=o>/</span><span class=n>full</span><span class=o>/</span><span class=n>full</span><span class=o>/</span><span class=m>1644</span><span class=n>_58401_49_1970ce6c62b57fa0ad6226e45738144e10c519941f21cd1b7d14d5d255997975_default.sst</span><span class=o>:</span> <span class=n>no</span> <span class=n>such</span> <span class=n>file</span> <span class=n>or</span> <span class=n>directory</span>
+</span></span></code></pre></td></tr></table></div></div><ul><li>备份数据目录包含子目录，且子目录可能为增量备份</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-s data-lang=s><span class=line><span class=cl> <span class=n>./br</span> <span class=n>validate</span> <span class=n>checksum</span> <span class=o>--</span><span class=n>storage</span> <span class=s>&#34;s3://full/full/zl-2/?endpoint=http://172.16.4.51:99&#34;</span>
+</span></span><span class=line><span class=cl><span class=n>Detial</span> <span class=n>BR</span> <span class=n>log</span> <span class=n>in</span> <span class=o>/</span><span class=n>tmp</span><span class=o>/</span><span class=n>br.log.2020</span><span class=m>-06-02</span><span class=n>T17.20.55</span><span class=m>+0800</span>
+</span></span><span class=line><span class=cl><span class=n>Error</span><span class=o>:</span> <span class=n>NoSuchKey</span><span class=o>:</span> <span class=n>The</span> <span class=n>specified</span> <span class=n>key</span> <span class=n>does</span> <span class=n>not</span> <span class=n>exist.</span>
+</span></span><span class=line><span class=cl>        <span class=n>status</span> <span class=n>code</span><span class=o>:</span> <span class=m>404</span><span class=p>,</span> <span class=n>request</span> <span class=n>id</span><span class=o>:</span> <span class=m>1614</span><span class=n>AF9CB410A291</span><span class=p>,</span> <span class=n>host</span> <span class=n>id</span><span class=o>:</span>
+</span></span></code></pre></td></tr></table></div></div><ul><li>备份数据检测完整；可以进行数据恢复</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-S data-lang=S><span class=line><span class=cl><span class=n>./br</span> <span class=n>validate</span> <span class=n>checksum</span> <span class=o>--</span><span class=n>storage</span> <span class=s>&#34;s3://full/full/zl-2/?endpoint=http://172.16.4.51:99&#34;</span>
+</span></span><span class=line><span class=cl><span class=n>Detial</span> <span class=n>BR</span> <span class=n>log</span> <span class=n>in</span> <span class=o>/</span><span class=n>tmp</span><span class=o>/</span><span class=n>br.log.2020</span><span class=m>-06-02</span><span class=n>T17.21.51</span><span class=m>+0800</span>
+</span></span><span class=line><span class=cl><span class=n>backup</span> <span class=n>data</span> <span class=n>checksum</span> <span class=n>succeed</span><span class=o>!</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>./br</span> <span class=n>validate</span> <span class=n>checksum</span> <span class=o>--</span><span class=n>pd</span> <span class=m>172.16.4.51</span><span class=o>:</span><span class=m>14379</span>  <span class=o>--</span><span class=n>storage</span> <span class=s>&#34;local:///data3/tmpuser/full/full&#34;</span>  
+</span></span><span class=line><span class=cl><span class=n>Detial</span> <span class=n>BR</span> <span class=n>log</span> <span class=n>in</span> <span class=o>/</span><span class=n>tmp</span><span class=o>/</span><span class=n>br.log.2020</span><span class=m>-06-02</span><span class=n>T11.18.32</span><span class=m>+0800</span>
+</span></span><span class=line><span class=cl><span class=n>backup</span> <span class=n>data</span> <span class=n>checksum</span> <span class=n>succeed</span><span class=o>!</span>
+</span></span></code></pre></td></tr></table></div></div><ul><li>backupmeta 已存在目录中，该目录无法创建备份；</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-s data-lang=s><span class=line><span class=cl><span class=n>./br</span> <span class=n>backup</span> <span class=n>table</span>  <span class=o>--</span><span class=n>pd</span> <span class=m>172.16.4.51</span><span class=o>:</span><span class=m>14379</span> <span class=o>--</span><span class=n>db</span> <span class=n>tpcc</span> <span class=o>--</span><span class=n>table</span> <span class=n>order_line</span> <span class=o>--</span><span class=n>storage</span> <span class=s>&#34;local:///tmp/tmpuserbackup&#34;</span>  <span class=o>--</span><span class=n>log</span><span class=o>-</span><span class=n>file</span> <span class=n>backupfull.log</span><span class=m>-2</span>
+</span></span><span class=line><span class=cl><span class=n>Detial</span> <span class=n>BR</span> <span class=n>log</span> <span class=n>in</span> <span class=n>backupfull.log</span><span class=m>-2</span>
+</span></span><span class=line><span class=cl><span class=n>Error</span><span class=o>:</span> <span class=n>backup</span> <span class=n>meta</span> <span class=n>exists</span><span class=p>,</span> <span class=n>may</span> <span class=n>be</span> <span class=n>some</span> <span class=n>backup</span> <span class=n>files</span> <span class=n>in</span> <span class=n>the</span> <span class=n>path</span> <span class=n>already</span>
+</span></span></code></pre></td></tr></table></div></div><ul><li>该目录中已有 SST 文件不影响创建备份操作「不检测目录是否为空」，如果备份 SST 文件与已有文件重名会停止备份<ul><li>文件名带有 storeid_regionid_schemaid_key 信息，动态数据重名几率较小</li></ul></li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-s data-lang=s><span class=line><span class=cl><span class=n>./br</span> <span class=n>backup</span> <span class=n>table</span>  <span class=o>--</span><span class=n>pd</span> <span class=m>172.16.4.51</span><span class=o>:</span><span class=m>14379</span> <span class=o>--</span><span class=n>db</span> <span class=n>tpcc</span> <span class=o>--</span><span class=n>table</span> <span class=n>order_line</span> <span class=o>--</span><span class=n>storage</span> <span class=s>&#34;local:///tmp/tmpuserbackup-2&#34;</span>  <span class=o>--</span><span class=n>log</span><span class=o>-</span><span class=n>file</span> <span class=n>backupfull.log</span><span class=m>-2</span>
+</span></span><span class=line><span class=cl><span class=n>Detial</span> <span class=n>BR</span> <span class=n>log</span> <span class=n>in</span> <span class=n>backupfull.log</span><span class=m>-2</span>
+</span></span><span class=line><span class=cl><span class=n>Table</span> <span class=n>backup</span> <span class=o>&lt;</span><span class=n>..............................................................................................................................................................................................</span><span class=o>&gt;</span> <span class=m>0.00</span>%<span class=n>Error</span><span class=o>:</span> <span class=n>msg</span><span class=o>:</span><span class=s>&#34;Io(Custom { kind: AlreadyExists, error: \&#34;[1_112_45_393d3575060c0d616300c1199ef1c015784fdd3d13e950a6251007bbcbaf2c06_write.sst] is already exists in /tmp/tmpuserbackup-2\&#34; })&#34;</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=0x03-测试>0x03 测试</h2><blockquote><p>BR 使用简单、快捷，填充参数增加文章长度；</p></blockquote><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-s data-lang=s><span class=line><span class=cl><span class=n>br</span> <span class=n>is</span> <span class=n>a</span> <span class=n>TiDB</span><span class=o>/</span><span class=n>TiKV</span> <span class=n>cluster</span> <span class=n>backup</span> <span class=n>restore</span> <span class=n>tool.</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>Usage</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>  <span class=n>br</span> <span class=n>[command]</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>Available</span> <span class=n>Commands</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>  <span class=n>backup</span>      <span class=n>backup</span> <span class=n>a</span> <span class=n>TiDB</span><span class=o>/</span><span class=n>TiKV</span> <span class=n>cluster</span>
+</span></span><span class=line><span class=cl>  <span class=n>help</span>        <span class=n>Help</span> <span class=n>about</span> <span class=n>any</span> <span class=n>command</span>
+</span></span><span class=line><span class=cl>  <span class=n>restore</span>     <span class=n>restore</span> <span class=n>a</span> <span class=n>TiDB</span><span class=o>/</span><span class=n>TiKV</span> <span class=n>cluster</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>Flags</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>      <span class=o>--</span><span class=n>ca</span> <span class=n>string</span>                     <span class=n>CA</span> <span class=n>certificate</span> <span class=n>path</span> <span class=n>for</span> <span class=n>TLS</span> <span class=n>connection</span>
+</span></span><span class=line><span class=cl>      <span class=o>--</span><span class=n>cert</span> <span class=n>string</span>                   <span class=n>Certificate</span> <span class=n>path</span> <span class=n>for</span> <span class=n>TLS</span> <span class=n>connection</span>
+</span></span><span class=line><span class=cl>      <span class=o>--</span><span class=n>checksum</span>                      <span class=n>Run</span> <span class=n>checksum</span> <span class=n>at</span> <span class=n>end</span> <span class=n>of</span> <span class=nf>task </span><span class=p>(</span><span class=n>default</span> <span class=n>true</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>      <span class=o>--</span><span class=n>gcs.credentials</span><span class=o>-</span><span class=n>file</span> <span class=nf>string   </span><span class=p>(</span><span class=n>experimental</span><span class=p>)</span> <span class=n>Set</span> <span class=n>the</span> <span class=n>GCS</span> <span class=n>credentials</span> <span class=n>file</span> <span class=n>path</span>
+</span></span><span class=line><span class=cl>      <span class=o>--</span><span class=n>gcs.endpoint</span> <span class=nf>string           </span><span class=p>(</span><span class=n>experimental</span><span class=p>)</span> <span class=n>Set</span> <span class=n>the</span> <span class=n>GCS</span> <span class=n>endpoint</span> <span class=n>URL</span>
+</span></span><span class=line><span class=cl>      <span class=o>--</span><span class=n>gcs.predefined</span><span class=o>-</span><span class=n>acl</span> <span class=nf>string     </span><span class=p>(</span><span class=n>experimental</span><span class=p>)</span> <span class=n>Specify</span> <span class=n>the</span> <span class=n>GCS</span> <span class=n>predefined</span> <span class=n>acl</span> <span class=n>for</span> <span class=n>objects</span>
+</span></span><span class=line><span class=cl>      <span class=o>--</span><span class=n>gcs.storage</span><span class=o>-</span><span class=n>class</span> <span class=nf>string      </span><span class=p>(</span><span class=n>experimental</span><span class=p>)</span> <span class=n>Specify</span> <span class=n>the</span> <span class=n>GCS</span> <span class=n>storage</span> <span class=n>class</span> <span class=n>for</span> <span class=n>objects</span>
+</span></span><span class=line><span class=cl>  <span class=o>-</span><span class=n>h</span><span class=p>,</span> <span class=o>--</span><span class=n>help</span>                          <span class=n>help</span> <span class=n>for</span> <span class=n>br</span>
+</span></span><span class=line><span class=cl>      <span class=o>--</span><span class=n>key</span> <span class=n>string</span>                    <span class=n>Private</span> <span class=n>key</span> <span class=n>path</span> <span class=n>for</span> <span class=n>TLS</span> <span class=n>connection</span>
+</span></span><span class=line><span class=cl>      <span class=o>--</span><span class=n>log</span><span class=o>-</span><span class=n>file</span> <span class=n>string</span>               <span class=n>Set</span> <span class=n>the</span> <span class=n>log</span> <span class=n>file</span> <span class=n>path.</span> <span class=n>If</span> <span class=n>not</span> <span class=n>set</span><span class=p>,</span> <span class=n>logs</span> <span class=n>will</span> <span class=n>output</span> <span class=n>to</span> <span class=n>temp</span> <span class=nf>file </span><span class=p>(</span><span class=n>default</span> <span class=s>&#34;/tmp/br.log.2020-07-02T14.25.25+0800&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>  <span class=o>-</span><span class=n>L</span><span class=p>,</span> <span class=o>--</span><span class=n>log</span><span class=o>-</span><span class=n>level</span> <span class=n>string</span>              <span class=n>Set</span> <span class=n>the</span> <span class=n>log</span> <span class=nf>level </span><span class=p>(</span><span class=n>default</span> <span class=s>&#34;info&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>  <span class=o>-</span><span class=n>u</span><span class=p>,</span> <span class=o>--</span><span class=n>pd</span> <span class=n>strings</span>                    <span class=n>PD</span> <span class=nf>address </span><span class=p>(</span><span class=n>default</span> <span class=n>[127.0.0.1</span><span class=o>:</span><span class=m>2379</span><span class=n>]</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>      <span class=o>--</span><span class=n>ratelimit</span> <span class=n>uint</span>                <span class=n>The</span> <span class=n>rate</span> <span class=n>limit</span> <span class=n>of</span> <span class=n>the</span> <span class=n>task</span><span class=p>,</span> <span class=n>MB</span><span class=o>/</span><span class=n>s</span> <span class=n>per</span> <span class=n>node</span>
+</span></span><span class=line><span class=cl>      <span class=o>--</span><span class=n>s3.acl</span> <span class=nf>string                 </span><span class=p>(</span><span class=n>experimental</span><span class=p>)</span> <span class=n>Set</span> <span class=n>the</span> <span class=n>S3</span> <span class=n>canned</span> <span class=n>ACLs</span><span class=p>,</span> <span class=n>e.g.</span> <span class=n>authenticated</span><span class=o>-</span><span class=n>read</span>
+</span></span><span class=line><span class=cl>      <span class=o>--</span><span class=n>s3.endpoint</span> <span class=nf>string            </span><span class=p>(</span><span class=n>experimental</span><span class=p>)</span> <span class=n>Set</span> <span class=n>the</span> <span class=n>S3</span> <span class=n>endpoint</span> <span class=n>URL</span><span class=p>,</span> <span class=n>please</span> <span class=n>specify</span> <span class=n>the</span> <span class=n>http</span> <span class=n>or</span> <span class=n>https</span> <span class=n>scheme</span> <span class=n>explicitly</span>
+</span></span><span class=line><span class=cl>      <span class=o>--</span><span class=n>s3.provider</span> <span class=nf>string            </span><span class=p>(</span><span class=n>experimental</span><span class=p>)</span> <span class=n>Set</span> <span class=n>the</span> <span class=n>S3</span> <span class=n>provider</span><span class=p>,</span> <span class=n>e.g.</span> <span class=n>aws</span><span class=p>,</span> <span class=n>alibaba</span><span class=p>,</span> <span class=n>ceph</span>
+</span></span><span class=line><span class=cl>      <span class=o>--</span><span class=n>s3.region</span> <span class=nf>string              </span><span class=p>(</span><span class=n>experimental</span><span class=p>)</span> <span class=n>Set</span> <span class=n>the</span> <span class=n>S3</span> <span class=n>region</span><span class=p>,</span> <span class=n>e.g.</span> <span class=n>us</span><span class=o>-</span><span class=n>east</span><span class=m>-1</span>
+</span></span><span class=line><span class=cl>      <span class=o>--</span><span class=n>s3.sse</span> <span class=n>string</span>                 <span class=n>Set</span> <span class=n>S3</span> <span class=n>server</span><span class=o>-</span><span class=n>side</span> <span class=n>encryption</span><span class=p>,</span> <span class=n>e.g.</span> <span class=n>aws</span><span class=o>:</span><span class=n>kms</span>
+</span></span><span class=line><span class=cl>      <span class=o>--</span><span class=n>s3.sse</span><span class=o>-</span><span class=n>kms</span><span class=o>-</span><span class=n>key</span><span class=o>-</span><span class=n>id</span> <span class=n>string</span>      <span class=n>KMS</span> <span class=n>CMK</span> <span class=n>key</span> <span class=n>id</span> <span class=n>to</span> <span class=n>use</span> <span class=n>with</span> <span class=n>S3</span> <span class=n>server</span><span class=o>-</span><span class=n>side</span> <span class=n>encryption.Leave</span> <span class=n>empty</span> <span class=n>to</span> <span class=n>use</span> <span class=n>S3</span> <span class=n>owned</span> <span class=n>key.</span>
+</span></span><span class=line><span class=cl>      <span class=o>--</span><span class=n>s3.storage</span><span class=o>-</span><span class=n>class</span> <span class=nf>string       </span><span class=p>(</span><span class=n>experimental</span><span class=p>)</span> <span class=n>Set</span> <span class=n>the</span> <span class=n>S3</span> <span class=n>storage</span> <span class=n>class</span><span class=p>,</span> <span class=n>e.g.</span> <span class=n>STANDARD</span>
+</span></span><span class=line><span class=cl>  <span class=o>-</span><span class=n>c</span><span class=p>,</span> <span class=o>--</span><span class=n>send</span><span class=o>-</span><span class=n>credentials</span><span class=o>-</span><span class=n>to</span><span class=o>-</span><span class=n>tikv</span>      <span class=n>Whether</span> <span class=n>send</span> <span class=n>credentials</span> <span class=n>to</span> <span class=nf>tikv </span><span class=p>(</span><span class=n>default</span> <span class=n>true</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>      <span class=o>--</span><span class=n>status</span><span class=o>-</span><span class=n>addr</span> <span class=n>string</span>            <span class=n>Set</span> <span class=n>the</span> <span class=n>HTTP</span> <span class=n>listening</span> <span class=n>address</span> <span class=n>for</span> <span class=n>the</span> <span class=n>status</span> <span class=n>report</span> <span class=n>service.</span> <span class=n>Set</span> <span class=n>to</span> <span class=n>empty</span> <span class=n>string</span> <span class=n>to</span> <span class=n>disable</span>
+</span></span><span class=line><span class=cl>  <span class=o>-</span><span class=n>s</span><span class=p>,</span> <span class=o>--</span><span class=n>storage</span> <span class=n>string</span>                <span class=n>specify</span> <span class=n>the</span> <span class=n>url</span> <span class=n>where</span> <span class=n>backup</span> <span class=n>storage</span><span class=p>,</span> <span class=n>eg</span><span class=p>,</span> <span class=s>&#34;s3://bucket/path/prefix&#34;</span>
+</span></span><span class=line><span class=cl>  <span class=o>-</span><span class=n>V</span><span class=p>,</span> <span class=o>--</span><span class=n>version</span>                       <span class=n>Display</span> <span class=n>version</span> <span class=n>information</span> <span class=n>about</span> <span class=n>BR</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>Use</span> <span class=s>&#34;br [command] --help&#34;</span> <span class=n>for</span> <span class=n>more</span> <span class=n>information</span> <span class=n>about</span> <span class=n>a</span> <span class=n>command.</span>
+</span></span></code></pre></td></tr></table></div></div><blockquote><p>以下内容请移步参观官网详细文档 <a href=https://docs.pingcap.com/zh/tidb/dev/backup-and-restore-tool title="PingCAP 官网文档-使用 BR 进行备份与恢复">PingCAP 官网文档-使用 BR 进行备份与恢复</a></p></blockquote><h3 id=local-br>local BR</h3><ul><li>备份数据到本地存储「提前准备好全量数据备份的磁盘空间（如果需要本地恢复的话）」</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-s data-lang=s><span class=line><span class=cl><span class=n>./br</span> <span class=n>backup</span> <span class=n>table</span>  <span class=o>--</span><span class=n>pd</span> <span class=m>172.16.4.51</span><span class=o>:</span><span class=m>14379</span> <span class=o>--</span><span class=n>db</span> <span class=n>tpcc</span> <span class=o>--</span><span class=n>table</span> <span class=n>history</span> <span class=o>--</span><span class=n>storage</span> <span class=s>&#34;local:///tmp/tmpuserbackup-3&#34;</span>  <span class=o>--</span><span class=n>log</span><span class=o>-</span><span class=n>file</span> <span class=n>backupfull.log</span><span class=m>-2</span>
+</span></span><span class=line><span class=cl><span class=n>Detial</span> <span class=n>BR</span> <span class=n>log</span> <span class=n>in</span> <span class=n>backupfull.log</span><span class=m>-2</span>
+</span></span><span class=line><span class=cl><span class=n>Table</span> <span class=n>backup</span> <span class=o>&lt;--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------&gt;</span> <span class=m>100.00</span><span class=o>%
+</span></span></span><span class=line><span class=cl><span class=o>Checksum &lt;------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------&gt; 100.00%</span>
+</span></span><span class=line><span class=cl><span class=p>{</span><span class=s>&#34;level&#34;</span><span class=o>:</span><span class=s>&#34;warn&#34;</span><span class=p>,</span><span class=s>&#34;ts&#34;</span><span class=o>:</span><span class=s>&#34;2020-06-01T15:59:34.671+0800&#34;</span><span class=p>,</span><span class=s>&#34;caller&#34;</span><span class=o>:</span><span class=s>&#34;clientv3/retry_interceptor.go:61&#34;</span><span class=p>,</span><span class=s>&#34;msg&#34;</span><span class=o>:</span><span class=s>&#34;retrying of unary invoker failed&#34;</span><span class=p>,</span><span class=s>&#34;target&#34;</span><span class=o>:</span><span class=s>&#34;endpoint://client-3be8bd38-4e9e-4166-a102-afcab137eee9/172.16.4.51:14379&#34;</span><span class=p>,</span><span class=s>&#34;attempt&#34;</span><span class=o>:</span><span class=m>0</span><span class=p>,</span><span class=s>&#34;error&#34;</span><span class=o>:</span><span class=s>&#34;rpc error: code = Canceled desc = grpc: the client connection is closing&#34;</span><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>{</span><span class=s>&#34;level&#34;</span><span class=o>:</span><span class=s>&#34;warn&#34;</span><span class=p>,</span><span class=s>&#34;ts&#34;</span><span class=o>:</span><span class=s>&#34;2020-06-01T15:59:34.697+0800&#34;</span><span class=p>,</span><span class=s>&#34;caller&#34;</span><span class=o>:</span><span class=s>&#34;clientv3/retry_interceptor.go:61&#34;</span><span class=p>,</span><span class=s>&#34;msg&#34;</span><span class=o>:</span><span class=s>&#34;retrying of unary invoker failed&#34;</span><span class=p>,</span><span class=s>&#34;target&#34;</span><span class=o>:</span><span class=s>&#34;endpoint://client-3be8bd38-4e9e-4166-a102-afcab137eee9/172.16.4.51:14379&#34;</span><span class=p>,</span><span class=s>&#34;attempt&#34;</span><span class=o>:</span><span class=m>1</span><span class=p>,</span><span class=s>&#34;error&#34;</span><span class=o>:</span><span class=s>&#34;rpc error: code = Canceled desc = grpc: the client connection is closing&#34;</span><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>{</span><span class=s>&#34;level&#34;</span><span class=o>:</span><span class=s>&#34;warn&#34;</span><span class=p>,</span><span class=s>&#34;ts&#34;</span><span class=o>:</span><span class=s>&#34;2020-06-01T15:59:34.723+0800&#34;</span><span class=p>,</span><span class=s>&#34;caller&#34;</span><span class=o>:</span><span class=s>&#34;clientv3/retry_interceptor.go:61&#34;</span><span class=p>,</span><span class=s>&#34;msg&#34;</span><span class=o>:</span><span class=s>&#34;retrying of unary invoker failed&#34;</span><span class=p>,</span><span class=s>&#34;target&#34;</span><span class=o>:</span><span class=s>&#34;endpoint://client-3be8bd38-4e9e-4166-a102-afcab137eee9/172.16.4.51:14379&#34;</span><span class=p>,</span><span class=s>&#34;attempt&#34;</span><span class=o>:</span><span class=m>2</span><span class=p>,</span><span class=s>&#34;error&#34;</span><span class=o>:</span><span class=s>&#34;rpc error: code = Canceled desc = grpc: the client connection is closing&#34;</span><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=n>[2020</span><span class=o>/</span><span class=m>06</span><span class=o>/</span><span class=m>01</span> <span class=m>15</span><span class=o>:</span><span class=m>59</span><span class=o>:</span><span class=m>37.355</span> <span class=m>+08</span><span class=o>:</span><span class=m>00</span><span class=n>]</span> <span class=n>[INFO]</span> <span class=n>[collector.go</span><span class=o>:</span><span class=m>58</span><span class=n>]</span> <span class=n>[</span><span class=s>&#34;Table backup Success summary: total backup ranges: 3, total success: 3, total failed: 0, total take(s): 24.02, total kv: 53717061, total size(MB): 2859.38, avg speed(MB/s): 119.02&#34;</span><span class=n>]</span> <span class=n>[</span><span class=s>&#34;backup checksum&#34;</span><span class=o>=</span><span class=m>3.148382555</span><span class=n>s]</span> <span class=n>[</span><span class=s>&#34;backup fast checksum&#34;</span><span class=o>=</span><span class=m>634.588</span>µ<span class=n>s]</span> <span class=n>[</span><span class=s>&#34;backup total regions&#34;</span><span class=o>=</span><span class=m>62</span><span class=n>]</span>
+</span></span></code></pre></td></tr></table></div></div><ul><li>permission denied<ul><li><strong>首先检查每个 tikv-server 主机上是否有全量数据</strong></li><li>然后检查 br -s 指定的数据目录是否正确，<strong>每个 tikv 节点路径必须一致</strong></li><li>然后检查<strong>目录权限是否被 tikv-server 运行用户可读</strong></li></ul></li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-s data-lang=s><span class=line><span class=cl><span class=n>./br</span> <span class=n>restore</span> <span class=n>full</span> <span class=o>--</span><span class=n>pd</span> <span class=m>172.16.4.51</span><span class=o>:</span><span class=m>14379</span>  <span class=o>--</span><span class=n>storage</span> <span class=s>&#34;local:///data3/tmpuser/full/full&#34;</span>  <span class=o>--</span><span class=n>status</span><span class=o>-</span><span class=n>addr</span> <span class=m>172.16.4.51</span><span class=o>:</span><span class=m>18880</span>
+</span></span><span class=line><span class=cl><span class=n>Detial</span> <span class=n>BR</span> <span class=n>log</span> <span class=n>in</span> <span class=o>/</span><span class=n>tmp</span><span class=o>/</span><span class=n>br.log.2020</span><span class=m>-06-02</span><span class=n>T11.30.48</span><span class=m>+0800</span>
+</span></span><span class=line><span class=cl><span class=n>Full</span> <span class=n>restore</span> <span class=o>&lt;--------</span><span class=m>-.</span><span class=n>................................................................................................................................................................................</span><span class=o>&gt;</span> <span class=m>4.74</span>%<span class=n>Error</span><span class=o>:</span> <span class=n>permission</span> <span class=n>denied</span><span class=o>:</span> <span class=n>download</span> <span class=n>sst</span> <span class=n>failed</span><span class=p>;</span> <span class=n>permission</span> <span class=n>denied</span><span class=o>:</span> <span class=n>download</span> <span class=n>sst</span> <span class=n>failed</span><span class=p>;</span> <span class=n>permission</span> <span class=n>denied</span><span class=o>:</span> <span class=n>download</span> <span class=n>sst</span> <span class=n>failed</span><span class=p>;</span> <span class=n>permission</span> <span class=n>denied</span><span class=o>:</span> <span class=n>download</span> <span class=n>sst</span> <span class=n>failed</span><span class=p>;</span> <span class=n>permission</span> <span class=n>denied</span><span class=o>:</span> <span class=n>download</span> <span class=n>sst</span> <span class=n>failed</span><span class=p>;</span> <span class=n>permission</span> <span class=n>denied</span><span class=o>:</span> <span class=n>download</span> <span class=n>sst</span> <span class=n>failed</span><span class=p>;</span> <span class=n>permission</span> <span class=n>denied</span><span class=o>:</span> <span class=n>download</span> <span class=n>sst</span> <span class=n>failed</span><span class=p>;</span> <span class=n>permission</span> <span class=n>denied</span><span class=o>:</span> <span class=n>download</span> <span class=n>sst</span> <span class=n>failed</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=s3-br>S3 BR</h3><ul><li>备份数据到网络存储<ul><li>export AWS_ACCESS_KEY_ID=minioadmin</li><li>export AWS_SECRET_ACCESS_KEY=minioadmin</li></ul></li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-s data-lang=s><span class=line><span class=cl> <span class=n>./br</span> <span class=n>backup</span> <span class=n>db</span> <span class=o>--</span><span class=n>db</span> <span class=n>br</span> <span class=o>--</span><span class=n>pd</span> <span class=m>172.16.4.51</span><span class=o>:</span><span class=m>14379</span>  <span class=o>--</span><span class=n>storage</span> <span class=s>&#34;s3://br-order-line/?endpoint=http://172.16.4.51:99&#34;</span>
+</span></span><span class=line><span class=cl><span class=n>Detial</span> <span class=n>BR</span> <span class=n>log</span> <span class=n>in</span> <span class=o>/</span><span class=n>tmp</span><span class=o>/</span><span class=n>br.log.2020</span><span class=m>-06-02</span><span class=n>T17.32.47</span><span class=m>+0800</span>
+</span></span><span class=line><span class=cl><span class=n>Database</span> <span class=n>backup</span> <span class=o>&lt;----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------&gt;</span> <span class=m>100.00</span><span class=o>%
+</span></span></span><span class=line><span class=cl><span class=o>Checksum &lt;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------&gt; 100.00%</span>
+</span></span><span class=line><span class=cl><span class=n>[2020</span><span class=o>/</span><span class=m>06</span><span class=o>/</span><span class=m>02</span> <span class=m>17</span><span class=o>:</span><span class=m>39</span><span class=o>:</span><span class=m>37.879</span> <span class=m>+08</span><span class=o>:</span><span class=m>00</span><span class=n>]</span> <span class=n>[INFO]</span> <span class=n>[collector.go</span><span class=o>:</span><span class=m>58</span><span class=n>]</span> <span class=n>[</span><span class=s>&#34;Database backup Success summary: total backup ranges: 20, total success: 20, total failed: 0, total take(s): 366.26, total kv: 1390969552, total size(MB): 128968.74, avg speed(MB/s): 352.12&#34;</span><span class=n>]</span> <span class=n>[</span><span class=s>&#34;backup checksum&#34;</span><span class=o>=</span><span class=m>44.411943312</span><span class=n>s]</span> <span class=n>[</span><span class=s>&#34;backup fast checksum&#34;</span><span class=o>=</span><span class=m>5.160845</span><span class=n>ms]</span> <span class=n>[</span><span class=s>&#34;backup total regions&#34;</span><span class=o>=</span><span class=m>2402</span><span class=n>]</span>
+</span></span></code></pre></td></tr></table></div></div><ul><li>从网络存储恢复数据<ul><li>export AWS_ACCESS_KEY_ID=minioadmin</li><li>export AWS_SECRET_ACCESS_KEY=minioadmin</li></ul></li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-s data-lang=s><span class=line><span class=cl> <span class=n>./br</span> <span class=n>restore</span> <span class=n>full</span> <span class=o>--</span><span class=n>pd</span> <span class=m>172.16.4.51</span><span class=o>:</span><span class=m>14379</span>  <span class=o>--</span><span class=n>storage</span> <span class=s>&#34;s3://full/full/full/?endpoint=http://172.16.4.51:99&#34;</span> <span class=o>--</span><span class=n>status</span><span class=o>-</span><span class=n>addr</span> <span class=m>172.16.4.51</span><span class=o>:</span><span class=m>18880</span>
+</span></span><span class=line><span class=cl><span class=n>Detial</span> <span class=n>BR</span> <span class=n>log</span> <span class=n>in</span> <span class=o>/</span><span class=n>tmp</span><span class=o>/</span><span class=n>br.log.2020</span><span class=m>-06-02</span><span class=n>T17.13.34</span><span class=m>+0800</span>
+</span></span><span class=line><span class=cl><span class=n>Full</span> <span class=n>restore</span> <span class=o>&lt;-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------&gt;</span> <span class=m>100.00</span><span class=o>%
+</span></span></span><span class=line><span class=cl><span class=o>Checksum &lt;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------&gt; 100.00%</span>
+</span></span><span class=line><span class=cl><span class=n>[2020</span><span class=o>/</span><span class=m>06</span><span class=o>/</span><span class=m>02</span> <span class=m>17</span><span class=o>:</span><span class=m>15</span><span class=o>:</span><span class=m>38.093</span> <span class=m>+08</span><span class=o>:</span><span class=m>00</span><span class=n>]</span> <span class=n>[INFO]</span> <span class=n>[collector.go</span><span class=o>:</span><span class=m>58</span><span class=n>]</span> <span class=n>[</span><span class=s>&#34;Full restore Success summary: total restore files: 866, total success: 866, total failed: 0, total take(s): 84.16, total kv: 501863655, total size(MB): 38876.69, avg speed(MB/s): 461.96&#34;</span><span class=n>]</span> <span class=n>[</span><span class=s>&#34;split region&#34;</span><span class=o>=</span><span class=m>12.75036978</span><span class=n>s]</span> <span class=n>[</span><span class=s>&#34;restore checksum&#34;</span><span class=o>=</span><span class=m>16.45494056</span><span class=n>s]</span> <span class=n>[</span><span class=s>&#34;restore ranges&#34;</span><span class=o>=</span><span class=m>822</span><span class=n>]</span>
+</span></span></code></pre></td></tr></table></div></div><ul><li>手动提前创建好 S3/backup 信息；backup == S3 目录</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-s data-lang=s><span class=line><span class=cl> <span class=n>./br</span> <span class=n>backup</span> <span class=n>db</span> <span class=o>--</span><span class=n>db</span> <span class=n>br</span> <span class=o>--</span><span class=n>pd</span> <span class=m>172.16.4.51</span><span class=o>:</span><span class=m>14379</span>  <span class=o>--</span><span class=n>storage</span> <span class=s>&#34;s3://br-order-line/?endpoint=http://172.16.4.51:99&#34;</span>
+</span></span><span class=line><span class=cl><span class=n>Detial</span> <span class=n>BR</span> <span class=n>log</span> <span class=n>in</span> <span class=o>/</span><span class=n>tmp</span><span class=o>/</span><span class=n>br.log.2020</span><span class=m>-06-02</span><span class=n>T17.32.11</span><span class=m>+0800</span>
+</span></span><span class=line><span class=cl><span class=n>Error</span><span class=o>:</span> <span class=n>Bucket</span> <span class=n>br</span><span class=o>-</span><span class=n>order</span><span class=o>-</span><span class=n>line</span> <span class=n>is</span> <span class=n>not</span> <span class=n>accessible</span><span class=o>:</span> <span class=n>NotFound</span><span class=o>:</span> <span class=n>Not</span> <span class=n>Found</span>
+</span></span><span class=line><span class=cl>        <span class=n>status</span> <span class=n>code</span><span class=o>:</span> <span class=m>404</span><span class=p>,</span> <span class=n>request</span> <span class=n>id</span><span class=o>:</span> <span class=m>1614</span><span class=n>B03A0CD600B5</span><span class=p>,</span> <span class=n>host</span> <span class=n>id</span><span class=o>:</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=faq>FAQ</h2><p>数据一边大量写入，一边做增量备份；BR 是怎么控制结束时间的呢？「有奖问答」</p><ul><li>贴一段 BR 运行日志</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-s data-lang=s><span class=line><span class=cl><span class=n>[2020</span><span class=o>/</span><span class=m>06</span><span class=o>/</span><span class=m>01</span> <span class=m>16</span><span class=o>:</span><span class=m>15</span><span class=o>:</span><span class=m>38.439</span> <span class=m>+08</span><span class=o>:</span><span class=m>00</span><span class=n>]</span> <span class=n>[INFO]</span> <span class=n>[coprocessor.go</span><span class=o>:</span><span class=m>870</span><span class=n>]</span> <span class=n>[</span><span class=s>&#34;[TIME_COP_PROCESS] resp_time:303.5223ms txnStartTS:417070892274155527 region_id:148 store_addr:172.16.4.52:15160 kv_process_ms:301 scan_total_write:145255 scan_processed_write:145254 scan_total_data:145254 scan_processed_data:145254 scan_total_lock:1 scan_processed_lock:0&#34;</span><span class=n>]</span>
+</span></span><span class=line><span class=cl><span class=n>[2020</span><span class=o>/</span><span class=m>06</span><span class=o>/</span><span class=m>01</span> <span class=m>16</span><span class=o>:</span><span class=m>15</span><span class=o>:</span><span class=m>54.730</span> <span class=m>+08</span><span class=o>:</span><span class=m>00</span><span class=n>]</span> <span class=n>[INFO]</span> <span class=n>[schema.go</span><span class=o>:</span><span class=m>94</span><span class=n>]</span> <span class=n>[</span><span class=s>&#34;table checksum finished&#34;</span><span class=n>]</span> <span class=n>[table</span><span class=o>=</span><span class=n>`tpcc`.`order_line`]</span> <span class=n>[Crc64Xor</span><span class=o>=</span><span class=m>18378085887538976218</span><span class=n>]</span> <span class=n>[TotalKvs</span><span class=o>=</span><span class=m>369955866</span><span class=n>]</span> <span class=n>[TotalBytes</span><span class=o>=</span><span class=m>30627398952</span><span class=n>]</span> <span class=n>[take</span><span class=o>=</span><span class=m>16.601811036</span><span class=n>s]</span>
+</span></span><span class=line><span class=cl><span class=n>[2020</span><span class=o>/</span><span class=m>06</span><span class=o>/</span><span class=m>01</span> <span class=m>16</span><span class=o>:</span><span class=m>15</span><span class=o>:</span><span class=m>54.730</span> <span class=m>+08</span><span class=o>:</span><span class=m>00</span><span class=n>]</span> <span class=n>[INFO]</span> <span class=n>[schema.go</span><span class=o>:</span><span class=m>107</span><span class=n>]</span> <span class=n>[</span><span class=s>&#34;backup checksum&#34;</span><span class=n>]</span> <span class=n>[take</span><span class=o>=</span><span class=m>16.602038025</span><span class=n>s]</span>
+</span></span><span class=line><span class=cl><span class=n>[2020</span><span class=o>/</span><span class=m>06</span><span class=o>/</span><span class=m>01</span> <span class=m>16</span><span class=o>:</span><span class=m>15</span><span class=o>:</span><span class=m>54.734</span> <span class=m>+08</span><span class=o>:</span><span class=m>00</span><span class=n>]</span> <span class=n>[INFO]</span> <span class=n>[client.go</span><span class=o>:</span><span class=m>895</span><span class=n>]</span> <span class=n>[</span><span class=s>&#34;fast checksum calculated&#34;</span><span class=n>]</span> <span class=n>[db</span><span class=o>=</span><span class=n>tpcc]</span> <span class=n>[table</span><span class=o>=</span><span class=n>warehouse]</span>
+</span></span><span class=line><span class=cl><span class=n>[2020</span><span class=o>/</span><span class=m>06</span><span class=o>/</span><span class=m>01</span> <span class=m>16</span><span class=o>:</span><span class=m>15</span><span class=o>:</span><span class=m>54.734</span> <span class=m>+08</span><span class=o>:</span><span class=m>00</span><span class=n>]</span> <span class=n>[INFO]</span> <span class=n>[client.go</span><span class=o>:</span><span class=m>895</span><span class=n>]</span> <span class=n>[</span><span class=s>&#34;fast checksum calculated&#34;</span><span class=n>]</span> <span class=n>[db</span><span class=o>=</span><span class=n>tpcc]</span> <span class=n>[table</span><span class=o>=</span><span class=n>district]</span>
+</span></span><span class=line><span class=cl><span class=n>[2020</span><span class=o>/</span><span class=m>06</span><span class=o>/</span><span class=m>01</span> <span class=m>16</span><span class=o>:</span><span class=m>15</span><span class=o>:</span><span class=m>54.735</span> <span class=m>+08</span><span class=o>:</span><span class=m>00</span><span class=n>]</span> <span class=n>[INFO]</span> <span class=n>[client.go</span><span class=o>:</span><span class=m>895</span><span class=n>]</span> <span class=n>[</span><span class=s>&#34;fast checksum calculated&#34;</span><span class=n>]</span> <span class=n>[db</span><span class=o>=</span><span class=n>tpcc]</span> <span class=n>[table</span><span class=o>=</span><span class=n>item]</span>
+</span></span><span class=line><span class=cl><span class=n>[2020</span><span class=o>/</span><span class=m>06</span><span class=o>/</span><span class=m>01</span> <span class=m>16</span><span class=o>:</span><span class=m>15</span><span class=o>:</span><span class=m>54.735</span> <span class=m>+08</span><span class=o>:</span><span class=m>00</span><span class=n>]</span> <span class=n>[INFO]</span> <span class=n>[client.go</span><span class=o>:</span><span class=m>895</span><span class=n>]</span> <span class=n>[</span><span class=s>&#34;fast checksum calculated&#34;</span><span class=n>]</span> <span class=n>[db</span><span class=o>=</span><span class=n>tpcc]</span> <span class=n>[table</span><span class=o>=</span><span class=n>new_order]</span>
+</span></span><span class=line><span class=cl><span class=n>[2020</span><span class=o>/</span><span class=m>06</span><span class=o>/</span><span class=m>01</span> <span class=m>16</span><span class=o>:</span><span class=m>15</span><span class=o>:</span><span class=m>54.735</span> <span class=m>+08</span><span class=o>:</span><span class=m>00</span><span class=n>]</span> <span class=n>[INFO]</span> <span class=n>[client.go</span><span class=o>:</span><span class=m>895</span><span class=n>]</span> <span class=n>[</span><span class=s>&#34;fast checksum calculated&#34;</span><span class=n>]</span> <span class=n>[db</span><span class=o>=</span><span class=n>tpcc]</span> <span class=n>[table</span><span class=o>=</span><span class=n>customer]</span>
+</span></span><span class=line><span class=cl><span class=n>[2020</span><span class=o>/</span><span class=m>06</span><span class=o>/</span><span class=m>01</span> <span class=m>16</span><span class=o>:</span><span class=m>15</span><span class=o>:</span><span class=m>54.736</span> <span class=m>+08</span><span class=o>:</span><span class=m>00</span><span class=n>]</span> <span class=n>[INFO]</span> <span class=n>[client.go</span><span class=o>:</span><span class=m>895</span><span class=n>]</span> <span class=n>[</span><span class=s>&#34;fast checksum calculated&#34;</span><span class=n>]</span> <span class=n>[db</span><span class=o>=</span><span class=n>tpcc]</span> <span class=n>[table</span><span class=o>=</span><span class=n>stock]</span>
+</span></span><span class=line><span class=cl><span class=n>[2020</span><span class=o>/</span><span class=m>06</span><span class=o>/</span><span class=m>01</span> <span class=m>16</span><span class=o>:</span><span class=m>15</span><span class=o>:</span><span class=m>54.736</span> <span class=m>+08</span><span class=o>:</span><span class=m>00</span><span class=n>]</span> <span class=n>[INFO]</span> <span class=n>[client.go</span><span class=o>:</span><span class=m>895</span><span class=n>]</span> <span class=n>[</span><span class=s>&#34;fast checksum calculated&#34;</span><span class=n>]</span> <span class=n>[db</span><span class=o>=</span><span class=n>tpcc]</span> <span class=n>[table</span><span class=o>=</span><span class=n>history]</span>
+</span></span><span class=line><span class=cl><span class=n>[2020</span><span class=o>/</span><span class=m>06</span><span class=o>/</span><span class=m>01</span> <span class=m>16</span><span class=o>:</span><span class=m>15</span><span class=o>:</span><span class=m>54.736</span> <span class=m>+08</span><span class=o>:</span><span class=m>00</span><span class=n>]</span> <span class=n>[INFO]</span> <span class=n>[client.go</span><span class=o>:</span><span class=m>895</span><span class=n>]</span> <span class=n>[</span><span class=s>&#34;fast checksum calculated&#34;</span><span class=n>]</span> <span class=n>[db</span><span class=o>=</span><span class=n>tpcc]</span> <span class=n>[table</span><span class=o>=</span><span class=n>orders]</span>
+</span></span><span class=line><span class=cl><span class=n>[2020</span><span class=o>/</span><span class=m>06</span><span class=o>/</span><span class=m>01</span> <span class=m>16</span><span class=o>:</span><span class=m>15</span><span class=o>:</span><span class=m>54.737</span> <span class=m>+08</span><span class=o>:</span><span class=m>00</span><span class=n>]</span> <span class=n>[INFO]</span> <span class=n>[client.go</span><span class=o>:</span><span class=m>895</span><span class=n>]</span> <span class=n>[</span><span class=s>&#34;fast checksum calculated&#34;</span><span class=n>]</span> <span class=n>[db</span><span class=o>=</span><span class=n>tpcc]</span> <span class=n>[table</span><span class=o>=</span><span class=n>order_line]</span>
+</span></span><span class=line><span class=cl><span class=n>[2020</span><span class=o>/</span><span class=m>06</span><span class=o>/</span><span class=m>01</span> <span class=m>16</span><span class=o>:</span><span class=m>15</span><span class=o>:</span><span class=m>54.737</span> <span class=m>+08</span><span class=o>:</span><span class=m>00</span><span class=n>]</span> <span class=n>[INFO]</span> <span class=n>[client.go</span><span class=o>:</span><span class=m>841</span><span class=n>]</span> <span class=n>[</span><span class=s>&#34;fast checksum success&#34;</span><span class=n>]</span> <span class=n>[database</span><span class=o>=</span><span class=n>tpcc]</span> <span class=n>[table</span><span class=o>=</span><span class=n>warehouse]</span>
+</span></span><span class=line><span class=cl><span class=n>[2020</span><span class=o>/</span><span class=m>06</span><span class=o>/</span><span class=m>01</span> <span class=m>16</span><span class=o>:</span><span class=m>15</span><span class=o>:</span><span class=m>54.737</span> <span class=m>+08</span><span class=o>:</span><span class=m>00</span><span class=n>]</span> <span class=n>[INFO]</span> <span class=n>[client.go</span><span class=o>:</span><span class=m>841</span><span class=n>]</span> <span class=n>[</span><span class=s>&#34;fast checksum success&#34;</span><span class=n>]</span> <span class=n>[database</span><span class=o>=</span><span class=n>tpcc]</span> <span class=n>[table</span><span class=o>=</span><span class=n>district]</span>
+</span></span><span class=line><span class=cl><span class=n>[2020</span><span class=o>/</span><span class=m>06</span><span class=o>/</span><span class=m>01</span> <span class=m>16</span><span class=o>:</span><span class=m>15</span><span class=o>:</span><span class=m>54.737</span> <span class=m>+08</span><span class=o>:</span><span class=m>00</span><span class=n>]</span> <span class=n>[INFO]</span> <span class=n>[client.go</span><span class=o>:</span><span class=m>841</span><span class=n>]</span> <span class=n>[</span><span class=s>&#34;fast checksum success&#34;</span><span class=n>]</span> <span class=n>[database</span><span class=o>=</span><span class=n>tpcc]</span> <span class=n>[table</span><span class=o>=</span><span class=n>item]</span>
+</span></span><span class=line><span class=cl><span class=n>[2020</span><span class=o>/</span><span class=m>06</span><span class=o>/</span><span class=m>01</span> <span class=m>16</span><span class=o>:</span><span class=m>15</span><span class=o>:</span><span class=m>54.737</span> <span class=m>+08</span><span class=o>:</span><span class=m>00</span><span class=n>]</span> <span class=n>[INFO]</span> <span class=n>[client.go</span><span class=o>:</span><span class=m>841</span><span class=n>]</span> <span class=n>[</span><span class=s>&#34;fast checksum success&#34;</span><span class=n>]</span> <span class=n>[database</span><span class=o>=</span><span class=n>tpcc]</span> <span class=n>[table</span><span class=o>=</span><span class=n>new_order]</span>
+</span></span><span class=line><span class=cl><span class=n>[2020</span><span class=o>/</span><span class=m>06</span><span class=o>/</span><span class=m>01</span> <span class=m>16</span><span class=o>:</span><span class=m>15</span><span class=o>:</span><span class=m>54.738</span> <span class=m>+08</span><span class=o>:</span><span class=m>00</span><span class=n>]</span> <span class=n>[INFO]</span> <span class=n>[client.go</span><span class=o>:</span><span class=m>841</span><span class=n>]</span> <span class=n>[</span><span class=s>&#34;fast checksum success&#34;</span><span class=n>]</span> <span class=n>[database</span><span class=o>=</span><span class=n>tpcc]</span> <span class=n>[table</span><span class=o>=</span><span class=n>customer]</span>
+</span></span><span class=line><span class=cl><span class=n>[2020</span><span class=o>/</span><span class=m>06</span><span class=o>/</span><span class=m>01</span> <span class=m>16</span><span class=o>:</span><span class=m>15</span><span class=o>:</span><span class=m>54.739</span> <span class=m>+08</span><span class=o>:</span><span class=m>00</span><span class=n>]</span> <span class=n>[INFO]</span> <span class=n>[client.go</span><span class=o>:</span><span class=m>841</span><span class=n>]</span> <span class=n>[</span><span class=s>&#34;fast checksum success&#34;</span><span class=n>]</span> <span class=n>[database</span><span class=o>=</span><span class=n>tpcc]</span> <span class=n>[table</span><span class=o>=</span><span class=n>stock]</span>
+</span></span><span class=line><span class=cl><span class=n>[2020</span><span class=o>/</span><span class=m>06</span><span class=o>/</span><span class=m>01</span> <span class=m>16</span><span class=o>:</span><span class=m>15</span><span class=o>:</span><span class=m>54.739</span> <span class=m>+08</span><span class=o>:</span><span class=m>00</span><span class=n>]</span> <span class=n>[INFO]</span> <span class=n>[client.go</span><span class=o>:</span><span class=m>841</span><span class=n>]</span> <span class=n>[</span><span class=s>&#34;fast checksum success&#34;</span><span class=n>]</span> <span class=n>[database</span><span class=o>=</span><span class=n>tpcc]</span> <span class=n>[table</span><span class=o>=</span><span class=n>history]</span>
+</span></span><span class=line><span class=cl><span class=n>[2020</span><span class=o>/</span><span class=m>06</span><span class=o>/</span><span class=m>01</span> <span class=m>16</span><span class=o>:</span><span class=m>15</span><span class=o>:</span><span class=m>54.740</span> <span class=m>+08</span><span class=o>:</span><span class=m>00</span><span class=n>]</span> <span class=n>[INFO]</span> <span class=n>[client.go</span><span class=o>:</span><span class=m>841</span><span class=n>]</span> <span class=n>[</span><span class=s>&#34;fast checksum success&#34;</span><span class=n>]</span> <span class=n>[database</span><span class=o>=</span><span class=n>tpcc]</span> <span class=n>[table</span><span class=o>=</span><span class=n>orders]</span>
+</span></span><span class=line><span class=cl><span class=n>[2020</span><span class=o>/</span><span class=m>06</span><span class=o>/</span><span class=m>01</span> <span class=m>16</span><span class=o>:</span><span class=m>15</span><span class=o>:</span><span class=m>54.740</span> <span class=m>+08</span><span class=o>:</span><span class=m>00</span><span class=n>]</span> <span class=n>[INFO]</span> <span class=n>[client.go</span><span class=o>:</span><span class=m>841</span><span class=n>]</span> <span class=n>[</span><span class=s>&#34;fast checksum success&#34;</span><span class=n>]</span> <span class=n>[database</span><span class=o>=</span><span class=n>tpcc]</span> <span class=n>[table</span><span class=o>=</span><span class=n>order_line]</span>
+</span></span><span class=line><span class=cl><span class=n>[2020</span><span class=o>/</span><span class=m>06</span><span class=o>/</span><span class=m>01</span> <span class=m>16</span><span class=o>:</span><span class=m>15</span><span class=o>:</span><span class=m>54.741</span> <span class=m>+08</span><span class=o>:</span><span class=m>00</span><span class=n>]</span> <span class=n>[INFO]</span> <span class=n>[client.go</span><span class=o>:</span><span class=m>168</span><span class=n>]</span> <span class=n>[</span><span class=s>&#34;save backup meta&#34;</span><span class=n>]</span> <span class=n>[path</span><span class=o>=</span><span class=n>local</span><span class=o>:///</span><span class=n>tmp</span><span class=o>/</span><span class=n>tmpuserbackup]</span> <span class=n>[jobs</span><span class=o>=</span><span class=m>0</span><span class=n>]</span>
+</span></span><span class=line><span class=cl><span class=n>[2020</span><span class=o>/</span><span class=m>06</span><span class=o>/</span><span class=m>01</span> <span class=m>16</span><span class=o>:</span><span class=m>15</span><span class=o>:</span><span class=m>54.743</span> <span class=m>+08</span><span class=o>:</span><span class=m>00</span><span class=n>]</span> <span class=n>[INFO]</span> <span class=n>[ddl.go</span><span class=o>:</span><span class=m>407</span><span class=n>]</span> <span class=n>[</span><span class=s>&#34;[ddl] DDL closed&#34;</span><span class=n>]</span> <span class=n>[ID</span><span class=o>=</span><span class=m>85890430-0</span><span class=n>b99</span><span class=m>-4322-8908-9</span><span class=n>a6412da4ad8]</span> <span class=n>[</span><span class=s>&#34;take time&#34;</span><span class=o>=</span><span class=m>788.052</span>µ<span class=n>s]</span>
+</span></span><span class=line><span class=cl><span class=n>[2020</span><span class=o>/</span><span class=m>06</span><span class=o>/</span><span class=m>01</span> <span class=m>16</span><span class=o>:</span><span class=m>15</span><span class=o>:</span><span class=m>54.743</span> <span class=m>+08</span><span class=o>:</span><span class=m>00</span><span class=n>]</span> <span class=n>[INFO]</span> <span class=n>[ddl.go</span><span class=o>:</span><span class=m>301</span><span class=n>]</span> <span class=n>[</span><span class=s>&#34;[ddl] stop DDL&#34;</span><span class=n>]</span> <span class=n>[ID</span><span class=o>=</span><span class=m>85890430-0</span><span class=n>b99</span><span class=m>-4322-8908-9</span><span class=n>a6412da4ad8]</span>
+</span></span><span class=line><span class=cl><span class=n>[2020</span><span class=o>/</span><span class=m>06</span><span class=o>/</span><span class=m>01</span> <span class=m>16</span><span class=o>:</span><span class=m>15</span><span class=o>:</span><span class=m>54.744</span> <span class=m>+08</span><span class=o>:</span><span class=m>00</span><span class=n>]</span> <span class=n>[INFO]</span> <span class=n>[domain.go</span><span class=o>:</span><span class=m>607</span><span class=n>]</span> <span class=n>[</span><span class=s>&#34;domain closed&#34;</span><span class=n>]</span> <span class=n>[</span><span class=s>&#34;take time&#34;</span><span class=o>=</span><span class=m>1.996407</span><span class=n>ms]</span>
+</span></span><span class=line><span class=cl><span class=n>[2020</span><span class=o>/</span><span class=m>06</span><span class=o>/</span><span class=m>01</span> <span class=m>16</span><span class=o>:</span><span class=m>15</span><span class=o>:</span><span class=m>54.745</span> <span class=m>+08</span><span class=o>:</span><span class=m>00</span><span class=n>]</span> <span class=n>[INFO]</span> <span class=n>[collector.go</span><span class=o>:</span><span class=m>59</span><span class=n>]</span> <span class=n>[</span><span class=s>&#34;Database backup Success summary: total backup ranges: 19, total success: 19, total failed: 0, total take(s): 145.77, total kv: 498155202, total size(MB): 38602.90, avg speed(MB/s): 264.83&#34;</span><span class=n>]</span> <span class=n>[</span><span class=s>&#34;backup fast checksum&#34;</span><span class=o>=</span><span class=m>6.338075</span><span class=n>ms]</span> <span class=n>[</span><span class=s>&#34;backup checksum&#34;</span><span class=o>=</span><span class=m>16.602056489</span><span class=n>s]</span> <span class=n>[</span><span class=s>&#34;backup total regions&#34;</span><span class=o>=</span><span class=m>812</span><span class=n>]</span>
+</span></span></code></pre></td></tr></table></div></div></div><div class=post-copyright><p class=copyright-item><span class=item-title>Author</span>
+<span class=item-content>Jeff</span></p><p class=copyright-item><span class=item-title>LastMod</span>
+<span class=item-content>2020-06-18</span></p><p class=copyright-item><span class=item-title>License</span>
+<span class=item-content><a rel="license noopener" href=https://creativecommons.org/licenses/by-nc-nd/4.0/ target=_blank>CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span></p></div><footer class=post-footer><div class=post-tags><a href=/tags/airplan/>AirPlan</a>
+<a href=/tags/br/>BR</a></div><nav class=post-nav><a class=prev href=/post/20200703-27-tskill/><i class="iconfont icon-left"></i>
+<span class="prev-text nav-default">九死一生 - 运维小技巧</span>
+<span class="prev-text nav-mobile">Prev</span></a>
+<a class=next href=/post/20200612-24-minio/><span class="next-text nav-default">软件测试 - S3 协议与 minio</span>
+<span class="next-text nav-mobile">Next</span>
+<i class="iconfont icon-right"></i></a></nav></footer></article></div></div></main><footer id=footer class=footer><div class=social-links><a href=https://github.com/BigerCAP/TiDB-AirPlan/issues class="iconfont icon-github" title=github></a>
+<a href=https://ap.biger.cc/index.xml type=application/rss+xml class="iconfont icon-rss" title=rss></a></div><div class=copyright><span class=power-by>Powered by <a class=hexo-link href=https://gohugo.io>Hugo</a></span>
+<span class=division>|</span>
+<span class=theme-info>Theme -
+<a class=theme-link href=https://github.com/olOwOlo/hugo-theme-even>Even</a></span><div class=busuanzi-footer><span id=busuanzi_container_site_pv>site pv: <span id=busuanzi_value_site_pv><img src=/img/spinner.svg alt=spinner.svg></span></span>
+<span class=division>|</span>
+<span id=busuanzi_container_site_uv>site uv: <span id=busuanzi_value_site_uv><img src=/img/spinner.svg alt=spinner.svg></span></span></div><span class=copyright-year>&copy;
+2017 -
+2023
+<span class=heart><i class="iconfont icon-heart"></i></span>
+<span class=author>DB - AirPlan</span></span></div></footer><div class=back-to-top id=back-to-top><i class="iconfont icon-up"></i></div></div><script src=https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin=anonymous></script>
+<script>var languageCode="en".replace(/-/g,"_").replace(/_(.*)/,function(e,t){return e.replace(t,t.toUpperCase())});timeago().render(document.querySelectorAll(".timeago"),languageCode),timeago.cancel()</script><script type=text/javascript src=/dist/even.26188efa.min.js></script></body></html>

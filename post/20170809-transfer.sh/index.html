@@ -1,592 +1,78 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>Linux - Transfer.sh 一键文件服务器 - TiDB AirPlan - A biger solution</title>
-  <meta name="renderer" content="webkit" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-
-<meta http-equiv="Cache-Control" content="no-transform" />
-<meta http-equiv="Cache-Control" content="no-siteapp" />
-
-<meta name="theme-color" content="#f8f5ec" />
-<meta name="msapplication-navbutton-color" content="#f8f5ec">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
-
-
-<meta name="author" content="Jeff" /><meta name="description" content="0x00 起源 平常需要各种传输日志文件，TiDB 部署进程比较多，打包后可能超过 100MB（微信最大支持 100MB 附件传输），发送人和接受人不是同平台时，文件" /><meta name="keywords" content="TiDB, AirPlan, TiDB OPS, tidb-operator, 2pc, raft, databases, mysql, htap" />
-
-
-
-
-
-
-<meta name="generator" content="Hugo 0.78.2 with theme even" />
-
-
-<link rel="canonical" href="https://ap.tidb.cc/post/20170809-transfer.sh/" />
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="manifest" href="/manifest.json">
-<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
-
-<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-<link href="/dist/even.04bd84cd.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
-
-
-<meta property="og:title" content="Linux - Transfer.sh 一键文件服务器" />
-<meta property="og:description" content="0x00 起源 平常需要各种传输日志文件，TiDB 部署进程比较多，打包后可能超过 100MB（微信最大支持 100MB 附件传输），发送人和接受人不是同平台时，文件" />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://ap.tidb.cc/post/20170809-transfer.sh/" />
-<meta property="article:published_time" content="2017-08-09T00:00:00+08:00" />
-<meta property="article:modified_time" content="2020-01-21T00:00:00+08:00" />
-<meta itemprop="name" content="Linux - Transfer.sh 一键文件服务器">
-<meta itemprop="description" content="0x00 起源 平常需要各种传输日志文件，TiDB 部署进程比较多，打包后可能超过 100MB（微信最大支持 100MB 附件传输），发送人和接受人不是同平台时，文件">
-<meta itemprop="datePublished" content="2017-08-09T00:00:00+08:00" />
-<meta itemprop="dateModified" content="2020-01-21T00:00:00+08:00" />
-<meta itemprop="wordCount" content="1236">
-
-
-
-<meta itemprop="keywords" content="Linux,Transfer,AirPlan," />
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Linux - Transfer.sh 一键文件服务器"/>
-<meta name="twitter:description" content="0x00 起源 平常需要各种传输日志文件，TiDB 部署进程比较多，打包后可能超过 100MB（微信最大支持 100MB 附件传输），发送人和接受人不是同平台时，文件"/>
-
-<!--[if lte IE 9]>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
-<![endif]-->
-
-<!--[if lt IE 9]>
-  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
-<![endif]-->
-
-</head>
-<body>
-  <div id="mobile-navbar" class="mobile-navbar">
-  <div class="mobile-header-logo">
-    <a href="/" class="logo">TiDB AirPlan</a>
-  </div>
-  <div class="mobile-navbar-icon">
-    <span></span>
-    <span></span>
-    <span></span>
-  </div>
-</div>
-<nav id="mobile-menu" class="mobile-menu slideout-menu">
-  <ul class="mobile-menu-list">
-    <a href="/post/">
-        <li class="mobile-menu-item">Blog</li>
-      </a><a href="/look/">
-        <li class="mobile-menu-item">Look</li>
-      </a><a href="/tags/">
-        <li class="mobile-menu-item">Tags</li>
-      </a><a href="/categories/">
-        <li class="mobile-menu-item">Categories</li>
-      </a><a href="/about/">
-        <li class="mobile-menu-item">About</li>
-      </a>
-  </ul>
-</nav>
-  <div class="container" id="mobile-panel">
-    <header id="header" class="header">
-        <div class="logo-wrapper">
-  <a href="/" class="logo">TiDB AirPlan</a>
-</div>
-
-<nav class="site-navbar">
-  <ul id="menu" class="menu">
-    <li class="menu-item">
-        <a class="menu-item-link" href="/post/">Blog</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/look/">Look</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/tags/">Tags</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/categories/">Categories</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/about/">About</a>
-      </li>
-  </ul>
-</nav>
-    </header>
-
-    <main id="main" class="main">
-      <div class="content-wrapper">
-        <div id="content" class="content">
-          <article class="post">
-    
-    <header class="post-header">
-      <h1 class="post-title">Linux - Transfer.sh 一键文件服务器</h1>
-
-      <div class="post-meta">
-        <span class="post-time"> 2017-08-09 </span>
-        <div class="post-category">
-            <a href="/categories/software/"> software </a>
-            </div>
-          <span class="more-meta"> 1236 words </span>
-          <span class="more-meta"> 3 mins read </span>
-        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
-      </div>
-    </header>
-
-    <div class="post-toc" id="post-toc">
-  <h2 class="post-toc-title">Contents</h2>
-  <div class="post-toc-content">
-    <nav id="TableOfContents">
-  <ul>
-    <li><a href="#0x00-起源">0x00 起源</a></li>
-    <li><a href="#0x01-介绍">0x01 介绍</a></li>
-    <li><a href="#0x02-安装">0x02 安装</a>
-      <ul>
-        <li><a href="#transfersh-命令行参数">Transfer.sh 命令行参数</a></li>
-        <li><a href="#ssl">SSL</a></li>
-      </ul>
-    </li>
-    <li><a href="#0x03-测试">0x03 测试</a>
-      <ul>
-        <li><a href="#命令行上传">命令行上传</a></li>
-        <li><a href="#网页上传">网页上传</a></li>
-      </ul>
-    </li>
-    <li><a href="#0x04-faq">0x04 FAQ</a>
-      <ul>
-        <li><a href="#linux-alias">Linux alias</a></li>
-      </ul>
-    </li>
-  </ul>
-</nav>
-  </div>
-</div>
-  <div class="post-outdated">
-    <div class="warn">
-      <p>[NOTE] Updated <span class="timeago" datetime="2020-01-21T00:00:00" title="January 21, 2020">January 21, 2020</span>. This article may have outdated content or subject matter.</p>
-    </div>
-  </div>
-    <div class="post-content">
-      <h2 id="0x00-起源">0x00 起源</h2>
-<blockquote>
-<p>平常需要各种传输日志文件，TiDB 部署进程比较多，打包后可能超过 100MB（微信最大支持 100MB 附件传输），发送人和接受人不是同平台时，文件切割什么的真不好用；
+<!doctype html><html lang=en><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge,chrome=1"><title>Linux - Transfer.sh 一键文件服务器 - AirPlan - A biger solution</title><meta name=renderer content="webkit"><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta http-equiv=cache-control content="no-transform"><meta http-equiv=cache-control content="no-siteapp"><meta name=theme-color content="#f8f5ec"><meta name=msapplication-navbutton-color content="#f8f5ec"><meta name=apple-mobile-web-app-capable content="yes"><meta name=apple-mobile-web-app-status-bar-style content="#f8f5ec"><meta name=author content="Jeff"><meta name=description content="0x00 起源 平常需要各种传输日志文件，TiDB 部署进程比较多，打包后可能超过 100MB（微信最大支持 100MB 附件传输），发送人和接受人不是同平台时，文件"><meta name=keywords content="TiDB,AirPlan,TiDB OPS,tidb-operator,2pc,raft,databases,mysql,htap"><meta name=generator content="Hugo 0.110.0 with theme even"><link rel=canonical href=https://ap.biger.cc/post/20170809-transfer.sh/><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/manifest.json><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><script async src=//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js></script>
+<link href=/dist/even.04bd84cd.min.css rel=stylesheet><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin=anonymous><meta property="og:title" content="Linux - Transfer.sh 一键文件服务器"><meta property="og:description" content="0x00 起源 平常需要各种传输日志文件，TiDB 部署进程比较多，打包后可能超过 100MB（微信最大支持 100MB 附件传输），发送人和接受人不是同平台时，文件"><meta property="og:type" content="article"><meta property="og:url" content="https://ap.biger.cc/post/20170809-transfer.sh/"><meta property="article:section" content="post"><meta property="article:published_time" content="2017-08-09T00:00:00+08:00"><meta property="article:modified_time" content="2020-01-21T00:00:00+08:00"><meta itemprop=name content="Linux - Transfer.sh 一键文件服务器"><meta itemprop=description content="0x00 起源 平常需要各种传输日志文件，TiDB 部署进程比较多，打包后可能超过 100MB（微信最大支持 100MB 附件传输），发送人和接受人不是同平台时，文件"><meta itemprop=datePublished content="2017-08-09T00:00:00+08:00"><meta itemprop=dateModified content="2020-01-21T00:00:00+08:00"><meta itemprop=wordCount content="1236"><meta itemprop=keywords content="Linux,Transfer,AirPlan,"><meta name=twitter:card content="summary"><meta name=twitter:title content="Linux - Transfer.sh 一键文件服务器"><meta name=twitter:description content="0x00 起源 平常需要各种传输日志文件，TiDB 部署进程比较多，打包后可能超过 100MB（微信最大支持 100MB 附件传输），发送人和接受人不是同平台时，文件"><!--[if lte IE 9]><script src=https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js></script><![endif]--><!--[if lt IE 9]><script src=https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js></script>
+<script src=https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js></script><![endif]--></head><body><div id=mobile-navbar class=mobile-navbar><div class=mobile-header-logo><a href=/ class=logo>AirPlan</a></div><div class=mobile-navbar-icon><span></span>
+<span></span>
+<span></span></div></div><nav id=mobile-menu class="mobile-menu slideout-menu"><ul class=mobile-menu-list><a href=/post/><li class=mobile-menu-item>Blog</li></a><a href=/look/><li class=mobile-menu-item>Look</li></a><a href=/tags/><li class=mobile-menu-item>Tags</li></a><a href=/categories/><li class=mobile-menu-item>Categories</li></a><a href=/about/><li class=mobile-menu-item>About</li></a></ul></nav><div class=container id=mobile-panel><header id=header class=header><div class=logo-wrapper><a href=/ class=logo>AirPlan</a></div><nav class=site-navbar><ul id=menu class=menu><li class=menu-item><a class=menu-item-link href=/post/>Blog</a></li><li class=menu-item><a class=menu-item-link href=/look/>Look</a></li><li class=menu-item><a class=menu-item-link href=/tags/>Tags</a></li><li class=menu-item><a class=menu-item-link href=/categories/>Categories</a></li><li class=menu-item><a class=menu-item-link href=/about/>About</a></li></ul></nav></header><main id=main class=main><div class=content-wrapper><div id=content class=content><article class=post><header class=post-header><h1 class=post-title>Linux - Transfer.sh 一键文件服务器</h1><div class=post-meta><span class=post-time>2017-08-09</span><div class=post-category><a href=/categories/software/>software</a></div><span class=more-meta>1236 words</span>
+<span class=more-meta>3 mins read</span>
+<span id=busuanzi_container_page_pv class=more-meta><span id=busuanzi_value_page_pv><img src=/img/spinner.svg alt=spinner.svg></span> times read</span></div></header><div class=post-toc id=post-toc><h2 class=post-toc-title>Contents</h2><div class=post-toc-content><nav id=TableOfContents><ul><li><a href=#0x00-起源>0x00 起源</a></li><li><a href=#0x01-介绍>0x01 介绍</a></li><li><a href=#0x02-安装>0x02 安装</a><ul><li><a href=#transfersh-命令行参数>Transfer.sh 命令行参数</a></li><li><a href=#ssl>SSL</a></li></ul></li><li><a href=#0x03-测试>0x03 测试</a><ul><li><a href=#命令行上传>命令行上传</a></li><li><a href=#网页上传>网页上传</a></li></ul></li><li><a href=#0x04-faq>0x04 FAQ</a><ul><li><a href=#linux-alias>Linux alias</a></li></ul></li></ul></nav></div></div><div class=post-outdated><div class=warn><p>[NOTE] Updated <span class=timeago datetime=2020-01-21T00:00:00 title="January 21, 2020">January 21, 2020</span>. This article may have outdated content or subject matter.</p></div></div><div class=post-content><h2 id=0x00-起源>0x00 起源</h2><blockquote><p>平常需要各种传输日志文件，TiDB 部署进程比较多，打包后可能超过 100MB（微信最大支持 100MB 附件传输），发送人和接受人不是同平台时，文件切割什么的真不好用；
 寻找到这么一个横跨多平台（伪）使用的文件服务器工具，支持浏览器、命令行方式上传下载数据文件。
-transfer.sh 需要一个支持高速下载与上传的 Linux 服务器，否则效率大大降低；另外需要定期清理已上传数据内容（temp-path 参数），工具不自带 GC 功能</p>
-</blockquote>
-<h2 id="0x01-介绍">0x01 介绍</h2>
-<ul>
-<li><a href="https://transfer.sh/" title="Easy and fast file sharing from the command-line.">Transfer.sh</a> 项目官网</li>
-<li>Github <a href="https://github.com/dutchcoders/transfer.sh/">Transfer.sh</a> Repo 地址</li>
-</ul>
-<p>从命令行轻松快速地共享文件。Transfer.sh 可直接启动一个文件共享服务器，使用 curl 命令发送数据 (HTTP 协议) 到 Transfer 服务器，通过 Transfer.sh 共享链接 (HTTP 协议) 下载数据。</p>
-<p>Transfer.sh 支持 S3 协议的对象云存储 (Amazon S3)、谷歌网盘 (Google Drive)、系统本地存储 (local) 作为存储资源池。</p>
-<h2 id="0x02-安装">0x02 安装</h2>
-<blockquote>
-<p>相关服务使用 Golang 编写<br>
-官方提供 docker images，通过 <code>docker pull dutchcoders/transfer.sh</code> 获取镜像，国内可使用 <code>docker pull registry.docker-cn.com/dutchcoders/transfer.sh</code> 获取镜像</p>
-</blockquote>
-<ul>
-<li>
-<p>安装 docker (centos 7.4)</p>
-<ul>
-<li><code>yum install docker -y</code></li>
-</ul>
-</li>
-<li>
-<p>启动 dcoker，并设置为开机启动</p>
-<ul>
-<li><code>systemctl start docker</code></li>
-<li><code>systemctl enable docker</code></li>
-</ul>
-</li>
-<li>
-<p>获取镜像 (国内)</p>
-<ul>
-<li><code>docker pull registry.docker-cn.com/dutchcoders/transfer.sh</code></li>
-<li>通过这个方式获取到的镜像名为 <code>registry.docker-cn.com/dutchcoders/transfer.sh</code></li>
-</ul>
-</li>
-<li>
-<p>查看镜像信息</p>
-<ul>
-<li><code>docker images</code></li>
-</ul>
-</li>
-<li>
-<p>启动 <code>transfer.sh</code> 服务前准备</p>
-<ul>
-<li>需要使用 root 用户执行 docker run 命令</li>
-<li>需要提前关闭 selinux，使用 getenforce 查看 selinux 状态；如果开启状态，使用 <code>setenforce 0</code> 临时关闭 selinux</li>
-<li>在 centos 7 创建 <code>/data/transfer_dir/</code> 数据目录，稍后映射到 docker 容器内</li>
-</ul>
-</li>
-<li>
-<p>启动 <code>transfer.sh</code> 服务</p>
-<ul>
-<li>命令中 -d 为后台运行，初次运行时建议去掉；启动成功后再次添加，如果第二次启动失败，可以执行 <code>docker rm -f transfer</code></li>
-<li><code>docker run --publish 8000:8080 --name transfer -d -v /data/transfer_dir/:/tmp/ registry.docker-cn.com/dutchcoders/transfer.sh:latest --provider local --basedir /tmp/</code>
-<ul>
-<li>docker 容器内默认监听 8080 端口，通过 8000 端口映射后对外提供服务</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<p>启动成功后，使用 <code>docker logs transfer</code> 可以看到以下日志信息</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-fallback" data-lang="fallback">[root@Jeff-VM1 data]# docker logs 298d8dbd3cdf
-2019/02/15 08:41:57 Transfer.sh server started.
-using temp folder: /tmp/
-using storage provider: local
-2019/02/15 08:41:57 listening on port: :8080
-2019/02/15 08:41:57 ---------------------------
-</code></pre></td></tr></table>
-</div>
-</div></li>
-</ul>
-<h3 id="transfersh-命令行参数">Transfer.sh 命令行参数</h3>
-<table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Description</th>
-<th>Value</th>
-<th>Env</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>listener</td>
-<td>port to use for http (:80)</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>profile-listener</td>
-<td>port to use for profiler (:6060)</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>force-https</td>
-<td>redirect to https</td>
-<td>false</td>
-<td></td>
-</tr>
-<tr>
-<td>tls-listener</td>
-<td>port to use for https (:443)</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>tls-listener-only</td>
-<td>flag to enable tls listener only</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>tls-cert-file</td>
-<td>path to tls certificate</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>tls-private-key</td>
-<td>path to tls private key</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>http-auth-user</td>
-<td>user for basic http auth on upload</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>http-auth-pass</td>
-<td>pass for basic http auth on upload</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>temp-path</td>
-<td>path to temp folder</td>
-<td>system temp</td>
-<td></td>
-</tr>
-<tr>
-<td>web-path</td>
-<td>path to static web files (for development)</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>ga-key</td>
-<td>google analytics key for the front end</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>uservoice-key</td>
-<td>user voice key for the front end</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>provider</td>
-<td>which storage provider to use</td>
-<td>(s3, grdrive or local)</td>
-<td></td>
-</tr>
-<tr>
-<td>aws-access-key</td>
-<td>aws access key</td>
-<td></td>
-<td>AWS_ACCESS_KEY</td>
-</tr>
-<tr>
-<td>aws-secret-key</td>
-<td>aws access key</td>
-<td></td>
-<td>AWS_SECRET_KEY</td>
-</tr>
-<tr>
-<td>bucket</td>
-<td>aws bucket</td>
-<td></td>
-<td>BUCKET</td>
-</tr>
-<tr>
-<td>basedir</td>
-<td>path storage for local/gdrive provider</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>gdrive-client-json-filepath</td>
-<td>path to client json config for gdrive provider</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>gdrive-local-config-path</td>
-<td>path to local transfer.sh config cache for gdrive provider</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>lets-encrypt-hosts</td>
-<td>hosts to use for lets encrypt certificates (comma seperated)</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>log</td>
-<td>path to log file</td>
-<td></td>
-<td></td>
-</tr>
-</tbody>
-</table>
-<h3 id="ssl">SSL</h3>
-<p>如果要开启 SSL (默认使用 <a href="https://letsencrypt.org" title="Let’s Encrypt is a free, automated, and open Certificate Authority.">Let&rsquo;s Encrypt</a> 证书)，需要开启 force-https 并设置 tls-listener 参数，默认 tls-listener 端口 443，需要根据 Let&rsquo;s Encrypt 给的信息设置 lets-encrypt-hosts 参数</p>
-<p>如果使用自己的 SSL 证书，需要设置 tls-listener 参数，默认为 :443 ；开启 force-https 参数，设置 tls-cert=file 与 tls-private-key 参数</p>
-<h2 id="0x03-测试">0x03 测试</h2>
-<h3 id="命令行上传">命令行上传</h3>
-<blockquote>
-<p>该工具没有断点续传，请注意客户端与服务器端的网络质量</p>
-</blockquote>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-bash" data-lang="bash">Upload:
-  curl --upload-file ./hello.txt https://transfer.sh/hello.txt
-
-Encrypt <span class="p">&amp;</span> upload:
-  cat /tmp/hello.txt<span class="p">|</span>gpg -ac -o-<span class="p">|</span>curl -X PUT --upload-file <span class="s2">&#34;-&#34;</span> https://transfer.sh/test.txt
-
-Download <span class="p">&amp;</span> decrypt:
-  curl https://transfer.sh/1lDau/test.txt<span class="p">|</span>gpg -o- &gt; /tmp/hello.txt
-
-Upload to virustotal:
-  curl -X PUT --upload-file nhgbhhj https://transfer.sh/test.txt/virustotal
-</code></pre></td></tr></table>
-</div>
-</div><h3 id="网页上传">网页上传</h3>
-<blockquote>
-<p>如果是使用上面步骤的启动命令，可通过 <code>http://IP:3000/</code> 打开网页，如下图</p>
-</blockquote>
-<p><img src="180802-transfer-windows-upload.jpg" alt="transfer-windows-upload" title="transfer 浏览器上传文件 ap.tidb.cc"></p>
-<p><img src="./180802-transfer-windows-upload-2.jpg" alt="transfer-windows-upload" title="transfer 浏览器上传文件 ap.tidb.cc"></p>
-<p><img src="./180802-transfer-windows-upload-3.jpg" alt="transfer-windows-upload" title="transfer 浏览器上传文件 ap.tidb.cc"></p>
-<h2 id="0x04-faq">0x04 FAQ</h2>
-<ul>
-<li>调试时出现 <code>2018/08/01 03:08:38 mkdir /tmp/u5fJW: permission denied</code>，上传文件失败
-<ul>
-<li>centos 7 默认开启 selinux ，使用 -v 挂载映射存储时，docker 无法正确映射该存储</li>
-<li>解决办法由两种，一种是关闭 selinux ，一种时启动时添加超级权限 <code>--privileged=true</code>，建议关闭 selinux</li>
-</ul>
-</li>
-<li>调试时出现 401 错误
-<ul>
-<li>因为添加了 http-auth-user / http-auth-pass 参数，在网页上传时，没有鉴权功能。</li>
-<li>可使用 curl 命令携带鉴权信息</li>
-</ul>
-</li>
-</ul>
-<h3 id="linux-alias">Linux alias</h3>
-<blockquote>
-<p>添加到用户 .bashrc or .zshrc 文件内<br>
-添加完成后需要使用 source .bashrc or .zshrc 重新加载环境变量</p>
-</blockquote>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-bash" data-lang="bash">transfer<span class="o">()</span> <span class="o">{</span>
-    curl --progress-bar --upload-file <span class="nv">$1</span> https://transfer.sh/<span class="k">$(</span>basename <span class="nv">$1</span><span class="k">)</span> <span class="p">|</span> tee /dev/null<span class="p">;</span>
-<span class="o">}</span>
-
-<span class="nb">alias</span> <span class="nv">transfer</span><span class="o">=</span>transfer
-</code></pre></td></tr></table>
-</div>
-</div>
-    </div>
-
-    <div class="post-copyright">
-  <p class="copyright-item">
-    <span class="item-title">Author</span>
-    <span class="item-content">Jeff</span>
-  </p>
-  <p class="copyright-item">
-    <span class="item-title">LastMod</span>
-    <span class="item-content">
-        2020-01-21
-        
-    </span>
-  </p>
-  
-  <p class="copyright-item">
-    <span class="item-title">License</span>
-    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span>
-  </p>
-</div>
-<footer class="post-footer">
-      <div class="post-tags">
-          <a href="/tags/linux/">Linux</a>
-          <a href="/tags/transfer/">Transfer</a>
-          <a href="/tags/airplan/">AirPlan</a>
-          </div>
-      <nav class="post-nav">
-        <a class="prev" href="/post/20171108-40-testing-binlog/">
-            <i class="iconfont icon-left"></i>
-            <span class="prev-text nav-default">TiDB - Binlog 数据同步架构测试</span>
-            <span class="prev-text nav-mobile">Prev</span>
-          </a>
-        <a class="next" href="/post/20170610-haproxy/">
-            <span class="next-text nav-default">负载均衡 - HAProxy &amp; TiDB 配合食用</span>
-            <span class="next-text nav-mobile">Next</span>
-            <i class="iconfont icon-right"></i>
-          </a>
-      </nav>
-    </footer>
-  </article>
-        </div>
-        
-
-  
-
-  
-
-      </div>
-    </main>
-
-    <footer id="footer" class="footer">
-      <div class="social-links">
-      <a href="https://github.com/BigerCAP/TiDB-AirPlan/issues" class="iconfont icon-github" title="github"></a>
-  <a href="https://ap.tidb.cc/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
-</div>
-
-<div class="copyright">
-  <span class="power-by">
-    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
-  </span>
-  <span class="division">|</span>
-  <span class="theme-info">
-    Theme - 
-    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
-  </span>
-
-  <div class="busuanzi-footer">
-    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
-      <span class="division">|</span>
-    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
-  </div>
-
-  <span class="copyright-year">
-    &copy; 
-    2017 - 
-    2020
-    <span class="heart">
-      <i class="iconfont icon-heart"></i>
-    </span>
-    <span class="author">TiDB - AirPlan</span>
-  </span>
-</div>
-    </footer>
-
-    <div class="back-to-top" id="back-to-top">
-      <i class="iconfont icon-up"></i>
-    </div>
-  </div>
-  
-  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js" integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js" integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin="anonymous"></script>
-  <script><!-- NOTE: timeago.js uses the language code format like "zh_CN" (underscore and case sensitive) -->
-    var languageCode = "en".replace(/-/g, '_').replace(/_(.*)/, function ($0, $1) {return $0.replace($1, $1.toUpperCase());});
-    timeago().render(document.querySelectorAll('.timeago'), languageCode);
-    timeago.cancel();  
-  </script>
-<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
-
-
-
-
-
-
-
-
-</body>
-</html>
+transfer.sh 需要一个支持高速下载与上传的 Linux 服务器，否则效率大大降低；另外需要定期清理已上传数据内容（temp-path 参数），工具不自带 GC 功能</p></blockquote><h2 id=0x01-介绍>0x01 介绍</h2><ul><li><a href=https://transfer.sh/ title="Easy and fast file sharing from the command-line.">Transfer.sh</a> 项目官网</li><li>Github <a href=https://github.com/dutchcoders/transfer.sh/>Transfer.sh</a> Repo 地址</li></ul><p>从命令行轻松快速地共享文件。Transfer.sh 可直接启动一个文件共享服务器，使用 curl 命令发送数据 (HTTP 协议) 到 Transfer 服务器，通过 Transfer.sh 共享链接 (HTTP 协议) 下载数据。</p><p>Transfer.sh 支持 S3 协议的对象云存储 (Amazon S3)、谷歌网盘 (Google Drive)、系统本地存储 (local) 作为存储资源池。</p><h2 id=0x02-安装>0x02 安装</h2><blockquote><p>相关服务使用 Golang 编写<br>官方提供 docker images，通过 <code>docker pull dutchcoders/transfer.sh</code> 获取镜像，国内可使用 <code>docker pull registry.docker-cn.com/dutchcoders/transfer.sh</code> 获取镜像</p></blockquote><ul><li><p>安装 docker (centos 7.4)</p><ul><li><code>yum install docker -y</code></li></ul></li><li><p>启动 dcoker，并设置为开机启动</p><ul><li><code>systemctl start docker</code></li><li><code>systemctl enable docker</code></li></ul></li><li><p>获取镜像 (国内)</p><ul><li><code>docker pull registry.docker-cn.com/dutchcoders/transfer.sh</code></li><li>通过这个方式获取到的镜像名为 <code>registry.docker-cn.com/dutchcoders/transfer.sh</code></li></ul></li><li><p>查看镜像信息</p><ul><li><code>docker images</code></li></ul></li><li><p>启动 <code>transfer.sh</code> 服务前准备</p><ul><li>需要使用 root 用户执行 docker run 命令</li><li>需要提前关闭 selinux，使用 getenforce 查看 selinux 状态；如果开启状态，使用 <code>setenforce 0</code> 临时关闭 selinux</li><li>在 centos 7 创建 <code>/data/transfer_dir/</code> 数据目录，稍后映射到 docker 容器内</li></ul></li><li><p>启动 <code>transfer.sh</code> 服务</p><ul><li>命令中 -d 为后台运行，初次运行时建议去掉；启动成功后再次添加，如果第二次启动失败，可以执行 <code>docker rm -f transfer</code></li><li><code>docker run --publish 8000:8080 --name transfer -d -v /data/transfer_dir/:/tmp/ registry.docker-cn.com/dutchcoders/transfer.sh:latest --provider local --basedir /tmp/</code><ul><li>docker 容器内默认监听 8080 端口，通过 8000 端口映射后对外提供服务</li></ul></li></ul></li><li><p>启动成功后，使用 <code>docker logs transfer</code> 可以看到以下日志信息</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>[root@Jeff-VM1 data]# docker logs 298d8dbd3cdf
+</span></span><span class=line><span class=cl>2019/02/15 08:41:57 Transfer.sh server started.
+</span></span><span class=line><span class=cl>using temp folder: /tmp/
+</span></span><span class=line><span class=cl>using storage provider: local
+</span></span><span class=line><span class=cl>2019/02/15 08:41:57 listening on port: :8080
+</span></span><span class=line><span class=cl>2019/02/15 08:41:57 ---------------------------
+</span></span></code></pre></td></tr></table></div></div></li></ul><h3 id=transfersh-命令行参数>Transfer.sh 命令行参数</h3><table><thead><tr><th>Parameter</th><th>Description</th><th>Value</th><th>Env</th></tr></thead><tbody><tr><td>listener</td><td>port to use for http (:80)</td><td></td><td></td></tr><tr><td>profile-listener</td><td>port to use for profiler (:6060)</td><td></td><td></td></tr><tr><td>force-https</td><td>redirect to https</td><td>false</td><td></td></tr><tr><td>tls-listener</td><td>port to use for https (:443)</td><td></td><td></td></tr><tr><td>tls-listener-only</td><td>flag to enable tls listener only</td><td></td><td></td></tr><tr><td>tls-cert-file</td><td>path to tls certificate</td><td></td><td></td></tr><tr><td>tls-private-key</td><td>path to tls private key</td><td></td><td></td></tr><tr><td>http-auth-user</td><td>user for basic http auth on upload</td><td></td><td></td></tr><tr><td>http-auth-pass</td><td>pass for basic http auth on upload</td><td></td><td></td></tr><tr><td>temp-path</td><td>path to temp folder</td><td>system temp</td><td></td></tr><tr><td>web-path</td><td>path to static web files (for development)</td><td></td><td></td></tr><tr><td>ga-key</td><td>google analytics key for the front end</td><td></td><td></td></tr><tr><td>uservoice-key</td><td>user voice key for the front end</td><td></td><td></td></tr><tr><td>provider</td><td>which storage provider to use</td><td>(s3, grdrive or local)</td><td></td></tr><tr><td>aws-access-key</td><td>aws access key</td><td></td><td>AWS_ACCESS_KEY</td></tr><tr><td>aws-secret-key</td><td>aws access key</td><td></td><td>AWS_SECRET_KEY</td></tr><tr><td>bucket</td><td>aws bucket</td><td></td><td>BUCKET</td></tr><tr><td>basedir</td><td>path storage for local/gdrive provider</td><td></td><td></td></tr><tr><td>gdrive-client-json-filepath</td><td>path to client json config for gdrive provider</td><td></td><td></td></tr><tr><td>gdrive-local-config-path</td><td>path to local transfer.sh config cache for gdrive provider</td><td></td><td></td></tr><tr><td>lets-encrypt-hosts</td><td>hosts to use for lets encrypt certificates (comma seperated)</td><td></td><td></td></tr><tr><td>log</td><td>path to log file</td><td></td><td></td></tr></tbody></table><h3 id=ssl>SSL</h3><p>如果要开启 SSL (默认使用 <a href=https://letsencrypt.org title="Let’s Encrypt is a free, automated, and open Certificate Authority.">Let&rsquo;s Encrypt</a> 证书)，需要开启 force-https 并设置 tls-listener 参数，默认 tls-listener 端口 443，需要根据 Let&rsquo;s Encrypt 给的信息设置 lets-encrypt-hosts 参数</p><p>如果使用自己的 SSL 证书，需要设置 tls-listener 参数，默认为 :443 ；开启 force-https 参数，设置 tls-cert=file 与 tls-private-key 参数</p><h2 id=0x03-测试>0x03 测试</h2><h3 id=命令行上传>命令行上传</h3><blockquote><p>该工具没有断点续传，请注意客户端与服务器端的网络质量</p></blockquote><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>Upload:
+</span></span><span class=line><span class=cl>  curl --upload-file ./hello.txt https://transfer.sh/hello.txt
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>Encrypt <span class=p>&amp;</span> upload:
+</span></span><span class=line><span class=cl>  cat /tmp/hello.txt<span class=p>|</span>gpg -ac -o-<span class=p>|</span>curl -X PUT --upload-file <span class=s2>&#34;-&#34;</span> https://transfer.sh/test.txt
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>Download <span class=p>&amp;</span> decrypt:
+</span></span><span class=line><span class=cl>  curl https://transfer.sh/1lDau/test.txt<span class=p>|</span>gpg -o- &gt; /tmp/hello.txt
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>Upload to virustotal:
+</span></span><span class=line><span class=cl>  curl -X PUT --upload-file nhgbhhj https://transfer.sh/test.txt/virustotal
+</span></span></code></pre></td></tr></table></div></div><h3 id=网页上传>网页上传</h3><blockquote><p>如果是使用上面步骤的启动命令，可通过 <code>http://IP:3000/</code> 打开网页，如下图</p></blockquote><p><img src=180802-transfer-windows-upload.jpg alt=transfer-windows-upload title="transfer 浏览器上传文件 ap.tidb.cc"></p><p><img src=./180802-transfer-windows-upload-2.jpg alt=transfer-windows-upload title="transfer 浏览器上传文件 ap.tidb.cc"></p><p><img src=./180802-transfer-windows-upload-3.jpg alt=transfer-windows-upload title="transfer 浏览器上传文件 ap.tidb.cc"></p><h2 id=0x04-faq>0x04 FAQ</h2><ul><li>调试时出现 <code>2018/08/01 03:08:38 mkdir /tmp/u5fJW: permission denied</code>，上传文件失败<ul><li>centos 7 默认开启 selinux ，使用 -v 挂载映射存储时，docker 无法正确映射该存储</li><li>解决办法由两种，一种是关闭 selinux ，一种时启动时添加超级权限 <code>--privileged=true</code>，建议关闭 selinux</li></ul></li><li>调试时出现 401 错误<ul><li>因为添加了 http-auth-user / http-auth-pass 参数，在网页上传时，没有鉴权功能。</li><li>可使用 curl 命令携带鉴权信息</li></ul></li></ul><h3 id=linux-alias>Linux alias</h3><blockquote><p>添加到用户 .bashrc or .zshrc 文件内<br>添加完成后需要使用 source .bashrc or .zshrc 重新加载环境变量</p></blockquote><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>transfer<span class=o>()</span> <span class=o>{</span>
+</span></span><span class=line><span class=cl>    curl --progress-bar --upload-file <span class=nv>$1</span> https://transfer.sh/<span class=k>$(</span>basename <span class=nv>$1</span><span class=k>)</span> <span class=p>|</span> tee /dev/null<span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=o>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nb>alias</span> <span class=nv>transfer</span><span class=o>=</span>transfer
+</span></span></code></pre></td></tr></table></div></div></div><div class=post-copyright><p class=copyright-item><span class=item-title>Author</span>
+<span class=item-content>Jeff</span></p><p class=copyright-item><span class=item-title>LastMod</span>
+<span class=item-content>2020-01-21</span></p><p class=copyright-item><span class=item-title>License</span>
+<span class=item-content><a rel="license noopener" href=https://creativecommons.org/licenses/by-nc-nd/4.0/ target=_blank>CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span></p></div><footer class=post-footer><div class=post-tags><a href=/tags/linux/>Linux</a>
+<a href=/tags/transfer/>Transfer</a>
+<a href=/tags/airplan/>AirPlan</a></div><nav class=post-nav><a class=prev href=/post/20171108-40-testing-binlog/><i class="iconfont icon-left"></i>
+<span class="prev-text nav-default">TiDB - Binlog 数据同步架构测试</span>
+<span class="prev-text nav-mobile">Prev</span></a>
+<a class=next href=/post/20170610-haproxy/><span class="next-text nav-default">负载均衡 - HAProxy & TiDB 配合食用</span>
+<span class="next-text nav-mobile">Next</span>
+<i class="iconfont icon-right"></i></a></nav></footer></article></div></div></main><footer id=footer class=footer><div class=social-links><a href=https://github.com/BigerCAP/TiDB-AirPlan/issues class="iconfont icon-github" title=github></a>
+<a href=https://ap.biger.cc/index.xml type=application/rss+xml class="iconfont icon-rss" title=rss></a></div><div class=copyright><span class=power-by>Powered by <a class=hexo-link href=https://gohugo.io>Hugo</a></span>
+<span class=division>|</span>
+<span class=theme-info>Theme -
+<a class=theme-link href=https://github.com/olOwOlo/hugo-theme-even>Even</a></span><div class=busuanzi-footer><span id=busuanzi_container_site_pv>site pv: <span id=busuanzi_value_site_pv><img src=/img/spinner.svg alt=spinner.svg></span></span>
+<span class=division>|</span>
+<span id=busuanzi_container_site_uv>site uv: <span id=busuanzi_value_site_uv><img src=/img/spinner.svg alt=spinner.svg></span></span></div><span class=copyright-year>&copy;
+2017 -
+2023
+<span class=heart><i class="iconfont icon-heart"></i></span>
+<span class=author>DB - AirPlan</span></span></div></footer><div class=back-to-top id=back-to-top><i class="iconfont icon-up"></i></div></div><script src=https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin=anonymous></script>
+<script>var languageCode="en".replace(/-/g,"_").replace(/_(.*)/,function(e,t){return e.replace(t,t.toUpperCase())});timeago().render(document.querySelectorAll(".timeago"),languageCode),timeago.cancel()</script><script type=text/javascript src=/dist/even.26188efa.min.js></script></body></html>

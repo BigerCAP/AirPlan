@@ -1,768 +1,289 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>TiDB &amp; Haproxy / show processlist View real IP - TiDB AirPlan - A biger solution</title>
-  <meta name="renderer" content="webkit" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-
-<meta http-equiv="Cache-Control" content="no-transform" />
-<meta http-equiv="Cache-Control" content="no-siteapp" />
-
-<meta name="theme-color" content="#f8f5ec" />
-<meta name="msapplication-navbutton-color" content="#f8f5ec">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
-
-
-<meta name="author" content="Jeff" /><meta name="description" content="0x00 - 背景 高可用性（英语：high availability，缩写为 HA）测试 failpoint 场景，需要在服务前面添加 load balance 组件；比如 F5、LVS、Haprox" /><meta name="keywords" content="TiDB, AirPlan, TiDB OPS, tidb-operator, 2pc, raft, databases, mysql, htap" />
-
-
-
-
-
-
-<meta name="generator" content="Hugo 0.78.2 with theme even" />
-
-
-<link rel="canonical" href="https://ap.tidb.cc/post/20200102-1-tidb-haproxy-real-ip/" />
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="manifest" href="/manifest.json">
-<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
-
-<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-<link href="/dist/even.04bd84cd.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
-
-
-<meta property="og:title" content="TiDB &amp; Haproxy / show processlist View real IP" />
-<meta property="og:description" content="0x00 - 背景 高可用性（英语：high availability，缩写为 HA）测试 failpoint 场景，需要在服务前面添加 load balance 组件；比如 F5、LVS、Haprox" />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://ap.tidb.cc/post/20200102-1-tidb-haproxy-real-ip/" />
-<meta property="article:published_time" content="2020-01-02T00:00:00+08:00" />
-<meta property="article:modified_time" content="2020-01-10T00:00:00+08:00" />
-<meta itemprop="name" content="TiDB &amp; Haproxy / show processlist View real IP">
-<meta itemprop="description" content="0x00 - 背景 高可用性（英语：high availability，缩写为 HA）测试 failpoint 场景，需要在服务前面添加 load balance 组件；比如 F5、LVS、Haprox">
-<meta itemprop="datePublished" content="2020-01-02T00:00:00+08:00" />
-<meta itemprop="dateModified" content="2020-01-10T00:00:00+08:00" />
-<meta itemprop="wordCount" content="3114">
-
-
-
-<meta itemprop="keywords" content="TiDB,Haproxy,real server ip,load balance," />
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="TiDB &amp; Haproxy / show processlist View real IP"/>
-<meta name="twitter:description" content="0x00 - 背景 高可用性（英语：high availability，缩写为 HA）测试 failpoint 场景，需要在服务前面添加 load balance 组件；比如 F5、LVS、Haprox"/>
-
-<!--[if lte IE 9]>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
-<![endif]-->
-
-<!--[if lt IE 9]>
-  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
-<![endif]-->
-
-</head>
-<body>
-  <div id="mobile-navbar" class="mobile-navbar">
-  <div class="mobile-header-logo">
-    <a href="/" class="logo">TiDB AirPlan</a>
-  </div>
-  <div class="mobile-navbar-icon">
-    <span></span>
-    <span></span>
-    <span></span>
-  </div>
-</div>
-<nav id="mobile-menu" class="mobile-menu slideout-menu">
-  <ul class="mobile-menu-list">
-    <a href="/post/">
-        <li class="mobile-menu-item">Blog</li>
-      </a><a href="/look/">
-        <li class="mobile-menu-item">Look</li>
-      </a><a href="/tags/">
-        <li class="mobile-menu-item">Tags</li>
-      </a><a href="/categories/">
-        <li class="mobile-menu-item">Categories</li>
-      </a><a href="/about/">
-        <li class="mobile-menu-item">About</li>
-      </a>
-  </ul>
-</nav>
-  <div class="container" id="mobile-panel">
-    <header id="header" class="header">
-        <div class="logo-wrapper">
-  <a href="/" class="logo">TiDB AirPlan</a>
-</div>
-
-<nav class="site-navbar">
-  <ul id="menu" class="menu">
-    <li class="menu-item">
-        <a class="menu-item-link" href="/post/">Blog</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/look/">Look</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/tags/">Tags</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/categories/">Categories</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/about/">About</a>
-      </li>
-  </ul>
-</nav>
-    </header>
-
-    <main id="main" class="main">
-      <div class="content-wrapper">
-        <div id="content" class="content">
-          <article class="post">
-    
-    <header class="post-header">
-      <h1 class="post-title">TiDB &amp; Haproxy / show processlist View real IP</h1>
-
-      <div class="post-meta">
-        <span class="post-time"> 2020-01-02 </span>
-        <div class="post-category">
-            <a href="/categories/tidb/"> TiDB </a>
-            <a href="/categories/software/"> Software </a>
-            </div>
-          <span class="more-meta"> 3114 words </span>
-          <span class="more-meta"> 7 mins read </span>
-        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
-      </div>
-    </header>
-
-    <div class="post-toc" id="post-toc">
-  <h2 class="post-toc-title">Contents</h2>
-  <div class="post-toc-content">
-    <nav id="TableOfContents">
-  <ul>
-    <li><a href="#0x00---背景">0x00 - 背景</a></li>
-    <li><a href="#0x01---场景复现">0x01 - 场景复现</a></li>
-    <li><a href="#0x02---探索与优化">0x02 - 探索与优化</a></li>
-    <li><a href="#0x03---没有彩蛋">0x03 - 没有彩蛋</a>
-      <ul>
-        <li><a href="#场景一">场景一</a></li>
-        <li><a href="#场景二">场景二</a></li>
-        <li><a href="#场景三">场景三</a></li>
-        <li><a href="#场景四">场景四</a></li>
-        <li><a href="#测试总结">测试总结</a></li>
-      </ul>
-    </li>
-    <li><a href="#0x04-赞">0x04 赞</a></li>
-  </ul>
-</nav>
-  </div>
-</div>
-  <div class="post-outdated">
-    <div class="warn">
-      <p>[NOTE] Updated <span class="timeago" datetime="2020-01-10T00:00:00" title="January 10, 2020">January 10, 2020</span>. This article may have outdated content or subject matter.</p>
-    </div>
-  </div>
-    <div class="post-content">
-      <h2 id="0x00---背景">0x00 - 背景</h2>
-<p>高可用性（英语：high availability，缩写为 HA）测试 failpoint 场景，需要在服务前面添加 load balance 组件；比如 F5、LVS、Haproxy 等支持 TCP 协议的网络分发负载工具。</p>
-<p>之前有篇文档介绍 TiDB &amp; Haproxy <a href="/post/20170610-HAproxy" title="docs.tidb.cc HAproxy – Load Balance Service https://ap.tidb.cc/post/20170610-haproxy/">HAproxy – Load Balance Service</a> 使用姿势 / 但随后在运维期间遇见一些小问题；即 TiDB 部署在 Haproxy 后面无法通过 show processlist 查看 client 真实 IP 地址信息，每次 show processlist 看到的都是 Haproxy 主机信息。</p>
-<blockquote>
-<p>Haproxy Proxy Architecture Overview</p>
-</blockquote>
-<p><img src="https://www.percona.com/blog/wp-content/uploads/2015/10/cluster3.png" alt="Proxy Architecture Overview"></p>
-<h2 id="0x01---场景复现">0x01 - 场景复现</h2>
-<table>
-<thead>
-<tr>
-<th>机器</th>
-<th style="text-align:left">IP</th>
-<th>备注</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>A</td>
-<td style="text-align:left">10.0.1.4</td>
-<td>部署 Haproxy、TiDB 4000 与 TiDB 4001</td>
-</tr>
-<tr>
-<td>A</td>
-<td style="text-align:left">10.0.1.4</td>
-<td>外网 IP 为 138.x.x.x</td>
-</tr>
-<tr>
-<td>B</td>
-<td style="text-align:left">42.x.x.x</td>
-<td>客户端所在机器</td>
-</tr>
-</tbody>
-</table>
-<p>通过 <a href="/post/20170610-HAproxy" title="docs.tidb.cc HAproxy – Load Balance Service https://ap.tidb.cc/post/20170610-haproxy/">HAproxy – Load Balance Service</a>文档中安装 haproxy ； yum install haproxy 并使用文档中的配置文件。</p>
-<p>Haproxy 配置文件栗子如下：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-c" data-lang="c"><span class="n">global</span>
-    <span class="n">log</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">log</span> <span class="n">local0</span>
-    <span class="n">maxconn</span> <span class="mi">65536</span>
-    <span class="n">ulimit</span><span class="o">-</span><span class="n">n</span> <span class="mi">131086</span>
-    <span class="n">quiet</span>
-    <span class="n">pidfile</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">haproxy</span><span class="p">.</span><span class="n">pid</span>
-
-<span class="n">defaults</span>
-    <span class="n">option</span> <span class="n">httplog</span>
-    <span class="n">option</span> <span class="n">redispatch</span>
-    <span class="n">option</span> <span class="n">nolinger</span>
-    <span class="n">option</span> <span class="n">dontlognull</span>
-    <span class="n">retries</span> <span class="mi">3</span>
-    <span class="n">contimeout</span> <span class="mi">5000</span>
-    <span class="n">clitimeout</span> <span class="mi">50000</span>
-    <span class="n">srvtimeout</span> <span class="mi">50000</span>
-    <span class="n">log</span> <span class="mf">127.0.0.1</span> <span class="n">local3</span>
-
-<span class="n">listen</span> <span class="n">testip</span>
-    <span class="nl">bind</span> <span class="p">:</span><span class="mi">3308</span>
-    <span class="n">mode</span> <span class="n">tcp</span>
-    <span class="n">balance</span> <span class="n">roundrobin</span>
-    <span class="n">server</span> <span class="n">tidb2</span> <span class="mf">10.0.1.4</span><span class="o">:</span><span class="mi">4001</span> <span class="n">weight</span> <span class="mi">1</span>
-</code></pre></td></tr></table>
-</div>
-</div><p>使用 <code>./tidb-server -path /tmp/nodb -P 4001</code> 方式在本地启动一个 mocktikv TiDB-Server 服务；注：TiDB 启动后自带的 root 用户无法远程登陆，需要新建带密码用户才可在远程机器登陆。</p>
-<p>在 B 机器执行 <code>mysql -h 138.x.x.x -u st -P 4001 -p</code> 执行结果如下</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-sql" data-lang="sql"><span class="n">mysql</span><span class="o">&gt;</span> <span class="k">show</span> <span class="n">processlist</span><span class="p">;</span>
-<span class="o">+</span><span class="c1">------+------+--------------+------+---------+------+-------+------------------+
-</span><span class="c1"></span><span class="o">|</span> <span class="n">Id</span>   <span class="o">|</span> <span class="k">User</span> <span class="o">|</span> <span class="k">Host</span>         <span class="o">|</span> <span class="n">db</span>   <span class="o">|</span> <span class="n">Command</span> <span class="o">|</span> <span class="n">Time</span> <span class="o">|</span> <span class="k">State</span> <span class="o">|</span> <span class="n">Info</span>             <span class="o">|</span>
-<span class="o">+</span><span class="c1">------+------+--------------+------+---------+------+-------+------------------+
-</span><span class="c1"></span><span class="o">|</span>    <span class="mi">1</span> <span class="o">|</span> <span class="n">st</span>   <span class="o">|</span> <span class="mi">42</span><span class="p">.</span><span class="n">X</span><span class="p">.</span><span class="n">X</span><span class="p">.</span><span class="n">X</span> <span class="o">|</span>      <span class="o">|</span> <span class="n">Query</span>   <span class="o">|</span>    <span class="mi">0</span> <span class="o">|</span> <span class="mi">2</span>     <span class="o">|</span> <span class="k">show</span> <span class="n">processlist</span> <span class="o">|</span>
-<span class="o">+</span><span class="c1">------+------+--------------+------+---------+------+-------+------------------+
-</span><span class="c1"></span><span class="mi">1</span> <span class="k">row</span> <span class="k">in</span> <span class="k">set</span> <span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span> <span class="n">sec</span><span class="p">)</span>
-</code></pre></td></tr></table>
-</div>
-</div><p>在 B 机器执行 <code>mysql -h 138.x.x.x -u st -P 3308 -p</code> 执行结果如下；通过 Haproxy 负载均衡连接数据库，在数据库无法区分客户端机器 IP 地址是多少；</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span><span class="lnt">8
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-sql" data-lang="sql"><span class="n">mysql</span><span class="o">&gt;</span> <span class="k">show</span> <span class="n">processlist</span><span class="p">;</span>
-<span class="o">+</span><span class="c1">------+------+--------------+------+---------+------+-------+------------------+
-</span><span class="c1"></span><span class="o">|</span> <span class="n">Id</span>   <span class="o">|</span> <span class="k">User</span> <span class="o">|</span> <span class="k">Host</span>         <span class="o">|</span> <span class="n">db</span>   <span class="o">|</span> <span class="n">Command</span> <span class="o">|</span> <span class="n">Time</span> <span class="o">|</span> <span class="k">State</span> <span class="o">|</span> <span class="n">Info</span>             <span class="o">|</span>
-<span class="o">+</span><span class="c1">------+------+--------------+------+---------+------+-------+------------------+
-</span><span class="c1"></span><span class="o">|</span>    <span class="mi">1</span> <span class="o">|</span> <span class="n">st</span>   <span class="o">|</span> <span class="mi">42</span><span class="p">.</span><span class="n">X</span><span class="p">.</span><span class="n">X</span><span class="p">.</span><span class="n">X</span> <span class="o">|</span>      <span class="o">|</span> <span class="n">Sleep</span>   <span class="o">|</span>  <span class="mi">597</span> <span class="o">|</span> <span class="mi">2</span>     <span class="o">|</span>                  <span class="o">|</span>
-<span class="o">|</span>    <span class="mi">2</span> <span class="o">|</span> <span class="n">st</span>   <span class="o">|</span> <span class="mi">10</span><span class="p">.</span><span class="mi">0</span><span class="p">.</span><span class="mi">1</span><span class="p">.</span><span class="mi">4</span>     <span class="o">|</span>      <span class="o">|</span> <span class="n">Query</span>   <span class="o">|</span>    <span class="mi">0</span> <span class="o">|</span> <span class="mi">2</span>     <span class="o">|</span> <span class="k">show</span> <span class="n">processlist</span> <span class="o">|</span>
-<span class="o">+</span><span class="c1">------+------+--------------+------+---------+------+-------+------------------+
-</span><span class="c1"></span><span class="mi">2</span> <span class="k">rows</span> <span class="k">in</span> <span class="k">set</span> <span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span> <span class="n">sec</span><span class="p">)</span>
-</code></pre></td></tr></table>
-</div>
-</div><p>此处通过 Haproxy 连接到数据库后，Host 字段显示 IP 地址为 Haproxy 所在主机地址。当 client 与 real server（TiDB-server）数量比较大的时候，无法准确判断数据流量来源；不方便运维管理。</p>
-<h2 id="0x02---探索与优化">0x02 - 探索与优化</h2>
-<p>经过一番搜索和学习，duck duck 过后看到 Percona 的一篇基于 <a href="https://www.percona.com/blog/2015/10/15/proxy-protocol-percona-xtradb-cluster-quick-guide/" title="Proxy Protocol and Percona XtraDB Cluster: A Quick Guide">Percona XtraDB &amp; Haproxy</a> 架构的文档；文档中介绍使用 Proxy Protocol Netowrk 产品功能来修复以上问题，此处需要先看下 TiDB-Server 是否支持类似的功能</p>
-<p>在 <a href="https://github.com/pingcap/tidb/blob/master/config/config.toml.example">TiDB-server 配置文件</a> 看到以下参数信息；从注释内容字面理解上与 Percona xtraDB 中的 Proxy Protocol 是类似的。</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-toml" data-lang="toml"><span class="p">[</span><span class="nx">proxy</span><span class="err">-</span><span class="nx">protocol</span><span class="p">]</span>
-<span class="c"># PROXY protocol acceptable client networks.</span>
-<span class="c"># Empty string means disable PROXY protocol, * means all networks.</span>
-<span class="nx">networks</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>
-
-<span class="c"># PROXY protocol header read timeout, unit is second</span>
-<span class="nx">header</span><span class="err">-</span><span class="nx">timeout</span> <span class="p">=</span> <span class="mi">5</span>
-</code></pre></td></tr></table>
-</div>
-</div><p>需要查到相关 PR 确认下代码块或者提交人，方便后续出问题做些咨询；通过 <a href="https://sourcegraph.com/github.com/pingcap/tidb">sourcegraph.com</a> 网站搜寻当时这段配置文件的作者；中间过程省略，最终查到 issue 地址为 <a href="https://github.com/pingcap/tidb/pull/3757" title="2017 年 7 月 14 日提交的代码，2017 年 11 月 26 日合并的 PR / TiDB 1.0 GA 后的功能">TiDB issue #3757</a>。</p>
-<blockquote>
-<p>PR 重要内容如下:</p>
-</blockquote>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-text" data-lang="text">Add PROXY protocol V1 and V2 support.
-usage: tidb-server --proxy-protocol-networks &#34;*&#34; --proxy-protocol-header-timeout 5
-Add --proxy-protocol-networks command parameter for PROXY protocol enable or disable. If you want to limit HAProxy server IP range, you can set --proxy-protocol-networks parameter to a CIDRs and split by &#34;,&#34;. For example:
-tidb-server --proxy-protocol-networks &#34;192.168.1.0/24,192.168.2.0/24&#34;
-For more information about PROXY protocol please refer https://www.haproxy.org/download/1.8/doc/proxy-protocol.txt
-</code></pre></td></tr></table>
-</div>
-</div><p>根据内容表述，使用 <code>--proxy-protocol-networks &quot;*&quot;</code> 启用 Proxy 协议，支持 v1 and v2 版本；如果需要限制 TiDB Proxy 数据源，可以使用 <code>--proxy-protocol-networks &quot;192.168.1.0/24,192.168.2.0/24&quot;</code> CIDRs <em>「无类别域间路由（Classless Inter-Domain Routing、CIDR）是一个用于给用户分配IP地址以及在互联网上有效地路由IP数据包的对IP地址进行归类的方法」</em> 声明，并使用 <strong>逗号</strong> 分割。</p>
-<blockquote>
-<p>同时还给出了 Haproxy 配置文件栗子</p>
-</blockquote>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-c" data-lang="c"><span class="n">global</span>
-    <span class="n">log</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">log</span> <span class="n">local0</span>
-    <span class="n">maxconn</span> <span class="mi">65536</span>
-    <span class="n">ulimit</span><span class="o">-</span><span class="n">n</span> <span class="mi">131086</span>
-    <span class="n">quiet</span>
-    <span class="n">pidfile</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">haproxy</span><span class="p">.</span><span class="n">pid</span>
-
-<span class="n">defaults</span>
-    <span class="n">option</span> <span class="n">httplog</span>
-    <span class="n">option</span> <span class="n">redispatch</span>
-    <span class="n">option</span> <span class="n">nolinger</span>
-    <span class="n">option</span> <span class="n">dontlognull</span>
-    <span class="n">retries</span> <span class="mi">3</span>
-    <span class="n">contimeout</span> <span class="mi">5000</span>
-    <span class="n">clitimeout</span> <span class="mi">50000</span>
-    <span class="n">srvtimeout</span> <span class="mi">50000</span>
-    <span class="n">log</span> <span class="mf">10.0.1.4</span> <span class="n">local3</span>
-
-<span class="n">listen</span> <span class="n">web</span>
-    <span class="nl">bind</span> <span class="p">:</span><span class="mi">3307</span>
-    <span class="n">mode</span> <span class="n">tcp</span>
-    <span class="n">balance</span> <span class="n">roundrobin</span>
-    <span class="n">server</span> <span class="n">tidb1</span> <span class="mf">10.0.1.4</span><span class="o">:</span><span class="mi">4000</span> <span class="n">send</span><span class="o">-</span><span class="n">proxy</span> <span class="n">weight</span> <span class="mi">1</span>
-</code></pre></td></tr></table>
-</div>
-</div><p>Haproxy 配置文件中 global 与 defaults 与其他一般无二；重点在 real server 中的 <strong>send-proxy</strong> 参数信息；</p>
-<p>按照 PR 内容启动了新的 TiDB 进程：<code>./tidb-server --proxy-protocol-networks &quot;10.0.1.0/24&quot;</code></p>
-<p>在 B 机器执行 <code>mysql -h 138.X.X.X -u te -P 4000 -p</code> 登陆主机，并执行 <code>select sleep(100)</code> 用于区分链接； 查看结果如下：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span><span class="lnt">8
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-sql" data-lang="sql"><span class="n">mysql</span><span class="o">&gt;</span> <span class="k">show</span> <span class="n">processlist</span><span class="p">;</span>
-<span class="o">+</span><span class="c1">------+------+--------------+------+---------+------+-------+------------------+
-</span><span class="c1"></span><span class="o">|</span> <span class="n">Id</span>   <span class="o">|</span> <span class="k">User</span> <span class="o">|</span> <span class="k">Host</span>         <span class="o">|</span> <span class="n">db</span>   <span class="o">|</span> <span class="n">Command</span> <span class="o">|</span> <span class="n">Time</span> <span class="o">|</span> <span class="k">State</span> <span class="o">|</span> <span class="n">Info</span>             <span class="o">|</span>
-<span class="o">+</span><span class="c1">------+------+--------------+------+---------+------+-------+------------------+
-</span><span class="c1"></span><span class="o">|</span>    <span class="mi">3</span> <span class="o">|</span> <span class="n">te</span>   <span class="o">|</span> <span class="mi">42</span><span class="p">.</span><span class="n">X</span><span class="p">.</span><span class="n">X</span><span class="p">.</span><span class="n">X</span> <span class="o">|</span>      <span class="o">|</span> <span class="n">Query</span>   <span class="o">|</span>    <span class="mi">0</span> <span class="o">|</span> <span class="mi">2</span>     <span class="o">|</span> <span class="k">show</span> <span class="n">processlist</span> <span class="o">|</span>
-<span class="o">|</span>    <span class="mi">4</span> <span class="o">|</span> <span class="n">te</span>   <span class="o">|</span> <span class="mi">42</span><span class="p">.</span><span class="n">X</span><span class="p">.</span><span class="n">X</span><span class="p">.</span><span class="n">X</span> <span class="o">|</span>      <span class="o">|</span> <span class="n">Query</span>   <span class="o">|</span>    <span class="mi">6</span> <span class="o">|</span> <span class="mi">2</span>     <span class="o">|</span> <span class="k">select</span> <span class="n">sleep</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span> <span class="o">|</span>
-<span class="o">+</span><span class="c1">------+------+--------------+------+---------+------+-------+------------------+
-</span><span class="c1"></span><span class="mi">1</span> <span class="k">row</span> <span class="k">in</span> <span class="k">set</span> <span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span> <span class="n">sec</span><span class="p">)</span>
-</code></pre></td></tr></table>
-</div>
-</div><p>在 B 机器执行 <code>mysql -h 138.X.X.X -u te -P 3307 -p</code> 查看结果如下：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span><span class="lnt">8
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-sql" data-lang="sql"><span class="n">mysql</span><span class="o">&gt;</span> <span class="k">show</span> <span class="n">processlist</span><span class="p">;</span>
-<span class="o">+</span><span class="c1">------+------+--------------+------+---------+------+-------+-------------------+
-</span><span class="c1"></span><span class="o">|</span> <span class="n">Id</span>   <span class="o">|</span> <span class="k">User</span> <span class="o">|</span> <span class="k">Host</span>         <span class="o">|</span> <span class="n">db</span>   <span class="o">|</span> <span class="n">Command</span> <span class="o">|</span> <span class="n">Time</span> <span class="o">|</span> <span class="k">State</span> <span class="o">|</span> <span class="n">Info</span>              <span class="o">|</span>
-<span class="o">+</span><span class="c1">------+------+--------------+------+---------+------+-------+-------------------+
-</span><span class="c1"></span><span class="o">|</span>    <span class="mi">4</span> <span class="o">|</span> <span class="n">te</span>   <span class="o">|</span> <span class="mi">42</span><span class="p">.</span><span class="n">X</span><span class="p">.</span><span class="n">X</span><span class="p">.</span><span class="n">X</span> <span class="o">|</span>      <span class="o">|</span> <span class="n">Query</span>   <span class="o">|</span>    <span class="mi">6</span> <span class="o">|</span> <span class="mi">15</span>    <span class="o">|</span> <span class="k">select</span> <span class="n">sleep</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span> <span class="o">|</span>
-<span class="o">|</span>    <span class="mi">5</span> <span class="o">|</span> <span class="n">te</span>   <span class="o">|</span> <span class="mi">42</span><span class="p">.</span><span class="n">X</span><span class="p">.</span><span class="n">X</span><span class="p">.</span><span class="n">X</span> <span class="o">|</span>      <span class="o">|</span> <span class="n">Query</span>   <span class="o">|</span>    <span class="mi">0</span> <span class="o">|</span> <span class="mi">2</span>     <span class="o">|</span> <span class="k">show</span> <span class="n">processlist</span>  <span class="o">|</span>
-<span class="o">+</span><span class="c1">------+------+--------------+------+---------+------+-------+-------------------+
-</span><span class="c1"></span><span class="mi">2</span> <span class="k">rows</span> <span class="k">in</span> <span class="k">set</span> <span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span> <span class="n">sec</span><span class="p">)</span>
-</code></pre></td></tr></table>
-</div>
-</div><p>由此发现，该功能使用姿势暂无问题，同时解决了上述 show processlist Host 字段无法看到 real sercer IP 的问题。</p>
-<h2 id="0x03---没有彩蛋">0x03 - 没有彩蛋</h2>
-<p>PR 最底部还有一些关于 Proxy Protocol 的讨论</p>
-<blockquote>
-<ul>
-<li>Proxy Protocol 扩展阅读
-<ul>
-<li>扩展阅读 <a href="http://mysql.taobao.org/monthly/2019/01/07/" title="aliyun RDS 团队文档">MariaDB 源码分析 Proxy Protocol</a></li>
-<li>扩展 issue <a href="https://github.com/blacktear23/go-proxyprotocol/pull/1" title="该 issue 不在 PingCAP/TiDB repo 下，由该作者自行控制，可能会被删除。">blacktear23/go-proxyprotocol/pull/1</a></li>
-</ul>
-</li>
-</ul>
-</blockquote>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-markdown" data-lang="markdown"><span class="k">1.</span> most proxy protocol implementations such as MariaDB, Percona server, apache(via mod_remoteip), allow user to specify a list of cider blocks（`proxy-protocol-networks` for MariaDB and Percona server，`RemoteIPProxyProtocolExceptions ` for apache), IP in the list MUST use proxy protocol and IP not in the list MUST NOT use proxy protocol(but they can still connect without proxy protocol). some implementations, like nginx and TiDB, forces all IP addresses to use proxy protocol when enables proxy protocol options.
-<span class="k">2.</span> the spec says that we &#34;MUST not try to guess whether the protocol header is presentor not&#34;, to prevent security issues, but there&#39;s no guessing when we provide a list and config IPs in the list to MUST use and IPs not in the list to MUST NOT use(but still able to connect). There&#39;s no security issues doing this way and it actually meet the spec requirement.
-<span class="k">3.</span> allowing certain IP blocks to connect directly without haproxy will make certain tasks much easier to configure, such as:
-    <span class="k">*</span> monitoring individual TiDB nodes
-    <span class="k">*</span> make a certain TiDB node to do complex OLAP tasks without influence other OLTP nodes.
-    <span class="k">*</span> control individual TiDB nodes via script tasks in the local machine(such as a crontab script at each TiDB node
-
-I think make IPs not in AllowedIPs to connect directly without proxy protocol is:
-
-<span class="k">1.</span> very easy to implement. only need to modify two lines of code
-<span class="k">2.</span> has some benefits
-<span class="k">3.</span> meets the spec
-
-So I think its good to do this way.
-</code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>以上内容重点内容是：
-<ul>
-<li>PR #3757 ｜ CIDRs 列表中所有 IP 地址仅能通过 Proxy 协议链接，如非 Proxy 协议链接将会被拒绝；但 CIDRs 列表外的 IP 地址依旧可以通过非 Proxy 协议链接（#3757 前半部分 PR 中的实现，TiDB 启用 Proxy 后所有流量都会走这个检查）。
-<ul>
-<li>原始 Proxy protocol 在使用 CIDRs 后不支持白名单以外的 IP 连接，SteamedFish 作者代码部分 PR 代码块可以做到 <strong>非 CIDRs 列表内的 IP</strong> 支持以普通方式链接 TiDB ，且改动代码量足够的小</li>
-<li>通过检测 IP 地址是否存在与 CIDRs 列表内，而不是尝试获取服务端返回的 hedaer 信息（proxy v1 header 是 5 字节，v2 版本是 12 字节）；同时在处理 CIDRs 列表外的 IP 时，可以省略探测服务器协议状态。</li>
-<li>允许非白名单外的 IP 连接 TiDB 后，可以对该 TiDB 做特殊处理，如：监控节点、处理 OLAP 业务、执行人工查询等</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="场景一">场景一</h3>
-<blockquote>
-<p>haproxy 使用以下配置文件</p>
-</blockquote>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-c" data-lang="c"><span class="n">listen</span> <span class="n">web</span>
-    <span class="nl">bind</span> <span class="p">:</span><span class="mi">3307</span>
-    <span class="n">mode</span> <span class="n">tcp</span>
-    <span class="n">balance</span> <span class="n">roundrobin</span>
-    <span class="n">server</span> <span class="n">tidb1</span> <span class="mf">127.0.0.1</span><span class="o">:</span><span class="mi">4000</span> <span class="n">send</span><span class="o">-</span><span class="n">proxy</span> <span class="n">weight</span> <span class="mi">1</span>
-</code></pre></td></tr></table>
-</div>
-</div><p>TiDB 使用命令启动 <code>./tidb-server --host 10.0.1.4 --proxy-protocol-networks &quot;10.0.2.0/24&quot;</code></p>
-<p>使用 <code>mysql -h 138.X -u te -P 3307 -p</code> 登陆时，提示 <code>ERROR 2013 (HY000): Lost connection to MySQL server at 'reading authorization packet', system error: 0</code> ；原因是 Haproxy real server IP 地址与 TiDB-server listen IP 地址不相等。</p>
-<p>使用 <code>mysql -h 138.X.X.X -u te -P 4000 -p</code> 登陆未出现异常；Proxy Protocol  CIDRs 列表外非 Proxy 协议数据可以直接连接 TiDB-server(10.0.1.4 与 138.x.x.x 在防火墙做了端口映射)。</p>
-<h3 id="场景二">场景二</h3>
-<blockquote>
-<p>haproxy 使用以下配置文件</p>
-</blockquote>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-c" data-lang="c"><span class="n">listen</span> <span class="n">web</span>
-    <span class="nl">bind</span> <span class="p">:</span><span class="mi">3307</span>
-    <span class="n">mode</span> <span class="n">tcp</span>
-    <span class="n">balance</span> <span class="n">roundrobin</span>
-    <span class="n">server</span> <span class="n">tidb1</span> <span class="mf">10.0.1.4</span><span class="o">:</span><span class="mi">4000</span> <span class="n">send</span><span class="o">-</span><span class="n">proxy</span> <span class="n">weight</span> <span class="mi">1</span>
-</code></pre></td></tr></table>
-</div>
-</div><p>TiDB 使用该模式启动 <code>./tidb-server --host 10.0.1.4 --proxy-protocol-networks &quot;10.0.1.0/24&quot;</code></p>
-<p>使用 <code>mysql -h 10.0.1.4 -u root -P 4000</code> 登陆时，提示 <code>ERROR 2013 (HY000): Lost connection to MySQL server at 'reading authorization packet', system error: 0</code> ；
-原因是 Proxy networks 中的 CIDRs IP 地址包含了目前 mysql client 登陆地址。</p>
-<p>使用 <code>mysql -h 10.0.1.4 -u root -P 3307</code> 可以登陆成功，Proxy protocol 已经被 Haproxy 做了包转发解析。
-使用 <code>mysql -h 138.x.x.x -u root -P 4000</code> 可以登陆成功，因为外网 IP 不在 proxy protocols 的白名单范围内。</p>
-<p>满足 Proxy 协议规则，CIDRs 列表内的 IP 地址必须使用 Proxy 协议链接，否则拒绝提供服务。</p>
-<h3 id="场景三">场景三</h3>
-<blockquote>
-<p>haproxy 使用以下配置文件</p>
-</blockquote>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-c" data-lang="c"><span class="n">listen</span> <span class="n">web</span>
-    <span class="nl">bind</span> <span class="p">:</span><span class="mi">3307</span>
-    <span class="n">mode</span> <span class="n">tcp</span>
-    <span class="n">balance</span> <span class="n">roundrobin</span>
-    <span class="n">server</span> <span class="n">tidb1</span> <span class="mf">10.0.1.4</span><span class="o">:</span><span class="mi">4000</span> <span class="n">send</span><span class="o">-</span><span class="n">proxy</span> <span class="n">weight</span> <span class="mi">1</span>
-</code></pre></td></tr></table>
-</div>
-</div><p>TiDB 使用该模式启动 <code>./tidb-server --host 10.0.1.4</code></p>
-<p>使用命令经过 Haproxy 服务登陆 TiDB <code>mysql -h  127.0.0.1 -u root -P 3307</code>，返回错误 <code>ERROR 2013 (HY000): Lost connection to MySQL server at 'reading authorization packet', system error: 0</code>
-后端主机不允许 Haproxy 建立链接，因 CIDRs IP 范围内的主机（ only support｜ 仅支持）proxy 协议的客户端链接。</p>
-<h3 id="场景四">场景四</h3>
-<blockquote>
-<p>haproxy 使用以下配置文件</p>
-</blockquote>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-c" data-lang="c"><span class="n">listen</span> <span class="n">web</span>
-    <span class="nl">bind</span> <span class="p">:</span><span class="mi">3308</span>
-    <span class="n">mode</span> <span class="n">tcp</span>
-    <span class="n">balance</span> <span class="n">roundrobin</span>
-    <span class="n">server</span> <span class="n">tidb1</span> <span class="mf">10.0.1.4</span><span class="o">:</span><span class="mi">4001</span> <span class="n">weight</span> <span class="mi">1</span>
-</code></pre></td></tr></table>
-</div>
-</div><p>TiDB 使用该模式启动 <code>./tidb-server --proxy-protocol-networks &quot;10.0.1.0/24&quot; -P 4001</code></p>
-<p>使用该命令经过 Haproxy 登陆 <code>mysql -h  127.0.0.1 -u root -P 3308</code>  TiDB 服务；返回错误  <code>ERROR 2013 (HY000): Lost connection to MySQL server at 'reading initial communication packet', system error: 0</code> ；查看 tidb.log 日志信息，发现是尝试判断 proxy 协议状态时失败；默认读取 proxy header 信息超时时间 5s</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-c" data-lang="c"><span class="p">[</span><span class="mi">2020</span><span class="o">/</span><span class="mo">01</span><span class="o">/</span><span class="mi">09</span> <span class="mi">22</span><span class="o">:</span><span class="mo">02</span><span class="o">:</span><span class="mf">59.274</span> <span class="o">+</span><span class="mi">08</span><span class="o">:</span><span class="mo">00</span><span class="p">]</span> <span class="p">[</span><span class="n">ERROR</span><span class="p">]</span> <span class="p">[</span><span class="n">server</span><span class="p">.</span><span class="nl">go</span><span class="p">:</span><span class="mi">321</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;PROXY protocol failed&#34;</span><span class="p">]</span> <span class="p">[</span><span class="n">error</span><span class="o">=</span><span class="s">&#34;Header read timeout&#34;</span><span class="p">]</span> <span class="p">[</span><span class="n">stack</span><span class="o">=</span><span class="s">&#34;github.com/pingcap/tidb/server.(*Server).Run</span><span class="se">\n\t</span><span class="s">/home/jenkins/workspace/build_tidb_master/go/src/github.com/pingcap/tidb/server/server.go:321</span><span class="se">\n</span><span class="s">main.runServer</span><span class="se">\n\t</span><span class="s">/home/jenkins/workspace/build_tidb_master/go/src/github.com/pingcap/tidb/tidb-server/main.go:568</span><span class="se">\n</span><span class="s">main.main</span><span class="se">\n\t</span><span class="s">/home/jenkins/workspace/build_tidb_master/go/src/github.com/pingcap/tidb/tidb-server/main.go:174</span><span class="se">\n</span><span class="s">runtime.main</span><span class="se">\n\t</span><span class="s">/usr/local/go/src/runtime/proc.go:200&#34;</span><span class="p">]</span>
-</code></pre></td></tr></table>
-</div>
-</div><h3 id="测试总结">测试总结</h3>
-<table>
-<thead>
-<tr>
-<th>场景</th>
-<th>Haproxy</th>
-<th>TiDB</th>
-<th>备注</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>一</td>
-<td>send haproxy 10.0.1.4</td>
-<td>proxy protocols 10.0.2.0 / 24</td>
-<td>链接失败，Haproxy CIP 不符合 CIDRs IP 范围</td>
-</tr>
-<tr>
-<td>二</td>
-<td>send haproxy 10.0.1.4</td>
-<td>proxy protocols 10.0.1.0 / 24</td>
-<td>正常工作，但无法使用 mysql -h 10.0.1.4 -P 4000 与 TiDB 直接建立链接</td>
-</tr>
-<tr>
-<td>三</td>
-<td>no send proxy 10.0.1.4</td>
-<td>proxy protocols 10.0.1.0 / 24</td>
-<td>无法建立链接，不符合 CIDRs IP 范围，与上一条场景类似</td>
-</tr>
-<tr>
-<td>四</td>
-<td>send haproxy 10.0.1.4</td>
-<td>no proxy</td>
-<td>获取 proxy header 失败，建立链接失败</td>
-</tr>
-</tbody>
-</table>
-<p>场景三与场景四中， proxy &amp; CIDRs 结合 TiDB #3757 PR 信息；
-先判断 IP 是否在 Proxy CIDRs 中，如果存在直接按照 Proxy 方式链接；当 IP 存在 CIDRs 中但客户端不存在 Proxy Header 消息包，会出现 header read timeout ，因为建立 Proxy 链接需要 Proxy Header 信息判断 v1 或者 v2 版本，以便传递给后端初始化链接。</p>
-<h2 id="0x04-赞">0x04 赞</h2>
-<blockquote>
-<p>点赞 <a href="https://github.com/pingcap/tidb/pull/3757">PR #3757</a> 作者 <a href="https://github.com/blacktear23">Rain Li</a> &amp; <a href="https://github.com/SteamedFish">SteamedFish</a>
+<!doctype html><html lang=en><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge,chrome=1"><title>TiDB & Haproxy / show processlist View real IP - AirPlan - A biger solution</title><meta name=renderer content="webkit"><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta http-equiv=cache-control content="no-transform"><meta http-equiv=cache-control content="no-siteapp"><meta name=theme-color content="#f8f5ec"><meta name=msapplication-navbutton-color content="#f8f5ec"><meta name=apple-mobile-web-app-capable content="yes"><meta name=apple-mobile-web-app-status-bar-style content="#f8f5ec"><meta name=author content="Jeff"><meta name=description content="0x00 - 背景 高可用性（英语：high availability，缩写为 HA）测试 failpoint 场景，需要在服务前面添加 load balance 组件；比如 F5、LVS、Haprox"><meta name=keywords content="TiDB,AirPlan,TiDB OPS,tidb-operator,2pc,raft,databases,mysql,htap"><meta name=generator content="Hugo 0.110.0 with theme even"><link rel=canonical href=https://ap.biger.cc/post/20200102-1-tidb-haproxy-real-ip/><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/manifest.json><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><script async src=//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js></script>
+<link href=/dist/even.04bd84cd.min.css rel=stylesheet><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin=anonymous><meta property="og:title" content="TiDB & Haproxy / show processlist View real IP"><meta property="og:description" content="0x00 - 背景 高可用性（英语：high availability，缩写为 HA）测试 failpoint 场景，需要在服务前面添加 load balance 组件；比如 F5、LVS、Haprox"><meta property="og:type" content="article"><meta property="og:url" content="https://ap.biger.cc/post/20200102-1-tidb-haproxy-real-ip/"><meta property="article:section" content="post"><meta property="article:published_time" content="2020-01-02T00:00:00+08:00"><meta property="article:modified_time" content="2020-01-10T00:00:00+08:00"><meta itemprop=name content="TiDB & Haproxy / show processlist View real IP"><meta itemprop=description content="0x00 - 背景 高可用性（英语：high availability，缩写为 HA）测试 failpoint 场景，需要在服务前面添加 load balance 组件；比如 F5、LVS、Haprox"><meta itemprop=datePublished content="2020-01-02T00:00:00+08:00"><meta itemprop=dateModified content="2020-01-10T00:00:00+08:00"><meta itemprop=wordCount content="3114"><meta itemprop=keywords content="TiDB,Haproxy,real server ip,load balance,"><meta name=twitter:card content="summary"><meta name=twitter:title content="TiDB & Haproxy / show processlist View real IP"><meta name=twitter:description content="0x00 - 背景 高可用性（英语：high availability，缩写为 HA）测试 failpoint 场景，需要在服务前面添加 load balance 组件；比如 F5、LVS、Haprox"><!--[if lte IE 9]><script src=https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js></script><![endif]--><!--[if lt IE 9]><script src=https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js></script>
+<script src=https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js></script><![endif]--></head><body><div id=mobile-navbar class=mobile-navbar><div class=mobile-header-logo><a href=/ class=logo>AirPlan</a></div><div class=mobile-navbar-icon><span></span>
+<span></span>
+<span></span></div></div><nav id=mobile-menu class="mobile-menu slideout-menu"><ul class=mobile-menu-list><a href=/post/><li class=mobile-menu-item>Blog</li></a><a href=/look/><li class=mobile-menu-item>Look</li></a><a href=/tags/><li class=mobile-menu-item>Tags</li></a><a href=/categories/><li class=mobile-menu-item>Categories</li></a><a href=/about/><li class=mobile-menu-item>About</li></a></ul></nav><div class=container id=mobile-panel><header id=header class=header><div class=logo-wrapper><a href=/ class=logo>AirPlan</a></div><nav class=site-navbar><ul id=menu class=menu><li class=menu-item><a class=menu-item-link href=/post/>Blog</a></li><li class=menu-item><a class=menu-item-link href=/look/>Look</a></li><li class=menu-item><a class=menu-item-link href=/tags/>Tags</a></li><li class=menu-item><a class=menu-item-link href=/categories/>Categories</a></li><li class=menu-item><a class=menu-item-link href=/about/>About</a></li></ul></nav></header><main id=main class=main><div class=content-wrapper><div id=content class=content><article class=post><header class=post-header><h1 class=post-title>TiDB & Haproxy / show processlist View real IP</h1><div class=post-meta><span class=post-time>2020-01-02</span><div class=post-category><a href=/categories/tidb/>TiDB</a>
+<a href=/categories/software/>Software</a></div><span class=more-meta>3114 words</span>
+<span class=more-meta>7 mins read</span>
+<span id=busuanzi_container_page_pv class=more-meta><span id=busuanzi_value_page_pv><img src=/img/spinner.svg alt=spinner.svg></span> times read</span></div></header><div class=post-toc id=post-toc><h2 class=post-toc-title>Contents</h2><div class=post-toc-content><nav id=TableOfContents><ul><li><a href=#0x00---背景>0x00 - 背景</a></li><li><a href=#0x01---场景复现>0x01 - 场景复现</a></li><li><a href=#0x02---探索与优化>0x02 - 探索与优化</a></li><li><a href=#0x03---没有彩蛋>0x03 - 没有彩蛋</a><ul><li><a href=#场景一>场景一</a></li><li><a href=#场景二>场景二</a></li><li><a href=#场景三>场景三</a></li><li><a href=#场景四>场景四</a></li><li><a href=#测试总结>测试总结</a></li></ul></li><li><a href=#0x04-赞>0x04 赞</a></li></ul></nav></div></div><div class=post-outdated><div class=warn><p>[NOTE] Updated <span class=timeago datetime=2020-01-10T00:00:00 title="January 10, 2020">January 10, 2020</span>. This article may have outdated content or subject matter.</p></div></div><div class=post-content><h2 id=0x00---背景>0x00 - 背景</h2><p>高可用性（英语：high availability，缩写为 HA）测试 failpoint 场景，需要在服务前面添加 load balance 组件；比如 F5、LVS、Haproxy 等支持 TCP 协议的网络分发负载工具。</p><p>之前有篇文档介绍 TiDB & Haproxy <a href=/post/20170610-HAproxy title="docs.tidb.cc HAproxy – Load Balance Service https://ap.tidb.cc/post/20170610-haproxy/">HAproxy – Load Balance Service</a> 使用姿势 / 但随后在运维期间遇见一些小问题；即 TiDB 部署在 Haproxy 后面无法通过 show processlist 查看 client 真实 IP 地址信息，每次 show processlist 看到的都是 Haproxy 主机信息。</p><blockquote><p>Haproxy Proxy Architecture Overview</p></blockquote><p><img src=https://www.percona.com/blog/wp-content/uploads/2015/10/cluster3.png alt="Proxy Architecture Overview"></p><h2 id=0x01---场景复现>0x01 - 场景复现</h2><table><thead><tr><th>机器</th><th style=text-align:left>IP</th><th>备注</th></tr></thead><tbody><tr><td>A</td><td style=text-align:left>10.0.1.4</td><td>部署 Haproxy、TiDB 4000 与 TiDB 4001</td></tr><tr><td>A</td><td style=text-align:left>10.0.1.4</td><td>外网 IP 为 138.x.x.x</td></tr><tr><td>B</td><td style=text-align:left>42.x.x.x</td><td>客户端所在机器</td></tr></tbody></table><p>通过 <a href=/post/20170610-HAproxy title="docs.tidb.cc HAproxy – Load Balance Service https://ap.tidb.cc/post/20170610-haproxy/">HAproxy – Load Balance Service</a>文档中安装 haproxy ； yum install haproxy 并使用文档中的配置文件。</p><p>Haproxy 配置文件栗子如下：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=n>global</span>
+</span></span><span class=line><span class=cl>    <span class=n>log</span> <span class=o>/</span><span class=n>dev</span><span class=o>/</span><span class=n>log</span> <span class=n>local0</span>
+</span></span><span class=line><span class=cl>    <span class=n>maxconn</span> <span class=mi>65536</span>
+</span></span><span class=line><span class=cl>    <span class=n>ulimit</span><span class=o>-</span><span class=n>n</span> <span class=mi>131086</span>
+</span></span><span class=line><span class=cl>    <span class=n>quiet</span>
+</span></span><span class=line><span class=cl>    <span class=n>pidfile</span> <span class=o>/</span><span class=n>var</span><span class=o>/</span><span class=n>run</span><span class=o>/</span><span class=n>haproxy</span><span class=p>.</span><span class=n>pid</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>defaults</span>
+</span></span><span class=line><span class=cl>    <span class=n>option</span> <span class=n>httplog</span>
+</span></span><span class=line><span class=cl>    <span class=n>option</span> <span class=n>redispatch</span>
+</span></span><span class=line><span class=cl>    <span class=n>option</span> <span class=n>nolinger</span>
+</span></span><span class=line><span class=cl>    <span class=n>option</span> <span class=n>dontlognull</span>
+</span></span><span class=line><span class=cl>    <span class=n>retries</span> <span class=mi>3</span>
+</span></span><span class=line><span class=cl>    <span class=n>contimeout</span> <span class=mi>5000</span>
+</span></span><span class=line><span class=cl>    <span class=n>clitimeout</span> <span class=mi>50000</span>
+</span></span><span class=line><span class=cl>    <span class=n>srvtimeout</span> <span class=mi>50000</span>
+</span></span><span class=line><span class=cl>    <span class=n>log</span> <span class=mf>127.0.0.1</span> <span class=n>local3</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>listen</span> <span class=n>testip</span>
+</span></span><span class=line><span class=cl>    <span class=nl>bind</span> <span class=p>:</span><span class=mi>3308</span>
+</span></span><span class=line><span class=cl>    <span class=n>mode</span> <span class=n>tcp</span>
+</span></span><span class=line><span class=cl>    <span class=n>balance</span> <span class=n>roundrobin</span>
+</span></span><span class=line><span class=cl>    <span class=n>server</span> <span class=n>tidb2</span> <span class=mf>10.0.1.4</span><span class=o>:</span><span class=mi>4001</span> <span class=n>weight</span> <span class=mi>1</span>
+</span></span></code></pre></td></tr></table></div></div><p>使用 <code>./tidb-server -path /tmp/nodb -P 4001</code> 方式在本地启动一个 mocktikv TiDB-Server 服务；注：TiDB 启动后自带的 root 用户无法远程登陆，需要新建带密码用户才可在远程机器登陆。</p><p>在 B 机器执行 <code>mysql -h 138.x.x.x -u st -P 4001 -p</code> 执行结果如下</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=n>mysql</span><span class=o>&gt;</span><span class=w> </span><span class=k>show</span><span class=w> </span><span class=n>processlist</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>------+------+--------------+------+---------+------+-------+------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=n>Id</span><span class=w>   </span><span class=o>|</span><span class=w> </span><span class=k>User</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=k>Host</span><span class=w>         </span><span class=o>|</span><span class=w> </span><span class=n>db</span><span class=w>   </span><span class=o>|</span><span class=w> </span><span class=n>Command</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=n>Time</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=k>State</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=n>Info</span><span class=w>             </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>------+------+--------------+------+---------+------+-------+------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w>    </span><span class=mi>1</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=n>st</span><span class=w>   </span><span class=o>|</span><span class=w> </span><span class=mi>42</span><span class=p>.</span><span class=n>X</span><span class=p>.</span><span class=n>X</span><span class=p>.</span><span class=n>X</span><span class=w> </span><span class=o>|</span><span class=w>      </span><span class=o>|</span><span class=w> </span><span class=n>Query</span><span class=w>   </span><span class=o>|</span><span class=w>    </span><span class=mi>0</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>2</span><span class=w>     </span><span class=o>|</span><span class=w> </span><span class=k>show</span><span class=w> </span><span class=n>processlist</span><span class=w> </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>------+------+--------------+------+---------+------+-------+------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=mi>1</span><span class=w> </span><span class=k>row</span><span class=w> </span><span class=k>in</span><span class=w> </span><span class=k>set</span><span class=w> </span><span class=p>(</span><span class=mi>0</span><span class=p>.</span><span class=mi>00</span><span class=w> </span><span class=n>sec</span><span class=p>)</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>在 B 机器执行 <code>mysql -h 138.x.x.x -u st -P 3308 -p</code> 执行结果如下；通过 Haproxy 负载均衡连接数据库，在数据库无法区分客户端机器 IP 地址是多少；</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=n>mysql</span><span class=o>&gt;</span><span class=w> </span><span class=k>show</span><span class=w> </span><span class=n>processlist</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>------+------+--------------+------+---------+------+-------+------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=n>Id</span><span class=w>   </span><span class=o>|</span><span class=w> </span><span class=k>User</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=k>Host</span><span class=w>         </span><span class=o>|</span><span class=w> </span><span class=n>db</span><span class=w>   </span><span class=o>|</span><span class=w> </span><span class=n>Command</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=n>Time</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=k>State</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=n>Info</span><span class=w>             </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>------+------+--------------+------+---------+------+-------+------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w>    </span><span class=mi>1</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=n>st</span><span class=w>   </span><span class=o>|</span><span class=w> </span><span class=mi>42</span><span class=p>.</span><span class=n>X</span><span class=p>.</span><span class=n>X</span><span class=p>.</span><span class=n>X</span><span class=w> </span><span class=o>|</span><span class=w>      </span><span class=o>|</span><span class=w> </span><span class=n>Sleep</span><span class=w>   </span><span class=o>|</span><span class=w>  </span><span class=mi>597</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>2</span><span class=w>     </span><span class=o>|</span><span class=w>                  </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>    </span><span class=mi>2</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=n>st</span><span class=w>   </span><span class=o>|</span><span class=w> </span><span class=mi>10</span><span class=p>.</span><span class=mi>0</span><span class=p>.</span><span class=mi>1</span><span class=p>.</span><span class=mi>4</span><span class=w>     </span><span class=o>|</span><span class=w>      </span><span class=o>|</span><span class=w> </span><span class=n>Query</span><span class=w>   </span><span class=o>|</span><span class=w>    </span><span class=mi>0</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>2</span><span class=w>     </span><span class=o>|</span><span class=w> </span><span class=k>show</span><span class=w> </span><span class=n>processlist</span><span class=w> </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>------+------+--------------+------+---------+------+-------+------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=mi>2</span><span class=w> </span><span class=k>rows</span><span class=w> </span><span class=k>in</span><span class=w> </span><span class=k>set</span><span class=w> </span><span class=p>(</span><span class=mi>0</span><span class=p>.</span><span class=mi>00</span><span class=w> </span><span class=n>sec</span><span class=p>)</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>此处通过 Haproxy 连接到数据库后，Host 字段显示 IP 地址为 Haproxy 所在主机地址。当 client 与 real server（TiDB-server）数量比较大的时候，无法准确判断数据流量来源；不方便运维管理。</p><h2 id=0x02---探索与优化>0x02 - 探索与优化</h2><p>经过一番搜索和学习，duck duck 过后看到 Percona 的一篇基于 <a href=https://www.percona.com/blog/2015/10/15/proxy-protocol-percona-xtradb-cluster-quick-guide/ title="Proxy Protocol and Percona XtraDB Cluster: A Quick Guide">Percona XtraDB & Haproxy</a> 架构的文档；文档中介绍使用 Proxy Protocol Netowrk 产品功能来修复以上问题，此处需要先看下 TiDB-Server 是否支持类似的功能</p><p>在 <a href=https://github.com/pingcap/tidb/blob/master/config/config.toml.example>TiDB-server 配置文件</a> 看到以下参数信息；从注释内容字面理解上与 Percona xtraDB 中的 Proxy Protocol 是类似的。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-toml data-lang=toml><span class=line><span class=cl><span class=p>[</span><span class=nx>proxy-protocol</span><span class=p>]</span>
+</span></span><span class=line><span class=cl><span class=c># PROXY protocol acceptable client networks.</span>
+</span></span><span class=line><span class=cl><span class=c># Empty string means disable PROXY protocol, * means all networks.</span>
+</span></span><span class=line><span class=cl><span class=nx>networks</span> <span class=p>=</span> <span class=s2>&#34;&#34;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c># PROXY protocol header read timeout, unit is second</span>
+</span></span><span class=line><span class=cl><span class=nx>header-timeout</span> <span class=p>=</span> <span class=mi>5</span>
+</span></span></code></pre></td></tr></table></div></div><p>需要查到相关 PR 确认下代码块或者提交人，方便后续出问题做些咨询；通过 <a href=https://sourcegraph.com/github.com/pingcap/tidb>sourcegraph.com</a> 网站搜寻当时这段配置文件的作者；中间过程省略，最终查到 issue 地址为 <a href=https://github.com/pingcap/tidb/pull/3757 title="2017 年 7 月 14 日提交的代码，2017 年 11 月 26 日合并的 PR / TiDB 1.0 GA 后的功能">TiDB issue #3757</a>。</p><blockquote><p>PR 重要内容如下:</p></blockquote><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>Add PROXY protocol V1 and V2 support.
+</span></span><span class=line><span class=cl>usage: tidb-server --proxy-protocol-networks &#34;*&#34; --proxy-protocol-header-timeout 5
+</span></span><span class=line><span class=cl>Add --proxy-protocol-networks command parameter for PROXY protocol enable or disable. If you want to limit HAProxy server IP range, you can set --proxy-protocol-networks parameter to a CIDRs and split by &#34;,&#34;. For example:
+</span></span><span class=line><span class=cl>tidb-server --proxy-protocol-networks &#34;192.168.1.0/24,192.168.2.0/24&#34;
+</span></span><span class=line><span class=cl>For more information about PROXY protocol please refer https://www.haproxy.org/download/1.8/doc/proxy-protocol.txt
+</span></span></code></pre></td></tr></table></div></div><p>根据内容表述，使用 <code>--proxy-protocol-networks "*"</code> 启用 Proxy 协议，支持 v1 and v2 版本；如果需要限制 TiDB Proxy 数据源，可以使用 <code>--proxy-protocol-networks "192.168.1.0/24,192.168.2.0/24"</code> CIDRs <em>「无类别域间路由（Classless Inter-Domain Routing、CIDR）是一个用于给用户分配IP地址以及在互联网上有效地路由IP数据包的对IP地址进行归类的方法」</em> 声明，并使用 <strong>逗号</strong> 分割。</p><blockquote><p>同时还给出了 Haproxy 配置文件栗子</p></blockquote><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=n>global</span>
+</span></span><span class=line><span class=cl>    <span class=n>log</span> <span class=o>/</span><span class=n>dev</span><span class=o>/</span><span class=n>log</span> <span class=n>local0</span>
+</span></span><span class=line><span class=cl>    <span class=n>maxconn</span> <span class=mi>65536</span>
+</span></span><span class=line><span class=cl>    <span class=n>ulimit</span><span class=o>-</span><span class=n>n</span> <span class=mi>131086</span>
+</span></span><span class=line><span class=cl>    <span class=n>quiet</span>
+</span></span><span class=line><span class=cl>    <span class=n>pidfile</span> <span class=o>/</span><span class=n>var</span><span class=o>/</span><span class=n>run</span><span class=o>/</span><span class=n>haproxy</span><span class=p>.</span><span class=n>pid</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>defaults</span>
+</span></span><span class=line><span class=cl>    <span class=n>option</span> <span class=n>httplog</span>
+</span></span><span class=line><span class=cl>    <span class=n>option</span> <span class=n>redispatch</span>
+</span></span><span class=line><span class=cl>    <span class=n>option</span> <span class=n>nolinger</span>
+</span></span><span class=line><span class=cl>    <span class=n>option</span> <span class=n>dontlognull</span>
+</span></span><span class=line><span class=cl>    <span class=n>retries</span> <span class=mi>3</span>
+</span></span><span class=line><span class=cl>    <span class=n>contimeout</span> <span class=mi>5000</span>
+</span></span><span class=line><span class=cl>    <span class=n>clitimeout</span> <span class=mi>50000</span>
+</span></span><span class=line><span class=cl>    <span class=n>srvtimeout</span> <span class=mi>50000</span>
+</span></span><span class=line><span class=cl>    <span class=n>log</span> <span class=mf>10.0.1.4</span> <span class=n>local3</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>listen</span> <span class=n>web</span>
+</span></span><span class=line><span class=cl>    <span class=nl>bind</span> <span class=p>:</span><span class=mi>3307</span>
+</span></span><span class=line><span class=cl>    <span class=n>mode</span> <span class=n>tcp</span>
+</span></span><span class=line><span class=cl>    <span class=n>balance</span> <span class=n>roundrobin</span>
+</span></span><span class=line><span class=cl>    <span class=n>server</span> <span class=n>tidb1</span> <span class=mf>10.0.1.4</span><span class=o>:</span><span class=mi>4000</span> <span class=n>send</span><span class=o>-</span><span class=n>proxy</span> <span class=n>weight</span> <span class=mi>1</span>
+</span></span></code></pre></td></tr></table></div></div><p>Haproxy 配置文件中 global 与 defaults 与其他一般无二；重点在 real server 中的 <strong>send-proxy</strong> 参数信息；</p><p>按照 PR 内容启动了新的 TiDB 进程：<code>./tidb-server --proxy-protocol-networks "10.0.1.0/24"</code></p><p>在 B 机器执行 <code>mysql -h 138.X.X.X -u te -P 4000 -p</code> 登陆主机，并执行 <code>select sleep(100)</code> 用于区分链接； 查看结果如下：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=n>mysql</span><span class=o>&gt;</span><span class=w> </span><span class=k>show</span><span class=w> </span><span class=n>processlist</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>------+------+--------------+------+---------+------+-------+------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=n>Id</span><span class=w>   </span><span class=o>|</span><span class=w> </span><span class=k>User</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=k>Host</span><span class=w>         </span><span class=o>|</span><span class=w> </span><span class=n>db</span><span class=w>   </span><span class=o>|</span><span class=w> </span><span class=n>Command</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=n>Time</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=k>State</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=n>Info</span><span class=w>             </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>------+------+--------------+------+---------+------+-------+------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w>    </span><span class=mi>3</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=n>te</span><span class=w>   </span><span class=o>|</span><span class=w> </span><span class=mi>42</span><span class=p>.</span><span class=n>X</span><span class=p>.</span><span class=n>X</span><span class=p>.</span><span class=n>X</span><span class=w> </span><span class=o>|</span><span class=w>      </span><span class=o>|</span><span class=w> </span><span class=n>Query</span><span class=w>   </span><span class=o>|</span><span class=w>    </span><span class=mi>0</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>2</span><span class=w>     </span><span class=o>|</span><span class=w> </span><span class=k>show</span><span class=w> </span><span class=n>processlist</span><span class=w> </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>    </span><span class=mi>4</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=n>te</span><span class=w>   </span><span class=o>|</span><span class=w> </span><span class=mi>42</span><span class=p>.</span><span class=n>X</span><span class=p>.</span><span class=n>X</span><span class=p>.</span><span class=n>X</span><span class=w> </span><span class=o>|</span><span class=w>      </span><span class=o>|</span><span class=w> </span><span class=n>Query</span><span class=w>   </span><span class=o>|</span><span class=w>    </span><span class=mi>6</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>2</span><span class=w>     </span><span class=o>|</span><span class=w> </span><span class=k>select</span><span class=w> </span><span class=n>sleep</span><span class=p>(</span><span class=mi>100</span><span class=p>)</span><span class=w> </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>------+------+--------------+------+---------+------+-------+------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=mi>1</span><span class=w> </span><span class=k>row</span><span class=w> </span><span class=k>in</span><span class=w> </span><span class=k>set</span><span class=w> </span><span class=p>(</span><span class=mi>0</span><span class=p>.</span><span class=mi>00</span><span class=w> </span><span class=n>sec</span><span class=p>)</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>在 B 机器执行 <code>mysql -h 138.X.X.X -u te -P 3307 -p</code> 查看结果如下：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=n>mysql</span><span class=o>&gt;</span><span class=w> </span><span class=k>show</span><span class=w> </span><span class=n>processlist</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>------+------+--------------+------+---------+------+-------+-------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=n>Id</span><span class=w>   </span><span class=o>|</span><span class=w> </span><span class=k>User</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=k>Host</span><span class=w>         </span><span class=o>|</span><span class=w> </span><span class=n>db</span><span class=w>   </span><span class=o>|</span><span class=w> </span><span class=n>Command</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=n>Time</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=k>State</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=n>Info</span><span class=w>              </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>------+------+--------------+------+---------+------+-------+-------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w>    </span><span class=mi>4</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=n>te</span><span class=w>   </span><span class=o>|</span><span class=w> </span><span class=mi>42</span><span class=p>.</span><span class=n>X</span><span class=p>.</span><span class=n>X</span><span class=p>.</span><span class=n>X</span><span class=w> </span><span class=o>|</span><span class=w>      </span><span class=o>|</span><span class=w> </span><span class=n>Query</span><span class=w>   </span><span class=o>|</span><span class=w>    </span><span class=mi>6</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>15</span><span class=w>    </span><span class=o>|</span><span class=w> </span><span class=k>select</span><span class=w> </span><span class=n>sleep</span><span class=p>(</span><span class=mi>100</span><span class=p>)</span><span class=w> </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>    </span><span class=mi>5</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=n>te</span><span class=w>   </span><span class=o>|</span><span class=w> </span><span class=mi>42</span><span class=p>.</span><span class=n>X</span><span class=p>.</span><span class=n>X</span><span class=p>.</span><span class=n>X</span><span class=w> </span><span class=o>|</span><span class=w>      </span><span class=o>|</span><span class=w> </span><span class=n>Query</span><span class=w>   </span><span class=o>|</span><span class=w>    </span><span class=mi>0</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>2</span><span class=w>     </span><span class=o>|</span><span class=w> </span><span class=k>show</span><span class=w> </span><span class=n>processlist</span><span class=w>  </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>------+------+--------------+------+---------+------+-------+-------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=mi>2</span><span class=w> </span><span class=k>rows</span><span class=w> </span><span class=k>in</span><span class=w> </span><span class=k>set</span><span class=w> </span><span class=p>(</span><span class=mi>0</span><span class=p>.</span><span class=mi>00</span><span class=w> </span><span class=n>sec</span><span class=p>)</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>由此发现，该功能使用姿势暂无问题，同时解决了上述 show processlist Host 字段无法看到 real sercer IP 的问题。</p><h2 id=0x03---没有彩蛋>0x03 - 没有彩蛋</h2><p>PR 最底部还有一些关于 Proxy Protocol 的讨论</p><blockquote><ul><li>Proxy Protocol 扩展阅读<ul><li>扩展阅读 <a href=http://mysql.taobao.org/monthly/2019/01/07/ title="aliyun RDS 团队文档">MariaDB 源码分析 Proxy Protocol</a></li><li>扩展 issue <a href=https://github.com/blacktear23/go-proxyprotocol/pull/1 title="该 issue 不在 PingCAP/TiDB repo 下，由该作者自行控制，可能会被删除。">blacktear23/go-proxyprotocol/pull/1</a></li></ul></li></ul></blockquote><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-markdown data-lang=markdown><span class=line><span class=cl><span class=k>1.</span> most proxy protocol implementations such as MariaDB, Percona server, apache(via mod_remoteip), allow user to specify a list of cider blocks（`proxy-protocol-networks` for MariaDB and Percona server，`RemoteIPProxyProtocolExceptions ` for apache), IP in the list MUST use proxy protocol and IP not in the list MUST NOT use proxy protocol(but they can still connect without proxy protocol). some implementations, like nginx and TiDB, forces all IP addresses to use proxy protocol when enables proxy protocol options.
+</span></span><span class=line><span class=cl><span class=k>2.</span> the spec says that we &#34;MUST not try to guess whether the protocol header is presentor not&#34;, to prevent security issues, but there&#39;s no guessing when we provide a list and config IPs in the list to MUST use and IPs not in the list to MUST NOT use(but still able to connect). There&#39;s no security issues doing this way and it actually meet the spec requirement.
+</span></span><span class=line><span class=cl><span class=k>3.</span> allowing certain IP blocks to connect directly without haproxy will make certain tasks much easier to configure, such as:
+</span></span><span class=line><span class=cl>    <span class=k>*</span> monitoring individual TiDB nodes
+</span></span><span class=line><span class=cl>    <span class=k>*</span> make a certain TiDB node to do complex OLAP tasks without influence other OLTP nodes.
+</span></span><span class=line><span class=cl>    <span class=k>*</span> control individual TiDB nodes via script tasks in the local machine(such as a crontab script at each TiDB node
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>I think make IPs not in AllowedIPs to connect directly without proxy protocol is:
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>1.</span> very easy to implement. only need to modify two lines of code
+</span></span><span class=line><span class=cl><span class=k>2.</span> has some benefits
+</span></span><span class=line><span class=cl><span class=k>3.</span> meets the spec
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>So I think its good to do this way.
+</span></span></code></pre></td></tr></table></div></div><ul><li>以上内容重点内容是：<ul><li>PR #3757 ｜ CIDRs 列表中所有 IP 地址仅能通过 Proxy 协议链接，如非 Proxy 协议链接将会被拒绝；但 CIDRs 列表外的 IP 地址依旧可以通过非 Proxy 协议链接（#3757 前半部分 PR 中的实现，TiDB 启用 Proxy 后所有流量都会走这个检查）。<ul><li>原始 Proxy protocol 在使用 CIDRs 后不支持白名单以外的 IP 连接，SteamedFish 作者代码部分 PR 代码块可以做到 <strong>非 CIDRs 列表内的 IP</strong> 支持以普通方式链接 TiDB ，且改动代码量足够的小</li><li>通过检测 IP 地址是否存在与 CIDRs 列表内，而不是尝试获取服务端返回的 hedaer 信息（proxy v1 header 是 5 字节，v2 版本是 12 字节）；同时在处理 CIDRs 列表外的 IP 时，可以省略探测服务器协议状态。</li><li>允许非白名单外的 IP 连接 TiDB 后，可以对该 TiDB 做特殊处理，如：监控节点、处理 OLAP 业务、执行人工查询等</li></ul></li></ul></li></ul><h3 id=场景一>场景一</h3><blockquote><p>haproxy 使用以下配置文件</p></blockquote><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=n>listen</span> <span class=n>web</span>
+</span></span><span class=line><span class=cl>    <span class=nl>bind</span> <span class=p>:</span><span class=mi>3307</span>
+</span></span><span class=line><span class=cl>    <span class=n>mode</span> <span class=n>tcp</span>
+</span></span><span class=line><span class=cl>    <span class=n>balance</span> <span class=n>roundrobin</span>
+</span></span><span class=line><span class=cl>    <span class=n>server</span> <span class=n>tidb1</span> <span class=mf>127.0.0.1</span><span class=o>:</span><span class=mi>4000</span> <span class=n>send</span><span class=o>-</span><span class=n>proxy</span> <span class=n>weight</span> <span class=mi>1</span>
+</span></span></code></pre></td></tr></table></div></div><p>TiDB 使用命令启动 <code>./tidb-server --host 10.0.1.4 --proxy-protocol-networks "10.0.2.0/24"</code></p><p>使用 <code>mysql -h 138.X -u te -P 3307 -p</code> 登陆时，提示 <code>ERROR 2013 (HY000): Lost connection to MySQL server at 'reading authorization packet', system error: 0</code> ；原因是 Haproxy real server IP 地址与 TiDB-server listen IP 地址不相等。</p><p>使用 <code>mysql -h 138.X.X.X -u te -P 4000 -p</code> 登陆未出现异常；Proxy Protocol CIDRs 列表外非 Proxy 协议数据可以直接连接 TiDB-server(10.0.1.4 与 138.x.x.x 在防火墙做了端口映射)。</p><h3 id=场景二>场景二</h3><blockquote><p>haproxy 使用以下配置文件</p></blockquote><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=n>listen</span> <span class=n>web</span>
+</span></span><span class=line><span class=cl>    <span class=nl>bind</span> <span class=p>:</span><span class=mi>3307</span>
+</span></span><span class=line><span class=cl>    <span class=n>mode</span> <span class=n>tcp</span>
+</span></span><span class=line><span class=cl>    <span class=n>balance</span> <span class=n>roundrobin</span>
+</span></span><span class=line><span class=cl>    <span class=n>server</span> <span class=n>tidb1</span> <span class=mf>10.0.1.4</span><span class=o>:</span><span class=mi>4000</span> <span class=n>send</span><span class=o>-</span><span class=n>proxy</span> <span class=n>weight</span> <span class=mi>1</span>
+</span></span></code></pre></td></tr></table></div></div><p>TiDB 使用该模式启动 <code>./tidb-server --host 10.0.1.4 --proxy-protocol-networks "10.0.1.0/24"</code></p><p>使用 <code>mysql -h 10.0.1.4 -u root -P 4000</code> 登陆时，提示 <code>ERROR 2013 (HY000): Lost connection to MySQL server at 'reading authorization packet', system error: 0</code> ；
+原因是 Proxy networks 中的 CIDRs IP 地址包含了目前 mysql client 登陆地址。</p><p>使用 <code>mysql -h 10.0.1.4 -u root -P 3307</code> 可以登陆成功，Proxy protocol 已经被 Haproxy 做了包转发解析。
+使用 <code>mysql -h 138.x.x.x -u root -P 4000</code> 可以登陆成功，因为外网 IP 不在 proxy protocols 的白名单范围内。</p><p>满足 Proxy 协议规则，CIDRs 列表内的 IP 地址必须使用 Proxy 协议链接，否则拒绝提供服务。</p><h3 id=场景三>场景三</h3><blockquote><p>haproxy 使用以下配置文件</p></blockquote><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=n>listen</span> <span class=n>web</span>
+</span></span><span class=line><span class=cl>    <span class=nl>bind</span> <span class=p>:</span><span class=mi>3307</span>
+</span></span><span class=line><span class=cl>    <span class=n>mode</span> <span class=n>tcp</span>
+</span></span><span class=line><span class=cl>    <span class=n>balance</span> <span class=n>roundrobin</span>
+</span></span><span class=line><span class=cl>    <span class=n>server</span> <span class=n>tidb1</span> <span class=mf>10.0.1.4</span><span class=o>:</span><span class=mi>4000</span> <span class=n>send</span><span class=o>-</span><span class=n>proxy</span> <span class=n>weight</span> <span class=mi>1</span>
+</span></span></code></pre></td></tr></table></div></div><p>TiDB 使用该模式启动 <code>./tidb-server --host 10.0.1.4</code></p><p>使用命令经过 Haproxy 服务登陆 TiDB <code>mysql -h 127.0.0.1 -u root -P 3307</code>，返回错误 <code>ERROR 2013 (HY000): Lost connection to MySQL server at 'reading authorization packet', system error: 0</code>
+后端主机不允许 Haproxy 建立链接，因 CIDRs IP 范围内的主机（ only support｜ 仅支持）proxy 协议的客户端链接。</p><h3 id=场景四>场景四</h3><blockquote><p>haproxy 使用以下配置文件</p></blockquote><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=n>listen</span> <span class=n>web</span>
+</span></span><span class=line><span class=cl>    <span class=nl>bind</span> <span class=p>:</span><span class=mi>3308</span>
+</span></span><span class=line><span class=cl>    <span class=n>mode</span> <span class=n>tcp</span>
+</span></span><span class=line><span class=cl>    <span class=n>balance</span> <span class=n>roundrobin</span>
+</span></span><span class=line><span class=cl>    <span class=n>server</span> <span class=n>tidb1</span> <span class=mf>10.0.1.4</span><span class=o>:</span><span class=mi>4001</span> <span class=n>weight</span> <span class=mi>1</span>
+</span></span></code></pre></td></tr></table></div></div><p>TiDB 使用该模式启动 <code>./tidb-server --proxy-protocol-networks "10.0.1.0/24" -P 4001</code></p><p>使用该命令经过 Haproxy 登陆 <code>mysql -h 127.0.0.1 -u root -P 3308</code> TiDB 服务；返回错误 <code>ERROR 2013 (HY000): Lost connection to MySQL server at 'reading initial communication packet', system error: 0</code> ；查看 tidb.log 日志信息，发现是尝试判断 proxy 协议状态时失败；默认读取 proxy header 信息超时时间 5s</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=p>[</span><span class=mi>2020</span><span class=o>/</span><span class=mo>01</span><span class=o>/</span><span class=mi>09</span> <span class=mi>22</span><span class=o>:</span><span class=mo>02</span><span class=o>:</span><span class=mf>59.274</span> <span class=o>+</span><span class=mi>08</span><span class=o>:</span><span class=mo>00</span><span class=p>]</span> <span class=p>[</span><span class=n>ERROR</span><span class=p>]</span> <span class=p>[</span><span class=n>server</span><span class=p>.</span><span class=nl>go</span><span class=p>:</span><span class=mi>321</span><span class=p>]</span> <span class=p>[</span><span class=s>&#34;PROXY protocol failed&#34;</span><span class=p>]</span> <span class=p>[</span><span class=n>error</span><span class=o>=</span><span class=s>&#34;Header read timeout&#34;</span><span class=p>]</span> <span class=p>[</span><span class=n>stack</span><span class=o>=</span><span class=s>&#34;github.com/pingcap/tidb/server.(*Server).Run</span><span class=se>\n\t</span><span class=s>/home/jenkins/workspace/build_tidb_master/go/src/github.com/pingcap/tidb/server/server.go:321</span><span class=se>\n</span><span class=s>main.runServer</span><span class=se>\n\t</span><span class=s>/home/jenkins/workspace/build_tidb_master/go/src/github.com/pingcap/tidb/tidb-server/main.go:568</span><span class=se>\n</span><span class=s>main.main</span><span class=se>\n\t</span><span class=s>/home/jenkins/workspace/build_tidb_master/go/src/github.com/pingcap/tidb/tidb-server/main.go:174</span><span class=se>\n</span><span class=s>runtime.main</span><span class=se>\n\t</span><span class=s>/usr/local/go/src/runtime/proc.go:200&#34;</span><span class=p>]</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=测试总结>测试总结</h3><table><thead><tr><th>场景</th><th>Haproxy</th><th>TiDB</th><th>备注</th></tr></thead><tbody><tr><td>一</td><td>send haproxy 10.0.1.4</td><td>proxy protocols 10.0.2.0 / 24</td><td>链接失败，Haproxy CIP 不符合 CIDRs IP 范围</td></tr><tr><td>二</td><td>send haproxy 10.0.1.4</td><td>proxy protocols 10.0.1.0 / 24</td><td>正常工作，但无法使用 mysql -h 10.0.1.4 -P 4000 与 TiDB 直接建立链接</td></tr><tr><td>三</td><td>no send proxy 10.0.1.4</td><td>proxy protocols 10.0.1.0 / 24</td><td>无法建立链接，不符合 CIDRs IP 范围，与上一条场景类似</td></tr><tr><td>四</td><td>send haproxy 10.0.1.4</td><td>no proxy</td><td>获取 proxy header 失败，建立链接失败</td></tr></tbody></table><p>场景三与场景四中， proxy & CIDRs 结合 TiDB #3757 PR 信息；
+先判断 IP 是否在 Proxy CIDRs 中，如果存在直接按照 Proxy 方式链接；当 IP 存在 CIDRs 中但客户端不存在 Proxy Header 消息包，会出现 header read timeout ，因为建立 Proxy 链接需要 Proxy Header 信息判断 v1 或者 v2 版本，以便传递给后端初始化链接。</p><h2 id=0x04-赞>0x04 赞</h2><blockquote><p>点赞 <a href=https://github.com/pingcap/tidb/pull/3757>PR #3757</a> 作者 <a href=https://github.com/blacktear23>Rain Li</a> & <a href=https://github.com/SteamedFish>SteamedFish</a>
 // 人文结案
 Proxy Protocols 功能总结：引入了 proxy protocol 来解决 client ip 透传的问题。
-proxy 节点获取到 client ip 后，将 client ip 包装在 proxy protocol 报文中发给 real server，real server 解析到了 proxy protocol 报文，再用报文中的 IP 替换 Proxy 节点的 IP</p>
-</blockquote>
-<p><img src="http://www.plantuml.com/plantuml/png/SoWkIImgAStDuNBEoKpDAr7GjLFmI2meog-eLB1IIFOCKB1LC3JGCz0pr3FHAKRXMXaR6vXpGHM3z8LakZXPAIIYQKh6r8Hka8c1WG4NI3V2bASTIvvDMwi0LFTinlgd4vOzdRD2mTdJ9QXOuScEjU_tz3nTEmCezAAd-UdiBK_RMXytDA4Q0D89KOFGzcHlsvCTlL3H0B2hFL8JKrAB59xiN_YiSVsJFREUh-rykg_rnRRMPzEteHduhAVpUUjogBwd6zeK8046TkBi_Szw5y723IW2qmeJ0eOafey912VKV2i5mW48Ypk4M_iNFkliVjOnuMdNV4p9pkKl5lPmEQJcfG3Z7G00" alt="UML Proxy Protocols / TiDB / Docs.tidb.cc" title="Proxy protocols &amp; TiDB / Docs.tidb.cc"></p>
-
-    </div>
-
-    <div class="post-copyright">
-  <p class="copyright-item">
-    <span class="item-title">Author</span>
-    <span class="item-content">Jeff</span>
-  </p>
-  <p class="copyright-item">
-    <span class="item-title">LastMod</span>
-    <span class="item-content">
-        2020-01-10
-        
-    </span>
-  </p>
-  
-  <p class="copyright-item">
-    <span class="item-title">License</span>
-    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span>
-  </p>
-</div>
-<footer class="post-footer">
-      <div class="post-tags">
-          <a href="/tags/tidb/">TiDB</a>
-          <a href="/tags/haproxy/">Haproxy</a>
-          <a href="/tags/real-server-ip/">real server ip</a>
-          <a href="/tags/load-balance/">load balance</a>
-          </div>
-      <nav class="post-nav">
-        <a class="prev" href="/post/20200108-2-github-hugo-actions/">
-            <i class="iconfont icon-left"></i>
-            <span class="prev-text nav-default">生态围墙 - Github Actions &amp; Hugo</span>
-            <span class="prev-text nav-mobile">Prev</span>
-          </a>
-        <a class="next" href="/post/20191008-41-dm-faq/">
-            <span class="next-text nav-default">总结 - Data Migration（数据同步）</span>
-            <span class="next-text nav-mobile">Next</span>
-            <i class="iconfont icon-right"></i>
-          </a>
-      </nav>
-    </footer>
-  </article>
-        </div>
-        
-
-  
-
-  
-
-      </div>
-    </main>
-
-    <footer id="footer" class="footer">
-      <div class="social-links">
-      <a href="https://github.com/BigerCAP/TiDB-AirPlan/issues" class="iconfont icon-github" title="github"></a>
-  <a href="https://ap.tidb.cc/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
-</div>
-
-<div class="copyright">
-  <span class="power-by">
-    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
-  </span>
-  <span class="division">|</span>
-  <span class="theme-info">
-    Theme - 
-    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
-  </span>
-
-  <div class="busuanzi-footer">
-    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
-      <span class="division">|</span>
-    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
-  </div>
-
-  <span class="copyright-year">
-    &copy; 
-    2017 - 
-    2020
-    <span class="heart">
-      <i class="iconfont icon-heart"></i>
-    </span>
-    <span class="author">TiDB - AirPlan</span>
-  </span>
-</div>
-    </footer>
-
-    <div class="back-to-top" id="back-to-top">
-      <i class="iconfont icon-up"></i>
-    </div>
-  </div>
-  
-  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js" integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js" integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin="anonymous"></script>
-  <script><!-- NOTE: timeago.js uses the language code format like "zh_CN" (underscore and case sensitive) -->
-    var languageCode = "en".replace(/-/g, '_').replace(/_(.*)/, function ($0, $1) {return $0.replace($1, $1.toUpperCase());});
-    timeago().render(document.querySelectorAll('.timeago'), languageCode);
-    timeago.cancel();  
-  </script>
-<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
-
-
-
-
-
-
-
-
-</body>
-</html>
+proxy 节点获取到 client ip 后，将 client ip 包装在 proxy protocol 报文中发给 real server，real server 解析到了 proxy protocol 报文，再用报文中的 IP 替换 Proxy 节点的 IP</p></blockquote><p><img src=http://www.plantuml.com/plantuml/png/SoWkIImgAStDuNBEoKpDAr7GjLFmI2meog-eLB1IIFOCKB1LC3JGCz0pr3FHAKRXMXaR6vXpGHM3z8LakZXPAIIYQKh6r8Hka8c1WG4NI3V2bASTIvvDMwi0LFTinlgd4vOzdRD2mTdJ9QXOuScEjU_tz3nTEmCezAAd-UdiBK_RMXytDA4Q0D89KOFGzcHlsvCTlL3H0B2hFL8JKrAB59xiN_YiSVsJFREUh-rykg_rnRRMPzEteHduhAVpUUjogBwd6zeK8046TkBi_Szw5y723IW2qmeJ0eOafey912VKV2i5mW48Ypk4M_iNFkliVjOnuMdNV4p9pkKl5lPmEQJcfG3Z7G00 alt="UML Proxy Protocols / TiDB / Docs.tidb.cc" title="Proxy protocols & TiDB / Docs.tidb.cc"></p></div><div class=post-copyright><p class=copyright-item><span class=item-title>Author</span>
+<span class=item-content>Jeff</span></p><p class=copyright-item><span class=item-title>LastMod</span>
+<span class=item-content>2020-01-10</span></p><p class=copyright-item><span class=item-title>License</span>
+<span class=item-content><a rel="license noopener" href=https://creativecommons.org/licenses/by-nc-nd/4.0/ target=_blank>CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span></p></div><footer class=post-footer><div class=post-tags><a href=/tags/tidb/>TiDB</a>
+<a href=/tags/haproxy/>Haproxy</a>
+<a href=/tags/real-server-ip/>real server ip</a>
+<a href=/tags/load-balance/>load balance</a></div><nav class=post-nav><a class=prev href=/post/20200108-2-github-hugo-actions/><i class="iconfont icon-left"></i>
+<span class="prev-text nav-default">生态围墙 - Github Actions & Hugo</span>
+<span class="prev-text nav-mobile">Prev</span></a>
+<a class=next href=/post/20191008-41-dm-faq/><span class="next-text nav-default">总结 - Data Migration（数据同步）</span>
+<span class="next-text nav-mobile">Next</span>
+<i class="iconfont icon-right"></i></a></nav></footer></article></div></div></main><footer id=footer class=footer><div class=social-links><a href=https://github.com/BigerCAP/TiDB-AirPlan/issues class="iconfont icon-github" title=github></a>
+<a href=https://ap.biger.cc/index.xml type=application/rss+xml class="iconfont icon-rss" title=rss></a></div><div class=copyright><span class=power-by>Powered by <a class=hexo-link href=https://gohugo.io>Hugo</a></span>
+<span class=division>|</span>
+<span class=theme-info>Theme -
+<a class=theme-link href=https://github.com/olOwOlo/hugo-theme-even>Even</a></span><div class=busuanzi-footer><span id=busuanzi_container_site_pv>site pv: <span id=busuanzi_value_site_pv><img src=/img/spinner.svg alt=spinner.svg></span></span>
+<span class=division>|</span>
+<span id=busuanzi_container_site_uv>site uv: <span id=busuanzi_value_site_uv><img src=/img/spinner.svg alt=spinner.svg></span></span></div><span class=copyright-year>&copy;
+2017 -
+2023
+<span class=heart><i class="iconfont icon-heart"></i></span>
+<span class=author>DB - AirPlan</span></span></div></footer><div class=back-to-top id=back-to-top><i class="iconfont icon-up"></i></div></div><script src=https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin=anonymous></script>
+<script>var languageCode="en".replace(/-/g,"_").replace(/_(.*)/,function(e,t){return e.replace(t,t.toUpperCase())});timeago().render(document.querySelectorAll(".timeago"),languageCode),timeago.cancel()</script><script type=text/javascript src=/dist/even.26188efa.min.js></script></body></html>

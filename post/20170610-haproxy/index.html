@@ -1,477 +1,168 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>负载均衡 - HAProxy &amp; TiDB 配合食用 - TiDB AirPlan - A biger solution</title>
-  <meta name="renderer" content="webkit" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-
-<meta http-equiv="Cache-Control" content="no-transform" />
-<meta http-equiv="Cache-Control" content="no-siteapp" />
-
-<meta name="theme-color" content="#f8f5ec" />
-<meta name="msapplication-navbutton-color" content="#f8f5ec">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
-
-
-<meta name="author" content="Jeff" /><meta name="description" content="0x01 介绍 Haproxy 官网 百家饭内容，将测试环境的最终结果整理了下 0x02 功能 负载均衡：L4(TCP) 和 L7(HTTP/HTTPS) 两种模式，支持 RR(roundrobin) / 静态 RR / LC / IP Hash/ URI Hash/ URL_PARAM Hash/ HTTP_HEADER Hash 等丰富的" /><meta name="keywords" content="TiDB, AirPlan, TiDB OPS, tidb-operator, 2pc, raft, databases, mysql, htap" />
-
-
-
-
-
-
-<meta name="generator" content="Hugo 0.78.2 with theme even" />
-
-
-<link rel="canonical" href="https://ap.tidb.cc/post/20170610-haproxy/" />
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="manifest" href="/manifest.json">
-<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
-
-<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-<link href="/dist/even.04bd84cd.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
-
-
-<meta property="og:title" content="负载均衡 - HAProxy &amp; TiDB 配合食用" />
-<meta property="og:description" content="0x01 介绍 Haproxy 官网 百家饭内容，将测试环境的最终结果整理了下 0x02 功能 负载均衡：L4(TCP) 和 L7(HTTP/HTTPS) 两种模式，支持 RR(roundrobin) / 静态 RR / LC / IP Hash/ URI Hash/ URL_PARAM Hash/ HTTP_HEADER Hash 等丰富的" />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://ap.tidb.cc/post/20170610-haproxy/" />
-<meta property="article:published_time" content="2017-06-10T00:00:00+08:00" />
-<meta property="article:modified_time" content="2020-01-20T00:00:00+08:00" />
-<meta itemprop="name" content="负载均衡 - HAProxy &amp; TiDB 配合食用">
-<meta itemprop="description" content="0x01 介绍 Haproxy 官网 百家饭内容，将测试环境的最终结果整理了下 0x02 功能 负载均衡：L4(TCP) 和 L7(HTTP/HTTPS) 两种模式，支持 RR(roundrobin) / 静态 RR / LC / IP Hash/ URI Hash/ URL_PARAM Hash/ HTTP_HEADER Hash 等丰富的">
-<meta itemprop="datePublished" content="2017-06-10T00:00:00+08:00" />
-<meta itemprop="dateModified" content="2020-01-20T00:00:00+08:00" />
-<meta itemprop="wordCount" content="1361">
-
-
-
-<meta itemprop="keywords" content="TiDB,HAProxy,AirPlan," />
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="负载均衡 - HAProxy &amp; TiDB 配合食用"/>
-<meta name="twitter:description" content="0x01 介绍 Haproxy 官网 百家饭内容，将测试环境的最终结果整理了下 0x02 功能 负载均衡：L4(TCP) 和 L7(HTTP/HTTPS) 两种模式，支持 RR(roundrobin) / 静态 RR / LC / IP Hash/ URI Hash/ URL_PARAM Hash/ HTTP_HEADER Hash 等丰富的"/>
-
-<!--[if lte IE 9]>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
-<![endif]-->
-
-<!--[if lt IE 9]>
-  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
-<![endif]-->
-
-</head>
-<body>
-  <div id="mobile-navbar" class="mobile-navbar">
-  <div class="mobile-header-logo">
-    <a href="/" class="logo">TiDB AirPlan</a>
-  </div>
-  <div class="mobile-navbar-icon">
-    <span></span>
-    <span></span>
-    <span></span>
-  </div>
-</div>
-<nav id="mobile-menu" class="mobile-menu slideout-menu">
-  <ul class="mobile-menu-list">
-    <a href="/post/">
-        <li class="mobile-menu-item">Blog</li>
-      </a><a href="/look/">
-        <li class="mobile-menu-item">Look</li>
-      </a><a href="/tags/">
-        <li class="mobile-menu-item">Tags</li>
-      </a><a href="/categories/">
-        <li class="mobile-menu-item">Categories</li>
-      </a><a href="/about/">
-        <li class="mobile-menu-item">About</li>
-      </a>
-  </ul>
-</nav>
-  <div class="container" id="mobile-panel">
-    <header id="header" class="header">
-        <div class="logo-wrapper">
-  <a href="/" class="logo">TiDB AirPlan</a>
-</div>
-
-<nav class="site-navbar">
-  <ul id="menu" class="menu">
-    <li class="menu-item">
-        <a class="menu-item-link" href="/post/">Blog</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/look/">Look</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/tags/">Tags</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/categories/">Categories</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/about/">About</a>
-      </li>
-  </ul>
-</nav>
-    </header>
-
-    <main id="main" class="main">
-      <div class="content-wrapper">
-        <div id="content" class="content">
-          <article class="post">
-    
-    <header class="post-header">
-      <h1 class="post-title">负载均衡 - HAProxy &amp; TiDB 配合食用</h1>
-
-      <div class="post-meta">
-        <span class="post-time"> 2017-06-10 </span>
-        <div class="post-category">
-            <a href="/categories/software/"> software </a>
-            </div>
-          <span class="more-meta"> 1361 words </span>
-          <span class="more-meta"> 3 mins read </span>
-        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
-      </div>
-    </header>
-
-    <div class="post-toc" id="post-toc">
-  <h2 class="post-toc-title">Contents</h2>
-  <div class="post-toc-content">
-    <nav id="TableOfContents">
-  <ul>
-    <li><a href="#0x01-介绍">0x01 介绍</a></li>
-    <li><a href="#0x02-功能">0x02 功能</a>
-      <ul>
-        <li><a href="#balance">balance</a></li>
-        <li><a href="#real-server">real server</a></li>
-      </ul>
-    </li>
-    <li><a href="#0x03-配置文件示例">0x03 配置文件示例</a></li>
-    <li><a href="#0x04-faq">0x04 FAQ</a>
-      <ul>
-        <li><a href="#ha">HA</a></li>
-      </ul>
-    </li>
-  </ul>
-</nav>
-  </div>
-</div>
-  <div class="post-outdated">
-    <div class="warn">
-      <p>[NOTE] Updated <span class="timeago" datetime="2020-01-20T00:00:00" title="January 20, 2020">January 20, 2020</span>. This article may have outdated content or subject matter.</p>
-    </div>
-  </div>
-    <div class="post-content">
-      <h2 id="0x01-介绍">0x01 介绍</h2>
-<ul>
-<li>Haproxy <a href="http://www.haproxy.org" title="ap.tidb.cc 负载均衡 - HAProxy &amp; TiDB 配合食用">官网</a></li>
-</ul>
-<blockquote>
-<p>百家饭内容，将测试环境的最终结果整理了下</p>
-</blockquote>
-<p><img src="./haproxy-1.png" alt="Haproxy 逻辑架构" title="ap.tidb.cc 负载均衡 - HAProxy &amp; TiDB 配合食用"></p>
-<h2 id="0x02-功能">0x02 功能</h2>
-<ul>
-<li>负载均衡：L4(TCP) 和 L7(HTTP/HTTPS) 两种模式，支持 RR(roundrobin) / 静态 RR / LC / IP Hash/ URI Hash/ URL_PARAM Hash/ HTTP_HEADER Hash 等丰富的负载均衡算法</li>
-<li>健康检查：支持 TCP 和 HTTP 两种健康检查模式</li>
-<li>会话保持：对于未实现会话共享的应用集群，可通过 Insert Cookie / Rewrite Cookie / Prefix Cookie，以及上述的多种 Hash 方式实现会话保持</li>
-<li>SSL：HAProxy 可以解析 HTTPS 协议，并能够将请求解密为 HTTP 后向后端传输</li>
-<li>HTTP：请求重写与重定向</li>
-<li>监控与统计：HAProxy 提供了基于 Web 的统计信息页面，展现健康状态和流量数据。基于此功能，使用者可以开发监控程序来监控 HAProxy 的状态</li>
-</ul>
-<h3 id="balance">balance</h3>
-<ul>
-<li>HAProxy 的算法现在也越来越多了，具体有如下：
-<ul>
-<li>roundrobin，表示简单的轮询，这个不多说，这个是负载均衡基本都具备的</li>
-<li>static-rr，表示根据权重，建议关注</li>
-<li>leastconn，表示最少连接者先处理，建议关注</li>
-<li>ource，表示根据请求源 IP，这个跟 Nginx 的 IP_hash 机制类似，我们用其作为解决 session 问题的一种方法，建议关注</li>
-<li>ri，表示根据请求的 URI</li>
-<li>rl_param，表示根据请求的 URl 参数&rsquo;balance url_param' requires an URL parameter name</li>
-<li>hdr(name)，表示根据 HTTP 请求头来锁定每一次 HTTP 请求</li>
-<li>rdp-cookie(name)，表示根据 cookie(name) 来锁定并哈希每一次 TCP 请求</li>
-</ul>
-</li>
-</ul>
-<h3 id="real-server">real server</h3>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="l">server tidb-3 172.16.18.13:4000 check port 4000 inter 2000 rise 2 fall 3</span><span class="w">
-</span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>port 4000  : 对目标机器 22 号端口健康检查；按照以下规则探测</li>
-<li>inter 2000  : 指间隔 2 秒做一次状态检测</li>
-<li>rise 2      : 检测 2 次状态为成功，恢复对该 RS 的流量转发</li>
-<li>fall 3      : 连续 3 次检测失败会被踢掉流量转发</li>
-</ul>
-<h2 id="0x03-配置文件示例">0x03 配置文件示例</h2>
-<blockquote>
-<p>TiDB or MySQL 需要使用 L4 (OSI) TCP 层模式</p>
-</blockquote>
-<ul>
-<li>使用以下配置文件，可以通过 <code>http://hostIP:1111</code> 查看 HAProxy 运行状态</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span><span class="lnt">33
-</span><span class="lnt">34
-</span><span class="lnt">35
-</span><span class="lnt">36
-</span><span class="lnt">37
-</span><span class="lnt">38
-</span><span class="lnt">39
-</span><span class="lnt">40
-</span><span class="lnt">41
-</span><span class="lnt">42
-</span><span class="lnt">43
-</span><span class="lnt">44
-</span><span class="lnt">45
-</span><span class="lnt">46
-</span><span class="lnt">47
-</span><span class="lnt">48
-</span><span class="lnt">49
-</span><span class="lnt">50
-</span><span class="lnt">51
-</span><span class="lnt">52
-</span><span class="lnt">53
-</span><span class="lnt">54
-</span><span class="lnt">55
-</span><span class="lnt">56
-</span><span class="lnt">57
-</span><span class="lnt">58
-</span><span class="lnt">59
-</span><span class="lnt">60
-</span><span class="lnt">61
-</span><span class="lnt">62
-</span><span class="lnt">63
-</span><span class="lnt">64
-</span><span class="lnt">65
-</span><span class="lnt">66
-</span><span class="lnt">67
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-fallback" data-lang="fallback">#---------------------------------------------------------------------
-# Example configuration for a possible web application.  See the
-# full configuration options online.
-#
-#   http://haproxy.1wt.eu/download/1.4/doc/configuration.txt
-#
-#---------------------------------------------------------------------
-
-#---------------------------------------------------------------------
-# Global settings
-#---------------------------------------------------------------------
-global
-    # to have these messages end up in /var/log/haproxy.log you will
-    # need to:
-    #
-    # 1) configure syslog to accept network log events.  This is done
-    #    by adding the &#39;-r&#39; option to the SYSLOGD_OPTIONS in
-    #    /etc/sysconfig/syslog
-    #
-    # 2) configure local2 events to go to the /var/log/haproxy.log
-    #   file. A line like the following can be added to
-    #   /etc/sysconfig/syslog
-    #
-    #    local2.*                       /var/log/haproxy.log
-    #
-    log         127.0.0.1 local2
-
-    chroot      /var/lib/haproxy
-    pidfile     /var/run/haproxy.pid
-    maxconn     4000  # 最大连接数
-    nbproc      1     # haproxy 进程数，默认为单进程
-    user        haproxy
-    group       haproxy
-    daemon
-
-    # turn on stats unix socket
-    stats socket /var/lib/haproxy/stats
-
-defaults
-    log global
-    retries 2
-  timeout connect  2s       # 连接超时
-  timeout client 30000s     # 客户端超时
-  timeout server 30000s     # 服务器超时
-  option abortonclose       # 当服务器负载很高的时候，自动结束掉当队列处理比较久的链接【不建议使用】
-  option redispatch         # 当 serverId 对应的服务器挂掉后，强制定向到其他健康的服务器【不建议使用】
-
-listen admin_stats
-  bind 0.0.0.0:1111               # 监控页面地址 &amp; 端口
-  mode http
-  option httplog                  # 采用 http 日志格式
-  maxconn 4000                    # 默认的最大连接数
-  stats refresh 30s               # 统计页面自动刷新时间
-  stats uri /haproxy              # 统计页面 url
-  stats realm Haproxy             # 统计页面密码框上提示文本
-  stats auth admin:pingcap123     # 设置监控页面的用户和密码: admin, 可以设置多个用户名
-  stats hide-version              # 隐藏统计页面上 HAProxy 的版本信息
-  stats  admin if TRUE            # 设置手工启动 / 禁用，后端服务器 (haproxy-1.4.9 以后版本)
-
-
-listen tidb-cluster
-    bind 0.0.0.0:3306     # 对外 vip【virtual ip】 端口
-    mode tcp              # 后端 mysql/tidb 需要使用 tcp / OSI L4 协议转发流量
-    balance roundrobin    # 轮询转发流量
-    server tidb-1 172.16.18.11:4000 check port 4000 inter 2000 rise 2 fall 3
-    server tidb-2 172.16.18.12:4000 check port 4000 inter 2000 rise 2 fall 3
-    server tidb-3 172.16.18.13:4000 check port 4000 inter 2000 rise 2 fall 3
-</code></pre></td></tr></table>
-</div>
-</div><h2 id="0x04-faq">0x04 FAQ</h2>
-<p>如果不能转发流量，你可以检查下这里：在配置内核参数开发转发功能，在 <code>/etc/sysctl.conf</code> 文件中底部添加 <code>net.ipv4.ip_forward = 1</code>；最后执行 <code>sysctl -p</code> 命令使其生效</p>
-<h3 id="ha">HA</h3>
-<p>Haproxy 的 HA 服务需要一个 keepalived 支持，这个 keepalived 主要作用是给 Linux 加了个灵活的网卡。方便主机切换网卡使用。</p>
-<p><img src="./haproxy-ha.png" alt="haproxy HA" title="ap.tidb.cc 负载均衡 - HAProxy &amp; TiDB 配合食用"></p>
-<p>除 keep alived 服务之外其实还有 ospf + haproxy / ospf + lvs 架构，还有 ospf + lvs &amp; haproxy 高级组网方式。【这里的 ospf + lvs 中的 lvs 需要使用 fullnet 流量转发策略】</p>
-<p><img src="./ospf-lvs.png" alt="ospf + lvs" title="ap.tidb.cc 负载均衡 - HAProxy &amp; TiDB 配合食用"></p>
-
-    </div>
-
-    <div class="post-copyright">
-  <p class="copyright-item">
-    <span class="item-title">Author</span>
-    <span class="item-content">Jeff</span>
-  </p>
-  <p class="copyright-item">
-    <span class="item-title">LastMod</span>
-    <span class="item-content">
-        2020-01-20
-        
-    </span>
-  </p>
-  
-  <p class="copyright-item">
-    <span class="item-title">License</span>
-    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span>
-  </p>
-</div>
-<footer class="post-footer">
-      <div class="post-tags">
-          <a href="/tags/tidb/">TiDB</a>
-          <a href="/tags/haproxy/">HAProxy</a>
-          <a href="/tags/airplan/">AirPlan</a>
-          </div>
-      <nav class="post-nav">
-        <a class="prev" href="/post/20170809-transfer.sh/">
-            <i class="iconfont icon-left"></i>
-            <span class="prev-text nav-default">Linux - Transfer.sh 一键文件服务器</span>
-            <span class="prev-text nav-mobile">Prev</span>
-          </a>
-        <a class="next" href="/post/20170607-prometheus-faq/">
-            <span class="next-text nav-default">监控架构 - TIDB 监控运维 FAQ</span>
-            <span class="next-text nav-mobile">Next</span>
-            <i class="iconfont icon-right"></i>
-          </a>
-      </nav>
-    </footer>
-  </article>
-        </div>
-        
-
-  
-
-  
-
-      </div>
-    </main>
-
-    <footer id="footer" class="footer">
-      <div class="social-links">
-      <a href="https://github.com/BigerCAP/TiDB-AirPlan/issues" class="iconfont icon-github" title="github"></a>
-  <a href="https://ap.tidb.cc/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
-</div>
-
-<div class="copyright">
-  <span class="power-by">
-    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
-  </span>
-  <span class="division">|</span>
-  <span class="theme-info">
-    Theme - 
-    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
-  </span>
-
-  <div class="busuanzi-footer">
-    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
-      <span class="division">|</span>
-    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
-  </div>
-
-  <span class="copyright-year">
-    &copy; 
-    2017 - 
-    2020
-    <span class="heart">
-      <i class="iconfont icon-heart"></i>
-    </span>
-    <span class="author">TiDB - AirPlan</span>
-  </span>
-</div>
-    </footer>
-
-    <div class="back-to-top" id="back-to-top">
-      <i class="iconfont icon-up"></i>
-    </div>
-  </div>
-  
-  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js" integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js" integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin="anonymous"></script>
-  <script><!-- NOTE: timeago.js uses the language code format like "zh_CN" (underscore and case sensitive) -->
-    var languageCode = "en".replace(/-/g, '_').replace(/_(.*)/, function ($0, $1) {return $0.replace($1, $1.toUpperCase());});
-    timeago().render(document.querySelectorAll('.timeago'), languageCode);
-    timeago.cancel();  
-  </script>
-<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
-
-
-
-
-
-
-
-
-</body>
-</html>
+<!doctype html><html lang=en><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge,chrome=1"><title>负载均衡 - HAProxy & TiDB 配合食用 - AirPlan - A biger solution</title><meta name=renderer content="webkit"><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta http-equiv=cache-control content="no-transform"><meta http-equiv=cache-control content="no-siteapp"><meta name=theme-color content="#f8f5ec"><meta name=msapplication-navbutton-color content="#f8f5ec"><meta name=apple-mobile-web-app-capable content="yes"><meta name=apple-mobile-web-app-status-bar-style content="#f8f5ec"><meta name=author content="Jeff"><meta name=description content="0x01 介绍 Haproxy 官网 百家饭内容，将测试环境的最终结果整理了下 0x02 功能 负载均衡：L4(TCP) 和 L7(HTTP/HTTPS) 两种模式，支持 RR(roundrobin) / 静态 RR / LC / IP Hash/ URI Hash/ URL_PARAM Hash/ HTTP_HEADER Hash 等丰富的"><meta name=keywords content="TiDB,AirPlan,TiDB OPS,tidb-operator,2pc,raft,databases,mysql,htap"><meta name=generator content="Hugo 0.110.0 with theme even"><link rel=canonical href=https://ap.biger.cc/post/20170610-haproxy/><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/manifest.json><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><script async src=//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js></script>
+<link href=/dist/even.04bd84cd.min.css rel=stylesheet><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin=anonymous><meta property="og:title" content="负载均衡 - HAProxy & TiDB 配合食用"><meta property="og:description" content="0x01 介绍 Haproxy 官网 百家饭内容，将测试环境的最终结果整理了下 0x02 功能 负载均衡：L4(TCP) 和 L7(HTTP/HTTPS) 两种模式，支持 RR(roundrobin) / 静态 RR / LC / IP Hash/ URI Hash/ URL_PARAM Hash/ HTTP_HEADER Hash 等丰富的"><meta property="og:type" content="article"><meta property="og:url" content="https://ap.biger.cc/post/20170610-haproxy/"><meta property="article:section" content="post"><meta property="article:published_time" content="2017-06-10T00:00:00+08:00"><meta property="article:modified_time" content="2020-01-20T00:00:00+08:00"><meta itemprop=name content="负载均衡 - HAProxy & TiDB 配合食用"><meta itemprop=description content="0x01 介绍 Haproxy 官网 百家饭内容，将测试环境的最终结果整理了下 0x02 功能 负载均衡：L4(TCP) 和 L7(HTTP/HTTPS) 两种模式，支持 RR(roundrobin) / 静态 RR / LC / IP Hash/ URI Hash/ URL_PARAM Hash/ HTTP_HEADER Hash 等丰富的"><meta itemprop=datePublished content="2017-06-10T00:00:00+08:00"><meta itemprop=dateModified content="2020-01-20T00:00:00+08:00"><meta itemprop=wordCount content="1361"><meta itemprop=keywords content="TiDB,HAProxy,AirPlan,"><meta name=twitter:card content="summary"><meta name=twitter:title content="负载均衡 - HAProxy & TiDB 配合食用"><meta name=twitter:description content="0x01 介绍 Haproxy 官网 百家饭内容，将测试环境的最终结果整理了下 0x02 功能 负载均衡：L4(TCP) 和 L7(HTTP/HTTPS) 两种模式，支持 RR(roundrobin) / 静态 RR / LC / IP Hash/ URI Hash/ URL_PARAM Hash/ HTTP_HEADER Hash 等丰富的"><!--[if lte IE 9]><script src=https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js></script><![endif]--><!--[if lt IE 9]><script src=https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js></script>
+<script src=https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js></script><![endif]--></head><body><div id=mobile-navbar class=mobile-navbar><div class=mobile-header-logo><a href=/ class=logo>AirPlan</a></div><div class=mobile-navbar-icon><span></span>
+<span></span>
+<span></span></div></div><nav id=mobile-menu class="mobile-menu slideout-menu"><ul class=mobile-menu-list><a href=/post/><li class=mobile-menu-item>Blog</li></a><a href=/look/><li class=mobile-menu-item>Look</li></a><a href=/tags/><li class=mobile-menu-item>Tags</li></a><a href=/categories/><li class=mobile-menu-item>Categories</li></a><a href=/about/><li class=mobile-menu-item>About</li></a></ul></nav><div class=container id=mobile-panel><header id=header class=header><div class=logo-wrapper><a href=/ class=logo>AirPlan</a></div><nav class=site-navbar><ul id=menu class=menu><li class=menu-item><a class=menu-item-link href=/post/>Blog</a></li><li class=menu-item><a class=menu-item-link href=/look/>Look</a></li><li class=menu-item><a class=menu-item-link href=/tags/>Tags</a></li><li class=menu-item><a class=menu-item-link href=/categories/>Categories</a></li><li class=menu-item><a class=menu-item-link href=/about/>About</a></li></ul></nav></header><main id=main class=main><div class=content-wrapper><div id=content class=content><article class=post><header class=post-header><h1 class=post-title>负载均衡 - HAProxy & TiDB 配合食用</h1><div class=post-meta><span class=post-time>2017-06-10</span><div class=post-category><a href=/categories/software/>software</a></div><span class=more-meta>1361 words</span>
+<span class=more-meta>3 mins read</span>
+<span id=busuanzi_container_page_pv class=more-meta><span id=busuanzi_value_page_pv><img src=/img/spinner.svg alt=spinner.svg></span> times read</span></div></header><div class=post-toc id=post-toc><h2 class=post-toc-title>Contents</h2><div class=post-toc-content><nav id=TableOfContents><ul><li><a href=#0x01-介绍>0x01 介绍</a></li><li><a href=#0x02-功能>0x02 功能</a><ul><li><a href=#balance>balance</a></li><li><a href=#real-server>real server</a></li></ul></li><li><a href=#0x03-配置文件示例>0x03 配置文件示例</a></li><li><a href=#0x04-faq>0x04 FAQ</a><ul><li><a href=#ha>HA</a></li></ul></li></ul></nav></div></div><div class=post-outdated><div class=warn><p>[NOTE] Updated <span class=timeago datetime=2020-01-20T00:00:00 title="January 20, 2020">January 20, 2020</span>. This article may have outdated content or subject matter.</p></div></div><div class=post-content><h2 id=0x01-介绍>0x01 介绍</h2><ul><li>Haproxy <a href=http://www.haproxy.org title="ap.tidb.cc 负载均衡 - HAProxy & TiDB 配合食用">官网</a></li></ul><blockquote><p>百家饭内容，将测试环境的最终结果整理了下</p></blockquote><p><img src=./haproxy-1.png alt="Haproxy 逻辑架构" title="ap.tidb.cc 负载均衡 - HAProxy & TiDB 配合食用"></p><h2 id=0x02-功能>0x02 功能</h2><ul><li>负载均衡：L4(TCP) 和 L7(HTTP/HTTPS) 两种模式，支持 RR(roundrobin) / 静态 RR / LC / IP Hash/ URI Hash/ URL_PARAM Hash/ HTTP_HEADER Hash 等丰富的负载均衡算法</li><li>健康检查：支持 TCP 和 HTTP 两种健康检查模式</li><li>会话保持：对于未实现会话共享的应用集群，可通过 Insert Cookie / Rewrite Cookie / Prefix Cookie，以及上述的多种 Hash 方式实现会话保持</li><li>SSL：HAProxy 可以解析 HTTPS 协议，并能够将请求解密为 HTTP 后向后端传输</li><li>HTTP：请求重写与重定向</li><li>监控与统计：HAProxy 提供了基于 Web 的统计信息页面，展现健康状态和流量数据。基于此功能，使用者可以开发监控程序来监控 HAProxy 的状态</li></ul><h3 id=balance>balance</h3><ul><li>HAProxy 的算法现在也越来越多了，具体有如下：<ul><li>roundrobin，表示简单的轮询，这个不多说，这个是负载均衡基本都具备的</li><li>static-rr，表示根据权重，建议关注</li><li>leastconn，表示最少连接者先处理，建议关注</li><li>ource，表示根据请求源 IP，这个跟 Nginx 的 IP_hash 机制类似，我们用其作为解决 session 问题的一种方法，建议关注</li><li>ri，表示根据请求的 URI</li><li>rl_param，表示根据请求的 URl 参数&rsquo;balance url_param&rsquo; requires an URL parameter name</li><li>hdr(name)，表示根据 HTTP 请求头来锁定每一次 HTTP 请求</li><li>rdp-cookie(name)，表示根据 cookie(name) 来锁定并哈希每一次 TCP 请求</li></ul></li></ul><h3 id=real-server>real server</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-yaml data-lang=yaml><span class=line><span class=cl><span class=l>server tidb-3 172.16.18.13:4000 check port 4000 inter 2000 rise 2 fall 3</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><ul><li>port 4000 : 对目标机器 22 号端口健康检查；按照以下规则探测</li><li>inter 2000 : 指间隔 2 秒做一次状态检测</li><li>rise 2 : 检测 2 次状态为成功，恢复对该 RS 的流量转发</li><li>fall 3 : 连续 3 次检测失败会被踢掉流量转发</li></ul><h2 id=0x03-配置文件示例>0x03 配置文件示例</h2><blockquote><p>TiDB or MySQL 需要使用 L4 (OSI) TCP 层模式</p></blockquote><ul><li>使用以下配置文件，可以通过 <code>http://hostIP:1111</code> 查看 HAProxy 运行状态</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span><span class=lnt>56
+</span><span class=lnt>57
+</span><span class=lnt>58
+</span><span class=lnt>59
+</span><span class=lnt>60
+</span><span class=lnt>61
+</span><span class=lnt>62
+</span><span class=lnt>63
+</span><span class=lnt>64
+</span><span class=lnt>65
+</span><span class=lnt>66
+</span><span class=lnt>67
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>#---------------------------------------------------------------------
+</span></span><span class=line><span class=cl># Example configuration for a possible web application.  See the
+</span></span><span class=line><span class=cl># full configuration options online.
+</span></span><span class=line><span class=cl>#
+</span></span><span class=line><span class=cl>#   http://haproxy.1wt.eu/download/1.4/doc/configuration.txt
+</span></span><span class=line><span class=cl>#
+</span></span><span class=line><span class=cl>#---------------------------------------------------------------------
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>#---------------------------------------------------------------------
+</span></span><span class=line><span class=cl># Global settings
+</span></span><span class=line><span class=cl>#---------------------------------------------------------------------
+</span></span><span class=line><span class=cl>global
+</span></span><span class=line><span class=cl>    # to have these messages end up in /var/log/haproxy.log you will
+</span></span><span class=line><span class=cl>    # need to:
+</span></span><span class=line><span class=cl>    #
+</span></span><span class=line><span class=cl>    # 1) configure syslog to accept network log events.  This is done
+</span></span><span class=line><span class=cl>    #    by adding the &#39;-r&#39; option to the SYSLOGD_OPTIONS in
+</span></span><span class=line><span class=cl>    #    /etc/sysconfig/syslog
+</span></span><span class=line><span class=cl>    #
+</span></span><span class=line><span class=cl>    # 2) configure local2 events to go to the /var/log/haproxy.log
+</span></span><span class=line><span class=cl>    #   file. A line like the following can be added to
+</span></span><span class=line><span class=cl>    #   /etc/sysconfig/syslog
+</span></span><span class=line><span class=cl>    #
+</span></span><span class=line><span class=cl>    #    local2.*                       /var/log/haproxy.log
+</span></span><span class=line><span class=cl>    #
+</span></span><span class=line><span class=cl>    log         127.0.0.1 local2
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    chroot      /var/lib/haproxy
+</span></span><span class=line><span class=cl>    pidfile     /var/run/haproxy.pid
+</span></span><span class=line><span class=cl>    maxconn     4000  # 最大连接数
+</span></span><span class=line><span class=cl>    nbproc      1     # haproxy 进程数，默认为单进程
+</span></span><span class=line><span class=cl>    user        haproxy
+</span></span><span class=line><span class=cl>    group       haproxy
+</span></span><span class=line><span class=cl>    daemon
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    # turn on stats unix socket
+</span></span><span class=line><span class=cl>    stats socket /var/lib/haproxy/stats
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>defaults
+</span></span><span class=line><span class=cl>    log global
+</span></span><span class=line><span class=cl>    retries 2
+</span></span><span class=line><span class=cl>  timeout connect  2s       # 连接超时
+</span></span><span class=line><span class=cl>  timeout client 30000s     # 客户端超时
+</span></span><span class=line><span class=cl>  timeout server 30000s     # 服务器超时
+</span></span><span class=line><span class=cl>  option abortonclose       # 当服务器负载很高的时候，自动结束掉当队列处理比较久的链接【不建议使用】
+</span></span><span class=line><span class=cl>  option redispatch         # 当 serverId 对应的服务器挂掉后，强制定向到其他健康的服务器【不建议使用】
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>listen admin_stats
+</span></span><span class=line><span class=cl>  bind 0.0.0.0:1111               # 监控页面地址 &amp; 端口
+</span></span><span class=line><span class=cl>  mode http
+</span></span><span class=line><span class=cl>  option httplog                  # 采用 http 日志格式
+</span></span><span class=line><span class=cl>  maxconn 4000                    # 默认的最大连接数
+</span></span><span class=line><span class=cl>  stats refresh 30s               # 统计页面自动刷新时间
+</span></span><span class=line><span class=cl>  stats uri /haproxy              # 统计页面 url
+</span></span><span class=line><span class=cl>  stats realm Haproxy             # 统计页面密码框上提示文本
+</span></span><span class=line><span class=cl>  stats auth admin:pingcap123     # 设置监控页面的用户和密码: admin, 可以设置多个用户名
+</span></span><span class=line><span class=cl>  stats hide-version              # 隐藏统计页面上 HAProxy 的版本信息
+</span></span><span class=line><span class=cl>  stats  admin if TRUE            # 设置手工启动 / 禁用，后端服务器 (haproxy-1.4.9 以后版本)
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>listen tidb-cluster
+</span></span><span class=line><span class=cl>    bind 0.0.0.0:3306     # 对外 vip【virtual ip】 端口
+</span></span><span class=line><span class=cl>    mode tcp              # 后端 mysql/tidb 需要使用 tcp / OSI L4 协议转发流量
+</span></span><span class=line><span class=cl>    balance roundrobin    # 轮询转发流量
+</span></span><span class=line><span class=cl>    server tidb-1 172.16.18.11:4000 check port 4000 inter 2000 rise 2 fall 3
+</span></span><span class=line><span class=cl>    server tidb-2 172.16.18.12:4000 check port 4000 inter 2000 rise 2 fall 3
+</span></span><span class=line><span class=cl>    server tidb-3 172.16.18.13:4000 check port 4000 inter 2000 rise 2 fall 3
+</span></span></code></pre></td></tr></table></div></div><h2 id=0x04-faq>0x04 FAQ</h2><p>如果不能转发流量，你可以检查下这里：在配置内核参数开发转发功能，在 <code>/etc/sysctl.conf</code> 文件中底部添加 <code>net.ipv4.ip_forward = 1</code>；最后执行 <code>sysctl -p</code> 命令使其生效</p><h3 id=ha>HA</h3><p>Haproxy 的 HA 服务需要一个 keepalived 支持，这个 keepalived 主要作用是给 Linux 加了个灵活的网卡。方便主机切换网卡使用。</p><p><img src=./haproxy-ha.png alt="haproxy HA" title="ap.tidb.cc 负载均衡 - HAProxy & TiDB 配合食用"></p><p>除 keep alived 服务之外其实还有 ospf + haproxy / ospf + lvs 架构，还有 ospf + lvs & haproxy 高级组网方式。【这里的 ospf + lvs 中的 lvs 需要使用 fullnet 流量转发策略】</p><p><img src=./ospf-lvs.png alt="ospf + lvs" title="ap.tidb.cc 负载均衡 - HAProxy & TiDB 配合食用"></p></div><div class=post-copyright><p class=copyright-item><span class=item-title>Author</span>
+<span class=item-content>Jeff</span></p><p class=copyright-item><span class=item-title>LastMod</span>
+<span class=item-content>2020-01-20</span></p><p class=copyright-item><span class=item-title>License</span>
+<span class=item-content><a rel="license noopener" href=https://creativecommons.org/licenses/by-nc-nd/4.0/ target=_blank>CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span></p></div><footer class=post-footer><div class=post-tags><a href=/tags/tidb/>TiDB</a>
+<a href=/tags/haproxy/>HAProxy</a>
+<a href=/tags/airplan/>AirPlan</a></div><nav class=post-nav><a class=prev href=/post/20170809-transfer.sh/><i class="iconfont icon-left"></i>
+<span class="prev-text nav-default">Linux - Transfer.sh 一键文件服务器</span>
+<span class="prev-text nav-mobile">Prev</span></a>
+<a class=next href=/post/20170607-prometheus-faq/><span class="next-text nav-default">监控架构 - TIDB 监控运维 FAQ</span>
+<span class="next-text nav-mobile">Next</span>
+<i class="iconfont icon-right"></i></a></nav></footer></article></div></div></main><footer id=footer class=footer><div class=social-links><a href=https://github.com/BigerCAP/TiDB-AirPlan/issues class="iconfont icon-github" title=github></a>
+<a href=https://ap.biger.cc/index.xml type=application/rss+xml class="iconfont icon-rss" title=rss></a></div><div class=copyright><span class=power-by>Powered by <a class=hexo-link href=https://gohugo.io>Hugo</a></span>
+<span class=division>|</span>
+<span class=theme-info>Theme -
+<a class=theme-link href=https://github.com/olOwOlo/hugo-theme-even>Even</a></span><div class=busuanzi-footer><span id=busuanzi_container_site_pv>site pv: <span id=busuanzi_value_site_pv><img src=/img/spinner.svg alt=spinner.svg></span></span>
+<span class=division>|</span>
+<span id=busuanzi_container_site_uv>site uv: <span id=busuanzi_value_site_uv><img src=/img/spinner.svg alt=spinner.svg></span></span></div><span class=copyright-year>&copy;
+2017 -
+2023
+<span class=heart><i class="iconfont icon-heart"></i></span>
+<span class=author>DB - AirPlan</span></span></div></footer><div class=back-to-top id=back-to-top><i class="iconfont icon-up"></i></div></div><script src=https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin=anonymous></script>
+<script>var languageCode="en".replace(/-/g,"_").replace(/_(.*)/,function(e,t){return e.replace(t,t.toUpperCase())});timeago().render(document.querySelectorAll(".timeago"),languageCode),timeago.cancel()</script><script type=text/javascript src=/dist/even.26188efa.min.js></script></body></html>

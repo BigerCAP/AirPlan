@@ -1,705 +1,132 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>总结 - Syncer 助力思维成长 - TiDB AirPlan - A biger solution</title>
-  <meta name="renderer" content="webkit" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-
-<meta http-equiv="Cache-Control" content="no-transform" />
-<meta http-equiv="Cache-Control" content="no-siteapp" />
-
-<meta name="theme-color" content="#f8f5ec" />
-<meta name="msapplication-navbutton-color" content="#f8f5ec">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
-
-
-<meta name="author" content="Jeff" /><meta name="description" content="0x00 背景 长期使用 Syncer 之后经过一番胡思乱想之后的总结经验，类似于“久病成医”的感觉 内容按照 201706 - 201806 期间使用经验整理，后续大致是不会遇见了，因为有了新" /><meta name="keywords" content="TiDB, AirPlan, TiDB OPS, tidb-operator, 2pc, raft, databases, mysql, htap" />
-
-
-
-
-
-
-<meta name="generator" content="Hugo 0.78.2 with theme even" />
-
-
-<link rel="canonical" href="https://ap.tidb.cc/post/20180605-syncer-mindmap/" />
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="manifest" href="/manifest.json">
-<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
-
-<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-<link href="/dist/even.04bd84cd.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
-
-
-<meta property="og:title" content="总结 - Syncer 助力思维成长" />
-<meta property="og:description" content="0x00 背景 长期使用 Syncer 之后经过一番胡思乱想之后的总结经验，类似于“久病成医”的感觉 内容按照 201706 - 201806 期间使用经验整理，后续大致是不会遇见了，因为有了新" />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://ap.tidb.cc/post/20180605-syncer-mindmap/" />
-<meta property="article:published_time" content="2018-06-05T00:00:00+08:00" />
-<meta property="article:modified_time" content="2020-01-20T00:00:00+08:00" />
-<meta itemprop="name" content="总结 - Syncer 助力思维成长">
-<meta itemprop="description" content="0x00 背景 长期使用 Syncer 之后经过一番胡思乱想之后的总结经验，类似于“久病成医”的感觉 内容按照 201706 - 201806 期间使用经验整理，后续大致是不会遇见了，因为有了新">
-<meta itemprop="datePublished" content="2018-06-05T00:00:00+08:00" />
-<meta itemprop="dateModified" content="2020-01-20T00:00:00+08:00" />
-<meta itemprop="wordCount" content="3320">
-
-
-
-<meta itemprop="keywords" content="Syncer,enterprise tools," />
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="总结 - Syncer 助力思维成长"/>
-<meta name="twitter:description" content="0x00 背景 长期使用 Syncer 之后经过一番胡思乱想之后的总结经验，类似于“久病成医”的感觉 内容按照 201706 - 201806 期间使用经验整理，后续大致是不会遇见了，因为有了新"/>
-
-<!--[if lte IE 9]>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
-<![endif]-->
-
-<!--[if lt IE 9]>
-  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
-<![endif]-->
-
-</head>
-<body>
-  <div id="mobile-navbar" class="mobile-navbar">
-  <div class="mobile-header-logo">
-    <a href="/" class="logo">TiDB AirPlan</a>
-  </div>
-  <div class="mobile-navbar-icon">
-    <span></span>
-    <span></span>
-    <span></span>
-  </div>
-</div>
-<nav id="mobile-menu" class="mobile-menu slideout-menu">
-  <ul class="mobile-menu-list">
-    <a href="/post/">
-        <li class="mobile-menu-item">Blog</li>
-      </a><a href="/look/">
-        <li class="mobile-menu-item">Look</li>
-      </a><a href="/tags/">
-        <li class="mobile-menu-item">Tags</li>
-      </a><a href="/categories/">
-        <li class="mobile-menu-item">Categories</li>
-      </a><a href="/about/">
-        <li class="mobile-menu-item">About</li>
-      </a>
-  </ul>
-</nav>
-  <div class="container" id="mobile-panel">
-    <header id="header" class="header">
-        <div class="logo-wrapper">
-  <a href="/" class="logo">TiDB AirPlan</a>
-</div>
-
-<nav class="site-navbar">
-  <ul id="menu" class="menu">
-    <li class="menu-item">
-        <a class="menu-item-link" href="/post/">Blog</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/look/">Look</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/tags/">Tags</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/categories/">Categories</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/about/">About</a>
-      </li>
-  </ul>
-</nav>
-    </header>
-
-    <main id="main" class="main">
-      <div class="content-wrapper">
-        <div id="content" class="content">
-          <article class="post">
-    
-    <header class="post-header">
-      <h1 class="post-title">总结 - Syncer 助力思维成长</h1>
-
-      <div class="post-meta">
-        <span class="post-time"> 2018-06-05 </span>
-        <div class="post-category">
-            <a href="/categories/troubleshooting/"> Troubleshooting </a>
-            </div>
-          <span class="more-meta"> 3320 words </span>
-          <span class="more-meta"> 7 mins read </span>
-        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
-      </div>
-    </header>
-
-    <div class="post-toc" id="post-toc">
-  <h2 class="post-toc-title">Contents</h2>
-  <div class="post-toc-content">
-    <nav id="TableOfContents">
-  <ul>
-    <li><a href="#0x00-背景">0x00 背景</a></li>
-    <li><a href="#0x01-syncer-faq">0x01 Syncer-FAQ</a></li>
-    <li><a href="#0x02-业务逻辑">0x02 业务逻辑</a></li>
-    <li><a href="#0x03-性能调优">0x03 性能调优</a></li>
-    <li><a href="#0x04-问题整理">0x04 问题整理</a>
-      <ul>
-        <li><a href="#上下游-schema-不一致场景">上下游 schema 不一致场景</a></li>
-        <li><a href="#unsupported-ddl">unsupported DDL</a></li>
-        <li><a href="#启动-syner-失败">启动 Syner 失败</a></li>
-        <li><a href="#数据同步不正常或数据上下游不一致">数据同步不正常或数据上下游不一致</a></li>
-        <li><a href="#mysql-a--b--c--syncer-同步场景">MySQL A &gt; B &gt; C &gt; Syncer 同步场景</a></li>
-      </ul>
-    </li>
-    <li><a href="#0x05-已-fixbug">0x05 已 fixbug</a>
-      <ul>
-        <li><a href="#gtid-开关问题">GTID 开关问题</a></li>
-        <li><a href="#syncer-未关闭的长连接">Syncer 未关闭的长连接</a></li>
-      </ul>
-    </li>
-    <li><a href="#0x06-问题排查示例">0x06 问题排查示例</a>
-      <ul>
-        <li><a href="#开启-debug-日志">开启 Debug 日志</a></li>
-        <li><a href="#查看下游-tidb-日志">查看下游 TiDB 日志</a></li>
-        <li><a href="#查看运行状态">查看运行状态</a></li>
-      </ul>
-    </li>
-  </ul>
-</nav>
-  </div>
-</div>
-  <div class="post-outdated">
-    <div class="warn">
-      <p>[NOTE] Updated <span class="timeago" datetime="2020-01-20T00:00:00" title="January 20, 2020">January 20, 2020</span>. This article may have outdated content or subject matter.</p>
-    </div>
-  </div>
-    <div class="post-content">
-      <h2 id="0x00-背景">0x00 背景</h2>
-<blockquote>
-<p>长期使用 Syncer 之后经过一番胡思乱想之后的总结经验，类似于“久病成医”的感觉
-内容按照 201706 - 201806 期间使用经验整理，后续大致是不会遇见了，因为有了新工具（DM）</p>
-</blockquote>
-<h2 id="0x01-syncer-faq">0x01 Syncer-FAQ</h2>
-<ul>
-<li>使用 Syncer 前请详细阅读官方 <a href="https://github.com/pingcap/docs-cn/blob/master/tools/syncer.md">Syncer</a> 文档</li>
-<li>Syncer 是一个 <strong>同步工具</strong> ，通过 Syncer 配置文件中的 [from] 获取上游 MySQL binlog 信息，解析 binlog 后会根据配置文件中的 skip-dmls、skip-ddls、replicate-do-db、replicate-do-table、route-rules 等参数匹配 or 过滤，然后将匹配 or 过滤后的数据集通过 SQL Client 的方式写入到 [to] 下游数据库</li>
-</ul>
-<h2 id="0x02-业务逻辑">0x02 业务逻辑</h2>
-<p><img src="180101-Syncer-FAQ.svg" alt="Syncer 业务逻辑，by: https://github.com/BigerCAP"></p>
-<ul>
-<li>Syncer 是个同步工具，Syncer 中分三个部分
-<ul>
-<li><strong>上游</strong> binlog 数据读取：这是个单线程模拟读取 MySQL binlog 内容，Syncer 针对 from binlog 有一定的 <a href="https://github.com/pingcap/docs-cn/blob/master/tools/syncer.md#syncer-%E5%90%8C%E6%AD%A5%E5%89%8D%E6%A3%80%E6%9F%A5">约束检查</a>，检查通过后开始拉取数据并进行数据预处理工作
-<ul>
-<li>目前 Syncer 拉取 binlog 不存在性能瓶颈 (远程网络读取 binlog 会受带宽质量影响)</li>
-<li>数据预处理工作是主动去掉 TiDB 目前不支持的 SQL format 、DML SQL format 转换、DDL Spilt 等内容</li>
-</ul>
-</li>
-<li><strong>中层</strong> 数据处理：将上游预处理的数据与配置文件中的 <code>skip-dmls、skip-ddls、replicate-do-db、replicate-do-table、route-rule</code> 参数做数据过滤、数据匹配、数据转换、数据检查
-<ul>
-<li>此处会消耗 Syncer 所在主机的计算资源、内存资源</li>
-</ul>
-</li>
-<li><strong>下游</strong> 数据消费：Syncer 作为 SQL Client 链接 TiDB 消费数据，由配置文件中 worker-count * batch 控制 Syncer 消费数据的速度
-<ul>
-<li>在数据消费时 binlog 的语句会被以下方式进行替换：
-<ul>
-<li>insert == replace</li>
-<li>update == update / update == delete + replace (safemode)</li>
-<li>delete == delete</li>
-</ul>
-</li>
-<li>数据消费过程中会记录下数据同步断点：Syncer 断点记录在 Syncer.meta 文件中， 格式是 binlog-name、Position 与 GTID
-<ul>
-<li>Syncer 会将上游一个大事务进行切分为多个小事务到下游执行，如在一个大事务内发生退出，Syncer 再次启动时会重新执行这个事务</li>
-<li>Syncer 是以 ROW format binlog 进行回放 SQL 语句，即使事务被重复执行也会保持一致性</li>
-</ul>
-</li>
-<li>此处会消耗 Syncer 所在主机的网络资源</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h2 id="0x03-性能调优">0x03 性能调优</h2>
-<ul>
-<li>Syncer 根据下游消费能力调整 worker-count 与 batch 参数控制其同步速度，worker-count 提供了并发能力，batch 是每个并发的数据量
-<ul>
-<li>worker-count 工作能力受 syncer 所在机器的 CPU 影响， worker-count 与 CPU 至少是 1:1 关系</li>
-<li>首先提高 worker-count(1-256 之间) ，batch 固定 (比如 100 )，当调大 worker-count 无法加快消费时，可以适当增加 batch 大小，不建议超过 1000
-<ul>
-<li>调整 worker-count * batch 时应当注意 <a href="https://github.com/pingcap/docs-cn/blob/master/tools/syncer.md#%E7%9B%91%E6%8E%A7%E6%96%B9%E6%A1%88" title="看这里可以知道如何配置 Syncer 监控">Syncer dashboard</a> 中的 <code>syncer_txn_costs_gauge_in_second</code> Panel，该项为 Syncer 执行语句到下游消费成功的时长 (正常该数值在 ms 级)</li>
-</ul>
-</li>
-<li>worker count * batch 等于最大消费 QPS ，实际运行过程会低于这个假设值，尤其当内外网之间进行同步时，此时应当注意内外网之间的最大带宽</li>
-</ul>
-</li>
-</ul>
-<h2 id="0x04-问题整理">0x04 问题整理</h2>
-<ul>
-<li>Syncer 在使用过程中会遇见以下错误：
-<ol>
-<li>Syncer 解析 binlog 出错：Syncer 目前支持的 binlog 有限，初始时按照 MySQL 5.7\5.6 版本开发，后期加入了 MariaDB 10 ；如果使用版本不在这个范围之内可能会出现一些异常错误。同时 MySQL 与 MariaDB 自身软件也会产生一些 binglog 相关的 BUG，这类 BUG 需要升级软件版本才可以解决</li>
-<li>Syncer 插入数据到下游出错：此类一般是下游 TiDB 不支持。此类报错与 SQL Client 执行 SQL 语句得到的报错一致</li>
-<li>Syncer 因为某些事件产生 panic (如使用了比较老版本的 MySQL)：此时需要联系 PingCAP 官方技术支持，发送业务场景、使用疑问信息到 <a href="mailto:info@pingcap.com">info@pingcap.com</a></li>
-<li>Syncer 使用过程中其他错误：如数据库权限问题、网络闪断或不可达、下游消费出现堵塞、写入冲突、数据同步慢、数据同步不正常 等，其实均可通过自建与阅读文档解决</li>
-</ol>
-</li>
-<li>Syncer 出现问题时应当先进行自检，完成以下步骤内容
-<ul>
-<li>Sycner <a href="https://github.com/pingcap/docs-cn/blob/master/tools/syncer.md#syncer-%E5%90%8C%E6%AD%A5%E5%89%8D%E6%A3%80%E6%9F%A5">同步前的一些检查项</a> ：检查上下游之间的参数是否符合需求</li>
-<li>Syncer <a href="https://github.com/pingcap/docs-cn/blob/master/tools/syncer.md#%E7%9B%91%E6%8E%A7%E6%96%B9%E6%A1%88">监控项 / 告警项配置</a> ：设置这个可以观察 Syncer 运行状态</li>
-<li>Syncer 数据同步不正常，应当先检查 <a href="https://github.com/pingcap/docs-cn/blob/master/tools/syncer.md#%E5%90%AF%E5%8A%A8-syncer">配置文件</a> 与 <a href="https://github.com/pingcap/docs-cn/blob/master/tools/syncer.md#%E6%8C%87%E5%AE%9A%E6%95%B0%E6%8D%AE%E5%BA%93%E5%90%8C%E6%AD%A5">route-rule</a>，检查这些是否与期望相等</li>
-<li>Syncer <a href="../Docs/180323-Systemd-Syncer.md">启动方式与守护进程</a></li>
-</ul>
-</li>
-</ul>
-<h3 id="上下游-schema-不一致场景">上下游 schema 不一致场景</h3>
-<ul>
-<li>该问题主要出现于分库分表，上游执行 DDL 后，Syncer 出现上下游 schema 信息不一致。</li>
-<li>原因是上游分表同步进步不一致，没有有效的通过中控机制锁住所有分表的 DDL 执行状态。</li>
-<li>日志输出如下：</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-fallback" data-lang="fallback">2018/07/18 19:21:17 main.go:79: [error] /home/jenkins/workspace/build_tidb_enterprise_tools_master/go/src/github.com/pingcap/tidb-enterprise-tools/syncer/syncer.go:529: gen insert sqls failed: insert columns and data mismatch in length: 25 vs 23, schema: CRM, table: ORDER
-/home/jenkins/workspace/build_tidb_enterprise_tools_master/go/src/github.com/pingcap/tidb-enterprise-tools/syncer/syncer.go:165:
-2018/07/18 19:21:17 syncer.go:752: [info] print status exits, err:context canceled
-</code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>
-<p>核验步骤</p>
-<ul>
-<li>通过 <code>show create table tablename</code> 核实上下游 schema info ，或者通过 mysqlbinlog 查看 binlog 内容，或者 syncer 开启 Debug 模式查看输出
-<ul>
-<li>mysqlbinlog 示例如下 (注意修改 binlogname 与 pos 点位置，可以使用 log 或者 syncer.meta 中的信息)
-<ul>
-<li><code>mysqlbinlog --base64-output=DECODE-ROWS  mysql-bin.002019 --start-position 430862799 --stop-position 430866627 -vv</code></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<p>解决方案</p>
-<ul>
-<li>如果数据量小，可以从新来一遍全量，然后再做增量数据</li>
-<li>联系 PingCAP 官方服务，官方会解决详细解决方案。
-<ul>
-<li>比如：去掉上下游 schema 检查，这种会有一定的潜在问题，如先执行 <code>alter table A add column</code>，紧随执行 <code>alter table A delete column</code>，此时数据会有影响。</li>
-<li>或者使用 Syncer 升级版 Data Migration Product Proposal (DM)，需要联系 PingCAP 商务支持 <a href="mailto:info@pingcap.com">info@pingcap.com</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="unsupported-ddl">unsupported DDL</h3>
-<blockquote>
-<p>Error 1105: unsupported modify column null to not null</p>
-</blockquote>
-<ul>
-<li>
-<p>Syncer 日志文件</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-SQL" data-lang="SQL"><span class="mi">2018</span><span class="o">/</span><span class="mi">09</span><span class="o">/</span><span class="mi">28</span> <span class="mi">18</span><span class="p">:</span><span class="mi">40</span><span class="p">:</span><span class="mi">54</span> <span class="n">db</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">123</span><span class="p">:</span> <span class="p">[</span><span class="n">warning</span><span class="p">]</span> <span class="p">[</span><span class="k">exec</span><span class="p">][</span><span class="k">sql</span><span class="p">]</span><span class="n">USE</span> <span class="o">`</span><span class="n">qxf</span><span class="o">`</span><span class="p">;</span> <span class="k">ALTER</span> <span class="k">TABLE</span> <span class="o">`</span><span class="n">fof_strategy</span><span class="o">`</span> <span class="k">MODIFY</span> <span class="k">COLUMN</span> <span class="o">`</span><span class="n">start_date</span><span class="o">`</span> <span class="n">datetime</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">;[</span><span class="n">args</span><span class="p">][][</span><span class="n">error</span><span class="p">]</span><span class="n">Error</span> <span class="mi">1105</span><span class="p">:</span> <span class="n">unsupported</span> <span class="k">modify</span> <span class="k">column</span> <span class="k">null</span> <span class="k">to</span> <span class="k">not</span> <span class="k">null</span>
-</code></pre></td></tr></table>
-</div>
-</div></li>
-<li>
-<p>问题原因</p>
-<ul>
-<li>这个错误是 TiDB 不支持  default null 与 default not null 之间的互相转换。详情阅读 <a href="https://github.com/pingcap/docs-cn/blob/master/sql/ddl.md#alter-table-%E8%AF%AD%E6%B3%95">官方文档 DDL 之 Alter table</a></li>
-</ul>
-</li>
-</ul>
-<h3 id="启动-syner-失败">启动 Syner 失败</h3>
-<ul>
-<li>
-<p>Meta 文件或者配置文件参数有回车符</p>
-<ul>
-<li><code>[error] Near line 3 (last key parsed ''): Strings cannot contain new lines.</code></li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-fallback" data-lang="fallback">2017/12/14 08:36:20 main.go:52: [info] config: log-level:info log-file:/root/prega-syncer/log/card.log log-rotate:day status-addr::11105 server-id:999 worker-count:32 batch:100 meta-file:/root/prega-syncer/meta/card.meta do-tables:[] do-dbs:[~^mmm*] ignore-tables:[] ignore-dbs:[] from:DBConfig(host:10.1.1.14, user:root, port:3306, pass:&lt;omitted&gt;) to:DBConfig(host:10.1.1.25, user:syncer, port:5555, pass:&lt;omitted&gt;) skip-sqls:[] route-rules:[] enable-gtid:true safe-mode:false git-hash: ba3ca1271bb63d58f4d4eecf6d189e353b40440a utc-build-time:[2017-11-23 11:34:40] go-version:go1.9.2
-2017/12/14 08:36:20 main.go:75: [error] Near line 3 (last key parsed &#39;&#39;): Strings cannot contain new lines.
-/home/jenkins/workspace/build_tidb_enterprise_tools_master/go/src/github.com/pingcap/tidb-enterprise-tools/syncer/meta.go:85:
-/home/jenkins/workspace/build_tidb_enterprise_tools_master/go/src/github.com/pingcap/tidb-enterprise-tools/syncer/syncer.go:136:
-2017/12/14 08:36:20 metrics.go:107: [info] listening on :11105 for status and metrics report.
-</code></pre></td></tr></table>
-</div>
-</div></li>
-</ul>
-<h3 id="数据同步不正常或数据上下游不一致">数据同步不正常或数据上下游不一致</h3>
-<blockquote>
-<p>数据同步不正常或数据上下游不一致问题检查</p>
-</blockquote>
-<ul>
-<li>
-<p>自检 <a href="https://github.com/pingcap/docs-cn/blob/master/tools/syncer.md#syncer-%E5%90%8C%E6%AD%A5%E5%89%8D%E6%A3%80%E6%9F%A5">checklist</a></p>
-</li>
-<li>
-<p>Syncer 正常运行，主库有插入数据，备库不同步</p>
-<ul>
-<li>
-<p>检查 binlog 是否存在</p>
-</li>
-<li>
-<p>检查 binlog 格式</p>
-</li>
-<li>
-<p>检查 binlog 内容</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span><span class="lnt">8
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-sql" data-lang="sql"><span class="n">MySQL</span> <span class="p">[(</span><span class="k">none</span><span class="p">)]</span><span class="o">&gt;</span> <span class="k">show</span> <span class="n">master</span> <span class="n">logs</span><span class="p">;</span>
-<span class="o">+</span><span class="c1">------------------+------------+
-</span><span class="c1"></span><span class="o">|</span> <span class="n">Log_name</span>         <span class="o">|</span> <span class="n">File_size</span>  <span class="o">|</span>
-<span class="o">+</span><span class="c1">------------------+------------+
-</span><span class="c1"></span><span class="o">|</span> <span class="n">mysql</span><span class="o">-</span><span class="n">bin</span><span class="p">.</span><span class="mi">000023</span> <span class="o">|</span> <span class="mi">1073742014</span> <span class="o">|</span>
-<span class="o">|</span> <span class="n">mysql</span><span class="o">-</span><span class="n">bin</span><span class="p">.</span><span class="mi">000024</span> <span class="o">|</span> <span class="mi">1073742302</span> <span class="o">|</span>
-<span class="o">|</span> <span class="n">mysql</span><span class="o">-</span><span class="n">bin</span><span class="p">.</span><span class="mi">000025</span> <span class="o">|</span>  <span class="mi">101832651</span> <span class="o">|</span>
-<span class="o">+</span><span class="c1">------------------+------------+
-</span></code></pre></td></tr></table>
-</div>
-</div></li>
-</ul>
-</li>
-<li>
-<p>如何区分 binlog 内容格式为 row 模式</p>
-<ul>
-<li>使用 <code>show master logs;</code> 查到最新的 binlog file name 。</li>
-<li>使用 <code>show binlog events in 'mysql-bin.000025'  limit 10;</code></li>
-<li>查看 Event_type 列是否有 <code>Write_rows</code> <code>Update_rows</code> 等值。</li>
-</ul>
-</li>
-<li>
-<p><code>SET GLOBAL binlog_format = ROW;</code> 修改 binlog 格式后，下一个 binlog file 才会生效。</p>
-<ul>
-<li>执行 <code>flush logs;</code> 手动刷新生成 binlog file 。</li>
-</ul>
-</li>
-<li>
-<p>查看 binlog 文件大小</p>
-<ul>
-<li>
-<p>默认 binlog file size  <code>show global variables like '%max_binlog_size%';</code></p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-sql" data-lang="sql"><span class="o">+</span><span class="c1">-----------------+------------+
-</span><span class="c1"></span><span class="o">|</span> <span class="n">Variable_name</span>   <span class="o">|</span> <span class="n">Value</span>      <span class="o">|</span>
-<span class="o">+</span><span class="c1">-----------------+------------+
-</span><span class="c1"></span><span class="o">|</span> <span class="n">max_binlog_size</span> <span class="o">|</span> <span class="mi">1073741824</span> <span class="o">|</span>
-<span class="o">+</span><span class="c1">-----------------+------------+
-</span></code></pre></td></tr></table>
-</div>
-</div></li>
-</ul>
-</li>
-</ul>
-<h3 id="mysql-a--b--c--syncer-同步场景">MySQL A &gt; B &gt; C &gt; Syncer 同步场景</h3>
-<p><img src="180101-Syncer-FAQ-181123.svg" alt="MySQL 主从从架构"></p>
-<ul>
-<li>MySQL 生产环境数据环境通过 MySQL “主从从” 架构实现高可用灾备模式
-<ul>
-<li>在该模式后面放置 syncer 工具同步数据到 TiDB Cluster, 如果未开启 log slave update 参数，会导致数据不一致。</li>
-<li>该参数具体功能以及主从之间其他参数可以查看 MySQL 官网 <a href="https://dev.mysql.com/doc/refman/8.0/en/replication-options-slave.html" title="TiDB-OPS, --log-slave-updates , MySQL 主从从模式">17.1.6.3 Replication Slave Options and Variables</a></li>
-</ul>
-</li>
-<li>该参数功能
-<ul>
-<li>从库只开启 log-bin 功能，不使用 log-slave-updates 功能
-<ul>
-<li>从库在主库复制的数据，不会写入 log-bin 文件</li>
-<li>直接向从库写入数据时，会写入 log-bin 文件</li>
-<li>此时 syncer 读到的数据并不是最终完整数据</li>
-</ul>
-</li>
-<li>从库开启 log-slave-updates 功能
-<ul>
-<li>从库从主库复制的数据会写入 log-bin 日志文件里</li>
-<li>此时 syncer 可读到最终完整数据</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h2 id="0x05-已-fixbug">0x05 已 fixbug</h2>
-<h3 id="gtid-开关问题">GTID 开关问题</h3>
-<ul>
-<li>
-<p>UUID 获取问题</p>
-<ul>
-<li>Syncer 引入 UUID 库版本问题，即时没有开启 enable-gtid，也会解析 binlog 中 UUID 信息，解析数据时失败</li>
-<li>与 syncer.meta 文件内 <code>binlog-gtid = &quot;&quot;</code> 信息无关</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-fallback" data-lang="fallback">2018/01/17 13:58:17 main.go:75: [error] uuid: invalid version number: %!s(uint8=101)
-</code></pre></td></tr></table>
-</div>
-</div></li>
-</ul>
-<h3 id="syncer-未关闭的长连接">Syncer 未关闭的长连接</h3>
-<ul>
-<li>
-<p>MySQL 上游出现由 Syncer 创建的大量长连接</p>
-<ul>
-<li>上游持续未插入数据，Syncer 会固定时间进行重连获取最新信息</li>
-<li>syncer 每隔一个小时会获取一次新的数据，但在建立新连接的时候未关闭老的连接，导致 mysql 出现非常多的长连接。导致业务告警。</li>
-<li>主要原因是，syncer 建立连接未进行正确关闭。</li>
-<li>日志 tps 持续为 0 ，通过 sql 查询上下游同步正常</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-fallback" data-lang="fallback">2017/12/30 00:17:40 syncer.go:803: [info] [syncer]total events = 102214510, total tps = 50, recent tps = 0, master-binlog = (mysql-bin.001244, 66802580), master-binlog-gtid=8c38f844-2985-11e7-a6f2-18ded76e567c:1-1838809963, syncer-binlog = (mysql-bin.001244, 66802580), syncer-binlog-gtid = 8c38f844-2985-11e7-a6f2-18ded76e567c:1-1838809963,b7ff0e7e-2985-11e7-a6f3-18ded76e34de:1-37
-</code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>通过 <code>show processlist</code> 查看到很多长连接，通过相邻 time 相减得到固定值 3614s ，确定每隔一段时间去检查一次信息。</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-SQL" data-lang="SQL"><span class="mi">849978</span>  <span class="n">sync_tidb</span>       <span class="mi">10</span><span class="p">.</span><span class="mi">1</span><span class="p">.</span><span class="mi">1</span><span class="p">.</span><span class="mi">2</span><span class="p">:</span><span class="mi">49773</span>        <span class="k">NULL</span>    <span class="n">Binlog</span> <span class="n">Dump</span> <span class="n">GTID</span>        <span class="mi">401307</span>  <span class="n">Master</span> <span class="n">has</span> <span class="n">sent</span> <span class="k">all</span> <span class="n">binlog</span> <span class="k">to</span> <span class="n">slave</span><span class="p">;</span> <span class="n">waiting</span> <span class="k">for</span> <span class="n">binlog</span> <span class="k">to</span> <span class="n">be</span> <span class="n">updated</span>   <span class="k">NULL</span>
-<span class="mi">850140</span>  <span class="n">sync_tidb</span>       <span class="mi">10</span><span class="p">.</span><span class="mi">1</span><span class="p">.</span><span class="mi">1</span><span class="p">.</span><span class="mi">2</span><span class="p">:</span><span class="mi">60822</span>        <span class="k">NULL</span>    <span class="n">Binlog</span> <span class="n">Dump</span> <span class="n">GTID</span>        <span class="mi">397693</span>  <span class="n">Master</span> <span class="n">has</span> <span class="n">sent</span> <span class="k">all</span> <span class="n">binlog</span> <span class="k">to</span> <span class="n">slave</span><span class="p">;</span> <span class="n">waiting</span> <span class="k">for</span> <span class="n">binlog</span> <span class="k">to</span> <span class="n">be</span> <span class="n">updated</span>   <span class="k">NULL</span>
-<span class="mi">850308</span>  <span class="n">sync_tidb</span>       <span class="mi">10</span><span class="p">.</span><span class="mi">1</span><span class="p">.</span><span class="mi">1</span><span class="p">.</span><span class="mi">2</span><span class="p">:</span><span class="mi">43534</span>        <span class="k">NULL</span>    <span class="n">Binlog</span> <span class="n">Dump</span> <span class="n">GTID</span>        <span class="mi">394079</span>  <span class="n">Master</span> <span class="n">has</span> <span class="n">sent</span> <span class="k">all</span> <span class="n">binlog</span> <span class="k">to</span> <span class="n">slave</span><span class="p">;</span> <span class="n">waiting</span> <span class="k">for</span> <span class="n">binlog</span> <span class="k">to</span> <span class="n">be</span> <span class="n">updated</span>   <span class="k">NULL</span>
-</code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>修复办法：杀掉 syncer 进程，然后登陆 MySQL 杀死所有长连接。</li>
-</ul>
-</li>
-</ul>
-<h2 id="0x06-问题排查示例">0x06 问题排查示例</h2>
-<h3 id="开启-debug-日志">开启 Debug 日志</h3>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-fallback" data-lang="fallback">2018/01/13 12:04:12 binlogsyncer.go:98: [info] create BinlogSyncer with config &amp;{100 mysql rm-bp173ev012345rp03.mysql.rds.tidbclouds.com 3306 g7pay_link_ro nxrwcQ47kdIn   false false &lt;nil&gt; false debug 0}
-2018/01/13 12:04:12 metrics.go:107: [info] listening on :10073 for status and metrics report.
-2018/01/13 12:04:12 binlogsyncer.go:274: [info] begin to sync binlog from position (mysql-bin.002019, 430862751)
-2018/01/13 12:04:12 binlogsyncer.go:158: [info] register slave for master server rm-bp173ev012345rp03.mysql.rds.tidbclouds.com:3306
-2018/01/13 12:04:12 binlogsyncer.go:632: [info] rotate to (mysql-bin.002019, 430862751)
-2018/01/13 12:04:12 syncer.go:521: [info] rotate binlog to (mysql-bin.002019, 430862751)
-2018/01/13 12:04:12 syncer.go:676: [debug] gtid information: binlog (mysql-bin.002019, 430862799), gtid b470bfb4-bdb4-11e6-a7e5-70106fac1460:1-277917818
-2018/01/13 12:04:12 syncer.go:525: [debug] source-db:cat_link table:link_cat; target-db:cat_link table:link_cat, RowsEvent data: [[E78D56BBBC2357PPPBBBBCACD6EBD2AC 区域经营 - 华南 118OO6009 华中 - 桂琼 - 柳州门店 118006GHJ025OO1 H00O6Q H00O6Q 浙广 TiDB 储物流动公司 陈王 120123ABCD149rrr2 桂 A88888 0 2 梁王 18212238888 &lt;nil&gt; 0000-00-00 00:00:00 0 0 0000-00-00 00:00:00 小芳 lij 0 1 2018-01-12 21:10:09 &lt;nil&gt; 2  291464]]
-2018/01/13 12:04:12 db.go:55: [debug] [query][sql]SHOW COLUMNS FROM `cat_link`.`link_cat`
-2018/01/13 12:04:12 db.go:55: [debug] [query][sql]SHOW INDEX FROM `cat_link`.`link_cat`
-2018/01/13 12:04:12 syncer.go:882: [info] flush all jobs meta = syncer-binlog = (mysql-bin.002019, 430862751), syncer-binlog-gtid = b470bfb4-bdb4-11e6-a7e5-70106fac1460:1-277917817
-2018/01/13 12:04:12 meta.go:120: [info] save position to file, binlog-name:mysql-bin.002019 binlog-pos:430862751 binlog-gtid:b470bfb4-bdb4-11e6-a7e5-70106fac1460:1-277917817
-2018/01/13 12:04:12 main.go:75: [error] /home/jenkins/workspace/build_tidb_enterprise_tools_master/go/src/github.com/pingcap/tidb-enterprise-tools/syncer/syncer.go:556: gen insert sqls failed: insert columns and data mismatch in length: 27 vs 28, schema: cat_link, table: link_cat
-/home/jenkins/workspace/build_tidb_enterprise_tools_master/go/src/github.com/pingcap/tidb-enterprise-tools/syncer/syncer.go:143:
-2018/01/13 12:04:12 syncer.go:795: [info] print status exits, err:context canceled
-2018/01/13 12:04:12 binlogsyncer.go:126: [info] syncer is closing...
-2018/01/13 12:04:12 binlogstreamer.go:47: [error] close sync with err: sync is been closing...
-2018/01/13 12:04:12 binlogsyncer.go:141: [info] syncer is closed
-</code></pre></td></tr></table>
-</div>
-</div><h3 id="查看下游-tidb-日志">查看下游 TiDB 日志</h3>
-<ul>
-<li>
-<p>Syncer 是作为上游的服务端，获取数据转换后，作为下游的客户端插入数据，以下信息是在插入数据的时候遇见错误接受到的返回</p>
-</li>
-<li>
-<p>Syncer 日志内显示以下信息，实际是 Syncer 下游 TiDB 返回的错误信息</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-fallback" data-lang="fallback">begin failed Error 1105: [try again later]: backoffer.maxSleep 5000ms is exceeded, errors:
-get timestamp failed: rpc error: code = Unknown desc = rpc error: code = Unavailable desc = not leader
-get timestamp failed: rpc error: code = Unavailable desc = grpc: the connection is unavailable
-get timestamp failed: rpc error: code = Unavailable desc = grpc: the connection is unavailable
-db.go💯 [warning] sql stmt_exec retry 90
-</code></pre></td></tr></table>
-</div>
-</div></li>
-</ul>
-<h3 id="查看运行状态">查看运行状态</h3>
-<ul>
-<li>检查 syncer 是否还在运行</li>
-<li>查看 syncer 最后 50 行日志，根据日志提示修复</li>
-<li>提示 <code>2017/08/01 08:28:59 binlogsyncer.go:554: [error] connection was bad</code></li>
-<li>tidb 链接 源库网络出现异常，tidb 会重试一段时间后退出</li>
-</ul>
-
-    </div>
-
-    <div class="post-copyright">
-  <p class="copyright-item">
-    <span class="item-title">Author</span>
-    <span class="item-content">Jeff</span>
-  </p>
-  <p class="copyright-item">
-    <span class="item-title">LastMod</span>
-    <span class="item-content">
-        2020-01-20
-        
-    </span>
-  </p>
-  
-  <p class="copyright-item">
-    <span class="item-title">License</span>
-    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span>
-  </p>
-</div>
-<footer class="post-footer">
-      <div class="post-tags">
-          <a href="/tags/syncer/">Syncer</a>
-          <a href="/tags/enterprise-tools/">enterprise tools</a>
-          </div>
-      <nav class="post-nav">
-        <a class="prev" href="/post/20180803-31-select-hash/">
-            <i class="iconfont icon-left"></i>
-            <span class="prev-text nav-default">School - TiDB 根据 PK 查询不到数据</span>
-            <span class="prev-text nav-mobile">Prev</span>
-          </a>
-        <a class="next" href="/post/20180512-drainer-crc/">
-            <span class="next-text nav-default">Drainer &amp; Binlog crc mismatch</span>
-            <span class="next-text nav-mobile">Next</span>
-            <i class="iconfont icon-right"></i>
-          </a>
-      </nav>
-    </footer>
-  </article>
-        </div>
-        
-
-  
-
-  
-
-      </div>
-    </main>
-
-    <footer id="footer" class="footer">
-      <div class="social-links">
-      <a href="https://github.com/BigerCAP/TiDB-AirPlan/issues" class="iconfont icon-github" title="github"></a>
-  <a href="https://ap.tidb.cc/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
-</div>
-
-<div class="copyright">
-  <span class="power-by">
-    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
-  </span>
-  <span class="division">|</span>
-  <span class="theme-info">
-    Theme - 
-    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
-  </span>
-
-  <div class="busuanzi-footer">
-    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
-      <span class="division">|</span>
-    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
-  </div>
-
-  <span class="copyright-year">
-    &copy; 
-    2017 - 
-    2020
-    <span class="heart">
-      <i class="iconfont icon-heart"></i>
-    </span>
-    <span class="author">TiDB - AirPlan</span>
-  </span>
-</div>
-    </footer>
-
-    <div class="back-to-top" id="back-to-top">
-      <i class="iconfont icon-up"></i>
-    </div>
-  </div>
-  
-  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js" integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js" integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin="anonymous"></script>
-  <script><!-- NOTE: timeago.js uses the language code format like "zh_CN" (underscore and case sensitive) -->
-    var languageCode = "en".replace(/-/g, '_').replace(/_(.*)/, function ($0, $1) {return $0.replace($1, $1.toUpperCase());});
-    timeago().render(document.querySelectorAll('.timeago'), languageCode);
-    timeago.cancel();  
-  </script>
-<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
-
-
-
-
-
-
-
-
-</body>
-</html>
+<!doctype html><html lang=en><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge,chrome=1"><title>总结 - Syncer 助力思维成长 - AirPlan - A biger solution</title><meta name=renderer content="webkit"><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta http-equiv=cache-control content="no-transform"><meta http-equiv=cache-control content="no-siteapp"><meta name=theme-color content="#f8f5ec"><meta name=msapplication-navbutton-color content="#f8f5ec"><meta name=apple-mobile-web-app-capable content="yes"><meta name=apple-mobile-web-app-status-bar-style content="#f8f5ec"><meta name=author content="Jeff"><meta name=description content="0x00 背景 长期使用 Syncer 之后经过一番胡思乱想之后的总结经验，类似于“久病成医”的感觉 内容按照 201706 - 201806 期间使用经验整理，后续大致是不会遇见了，因为有了新"><meta name=keywords content="TiDB,AirPlan,TiDB OPS,tidb-operator,2pc,raft,databases,mysql,htap"><meta name=generator content="Hugo 0.110.0 with theme even"><link rel=canonical href=https://ap.biger.cc/post/20180605-syncer-mindmap/><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/manifest.json><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><script async src=//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js></script>
+<link href=/dist/even.04bd84cd.min.css rel=stylesheet><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin=anonymous><meta property="og:title" content="总结 - Syncer 助力思维成长"><meta property="og:description" content="0x00 背景 长期使用 Syncer 之后经过一番胡思乱想之后的总结经验，类似于“久病成医”的感觉 内容按照 201706 - 201806 期间使用经验整理，后续大致是不会遇见了，因为有了新"><meta property="og:type" content="article"><meta property="og:url" content="https://ap.biger.cc/post/20180605-syncer-mindmap/"><meta property="article:section" content="post"><meta property="article:published_time" content="2018-06-05T00:00:00+08:00"><meta property="article:modified_time" content="2020-01-20T00:00:00+08:00"><meta itemprop=name content="总结 - Syncer 助力思维成长"><meta itemprop=description content="0x00 背景 长期使用 Syncer 之后经过一番胡思乱想之后的总结经验，类似于“久病成医”的感觉 内容按照 201706 - 201806 期间使用经验整理，后续大致是不会遇见了，因为有了新"><meta itemprop=datePublished content="2018-06-05T00:00:00+08:00"><meta itemprop=dateModified content="2020-01-20T00:00:00+08:00"><meta itemprop=wordCount content="3320"><meta itemprop=keywords content="Syncer,enterprise tools,"><meta name=twitter:card content="summary"><meta name=twitter:title content="总结 - Syncer 助力思维成长"><meta name=twitter:description content="0x00 背景 长期使用 Syncer 之后经过一番胡思乱想之后的总结经验，类似于“久病成医”的感觉 内容按照 201706 - 201806 期间使用经验整理，后续大致是不会遇见了，因为有了新"><!--[if lte IE 9]><script src=https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js></script><![endif]--><!--[if lt IE 9]><script src=https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js></script>
+<script src=https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js></script><![endif]--></head><body><div id=mobile-navbar class=mobile-navbar><div class=mobile-header-logo><a href=/ class=logo>AirPlan</a></div><div class=mobile-navbar-icon><span></span>
+<span></span>
+<span></span></div></div><nav id=mobile-menu class="mobile-menu slideout-menu"><ul class=mobile-menu-list><a href=/post/><li class=mobile-menu-item>Blog</li></a><a href=/look/><li class=mobile-menu-item>Look</li></a><a href=/tags/><li class=mobile-menu-item>Tags</li></a><a href=/categories/><li class=mobile-menu-item>Categories</li></a><a href=/about/><li class=mobile-menu-item>About</li></a></ul></nav><div class=container id=mobile-panel><header id=header class=header><div class=logo-wrapper><a href=/ class=logo>AirPlan</a></div><nav class=site-navbar><ul id=menu class=menu><li class=menu-item><a class=menu-item-link href=/post/>Blog</a></li><li class=menu-item><a class=menu-item-link href=/look/>Look</a></li><li class=menu-item><a class=menu-item-link href=/tags/>Tags</a></li><li class=menu-item><a class=menu-item-link href=/categories/>Categories</a></li><li class=menu-item><a class=menu-item-link href=/about/>About</a></li></ul></nav></header><main id=main class=main><div class=content-wrapper><div id=content class=content><article class=post><header class=post-header><h1 class=post-title>总结 - Syncer 助力思维成长</h1><div class=post-meta><span class=post-time>2018-06-05</span><div class=post-category><a href=/categories/troubleshooting/>Troubleshooting</a></div><span class=more-meta>3320 words</span>
+<span class=more-meta>7 mins read</span>
+<span id=busuanzi_container_page_pv class=more-meta><span id=busuanzi_value_page_pv><img src=/img/spinner.svg alt=spinner.svg></span> times read</span></div></header><div class=post-toc id=post-toc><h2 class=post-toc-title>Contents</h2><div class=post-toc-content><nav id=TableOfContents><ul><li><a href=#0x00-背景>0x00 背景</a></li><li><a href=#0x01-syncer-faq>0x01 Syncer-FAQ</a></li><li><a href=#0x02-业务逻辑>0x02 业务逻辑</a></li><li><a href=#0x03-性能调优>0x03 性能调优</a></li><li><a href=#0x04-问题整理>0x04 问题整理</a><ul><li><a href=#上下游-schema-不一致场景>上下游 schema 不一致场景</a></li><li><a href=#unsupported-ddl>unsupported DDL</a></li><li><a href=#启动-syner-失败>启动 Syner 失败</a></li><li><a href=#数据同步不正常或数据上下游不一致>数据同步不正常或数据上下游不一致</a></li><li><a href=#mysql-a--b--c--syncer-同步场景>MySQL A > B > C > Syncer 同步场景</a></li></ul></li><li><a href=#0x05-已-fixbug>0x05 已 fixbug</a><ul><li><a href=#gtid-开关问题>GTID 开关问题</a></li><li><a href=#syncer-未关闭的长连接>Syncer 未关闭的长连接</a></li></ul></li><li><a href=#0x06-问题排查示例>0x06 问题排查示例</a><ul><li><a href=#开启-debug-日志>开启 Debug 日志</a></li><li><a href=#查看下游-tidb-日志>查看下游 TiDB 日志</a></li><li><a href=#查看运行状态>查看运行状态</a></li></ul></li></ul></nav></div></div><div class=post-outdated><div class=warn><p>[NOTE] Updated <span class=timeago datetime=2020-01-20T00:00:00 title="January 20, 2020">January 20, 2020</span>. This article may have outdated content or subject matter.</p></div></div><div class=post-content><h2 id=0x00-背景>0x00 背景</h2><blockquote><p>长期使用 Syncer 之后经过一番胡思乱想之后的总结经验，类似于“久病成医”的感觉
+内容按照 201706 - 201806 期间使用经验整理，后续大致是不会遇见了，因为有了新工具（DM）</p></blockquote><h2 id=0x01-syncer-faq>0x01 Syncer-FAQ</h2><ul><li>使用 Syncer 前请详细阅读官方 <a href=https://github.com/pingcap/docs-cn/blob/master/tools/syncer.md>Syncer</a> 文档</li><li>Syncer 是一个 <strong>同步工具</strong> ，通过 Syncer 配置文件中的 [from] 获取上游 MySQL binlog 信息，解析 binlog 后会根据配置文件中的 skip-dmls、skip-ddls、replicate-do-db、replicate-do-table、route-rules 等参数匹配 or 过滤，然后将匹配 or 过滤后的数据集通过 SQL Client 的方式写入到 [to] 下游数据库</li></ul><h2 id=0x02-业务逻辑>0x02 业务逻辑</h2><p><img src=180101-Syncer-FAQ.svg alt="Syncer 业务逻辑，by: https://github.com/BigerCAP"></p><ul><li>Syncer 是个同步工具，Syncer 中分三个部分<ul><li><strong>上游</strong> binlog 数据读取：这是个单线程模拟读取 MySQL binlog 内容，Syncer 针对 from binlog 有一定的 <a href=https://github.com/pingcap/docs-cn/blob/master/tools/syncer.md#syncer-%E5%90%8C%E6%AD%A5%E5%89%8D%E6%A3%80%E6%9F%A5>约束检查</a>，检查通过后开始拉取数据并进行数据预处理工作<ul><li>目前 Syncer 拉取 binlog 不存在性能瓶颈 (远程网络读取 binlog 会受带宽质量影响)</li><li>数据预处理工作是主动去掉 TiDB 目前不支持的 SQL format 、DML SQL format 转换、DDL Spilt 等内容</li></ul></li><li><strong>中层</strong> 数据处理：将上游预处理的数据与配置文件中的 <code>skip-dmls、skip-ddls、replicate-do-db、replicate-do-table、route-rule</code> 参数做数据过滤、数据匹配、数据转换、数据检查<ul><li>此处会消耗 Syncer 所在主机的计算资源、内存资源</li></ul></li><li><strong>下游</strong> 数据消费：Syncer 作为 SQL Client 链接 TiDB 消费数据，由配置文件中 worker-count * batch 控制 Syncer 消费数据的速度<ul><li>在数据消费时 binlog 的语句会被以下方式进行替换：<ul><li>insert == replace</li><li>update == update / update == delete + replace (safemode)</li><li>delete == delete</li></ul></li><li>数据消费过程中会记录下数据同步断点：Syncer 断点记录在 Syncer.meta 文件中， 格式是 binlog-name、Position 与 GTID<ul><li>Syncer 会将上游一个大事务进行切分为多个小事务到下游执行，如在一个大事务内发生退出，Syncer 再次启动时会重新执行这个事务</li><li>Syncer 是以 ROW format binlog 进行回放 SQL 语句，即使事务被重复执行也会保持一致性</li></ul></li><li>此处会消耗 Syncer 所在主机的网络资源</li></ul></li></ul></li></ul><h2 id=0x03-性能调优>0x03 性能调优</h2><ul><li>Syncer 根据下游消费能力调整 worker-count 与 batch 参数控制其同步速度，worker-count 提供了并发能力，batch 是每个并发的数据量<ul><li>worker-count 工作能力受 syncer 所在机器的 CPU 影响， worker-count 与 CPU 至少是 1:1 关系</li><li>首先提高 worker-count(1-256 之间) ，batch 固定 (比如 100 )，当调大 worker-count 无法加快消费时，可以适当增加 batch 大小，不建议超过 1000<ul><li>调整 worker-count * batch 时应当注意 <a href=https://github.com/pingcap/docs-cn/blob/master/tools/syncer.md#%E7%9B%91%E6%8E%A7%E6%96%B9%E6%A1%88 title="看这里可以知道如何配置 Syncer 监控">Syncer dashboard</a> 中的 <code>syncer_txn_costs_gauge_in_second</code> Panel，该项为 Syncer 执行语句到下游消费成功的时长 (正常该数值在 ms 级)</li></ul></li><li>worker count * batch 等于最大消费 QPS ，实际运行过程会低于这个假设值，尤其当内外网之间进行同步时，此时应当注意内外网之间的最大带宽</li></ul></li></ul><h2 id=0x04-问题整理>0x04 问题整理</h2><ul><li>Syncer 在使用过程中会遇见以下错误：<ol><li>Syncer 解析 binlog 出错：Syncer 目前支持的 binlog 有限，初始时按照 MySQL 5.7\5.6 版本开发，后期加入了 MariaDB 10 ；如果使用版本不在这个范围之内可能会出现一些异常错误。同时 MySQL 与 MariaDB 自身软件也会产生一些 binglog 相关的 BUG，这类 BUG 需要升级软件版本才可以解决</li><li>Syncer 插入数据到下游出错：此类一般是下游 TiDB 不支持。此类报错与 SQL Client 执行 SQL 语句得到的报错一致</li><li>Syncer 因为某些事件产生 panic (如使用了比较老版本的 MySQL)：此时需要联系 PingCAP 官方技术支持，发送业务场景、使用疑问信息到 <a href=mailto:info@pingcap.com>info@pingcap.com</a></li><li>Syncer 使用过程中其他错误：如数据库权限问题、网络闪断或不可达、下游消费出现堵塞、写入冲突、数据同步慢、数据同步不正常 等，其实均可通过自建与阅读文档解决</li></ol></li><li>Syncer 出现问题时应当先进行自检，完成以下步骤内容<ul><li>Sycner <a href=https://github.com/pingcap/docs-cn/blob/master/tools/syncer.md#syncer-%E5%90%8C%E6%AD%A5%E5%89%8D%E6%A3%80%E6%9F%A5>同步前的一些检查项</a> ：检查上下游之间的参数是否符合需求</li><li>Syncer <a href=https://github.com/pingcap/docs-cn/blob/master/tools/syncer.md#%E7%9B%91%E6%8E%A7%E6%96%B9%E6%A1%88>监控项 / 告警项配置</a> ：设置这个可以观察 Syncer 运行状态</li><li>Syncer 数据同步不正常，应当先检查 <a href=https://github.com/pingcap/docs-cn/blob/master/tools/syncer.md#%E5%90%AF%E5%8A%A8-syncer>配置文件</a> 与 <a href=https://github.com/pingcap/docs-cn/blob/master/tools/syncer.md#%E6%8C%87%E5%AE%9A%E6%95%B0%E6%8D%AE%E5%BA%93%E5%90%8C%E6%AD%A5>route-rule</a>，检查这些是否与期望相等</li><li>Syncer <a href=../Docs/180323-Systemd-Syncer.md>启动方式与守护进程</a></li></ul></li></ul><h3 id=上下游-schema-不一致场景>上下游 schema 不一致场景</h3><ul><li>该问题主要出现于分库分表，上游执行 DDL 后，Syncer 出现上下游 schema 信息不一致。</li><li>原因是上游分表同步进步不一致，没有有效的通过中控机制锁住所有分表的 DDL 执行状态。</li><li>日志输出如下：</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>2018/07/18 19:21:17 main.go:79: [error] /home/jenkins/workspace/build_tidb_enterprise_tools_master/go/src/github.com/pingcap/tidb-enterprise-tools/syncer/syncer.go:529: gen insert sqls failed: insert columns and data mismatch in length: 25 vs 23, schema: CRM, table: ORDER
+</span></span><span class=line><span class=cl>/home/jenkins/workspace/build_tidb_enterprise_tools_master/go/src/github.com/pingcap/tidb-enterprise-tools/syncer/syncer.go:165:
+</span></span><span class=line><span class=cl>2018/07/18 19:21:17 syncer.go:752: [info] print status exits, err:context canceled
+</span></span></code></pre></td></tr></table></div></div><ul><li><p>核验步骤</p><ul><li>通过 <code>show create table tablename</code> 核实上下游 schema info ，或者通过 mysqlbinlog 查看 binlog 内容，或者 syncer 开启 Debug 模式查看输出<ul><li>mysqlbinlog 示例如下 (注意修改 binlogname 与 pos 点位置，可以使用 log 或者 syncer.meta 中的信息)<ul><li><code>mysqlbinlog --base64-output=DECODE-ROWS mysql-bin.002019 --start-position 430862799 --stop-position 430866627 -vv</code></li></ul></li></ul></li></ul></li><li><p>解决方案</p><ul><li>如果数据量小，可以从新来一遍全量，然后再做增量数据</li><li>联系 PingCAP 官方服务，官方会解决详细解决方案。<ul><li>比如：去掉上下游 schema 检查，这种会有一定的潜在问题，如先执行 <code>alter table A add column</code>，紧随执行 <code>alter table A delete column</code>，此时数据会有影响。</li><li>或者使用 Syncer 升级版 Data Migration Product Proposal (DM)，需要联系 PingCAP 商务支持 <a href=mailto:info@pingcap.com>info@pingcap.com</a></li></ul></li></ul></li></ul><h3 id=unsupported-ddl>unsupported DDL</h3><blockquote><p>Error 1105: unsupported modify column null to not null</p></blockquote><ul><li><p>Syncer 日志文件</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-SQL data-lang=SQL><span class=line><span class=cl><span class=mi>2018</span><span class=o>/</span><span class=mi>09</span><span class=o>/</span><span class=mi>28</span><span class=w> </span><span class=mi>18</span><span class=p>:</span><span class=mi>40</span><span class=p>:</span><span class=mi>54</span><span class=w> </span><span class=n>db</span><span class=p>.</span><span class=k>go</span><span class=p>:</span><span class=mi>123</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=n>warning</span><span class=p>]</span><span class=w> </span><span class=p>[</span><span class=k>exec</span><span class=p>][</span><span class=k>sql</span><span class=p>]</span><span class=n>USE</span><span class=w> </span><span class=o>`</span><span class=n>qxf</span><span class=o>`</span><span class=p>;</span><span class=w> </span><span class=k>ALTER</span><span class=w> </span><span class=k>TABLE</span><span class=w> </span><span class=o>`</span><span class=n>fof_strategy</span><span class=o>`</span><span class=w> </span><span class=k>MODIFY</span><span class=w> </span><span class=k>COLUMN</span><span class=w> </span><span class=o>`</span><span class=n>start_date</span><span class=o>`</span><span class=w> </span><span class=n>datetime</span><span class=w> </span><span class=k>NOT</span><span class=w> </span><span class=k>NULL</span><span class=p>;[</span><span class=n>args</span><span class=p>][][</span><span class=n>error</span><span class=p>]</span><span class=n>Error</span><span class=w> </span><span class=mi>1105</span><span class=p>:</span><span class=w> </span><span class=n>unsupported</span><span class=w> </span><span class=k>modify</span><span class=w> </span><span class=k>column</span><span class=w> </span><span class=k>null</span><span class=w> </span><span class=k>to</span><span class=w> </span><span class=k>not</span><span class=w> </span><span class=k>null</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div></li><li><p>问题原因</p><ul><li>这个错误是 TiDB 不支持 default null 与 default not null 之间的互相转换。详情阅读 <a href=https://github.com/pingcap/docs-cn/blob/master/sql/ddl.md#alter-table-%E8%AF%AD%E6%B3%95>官方文档 DDL 之 Alter table</a></li></ul></li></ul><h3 id=启动-syner-失败>启动 Syner 失败</h3><ul><li><p>Meta 文件或者配置文件参数有回车符</p><ul><li><code>[error] Near line 3 (last key parsed ''): Strings cannot contain new lines.</code></li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>2017/12/14 08:36:20 main.go:52: [info] config: log-level:info log-file:/root/prega-syncer/log/card.log log-rotate:day status-addr::11105 server-id:999 worker-count:32 batch:100 meta-file:/root/prega-syncer/meta/card.meta do-tables:[] do-dbs:[~^mmm*] ignore-tables:[] ignore-dbs:[] from:DBConfig(host:10.1.1.14, user:root, port:3306, pass:&lt;omitted&gt;) to:DBConfig(host:10.1.1.25, user:syncer, port:5555, pass:&lt;omitted&gt;) skip-sqls:[] route-rules:[] enable-gtid:true safe-mode:false git-hash: ba3ca1271bb63d58f4d4eecf6d189e353b40440a utc-build-time:[2017-11-23 11:34:40] go-version:go1.9.2
+</span></span><span class=line><span class=cl>2017/12/14 08:36:20 main.go:75: [error] Near line 3 (last key parsed &#39;&#39;): Strings cannot contain new lines.
+</span></span><span class=line><span class=cl>/home/jenkins/workspace/build_tidb_enterprise_tools_master/go/src/github.com/pingcap/tidb-enterprise-tools/syncer/meta.go:85:
+</span></span><span class=line><span class=cl>/home/jenkins/workspace/build_tidb_enterprise_tools_master/go/src/github.com/pingcap/tidb-enterprise-tools/syncer/syncer.go:136:
+</span></span><span class=line><span class=cl>2017/12/14 08:36:20 metrics.go:107: [info] listening on :11105 for status and metrics report.
+</span></span></code></pre></td></tr></table></div></div></li></ul><h3 id=数据同步不正常或数据上下游不一致>数据同步不正常或数据上下游不一致</h3><blockquote><p>数据同步不正常或数据上下游不一致问题检查</p></blockquote><ul><li><p>自检 <a href=https://github.com/pingcap/docs-cn/blob/master/tools/syncer.md#syncer-%E5%90%8C%E6%AD%A5%E5%89%8D%E6%A3%80%E6%9F%A5>checklist</a></p></li><li><p>Syncer 正常运行，主库有插入数据，备库不同步</p><ul><li><p>检查 binlog 是否存在</p></li><li><p>检查 binlog 格式</p></li><li><p>检查 binlog 内容</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=n>MySQL</span><span class=w> </span><span class=p>[(</span><span class=k>none</span><span class=p>)]</span><span class=o>&gt;</span><span class=w> </span><span class=k>show</span><span class=w> </span><span class=n>master</span><span class=w> </span><span class=n>logs</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>------------------+------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=n>Log_name</span><span class=w>         </span><span class=o>|</span><span class=w> </span><span class=n>File_size</span><span class=w>  </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>------------------+------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=n>mysql</span><span class=o>-</span><span class=n>bin</span><span class=p>.</span><span class=mi>000023</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>1073742014</span><span class=w> </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w> </span><span class=n>mysql</span><span class=o>-</span><span class=n>bin</span><span class=p>.</span><span class=mi>000024</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>1073742302</span><span class=w> </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w> </span><span class=n>mysql</span><span class=o>-</span><span class=n>bin</span><span class=p>.</span><span class=mi>000025</span><span class=w> </span><span class=o>|</span><span class=w>  </span><span class=mi>101832651</span><span class=w> </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>------------------+------------+
+</span></span></span></code></pre></td></tr></table></div></div></li></ul></li><li><p>如何区分 binlog 内容格式为 row 模式</p><ul><li>使用 <code>show master logs;</code> 查到最新的 binlog file name 。</li><li>使用 <code>show binlog events in 'mysql-bin.000025' limit 10;</code></li><li>查看 Event_type 列是否有 <code>Write_rows</code> <code>Update_rows</code> 等值。</li></ul></li><li><p><code>SET GLOBAL binlog_format = ROW;</code> 修改 binlog 格式后，下一个 binlog file 才会生效。</p><ul><li>执行 <code>flush logs;</code> 手动刷新生成 binlog file 。</li></ul></li><li><p>查看 binlog 文件大小</p><ul><li><p>默认 binlog file size <code>show global variables like '%max_binlog_size%';</code></p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=o>+</span><span class=c1>-----------------+------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=n>Variable_name</span><span class=w>   </span><span class=o>|</span><span class=w> </span><span class=n>Value</span><span class=w>      </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>-----------------+------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=n>max_binlog_size</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>1073741824</span><span class=w> </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>-----------------+------------+
+</span></span></span></code></pre></td></tr></table></div></div></li></ul></li></ul><h3 id=mysql-a--b--c--syncer-同步场景>MySQL A > B > C > Syncer 同步场景</h3><p><img src=180101-Syncer-FAQ-181123.svg alt="MySQL 主从从架构"></p><ul><li>MySQL 生产环境数据环境通过 MySQL “主从从” 架构实现高可用灾备模式<ul><li>在该模式后面放置 syncer 工具同步数据到 TiDB Cluster, 如果未开启 log slave update 参数，会导致数据不一致。</li><li>该参数具体功能以及主从之间其他参数可以查看 MySQL 官网 <a href=https://dev.mysql.com/doc/refman/8.0/en/replication-options-slave.html title="TiDB-OPS, --log-slave-updates , MySQL 主从从模式">17.1.6.3 Replication Slave Options and Variables</a></li></ul></li><li>该参数功能<ul><li>从库只开启 log-bin 功能，不使用 log-slave-updates 功能<ul><li>从库在主库复制的数据，不会写入 log-bin 文件</li><li>直接向从库写入数据时，会写入 log-bin 文件</li><li>此时 syncer 读到的数据并不是最终完整数据</li></ul></li><li>从库开启 log-slave-updates 功能<ul><li>从库从主库复制的数据会写入 log-bin 日志文件里</li><li>此时 syncer 可读到最终完整数据</li></ul></li></ul></li></ul><h2 id=0x05-已-fixbug>0x05 已 fixbug</h2><h3 id=gtid-开关问题>GTID 开关问题</h3><ul><li><p>UUID 获取问题</p><ul><li>Syncer 引入 UUID 库版本问题，即时没有开启 enable-gtid，也会解析 binlog 中 UUID 信息，解析数据时失败</li><li>与 syncer.meta 文件内 <code>binlog-gtid = ""</code> 信息无关</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>2018/01/17 13:58:17 main.go:75: [error] uuid: invalid version number: %!s(uint8=101)
+</span></span></code></pre></td></tr></table></div></div></li></ul><h3 id=syncer-未关闭的长连接>Syncer 未关闭的长连接</h3><ul><li><p>MySQL 上游出现由 Syncer 创建的大量长连接</p><ul><li>上游持续未插入数据，Syncer 会固定时间进行重连获取最新信息</li><li>syncer 每隔一个小时会获取一次新的数据，但在建立新连接的时候未关闭老的连接，导致 mysql 出现非常多的长连接。导致业务告警。</li><li>主要原因是，syncer 建立连接未进行正确关闭。</li><li>日志 tps 持续为 0 ，通过 sql 查询上下游同步正常</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>2017/12/30 00:17:40 syncer.go:803: [info] [syncer]total events = 102214510, total tps = 50, recent tps = 0, master-binlog = (mysql-bin.001244, 66802580), master-binlog-gtid=8c38f844-2985-11e7-a6f2-18ded76e567c:1-1838809963, syncer-binlog = (mysql-bin.001244, 66802580), syncer-binlog-gtid = 8c38f844-2985-11e7-a6f2-18ded76e567c:1-1838809963,b7ff0e7e-2985-11e7-a6f3-18ded76e34de:1-37
+</span></span></code></pre></td></tr></table></div></div><ul><li>通过 <code>show processlist</code> 查看到很多长连接，通过相邻 time 相减得到固定值 3614s ，确定每隔一段时间去检查一次信息。</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-SQL data-lang=SQL><span class=line><span class=cl><span class=mi>849978</span><span class=w>  </span><span class=n>sync_tidb</span><span class=w>       </span><span class=mi>10</span><span class=p>.</span><span class=mi>1</span><span class=p>.</span><span class=mi>1</span><span class=p>.</span><span class=mi>2</span><span class=p>:</span><span class=mi>49773</span><span class=w>        </span><span class=k>NULL</span><span class=w>    </span><span class=n>Binlog</span><span class=w> </span><span class=n>Dump</span><span class=w> </span><span class=n>GTID</span><span class=w>        </span><span class=mi>401307</span><span class=w>  </span><span class=n>Master</span><span class=w> </span><span class=n>has</span><span class=w> </span><span class=n>sent</span><span class=w> </span><span class=k>all</span><span class=w> </span><span class=n>binlog</span><span class=w> </span><span class=k>to</span><span class=w> </span><span class=n>slave</span><span class=p>;</span><span class=w> </span><span class=n>waiting</span><span class=w> </span><span class=k>for</span><span class=w> </span><span class=n>binlog</span><span class=w> </span><span class=k>to</span><span class=w> </span><span class=n>be</span><span class=w> </span><span class=n>updated</span><span class=w>   </span><span class=k>NULL</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=mi>850140</span><span class=w>  </span><span class=n>sync_tidb</span><span class=w>       </span><span class=mi>10</span><span class=p>.</span><span class=mi>1</span><span class=p>.</span><span class=mi>1</span><span class=p>.</span><span class=mi>2</span><span class=p>:</span><span class=mi>60822</span><span class=w>        </span><span class=k>NULL</span><span class=w>    </span><span class=n>Binlog</span><span class=w> </span><span class=n>Dump</span><span class=w> </span><span class=n>GTID</span><span class=w>        </span><span class=mi>397693</span><span class=w>  </span><span class=n>Master</span><span class=w> </span><span class=n>has</span><span class=w> </span><span class=n>sent</span><span class=w> </span><span class=k>all</span><span class=w> </span><span class=n>binlog</span><span class=w> </span><span class=k>to</span><span class=w> </span><span class=n>slave</span><span class=p>;</span><span class=w> </span><span class=n>waiting</span><span class=w> </span><span class=k>for</span><span class=w> </span><span class=n>binlog</span><span class=w> </span><span class=k>to</span><span class=w> </span><span class=n>be</span><span class=w> </span><span class=n>updated</span><span class=w>   </span><span class=k>NULL</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=mi>850308</span><span class=w>  </span><span class=n>sync_tidb</span><span class=w>       </span><span class=mi>10</span><span class=p>.</span><span class=mi>1</span><span class=p>.</span><span class=mi>1</span><span class=p>.</span><span class=mi>2</span><span class=p>:</span><span class=mi>43534</span><span class=w>        </span><span class=k>NULL</span><span class=w>    </span><span class=n>Binlog</span><span class=w> </span><span class=n>Dump</span><span class=w> </span><span class=n>GTID</span><span class=w>        </span><span class=mi>394079</span><span class=w>  </span><span class=n>Master</span><span class=w> </span><span class=n>has</span><span class=w> </span><span class=n>sent</span><span class=w> </span><span class=k>all</span><span class=w> </span><span class=n>binlog</span><span class=w> </span><span class=k>to</span><span class=w> </span><span class=n>slave</span><span class=p>;</span><span class=w> </span><span class=n>waiting</span><span class=w> </span><span class=k>for</span><span class=w> </span><span class=n>binlog</span><span class=w> </span><span class=k>to</span><span class=w> </span><span class=n>be</span><span class=w> </span><span class=n>updated</span><span class=w>   </span><span class=k>NULL</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><ul><li>修复办法：杀掉 syncer 进程，然后登陆 MySQL 杀死所有长连接。</li></ul></li></ul><h2 id=0x06-问题排查示例>0x06 问题排查示例</h2><h3 id=开启-debug-日志>开启 Debug 日志</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-mysql data-lang=mysql><span class=line><span class=cl><span class=mi>2018</span><span class=o>/</span><span class=mi>01</span><span class=o>/</span><span class=mi>13</span><span class=w> </span><span class=mi>12</span><span class=p>:</span><span class=mi>04</span><span class=p>:</span><span class=mi>12</span><span class=w> </span><span class=n>binlogsyncer</span><span class=p>.</span><span class=n>go</span><span class=p>:</span><span class=mi>98</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=n>info</span><span class=p>]</span><span class=w> </span><span class=k>create</span><span class=w> </span><span class=n>BinlogSyncer</span><span class=w> </span><span class=k>with</span><span class=w> </span><span class=n>config</span><span class=w> </span><span class=o>&amp;</span><span class=err>{</span><span class=mi>100</span><span class=w> </span><span class=n>mysql</span><span class=w> </span><span class=n>rm</span><span class=o>-</span><span class=n>bp173ev012345rp03</span><span class=p>.</span><span class=n>mysql</span><span class=p>.</span><span class=n>rds</span><span class=p>.</span><span class=n>tidbclouds</span><span class=p>.</span><span class=n>com</span><span class=w> </span><span class=mi>3306</span><span class=w> </span><span class=n>g7pay_link_ro</span><span class=w> </span><span class=n>nxrwcQ47kdIn</span><span class=w>   </span><span class=no>false</span><span class=w> </span><span class=no>false</span><span class=w> </span><span class=o>&lt;</span><span class=n>nil</span><span class=o>&gt;</span><span class=w> </span><span class=no>false</span><span class=w> </span><span class=n>debug</span><span class=w> </span><span class=mi>0</span><span class=err>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=mi>2018</span><span class=o>/</span><span class=mi>01</span><span class=o>/</span><span class=mi>13</span><span class=w> </span><span class=mi>12</span><span class=p>:</span><span class=mi>04</span><span class=p>:</span><span class=mi>12</span><span class=w> </span><span class=n>metrics</span><span class=p>.</span><span class=n>go</span><span class=p>:</span><span class=mi>107</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=n>info</span><span class=p>]</span><span class=w> </span><span class=n>listening</span><span class=w> </span><span class=k>on</span><span class=w> </span><span class=p>:</span><span class=mi>10073</span><span class=w> </span><span class=k>for</span><span class=w> </span><span class=n>status</span><span class=w> </span><span class=k>and</span><span class=w> </span><span class=n>metrics</span><span class=w> </span><span class=n>report</span><span class=p>.</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=mi>2018</span><span class=o>/</span><span class=mi>01</span><span class=o>/</span><span class=mi>13</span><span class=w> </span><span class=mi>12</span><span class=p>:</span><span class=mi>04</span><span class=p>:</span><span class=mi>12</span><span class=w> </span><span class=n>binlogsyncer</span><span class=p>.</span><span class=n>go</span><span class=p>:</span><span class=mi>274</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=n>info</span><span class=p>]</span><span class=w> </span><span class=n>begin</span><span class=w> </span><span class=k>to</span><span class=w> </span><span class=n>sync</span><span class=w> </span><span class=n>binlog</span><span class=w> </span><span class=k>from</span><span class=w> </span><span class=nf>position</span><span class=w> </span><span class=p>(</span><span class=n>mysql</span><span class=o>-</span><span class=n>bin</span><span class=p>.</span><span class=mi>002019</span><span class=p>,</span><span class=w> </span><span class=mi>430862751</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=mi>2018</span><span class=o>/</span><span class=mi>01</span><span class=o>/</span><span class=mi>13</span><span class=w> </span><span class=mi>12</span><span class=p>:</span><span class=mi>04</span><span class=p>:</span><span class=mi>12</span><span class=w> </span><span class=n>binlogsyncer</span><span class=p>.</span><span class=n>go</span><span class=p>:</span><span class=mi>158</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=n>info</span><span class=p>]</span><span class=w> </span><span class=n>register</span><span class=w> </span><span class=n>slave</span><span class=w> </span><span class=k>for</span><span class=w> </span><span class=n>master</span><span class=w> </span><span class=n>server</span><span class=w> </span><span class=n>rm</span><span class=o>-</span><span class=n>bp173ev012345rp03</span><span class=p>.</span><span class=n>mysql</span><span class=p>.</span><span class=n>rds</span><span class=p>.</span><span class=n>tidbclouds</span><span class=p>.</span><span class=n>com</span><span class=p>:</span><span class=mi>3306</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=mi>2018</span><span class=o>/</span><span class=mi>01</span><span class=o>/</span><span class=mi>13</span><span class=w> </span><span class=mi>12</span><span class=p>:</span><span class=mi>04</span><span class=p>:</span><span class=mi>12</span><span class=w> </span><span class=n>binlogsyncer</span><span class=p>.</span><span class=n>go</span><span class=p>:</span><span class=mi>632</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=n>info</span><span class=p>]</span><span class=w> </span><span class=n>rotate</span><span class=w> </span><span class=k>to</span><span class=w> </span><span class=p>(</span><span class=n>mysql</span><span class=o>-</span><span class=n>bin</span><span class=p>.</span><span class=mi>002019</span><span class=p>,</span><span class=w> </span><span class=mi>430862751</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=mi>2018</span><span class=o>/</span><span class=mi>01</span><span class=o>/</span><span class=mi>13</span><span class=w> </span><span class=mi>12</span><span class=p>:</span><span class=mi>04</span><span class=p>:</span><span class=mi>12</span><span class=w> </span><span class=n>syncer</span><span class=p>.</span><span class=n>go</span><span class=p>:</span><span class=mi>521</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=n>info</span><span class=p>]</span><span class=w> </span><span class=n>rotate</span><span class=w> </span><span class=n>binlog</span><span class=w> </span><span class=k>to</span><span class=w> </span><span class=p>(</span><span class=n>mysql</span><span class=o>-</span><span class=n>bin</span><span class=p>.</span><span class=mi>002019</span><span class=p>,</span><span class=w> </span><span class=mi>430862751</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=mi>2018</span><span class=o>/</span><span class=mi>01</span><span class=o>/</span><span class=mi>13</span><span class=w> </span><span class=mi>12</span><span class=p>:</span><span class=mi>04</span><span class=p>:</span><span class=mi>12</span><span class=w> </span><span class=n>syncer</span><span class=p>.</span><span class=n>go</span><span class=p>:</span><span class=mi>676</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=n>debug</span><span class=p>]</span><span class=w> </span><span class=n>gtid</span><span class=w> </span><span class=n>information</span><span class=p>:</span><span class=w> </span><span class=nf>binlog</span><span class=w> </span><span class=p>(</span><span class=n>mysql</span><span class=o>-</span><span class=n>bin</span><span class=p>.</span><span class=mi>002019</span><span class=p>,</span><span class=w> </span><span class=mi>430862799</span><span class=p>),</span><span class=w> </span><span class=n>gtid</span><span class=w> </span><span class=n>b470bfb4</span><span class=o>-</span><span class=n>bdb4</span><span class=o>-</span><span class=mi>11</span><span class=n>e6</span><span class=o>-</span><span class=n>a7e5</span><span class=o>-</span><span class=mi>70106</span><span class=n>fac1460</span><span class=p>:</span><span class=mi>1</span><span class=o>-</span><span class=mi>277917818</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=mi>2018</span><span class=o>/</span><span class=mi>01</span><span class=o>/</span><span class=mi>13</span><span class=w> </span><span class=mi>12</span><span class=p>:</span><span class=mi>04</span><span class=p>:</span><span class=mi>12</span><span class=w> </span><span class=n>syncer</span><span class=p>.</span><span class=n>go</span><span class=p>:</span><span class=mi>525</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=n>debug</span><span class=p>]</span><span class=w> </span><span class=n>source</span><span class=o>-</span><span class=n>db</span><span class=p>:</span><span class=n>cat_link</span><span class=w> </span><span class=k>table</span><span class=p>:</span><span class=n>link_cat</span><span class=p>;</span><span class=w> </span><span class=n>target</span><span class=o>-</span><span class=n>db</span><span class=p>:</span><span class=n>cat_link</span><span class=w> </span><span class=k>table</span><span class=p>:</span><span class=n>link_cat</span><span class=p>,</span><span class=w> </span><span class=n>RowsEvent</span><span class=w> </span><span class=n>data</span><span class=p>:</span><span class=w> </span><span class=p>[[</span><span class=n>E78D56BBBC2357PPPBBBBCACD6EBD2AC</span><span class=w> </span><span class=err>区域经营</span><span class=w> </span><span class=o>-</span><span class=w> </span><span class=err>华南</span><span class=w> </span><span class=mi>118</span><span class=n>OO6009</span><span class=w> </span><span class=err>华中</span><span class=w> </span><span class=o>-</span><span class=w> </span><span class=err>桂琼</span><span class=w> </span><span class=o>-</span><span class=w> </span><span class=err>柳州门店</span><span class=w> </span><span class=mi>118006</span><span class=n>GHJ025OO1</span><span class=w> </span><span class=n>H00O6Q</span><span class=w> </span><span class=n>H00O6Q</span><span class=w> </span><span class=err>浙广</span><span class=w> </span><span class=n>TiDB</span><span class=w> </span><span class=err>储物流动公司</span><span class=w> </span><span class=err>陈王</span><span class=w> </span><span class=mi>120123</span><span class=n>ABCD149rrr2</span><span class=w> </span><span class=err>桂</span><span class=w> </span><span class=n>A88888</span><span class=w> </span><span class=mi>0</span><span class=w> </span><span class=mi>2</span><span class=w> </span><span class=err>梁王</span><span class=w> </span><span class=mi>18212238888</span><span class=w> </span><span class=o>&lt;</span><span class=n>nil</span><span class=o>&gt;</span><span class=w> </span><span class=mi>0000</span><span class=o>-</span><span class=mi>00</span><span class=o>-</span><span class=mi>00</span><span class=w> </span><span class=mi>00</span><span class=p>:</span><span class=mi>00</span><span class=p>:</span><span class=mi>00</span><span class=w> </span><span class=mi>0</span><span class=w> </span><span class=mi>0</span><span class=w> </span><span class=mi>0000</span><span class=o>-</span><span class=mi>00</span><span class=o>-</span><span class=mi>00</span><span class=w> </span><span class=mi>00</span><span class=p>:</span><span class=mi>00</span><span class=p>:</span><span class=mi>00</span><span class=w> </span><span class=err>小芳</span><span class=w> </span><span class=n>lij</span><span class=w> </span><span class=mi>0</span><span class=w> </span><span class=mi>1</span><span class=w> </span><span class=mi>2018</span><span class=o>-</span><span class=mi>01</span><span class=o>-</span><span class=mi>12</span><span class=w> </span><span class=mi>21</span><span class=p>:</span><span class=mi>10</span><span class=p>:</span><span class=mi>09</span><span class=w> </span><span class=o>&lt;</span><span class=n>nil</span><span class=o>&gt;</span><span class=w> </span><span class=mi>2</span><span class=w>  </span><span class=mi>291464</span><span class=p>]]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=mi>2018</span><span class=o>/</span><span class=mi>01</span><span class=o>/</span><span class=mi>13</span><span class=w> </span><span class=mi>12</span><span class=p>:</span><span class=mi>04</span><span class=p>:</span><span class=mi>12</span><span class=w> </span><span class=n>db</span><span class=p>.</span><span class=n>go</span><span class=p>:</span><span class=mi>55</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=n>debug</span><span class=p>]</span><span class=w> </span><span class=p>[</span><span class=n>query</span><span class=p>][</span><span class=k>sql</span><span class=p>]</span><span class=k>SHOW</span><span class=w> </span><span class=n>COLUMNS</span><span class=w> </span><span class=k>FROM</span><span class=w> </span><span class=o>`</span><span class=n>cat_link</span><span class=o>`</span><span class=p>.</span><span class=o>`</span><span class=n>link_cat</span><span class=o>`</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=mi>2018</span><span class=o>/</span><span class=mi>01</span><span class=o>/</span><span class=mi>13</span><span class=w> </span><span class=mi>12</span><span class=p>:</span><span class=mi>04</span><span class=p>:</span><span class=mi>12</span><span class=w> </span><span class=n>db</span><span class=p>.</span><span class=n>go</span><span class=p>:</span><span class=mi>55</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=n>debug</span><span class=p>]</span><span class=w> </span><span class=p>[</span><span class=n>query</span><span class=p>][</span><span class=k>sql</span><span class=p>]</span><span class=k>SHOW</span><span class=w> </span><span class=k>INDEX</span><span class=w> </span><span class=k>FROM</span><span class=w> </span><span class=o>`</span><span class=n>cat_link</span><span class=o>`</span><span class=p>.</span><span class=o>`</span><span class=n>link_cat</span><span class=o>`</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=mi>2018</span><span class=o>/</span><span class=mi>01</span><span class=o>/</span><span class=mi>13</span><span class=w> </span><span class=mi>12</span><span class=p>:</span><span class=mi>04</span><span class=p>:</span><span class=mi>12</span><span class=w> </span><span class=n>syncer</span><span class=p>.</span><span class=n>go</span><span class=p>:</span><span class=mi>882</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=n>info</span><span class=p>]</span><span class=w> </span><span class=k>flush</span><span class=w> </span><span class=k>all</span><span class=w> </span><span class=n>jobs</span><span class=w> </span><span class=n>meta</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>syncer</span><span class=o>-</span><span class=n>binlog</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=p>(</span><span class=n>mysql</span><span class=o>-</span><span class=n>bin</span><span class=p>.</span><span class=mi>002019</span><span class=p>,</span><span class=w> </span><span class=mi>430862751</span><span class=p>),</span><span class=w> </span><span class=n>syncer</span><span class=o>-</span><span class=n>binlog</span><span class=o>-</span><span class=n>gtid</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>b470bfb4</span><span class=o>-</span><span class=n>bdb4</span><span class=o>-</span><span class=mi>11</span><span class=n>e6</span><span class=o>-</span><span class=n>a7e5</span><span class=o>-</span><span class=mi>70106</span><span class=n>fac1460</span><span class=p>:</span><span class=mi>1</span><span class=o>-</span><span class=mi>277917817</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=mi>2018</span><span class=o>/</span><span class=mi>01</span><span class=o>/</span><span class=mi>13</span><span class=w> </span><span class=mi>12</span><span class=p>:</span><span class=mi>04</span><span class=p>:</span><span class=mi>12</span><span class=w> </span><span class=n>meta</span><span class=p>.</span><span class=n>go</span><span class=p>:</span><span class=mi>120</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=n>info</span><span class=p>]</span><span class=w> </span><span class=n>save</span><span class=w> </span><span class=n>position</span><span class=w> </span><span class=k>to</span><span class=w> </span><span class=n>file</span><span class=p>,</span><span class=w> </span><span class=n>binlog</span><span class=o>-</span><span class=n>name</span><span class=p>:</span><span class=n>mysql</span><span class=o>-</span><span class=n>bin</span><span class=p>.</span><span class=mi>002019</span><span class=w> </span><span class=n>binlog</span><span class=o>-</span><span class=n>pos</span><span class=p>:</span><span class=mi>430862751</span><span class=w> </span><span class=n>binlog</span><span class=o>-</span><span class=n>gtid</span><span class=p>:</span><span class=n>b470bfb4</span><span class=o>-</span><span class=n>bdb4</span><span class=o>-</span><span class=mi>11</span><span class=n>e6</span><span class=o>-</span><span class=n>a7e5</span><span class=o>-</span><span class=mi>70106</span><span class=n>fac1460</span><span class=p>:</span><span class=mi>1</span><span class=o>-</span><span class=mi>277917817</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=mi>2018</span><span class=o>/</span><span class=mi>01</span><span class=o>/</span><span class=mi>13</span><span class=w> </span><span class=mi>12</span><span class=p>:</span><span class=mi>04</span><span class=p>:</span><span class=mi>12</span><span class=w> </span><span class=n>main</span><span class=p>.</span><span class=n>go</span><span class=p>:</span><span class=mi>75</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=n>error</span><span class=p>]</span><span class=w> </span><span class=o>/</span><span class=n>home</span><span class=o>/</span><span class=n>jenkins</span><span class=o>/</span><span class=n>workspace</span><span class=o>/</span><span class=n>build_tidb_enterprise_tools_master</span><span class=o>/</span><span class=n>go</span><span class=o>/</span><span class=n>src</span><span class=o>/</span><span class=n>github</span><span class=p>.</span><span class=n>com</span><span class=o>/</span><span class=n>pingcap</span><span class=o>/</span><span class=n>tidb</span><span class=o>-</span><span class=n>enterprise</span><span class=o>-</span><span class=n>tools</span><span class=o>/</span><span class=n>syncer</span><span class=o>/</span><span class=n>syncer</span><span class=p>.</span><span class=n>go</span><span class=p>:</span><span class=mi>556</span><span class=p>:</span><span class=w> </span><span class=n>gen</span><span class=w> </span><span class=k>insert</span><span class=w> </span><span class=n>sqls</span><span class=w> </span><span class=n>failed</span><span class=p>:</span><span class=w> </span><span class=k>insert</span><span class=w> </span><span class=n>columns</span><span class=w> </span><span class=k>and</span><span class=w> </span><span class=n>data</span><span class=w> </span><span class=n>mismatch</span><span class=w> </span><span class=k>in</span><span class=w> </span><span class=n>length</span><span class=p>:</span><span class=w> </span><span class=mi>27</span><span class=w> </span><span class=n>vs</span><span class=w> </span><span class=mi>28</span><span class=p>,</span><span class=w> </span><span class=k>schema</span><span class=p>:</span><span class=w> </span><span class=n>cat_link</span><span class=p>,</span><span class=w> </span><span class=k>table</span><span class=p>:</span><span class=w> </span><span class=n>link_cat</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>/</span><span class=n>home</span><span class=o>/</span><span class=n>jenkins</span><span class=o>/</span><span class=n>workspace</span><span class=o>/</span><span class=n>build_tidb_enterprise_tools_master</span><span class=o>/</span><span class=n>go</span><span class=o>/</span><span class=n>src</span><span class=o>/</span><span class=n>github</span><span class=p>.</span><span class=n>com</span><span class=o>/</span><span class=n>pingcap</span><span class=o>/</span><span class=n>tidb</span><span class=o>-</span><span class=n>enterprise</span><span class=o>-</span><span class=n>tools</span><span class=o>/</span><span class=n>syncer</span><span class=o>/</span><span class=n>syncer</span><span class=p>.</span><span class=n>go</span><span class=p>:</span><span class=mi>143</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=mi>2018</span><span class=o>/</span><span class=mi>01</span><span class=o>/</span><span class=mi>13</span><span class=w> </span><span class=mi>12</span><span class=p>:</span><span class=mi>04</span><span class=p>:</span><span class=mi>12</span><span class=w> </span><span class=n>syncer</span><span class=p>.</span><span class=n>go</span><span class=p>:</span><span class=mi>795</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=n>info</span><span class=p>]</span><span class=w> </span><span class=n>print</span><span class=w> </span><span class=n>status</span><span class=w> </span><span class=n>exits</span><span class=p>,</span><span class=w> </span><span class=n>err</span><span class=p>:</span><span class=n>context</span><span class=w> </span><span class=n>canceled</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=mi>2018</span><span class=o>/</span><span class=mi>01</span><span class=o>/</span><span class=mi>13</span><span class=w> </span><span class=mi>12</span><span class=p>:</span><span class=mi>04</span><span class=p>:</span><span class=mi>12</span><span class=w> </span><span class=n>binlogsyncer</span><span class=p>.</span><span class=n>go</span><span class=p>:</span><span class=mi>126</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=n>info</span><span class=p>]</span><span class=w> </span><span class=n>syncer</span><span class=w> </span><span class=k>is</span><span class=w> </span><span class=n>closing</span><span class=p>...</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=mi>2018</span><span class=o>/</span><span class=mi>01</span><span class=o>/</span><span class=mi>13</span><span class=w> </span><span class=mi>12</span><span class=p>:</span><span class=mi>04</span><span class=p>:</span><span class=mi>12</span><span class=w> </span><span class=n>binlogstreamer</span><span class=p>.</span><span class=n>go</span><span class=p>:</span><span class=mi>47</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=n>error</span><span class=p>]</span><span class=w> </span><span class=n>close</span><span class=w> </span><span class=n>sync</span><span class=w> </span><span class=k>with</span><span class=w> </span><span class=n>err</span><span class=p>:</span><span class=w> </span><span class=n>sync</span><span class=w> </span><span class=k>is</span><span class=w> </span><span class=n>been</span><span class=w> </span><span class=n>closing</span><span class=p>...</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=mi>2018</span><span class=o>/</span><span class=mi>01</span><span class=o>/</span><span class=mi>13</span><span class=w> </span><span class=mi>12</span><span class=p>:</span><span class=mi>04</span><span class=p>:</span><span class=mi>12</span><span class=w> </span><span class=n>binlogsyncer</span><span class=p>.</span><span class=n>go</span><span class=p>:</span><span class=mi>141</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=n>info</span><span class=p>]</span><span class=w> </span><span class=n>syncer</span><span class=w> </span><span class=k>is</span><span class=w> </span><span class=n>closed</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><h3 id=查看下游-tidb-日志>查看下游 TiDB 日志</h3><ul><li><p>Syncer 是作为上游的服务端，获取数据转换后，作为下游的客户端插入数据，以下信息是在插入数据的时候遇见错误接受到的返回</p></li><li><p>Syncer 日志内显示以下信息，实际是 Syncer 下游 TiDB 返回的错误信息</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>begin failed Error 1105: [try again later]: backoffer.maxSleep 5000ms is exceeded, errors:
+</span></span><span class=line><span class=cl>get timestamp failed: rpc error: code = Unknown desc = rpc error: code = Unavailable desc = not leader
+</span></span><span class=line><span class=cl>get timestamp failed: rpc error: code = Unavailable desc = grpc: the connection is unavailable
+</span></span><span class=line><span class=cl>get timestamp failed: rpc error: code = Unavailable desc = grpc: the connection is unavailable
+</span></span><span class=line><span class=cl>db.go💯 [warning] sql stmt_exec retry 90
+</span></span></code></pre></td></tr></table></div></div></li></ul><h3 id=查看运行状态>查看运行状态</h3><ul><li>检查 syncer 是否还在运行</li><li>查看 syncer 最后 50 行日志，根据日志提示修复</li><li>提示 <code>2017/08/01 08:28:59 binlogsyncer.go:554: [error] connection was bad</code></li><li>tidb 链接 源库网络出现异常，tidb 会重试一段时间后退出</li></ul></div><div class=post-copyright><p class=copyright-item><span class=item-title>Author</span>
+<span class=item-content>Jeff</span></p><p class=copyright-item><span class=item-title>LastMod</span>
+<span class=item-content>2020-01-20</span></p><p class=copyright-item><span class=item-title>License</span>
+<span class=item-content><a rel="license noopener" href=https://creativecommons.org/licenses/by-nc-nd/4.0/ target=_blank>CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span></p></div><footer class=post-footer><div class=post-tags><a href=/tags/syncer/>Syncer</a>
+<a href=/tags/enterprise-tools/>enterprise tools</a></div><nav class=post-nav><a class=prev href=/post/20180803-31-select-hash/><i class="iconfont icon-left"></i>
+<span class="prev-text nav-default">School - TiDB 根据 PK 查询不到数据</span>
+<span class="prev-text nav-mobile">Prev</span></a>
+<a class=next href=/post/20180512-drainer-crc/><span class="next-text nav-default">Drainer & Binlog crc mismatch</span>
+<span class="next-text nav-mobile">Next</span>
+<i class="iconfont icon-right"></i></a></nav></footer></article></div></div></main><footer id=footer class=footer><div class=social-links><a href=https://github.com/BigerCAP/TiDB-AirPlan/issues class="iconfont icon-github" title=github></a>
+<a href=https://ap.biger.cc/index.xml type=application/rss+xml class="iconfont icon-rss" title=rss></a></div><div class=copyright><span class=power-by>Powered by <a class=hexo-link href=https://gohugo.io>Hugo</a></span>
+<span class=division>|</span>
+<span class=theme-info>Theme -
+<a class=theme-link href=https://github.com/olOwOlo/hugo-theme-even>Even</a></span><div class=busuanzi-footer><span id=busuanzi_container_site_pv>site pv: <span id=busuanzi_value_site_pv><img src=/img/spinner.svg alt=spinner.svg></span></span>
+<span class=division>|</span>
+<span id=busuanzi_container_site_uv>site uv: <span id=busuanzi_value_site_uv><img src=/img/spinner.svg alt=spinner.svg></span></span></div><span class=copyright-year>&copy;
+2017 -
+2023
+<span class=heart><i class="iconfont icon-heart"></i></span>
+<span class=author>DB - AirPlan</span></span></div></footer><div class=back-to-top id=back-to-top><i class="iconfont icon-up"></i></div></div><script src=https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin=anonymous></script>
+<script>var languageCode="en".replace(/-/g,"_").replace(/_(.*)/,function(e,t){return e.replace(t,t.toUpperCase())});timeago().render(document.querySelectorAll(".timeago"),languageCode),timeago.cancel()</script><script type=text/javascript src=/dist/even.26188efa.min.js></script></body></html>

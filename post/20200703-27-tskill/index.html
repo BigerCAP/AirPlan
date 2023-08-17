@@ -1,772 +1,342 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>九死一生 - 运维小技巧 - TiDB AirPlan - A biger solution</title>
-  <meta name="renderer" content="webkit" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-
-<meta http-equiv="Cache-Control" content="no-transform" />
-<meta http-equiv="Cache-Control" content="no-siteapp" />
-
-<meta name="theme-color" content="#f8f5ec" />
-<meta name="msapplication-navbutton-color" content="#f8f5ec">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
-
-
-<meta name="author" content="Jeff" /><meta name="description" content="0x00 陷入江局 回顾下前两篇文档 《纸上谈兵 - TiDB 性能调优》&amp;amp; 《沙盘点将 - TiDB 监控知识初始化》；处理问题的时候从总是一脸懵逼到偶尔无证懵逼；然后" /><meta name="keywords" content="TiDB, AirPlan, TiDB OPS, tidb-operator, 2pc, raft, databases, mysql, htap" />
-
-
-
-
-
-
-<meta name="generator" content="Hugo 0.78.2 with theme even" />
-
-
-<link rel="canonical" href="https://ap.tidb.cc/post/20200703-27-tskill/" />
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="manifest" href="/manifest.json">
-<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
-
-<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-<link href="/dist/even.04bd84cd.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
-
-
-<meta property="og:title" content="九死一生 - 运维小技巧" />
-<meta property="og:description" content="0x00 陷入江局 回顾下前两篇文档 《纸上谈兵 - TiDB 性能调优》&amp; 《沙盘点将 - TiDB 监控知识初始化》；处理问题的时候从总是一脸懵逼到偶尔无证懵逼；然后" />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://ap.tidb.cc/post/20200703-27-tskill/" />
-<meta property="article:published_time" content="2020-07-02T00:00:00+08:00" />
-<meta property="article:modified_time" content="2020-07-03T00:00:00+08:00" />
-<meta itemprop="name" content="九死一生 - 运维小技巧">
-<meta itemprop="description" content="0x00 陷入江局 回顾下前两篇文档 《纸上谈兵 - TiDB 性能调优》&amp; 《沙盘点将 - TiDB 监控知识初始化》；处理问题的时候从总是一脸懵逼到偶尔无证懵逼；然后">
-<meta itemprop="datePublished" content="2020-07-02T00:00:00+08:00" />
-<meta itemprop="dateModified" content="2020-07-03T00:00:00+08:00" />
-<meta itemprop="wordCount" content="4084">
-
-
-
-<meta itemprop="keywords" content="AirPlan," />
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="九死一生 - 运维小技巧"/>
-<meta name="twitter:description" content="0x00 陷入江局 回顾下前两篇文档 《纸上谈兵 - TiDB 性能调优》&amp; 《沙盘点将 - TiDB 监控知识初始化》；处理问题的时候从总是一脸懵逼到偶尔无证懵逼；然后"/>
-
-<!--[if lte IE 9]>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
-<![endif]-->
-
-<!--[if lt IE 9]>
-  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
-<![endif]-->
-
-</head>
-<body>
-  <div id="mobile-navbar" class="mobile-navbar">
-  <div class="mobile-header-logo">
-    <a href="/" class="logo">TiDB AirPlan</a>
-  </div>
-  <div class="mobile-navbar-icon">
-    <span></span>
-    <span></span>
-    <span></span>
-  </div>
-</div>
-<nav id="mobile-menu" class="mobile-menu slideout-menu">
-  <ul class="mobile-menu-list">
-    <a href="/post/">
-        <li class="mobile-menu-item">Blog</li>
-      </a><a href="/look/">
-        <li class="mobile-menu-item">Look</li>
-      </a><a href="/tags/">
-        <li class="mobile-menu-item">Tags</li>
-      </a><a href="/categories/">
-        <li class="mobile-menu-item">Categories</li>
-      </a><a href="/about/">
-        <li class="mobile-menu-item">About</li>
-      </a>
-  </ul>
-</nav>
-  <div class="container" id="mobile-panel">
-    <header id="header" class="header">
-        <div class="logo-wrapper">
-  <a href="/" class="logo">TiDB AirPlan</a>
-</div>
-
-<nav class="site-navbar">
-  <ul id="menu" class="menu">
-    <li class="menu-item">
-        <a class="menu-item-link" href="/post/">Blog</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/look/">Look</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/tags/">Tags</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/categories/">Categories</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/about/">About</a>
-      </li>
-  </ul>
-</nav>
-    </header>
-
-    <main id="main" class="main">
-      <div class="content-wrapper">
-        <div id="content" class="content">
-          <article class="post">
-    
-    <header class="post-header">
-      <h1 class="post-title">九死一生 - 运维小技巧</h1>
-
-      <div class="post-meta">
-        <span class="post-time"> 2020-07-02 </span>
-        <div class="post-category">
-            <a href="/categories/troubleshooting/"> troubleshooting </a>
-            </div>
-          <span class="more-meta"> 4084 words </span>
-          <span class="more-meta"> 9 mins read </span>
-        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
-      </div>
-    </header>
-
-    <div class="post-toc" id="post-toc">
-  <h2 class="post-toc-title">Contents</h2>
-  <div class="post-toc-content">
-    <nav id="TableOfContents">
-  <ul>
-    <li><a href="#0x00-陷入江局">0x00 陷入江局</a></li>
-    <li><a href="#0x01-slow-query">0x01 Slow Query</a>
-      <ul>
-        <li><a href="#explan">exPlan</a></li>
-        <li><a href="#analyze">Analyze</a></li>
-        <li><a href="#trace">Trace</a></li>
-      </ul>
-    </li>
-    <li><a href="#0x02-ssr">0x02 SSR</a></li>
-    <li><a href="#0x03-profile">0x03 Profile</a></li>
-    <li><a href="#0x04-linux">0x04 Linux</a>
-      <ul>
-        <li><a href="#sar">Sar</a></li>
-      </ul>
-    </li>
-    <li><a href="#0x05-不友好的">0x05 不友好的</a></li>
-  </ul>
-</nav>
-  </div>
-</div>
-  <div class="post-outdated">
-    <div class="hint">
-      <p>[NOTE] Updated <span class="timeago" datetime="2020-07-03T00:00:00" title="July 3, 2020">July 3, 2020</span>. This article may have outdated content or subject matter.</p>
-    </div>
-  </div>
-    <div class="post-content">
-      <h2 id="0x00-陷入江局">0x00 陷入江局</h2>
-<p>回顾下前两篇文档 <a href="/post/20200311-11-performance-map/">《纸上谈兵 - TiDB 性能调优》</a>&amp; <a href="/post/20200416-16-init-monitoring-map/">《沙盘点将 - TiDB 监控知识初始化》</a>；处理问题的时候从总是一脸懵逼到偶尔无证懵逼；然后尝试给某个组件加个「无证之罪」先绕过这个棘手的问题。</p>
-<p><img src="./jiangju.png" alt="陷入江局"></p>
-<blockquote>
-<p>程序在干什么？观察 tidb 监控和 profile 获取 SQL 运行在 TiDB Cluster 的情况
+<!doctype html><html lang=en><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge,chrome=1"><title>九死一生 - 运维小技巧 - AirPlan - A biger solution</title><meta name=renderer content="webkit"><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta http-equiv=cache-control content="no-transform"><meta http-equiv=cache-control content="no-siteapp"><meta name=theme-color content="#f8f5ec"><meta name=msapplication-navbutton-color content="#f8f5ec"><meta name=apple-mobile-web-app-capable content="yes"><meta name=apple-mobile-web-app-status-bar-style content="#f8f5ec"><meta name=author content="Jeff"><meta name=description content="0x00 陷入江局 回顾下前两篇文档 《纸上谈兵 - TiDB 性能调优》&amp;amp; 《沙盘点将 - TiDB 监控知识初始化》；处理问题的时候从总是一脸懵逼到偶尔无证懵逼；然后"><meta name=keywords content="TiDB,AirPlan,TiDB OPS,tidb-operator,2pc,raft,databases,mysql,htap"><meta name=generator content="Hugo 0.110.0 with theme even"><link rel=canonical href=https://ap.biger.cc/post/20200703-27-tskill/><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/manifest.json><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><script async src=//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js></script>
+<link href=/dist/even.04bd84cd.min.css rel=stylesheet><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin=anonymous><meta property="og:title" content="九死一生 - 运维小技巧"><meta property="og:description" content="0x00 陷入江局 回顾下前两篇文档 《纸上谈兵 - TiDB 性能调优》& 《沙盘点将 - TiDB 监控知识初始化》；处理问题的时候从总是一脸懵逼到偶尔无证懵逼；然后"><meta property="og:type" content="article"><meta property="og:url" content="https://ap.biger.cc/post/20200703-27-tskill/"><meta property="article:section" content="post"><meta property="article:published_time" content="2020-07-02T00:00:00+08:00"><meta property="article:modified_time" content="2020-07-03T00:00:00+08:00"><meta itemprop=name content="九死一生 - 运维小技巧"><meta itemprop=description content="0x00 陷入江局 回顾下前两篇文档 《纸上谈兵 - TiDB 性能调优》& 《沙盘点将 - TiDB 监控知识初始化》；处理问题的时候从总是一脸懵逼到偶尔无证懵逼；然后"><meta itemprop=datePublished content="2020-07-02T00:00:00+08:00"><meta itemprop=dateModified content="2020-07-03T00:00:00+08:00"><meta itemprop=wordCount content="4084"><meta itemprop=keywords content="AirPlan,"><meta name=twitter:card content="summary"><meta name=twitter:title content="九死一生 - 运维小技巧"><meta name=twitter:description content="0x00 陷入江局 回顾下前两篇文档 《纸上谈兵 - TiDB 性能调优》& 《沙盘点将 - TiDB 监控知识初始化》；处理问题的时候从总是一脸懵逼到偶尔无证懵逼；然后"><!--[if lte IE 9]><script src=https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js></script><![endif]--><!--[if lt IE 9]><script src=https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js></script>
+<script src=https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js></script><![endif]--></head><body><div id=mobile-navbar class=mobile-navbar><div class=mobile-header-logo><a href=/ class=logo>AirPlan</a></div><div class=mobile-navbar-icon><span></span>
+<span></span>
+<span></span></div></div><nav id=mobile-menu class="mobile-menu slideout-menu"><ul class=mobile-menu-list><a href=/post/><li class=mobile-menu-item>Blog</li></a><a href=/look/><li class=mobile-menu-item>Look</li></a><a href=/tags/><li class=mobile-menu-item>Tags</li></a><a href=/categories/><li class=mobile-menu-item>Categories</li></a><a href=/about/><li class=mobile-menu-item>About</li></a></ul></nav><div class=container id=mobile-panel><header id=header class=header><div class=logo-wrapper><a href=/ class=logo>AirPlan</a></div><nav class=site-navbar><ul id=menu class=menu><li class=menu-item><a class=menu-item-link href=/post/>Blog</a></li><li class=menu-item><a class=menu-item-link href=/look/>Look</a></li><li class=menu-item><a class=menu-item-link href=/tags/>Tags</a></li><li class=menu-item><a class=menu-item-link href=/categories/>Categories</a></li><li class=menu-item><a class=menu-item-link href=/about/>About</a></li></ul></nav></header><main id=main class=main><div class=content-wrapper><div id=content class=content><article class=post><header class=post-header><h1 class=post-title>九死一生 - 运维小技巧</h1><div class=post-meta><span class=post-time>2020-07-02</span><div class=post-category><a href=/categories/troubleshooting/>troubleshooting</a></div><span class=more-meta>4084 words</span>
+<span class=more-meta>9 mins read</span>
+<span id=busuanzi_container_page_pv class=more-meta><span id=busuanzi_value_page_pv><img src=/img/spinner.svg alt=spinner.svg></span> times read</span></div></header><div class=post-toc id=post-toc><h2 class=post-toc-title>Contents</h2><div class=post-toc-content><nav id=TableOfContents><ul><li><a href=#0x00-陷入江局>0x00 陷入江局</a></li><li><a href=#0x01-slow-query>0x01 Slow Query</a><ul><li><a href=#explan>exPlan</a></li><li><a href=#analyze>Analyze</a></li><li><a href=#trace>Trace</a></li></ul></li><li><a href=#0x02-ssr>0x02 SSR</a></li><li><a href=#0x03-profile>0x03 Profile</a></li><li><a href=#0x04-linux>0x04 Linux</a><ul><li><a href=#sar>Sar</a></li></ul></li><li><a href=#0x05-不友好的>0x05 不友好的</a></li></ul></nav></div></div><div class=post-outdated><div class=warn><p>[NOTE] Updated <span class=timeago datetime=2020-07-03T00:00:00 title="July 3, 2020">July 3, 2020</span>. This article may have outdated content or subject matter.</p></div></div><div class=post-content><h2 id=0x00-陷入江局>0x00 陷入江局</h2><p>回顾下前两篇文档 <a href=/post/20200311-11-performance-map/>《纸上谈兵 - TiDB 性能调优》</a>& <a href=/post/20200416-16-init-monitoring-map/>《沙盘点将 - TiDB 监控知识初始化》</a>；处理问题的时候从总是一脸懵逼到偶尔无证懵逼；然后尝试给某个组件加个「无证之罪」先绕过这个棘手的问题。</p><p><img src=./jiangju.png alt=陷入江局></p><blockquote><p>程序在干什么？观察 tidb 监控和 profile 获取 SQL 运行在 TiDB Cluster 的情况
 系统在干什么？使用 linux 命令和 node export 查看运行负载
-程序和系统一起在干什么？比如 disk util 高的原因？CPU / MEM 占用高的原因？</p>
-<p>重点回顾；《一条 SQL 的使命》</p>
-</blockquote>
-<ul>
-<li>TiDB
-<ul>
-<li>QPS / duration / statement / slow query</li>
-<li>parser / compile / PD tso query</li>
-<li>kv count / kv error / kv duration</li>
-</ul>
-</li>
-<li>TiKV
-<ul>
-<li>GRPC「TiKV 进出口港」 / thread cpu / cluster / error</li>
-<li>coprocessor / schedule prewrite &amp; commit
-<ul>
-<li>coprocessor 与 store readpool 是两种查询方式，store readpool 主要应用<strong>不回表主键点查</strong></li>
-</ul>
-</li>
-<li>task / Raft / RocksDB</li>
-</ul>
-</li>
-<li>overview
-<ul>
-<li>CPU / Memory / Disk performance / OPEN FD / Network IO</li>
-</ul>
-</li>
-<li>SQL 在 TiDB cluster 内运行的过程均有打点记录，资源/耗时 可在 Grafana 上分析后查证</li>
-<li>SQL 进入 TiDB 之前、TiKV 与磁盘的交互；该怎么和 SQL 做一一对应呢？</li>
-</ul>
-<h2 id="0x01-slow-query">0x01 Slow Query</h2>
-<p>slow query 文件支持 <a href="https://www.percona.com/doc/percona-toolkit/LATEST/pt-query-digest.html">pt-query-digest</a> 工具分析<br>
-<a href="https://docs.pingcap.com/zh/tidb/dev/identify-slow-queries">PingCAP 官网-slow query 慢日志</a>；TiDB 会将执行时间超过 slow-threshold（默认值为 300 毫秒）的语句输出到 slow-query-file（默认值：&ldquo;tidb-slow.log&rdquo;）日志文件中，用于帮助用户定位慢查询语句，分析和解决 SQL 执行的性能问题</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-sql" data-lang="sql"><span class="o">#</span> <span class="n">Time</span><span class="p">:</span> <span class="mi">2020</span><span class="o">-</span><span class="mi">07</span><span class="o">-</span><span class="mi">02</span><span class="n">T16</span><span class="p">:</span><span class="mi">45</span><span class="p">:</span><span class="mi">48</span><span class="p">.</span><span class="mi">948834124</span><span class="o">+</span><span class="mi">08</span><span class="p">:</span><span class="mi">00</span>  <span class="o">//</span> <span class="err">执行</span> <span class="n">query</span> <span class="err">时间</span>
-<span class="o">#</span> <span class="n">Txn_start_ts</span><span class="p">:</span> <span class="mi">417773531665268886</span>          <span class="o">//</span> <span class="err">事物</span> <span class="n">tso</span>  <span class="err">，类似</span>  <span class="n">mysql</span> <span class="n">gtid</span>
-<span class="o">#</span> <span class="k">User</span><span class="p">:</span> <span class="n">dms</span><span class="o">@</span><span class="mi">172</span><span class="p">.</span><span class="mi">16</span><span class="p">.</span><span class="mi">4</span><span class="p">.</span><span class="mi">51</span>                     <span class="o">//</span> <span class="err">执行用户与客户端</span> <span class="n">IP</span><span class="err">「前置为</span> <span class="n">Proxy</span> <span class="err">时，此处显示</span> <span class="n">Proxy</span> <span class="n">IP</span><span class="err">」</span>
-<span class="o">#</span> <span class="n">Conn_ID</span><span class="p">:</span> <span class="mi">327382</span>                           <span class="o">//</span> <span class="err">链接</span> <span class="n">ID</span>
-<span class="o">#</span> <span class="n">Query_time</span><span class="p">:</span> <span class="mi">32</span><span class="p">.</span><span class="mi">452025271</span>                  <span class="o">//</span> <span class="n">query</span> <span class="err">从</span> <span class="k">begin</span> <span class="err">至</span> <span class="k">commit</span> <span class="err">总时长，</span><span class="k">begin</span> <span class="err">开启后发送</span> <span class="k">select</span> <span class="err">语句后，空置一段时间后提交也会被计入</span>
-<span class="o">#</span> <span class="n">Parse_time</span><span class="p">:</span> <span class="mi">0</span><span class="p">.</span><span class="mi">056166789</span>                   <span class="o">//</span> <span class="n">TiDB</span><span class="o">-</span><span class="n">server</span> <span class="n">AST</span> <span class="err">解析</span> <span class="nb">text</span> <span class="k">to</span> <span class="k">sql</span> <span class="err">耗时</span>
-<span class="o">#</span> <span class="n">Compile_time</span><span class="p">:</span> <span class="mi">0</span><span class="p">.</span><span class="mi">000314969</span>                 <span class="o">//</span> <span class="n">TiDB</span><span class="o">-</span><span class="n">server</span> <span class="n">Plan</span> <span class="err">编译耗时</span>
-<span class="o">#</span> <span class="n">Process_time</span><span class="p">:</span> <span class="mi">0</span><span class="p">.</span><span class="mi">001</span> <span class="n">Wait_time</span><span class="p">:</span> <span class="mi">0</span><span class="p">.</span><span class="mi">001</span> <span class="n">Request_count</span><span class="p">:</span> <span class="mi">2</span> <span class="n">Prewrite_time</span><span class="p">:</span> <span class="mi">0</span><span class="p">.</span><span class="mi">003820812</span> <span class="n">Commit_time</span><span class="p">:</span> <span class="mi">0</span><span class="p">.</span><span class="mi">003007832</span> <span class="n">Get_commit_ts_time</span><span class="p">:</span> <span class="mi">0</span><span class="p">.</span><span class="mi">000107308</span> <span class="n">Write_keys</span><span class="p">:</span> <span class="mi">1</span> <span class="n">Write_size</span><span class="p">:</span> <span class="mi">539</span> <span class="n">Prewrite_region</span><span class="p">:</span> <span class="mi">1</span>
-<span class="o">#</span> <span class="n">DB</span><span class="p">:</span> <span class="n">dms</span>                                     <span class="o">//</span> <span class="err">数据库信息</span>
-<span class="o">#</span> <span class="n">Index_names</span><span class="p">:</span> <span class="p">[</span><span class="n">t_data_0210</span><span class="p">:</span><span class="n">index_id</span><span class="p">]</span>        <span class="o">//</span> <span class="k">index</span> <span class="err">使用信息</span>
-<span class="o">#</span> <span class="n">Is_internal</span><span class="p">:</span> <span class="k">false</span>
-<span class="o">#</span> <span class="n">Digest</span><span class="p">:</span> <span class="mi">26</span><span class="n">becfd8135c8f31011bdb317406018a8de4473c26af18180ef97a91c224a77e</span>
-<span class="o">#</span> <span class="n">Stats</span><span class="p">:</span> <span class="n">t_data_0210</span><span class="p">:</span><span class="n">pseudo</span>  <span class="o">//</span> <span class="o">#</span> <span class="n">Stats</span><span class="p">:</span> <span class="n">t_data_0210</span><span class="p">:</span><span class="mi">417773784057512074</span>
-<span class="o">#</span> <span class="n">Num_cop_tasks</span><span class="p">:</span> <span class="mi">2</span>
-<span class="o">#</span> <span class="n">Cop_proc_avg</span><span class="p">:</span> <span class="mi">0</span><span class="p">.</span><span class="mi">0005</span> <span class="n">Cop_proc_p90</span><span class="p">:</span> <span class="mi">0</span><span class="p">.</span><span class="mi">001</span> <span class="n">Cop_proc_max</span><span class="p">:</span> <span class="mi">0</span><span class="p">.</span><span class="mi">001</span> <span class="n">Cop_proc_addr</span><span class="p">:</span> <span class="mi">172</span><span class="p">.</span><span class="mi">16</span><span class="p">.</span><span class="mi">4</span><span class="p">.</span><span class="mi">51</span><span class="p">:</span><span class="mi">20160</span>  <span class="o">//</span> <span class="n">store</span> <span class="n">readpool</span> <span class="err">不显示该部分信息</span>
-<span class="o">#</span> <span class="n">Cop_wait_avg</span><span class="p">:</span> <span class="mi">0</span><span class="p">.</span><span class="mi">0005</span> <span class="n">Cop_wait_p90</span><span class="p">:</span> <span class="mi">0</span><span class="p">.</span><span class="mi">001</span> <span class="n">Cop_wait_max</span><span class="p">:</span> <span class="mi">0</span><span class="p">.</span><span class="mi">001</span> <span class="n">Cop_wait_addr</span><span class="p">:</span> <span class="mi">172</span><span class="p">.</span><span class="mi">16</span><span class="p">.</span><span class="mi">4</span><span class="p">.</span><span class="mi">51</span><span class="p">:</span><span class="mi">20160</span>
-<span class="o">#</span> <span class="n">Mem_max</span><span class="p">:</span> <span class="mi">27644</span>
-<span class="o">#</span> <span class="n">Prepared</span><span class="p">:</span> <span class="k">false</span>
-<span class="o">#</span> <span class="n">Has_more_results</span><span class="p">:</span> <span class="k">false</span>
-<span class="o">#</span> <span class="n">Succ</span><span class="p">:</span> <span class="k">true</span>
-<span class="o">#</span> <span class="n">Plan</span><span class="p">:</span> <span class="n">tidb_decode_plan</span><span class="p">(</span><span class="s1">&#39;2gHwaTAJMzFfNgkwCTEJCjEJMTNfNAkxCTEJdGFibGU6VF9EQVRBXzAyMTkxMDE3MDc0NDk4NjAsIGluZGV4OmRldmljZV9pZCwgcmFuZ2U6WyIyMDAxMTgwMDc2NDE4MSIsIjIwMDExODAwNzYFEYBdLCBrZWVwIG9yZGVyOmZhbHNlLCBzdGF0czpwc2V1ZG8BhQgwXzWOhQB6SQA=&#39;</span><span class="p">)</span>
-<span class="k">UPDATE</span> <span class="n">t_data_0210</span> <span class="k">SET</span> <span class="o">`</span><span class="n">pos</span><span class="o">`=</span><span class="s1">&#39;114&#39;</span> <span class="k">WHERE</span> <span class="p">(</span><span class="o">`</span><span class="n">id</span><span class="o">`=</span><span class="s1">&#39;800764181&#39;</span><span class="p">);</span>
-</code></pre></td></tr></table>
-</div>
-</div><h3 id="explan">exPlan</h3>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span><span class="lnt">8
-</span><span class="lnt">9
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-sql" data-lang="sql"><span class="p">(</span><span class="n">root</span><span class="o">@</span><span class="mi">127</span><span class="p">.</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">.</span><span class="mi">1</span><span class="p">)</span> <span class="p">[(</span><span class="k">none</span><span class="p">)]</span><span class="o">&gt;</span><span class="k">select</span> <span class="n">tidb_decode_plan</span><span class="p">(</span><span class="s1">&#39;2gHwaTAJMzFfNgkwCTEJCjEJMTNfNAkxCTEJdGFibGU6VF9EQVRBXzAyMTkxMDE3MDc0NDk4NjAsIGluZGV4OmRldmljZV9pZCwgcmFuZ2U6WyIyMDAxMTgwMDc2NDE4MSIsIjIwMDExODAwNzYFEYBdLCBrZWVwIG9yZGVyOmZhbHNlLCBzdGF0czpwc2V1ZG8BhQgwXzWOhQB6SQA=&#39;</span><span class="p">);</span>
-<span class="o">+</span><span class="c1">--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-</span><span class="c1"></span><span class="o">|</span> <span class="n">tidb_decode_plan</span><span class="p">(</span><span class="s1">&#39;2gHwaTAJMzFfNgkwCTEJCjEJMTNfNAkxCTEJdGFibGU6VF9EQVRBXzAyMTkxMDE3MDc0NDk4NjAsIGluZGV4OmRldmljZV9pZCwgcmFuZ2U6WyIyMDAxMTgwMDc2NDE4MSIsIjIwMDExODAwNzYFEYBdLCBrZWVwIG9yZGVyOmZhbHNlLCBzdGF0czpwc2V1ZG8BhQgwXzWOhQB6SQA=&#39;</span><span class="p">)</span>                           <span class="o">|</span>
-<span class="o">+</span><span class="c1">--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-</span><span class="c1"></span><span class="o">|</span> 	<span class="n">TableReader_6</span>	<span class="n">root</span>	<span class="mi">1</span>	
-	<span class="err">├─</span><span class="n">IndexScan_4</span>	<span class="n">cop</span> 	<span class="mi">1</span>	<span class="k">table</span><span class="p">:</span><span class="n">t_data_0210</span><span class="p">,</span> <span class="k">index</span><span class="p">:</span><span class="n">id</span><span class="p">,</span> <span class="n">range</span><span class="p">:[</span><span class="s2">&#34;800764181&#34;</span><span class="p">,</span><span class="s2">&#34;800764181&#34;</span><span class="p">],</span> <span class="n">keep</span> <span class="k">order</span><span class="p">:</span><span class="k">false</span><span class="p">,</span> <span class="n">stats</span><span class="p">:</span><span class="n">pseudo</span>
-	<span class="err">└─</span><span class="n">TableScan_5</span>	<span class="n">cop</span> 	<span class="mi">1</span>	<span class="k">table</span><span class="p">:</span><span class="n">t_data_0210</span><span class="p">,</span> <span class="n">keep</span> <span class="k">order</span><span class="p">:</span><span class="k">false</span><span class="p">,</span> <span class="n">stats</span><span class="p">:</span><span class="n">pseudo</span>         <span class="o">|</span>
-<span class="o">+</span><span class="c1">--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-</span><span class="c1"></span><span class="mi">1</span> <span class="k">row</span> <span class="k">in</span> <span class="k">set</span> <span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span> <span class="n">sec</span><span class="p">)</span>
-</code></pre></td></tr></table>
-</div>
-</div><h3 id="analyze">Analyze</h3>
-<p><a href="https://docs.pingcap.com/zh/tidb/v4.0/sql-statement-explain-analyze">PingCAP 官网-Analyze</a>；EXPLAIN ANALYZE 语句的工作方式类似于 EXPLAIN，主要区别在于前者实际上会执行语句。这样可以将查询计划中的估计值与执行时所遇到的实际值进行比较。如果估计值与实际值显著不同，那么应考虑在受影响的表上运行 ANALYZE TABLE。</p>
-<blockquote>
-<p>explain analyze 是将 SQL 语句在数据库中执行了一遍，然后通过打点收集到的数据；如果是 insert / update /delete 会被实际运行并且操作数据</p>
-</blockquote>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-sql" data-lang="sql"><span class="k">explain</span> <span class="k">analyze</span> <span class="k">select</span> <span class="n">id</span> <span class="k">from</span> <span class="n">T_DATA_0210</span>  <span class="k">WHERE</span> <span class="p">(</span><span class="o">`</span><span class="n">id</span><span class="o">`=</span><span class="s1">&#39;800764181&#39;</span><span class="p">);</span>
-<span class="o">+</span><span class="c1">---------------------+-------+------+-------------------------------------------------------------------------------------------------------------+----------------------------------+---------+
-</span><span class="c1"></span><span class="o">|</span> <span class="n">id</span>                  <span class="o">|</span> <span class="k">count</span> <span class="o">|</span> <span class="n">task</span> <span class="o">|</span> <span class="k">operator</span> <span class="n">info</span>                                                                                               <span class="o">|</span> <span class="n">execution</span> <span class="n">info</span>                   <span class="o">|</span> <span class="n">memory</span>  <span class="o">|</span>
-<span class="o">+</span><span class="c1">---------------------+-------+------+-------------------------------------------------------------------------------------------------------------+----------------------------------+---------+
-</span><span class="c1"></span><span class="o">|</span> <span class="n">Projection_4</span>        <span class="o">|</span> <span class="mi">2</span><span class="p">.</span><span class="mi">00</span>  <span class="o">|</span> <span class="n">root</span> <span class="o">|</span> <span class="n">paas_dms</span><span class="p">.</span><span class="n">t_data_0210</span><span class="p">.</span><span class="n">id</span>                                                                         <span class="o">|</span> <span class="n">time</span><span class="p">:</span><span class="mi">1</span><span class="p">.</span><span class="mi">195879</span><span class="n">ms</span><span class="p">,</span> <span class="n">loops</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span> <span class="k">rows</span><span class="p">:</span><span class="mi">1</span> <span class="o">|</span> <span class="n">N</span><span class="o">/</span><span class="n">A</span>     <span class="o">|</span>
-<span class="o">|</span> <span class="err">└─</span><span class="n">IndexLookUp_7</span>     <span class="o">|</span> <span class="mi">2</span><span class="p">.</span><span class="mi">00</span>  <span class="o">|</span> <span class="n">root</span> <span class="o">|</span>                                                                                                             <span class="o">|</span> <span class="n">time</span><span class="p">:</span><span class="mi">1</span><span class="p">.</span><span class="mi">189899</span><span class="n">ms</span><span class="p">,</span> <span class="n">loops</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span> <span class="k">rows</span><span class="p">:</span><span class="mi">1</span> <span class="o">|</span> <span class="mi">1</span><span class="p">.</span><span class="mi">25</span> <span class="n">KB</span> <span class="o">|</span>
-<span class="o">|</span>   <span class="err">├─</span><span class="n">IndexScan_5</span>     <span class="o">|</span> <span class="mi">2</span><span class="p">.</span><span class="mi">00</span>  <span class="o">|</span> <span class="n">cop</span>  <span class="o">|</span> <span class="k">table</span><span class="p">:</span><span class="n">t_data_0210</span><span class="p">,</span> <span class="k">index</span><span class="p">:</span><span class="n">id</span><span class="p">,</span> <span class="n">range</span><span class="p">:[</span><span class="s2">&#34;800764181&#34;</span><span class="p">,</span><span class="s2">&#34;800764181&#34;</span><span class="p">],</span> <span class="n">keep</span> <span class="k">order</span><span class="p">:</span><span class="k">false</span> <span class="o">|</span> <span class="n">time</span><span class="p">:</span><span class="mi">0</span><span class="n">s</span><span class="p">,</span> <span class="n">loops</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="k">rows</span><span class="p">:</span><span class="mi">1</span>         <span class="o">|</span> <span class="n">N</span><span class="o">/</span><span class="n">A</span>     <span class="o">|</span>
-<span class="o">|</span>   <span class="err">└─</span><span class="n">TableScan_6</span>     <span class="o">|</span> <span class="mi">2</span><span class="p">.</span><span class="mi">00</span>  <span class="o">|</span> <span class="n">cop</span>  <span class="o">|</span> <span class="k">table</span><span class="p">:</span><span class="n">t_data_0210</span><span class="p">,</span> <span class="n">keep</span> <span class="k">order</span><span class="p">:</span><span class="k">false</span>                                                             <span class="o">|</span> <span class="n">time</span><span class="p">:</span><span class="mi">0</span><span class="n">s</span><span class="p">,</span> <span class="n">loops</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="k">rows</span><span class="p">:</span><span class="mi">1</span>         <span class="o">|</span> <span class="n">N</span><span class="o">/</span><span class="n">A</span>     <span class="o">|</span>
-<span class="o">+</span><span class="c1">---------------------+-------+------+-------------------------------------------------------------------------------------------------------------+----------------------------------+---------+
-</span><span class="c1"></span><span class="mi">4</span> <span class="k">rows</span> <span class="k">in</span> <span class="k">set</span> <span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span> <span class="n">sec</span><span class="p">)</span>
-</code></pre></td></tr></table>
-</div>
-</div><div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-sql" data-lang="sql"><span class="o">//</span> <span class="k">explain</span> <span class="k">analyze</span> <span class="k">select</span> <span class="k">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="o">/</span><span class="k">count</span><span class="p">(</span><span class="k">distinct</span> <span class="n">date_format</span><span class="p">(</span><span class="n">account_mdate</span><span class="p">,</span><span class="s1">&#39;%Y-%m-%d&#39;</span><span class="p">))</span> <span class="k">from</span> <span class="n">account</span><span class="p">;</span>
-<span class="o">//</span> <span class="err">看起来只做了一次</span> <span class="k">table</span> <span class="k">full</span> <span class="n">scan</span><span class="err">、同时</span> <span class="k">distinct</span> <span class="err">与</span> <span class="n">date_format</span> <span class="err">无法下推到</span> <span class="n">tikv</span> <span class="err">上执行</span>
-<span class="o">+</span><span class="c1">-----------------------------+--------------+-----------+-----------+---------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------+-----------------------+------+
-</span><span class="c1"></span><span class="o">|</span> <span class="n">id</span>                          <span class="o">|</span> <span class="n">estRows</span>      <span class="o">|</span> <span class="n">actRows</span>   <span class="o">|</span> <span class="n">task</span>      <span class="o">|</span> <span class="k">access</span> <span class="k">object</span> <span class="o">|</span> <span class="n">execution</span> <span class="n">info</span>                                                                                                                                                             <span class="o">|</span> <span class="k">operator</span> <span class="n">info</span>                                                                                <span class="o">|</span> <span class="n">memory</span>                <span class="o">|</span> <span class="n">disk</span> <span class="o">|</span>
-<span class="o">+</span><span class="c1">-----------------------------+--------------+-----------+-----------+---------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------+-----------------------+------+
-</span><span class="c1"></span><span class="o">|</span> <span class="n">Projection_4</span>                <span class="o">|</span> <span class="mi">1</span><span class="p">.</span><span class="mi">00</span>         <span class="o">|</span> <span class="mi">1</span>         <span class="o">|</span> <span class="n">root</span>      <span class="o">|</span>               <span class="o">|</span> <span class="n">time</span><span class="p">:</span><span class="mi">18</span><span class="p">.</span><span class="mi">899834996</span><span class="n">s</span><span class="p">,</span> <span class="n">loops</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span> <span class="n">Concurrency</span><span class="p">:</span><span class="k">OFF</span>                                                                                                                               <span class="o">|</span> <span class="n">div</span><span class="p">(</span><span class="k">cast</span><span class="p">(</span><span class="k">Column</span><span class="o">#</span><span class="mi">19</span><span class="p">,</span> <span class="nb">decimal</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span> <span class="nb">BINARY</span><span class="p">),</span> <span class="k">cast</span><span class="p">(</span><span class="k">Column</span><span class="o">#</span><span class="mi">20</span><span class="p">,</span> <span class="nb">decimal</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span> <span class="nb">BINARY</span><span class="p">))</span><span class="o">-&gt;</span><span class="k">Column</span><span class="o">#</span><span class="mi">21</span> <span class="o">|</span> <span class="mi">744</span> <span class="n">Bytes</span>             <span class="o">|</span> <span class="n">N</span><span class="o">/</span><span class="n">A</span>  <span class="o">|</span>
-<span class="o">|</span> <span class="err">└─</span><span class="n">StreamAgg_6</span>               <span class="o">|</span> <span class="mi">1</span><span class="p">.</span><span class="mi">00</span>         <span class="o">|</span> <span class="mi">1</span>         <span class="o">|</span> <span class="n">root</span>      <span class="o">|</span>               <span class="o">|</span> <span class="n">time</span><span class="p">:</span><span class="mi">18</span><span class="p">.</span><span class="mi">899801597</span><span class="n">s</span><span class="p">,</span> <span class="n">loops</span><span class="p">:</span><span class="mi">2</span>                                                                                                                                                <span class="o">|</span> <span class="n">funcs</span><span class="p">:</span><span class="k">count</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">-&gt;</span><span class="k">Column</span><span class="o">#</span><span class="mi">19</span><span class="p">,</span> <span class="n">funcs</span><span class="p">:</span><span class="k">count</span><span class="p">(</span><span class="k">distinct</span> <span class="k">Column</span><span class="o">#</span><span class="mi">23</span><span class="p">)</span><span class="o">-&gt;</span><span class="k">Column</span><span class="o">#</span><span class="mi">20</span>                        <span class="o">|</span> <span class="mi">17</span><span class="p">.</span><span class="mi">5087890625</span> <span class="n">KB</span>      <span class="o">|</span> <span class="n">N</span><span class="o">/</span><span class="n">A</span>  <span class="o">|</span>
-<span class="o">|</span>   <span class="err">└─</span><span class="n">Projection_11</span>           <span class="o">|</span> <span class="mi">100036000</span><span class="p">.</span><span class="mi">00</span> <span class="o">|</span> <span class="mi">100036000</span> <span class="o">|</span> <span class="n">root</span>      <span class="o">|</span>               <span class="o">|</span> <span class="n">time</span><span class="p">:</span><span class="mi">670</span><span class="p">.</span><span class="mi">978479</span><span class="n">ms</span><span class="p">,</span> <span class="n">loops</span><span class="p">:</span><span class="mi">98163</span><span class="p">,</span> <span class="n">Concurrency</span><span class="p">:</span><span class="mi">8</span>                                                                                                                              <span class="o">|</span> <span class="n">date_format</span><span class="p">(</span><span class="n">findpt</span><span class="p">.</span><span class="n">account</span><span class="p">.</span><span class="n">account_mdate</span><span class="p">,</span> <span class="o">%</span><span class="n">Y</span><span class="o">-%</span><span class="n">m</span><span class="o">-%</span><span class="n">d</span><span class="p">)</span><span class="o">-&gt;</span><span class="k">Column</span><span class="o">#</span><span class="mi">23</span>                               <span class="o">|</span> <span class="mi">208</span><span class="p">.</span><span class="mi">76953125</span> <span class="n">KB</span>       <span class="o">|</span> <span class="n">N</span><span class="o">/</span><span class="n">A</span>  <span class="o">|</span>
-<span class="o">|</span>     <span class="err">└─</span><span class="n">TableReader_10</span>        <span class="o">|</span> <span class="mi">100036000</span><span class="p">.</span><span class="mi">00</span> <span class="o">|</span> <span class="mi">100036000</span> <span class="o">|</span> <span class="n">root</span>      <span class="o">|</span>               <span class="o">|</span> <span class="n">time</span><span class="p">:</span><span class="mi">528</span><span class="p">.</span><span class="mi">386518</span><span class="n">ms</span><span class="p">,</span> <span class="n">loops</span><span class="p">:</span><span class="mi">98163</span><span class="p">,</span> <span class="n">rpc</span> <span class="n">num</span><span class="p">:</span> <span class="mi">560</span><span class="p">,</span> <span class="n">rpc</span> <span class="k">max</span><span class="p">:</span><span class="mi">684</span><span class="p">.</span><span class="mi">898903</span><span class="n">ms</span><span class="p">,</span> <span class="k">min</span><span class="p">:</span><span class="mi">70</span><span class="p">.</span><span class="mi">020085</span><span class="n">ms</span><span class="p">,</span> <span class="k">avg</span><span class="p">:</span><span class="mi">427</span><span class="p">.</span><span class="mi">347923</span><span class="n">ms</span><span class="p">,</span> <span class="n">p80</span><span class="p">:</span><span class="mi">474</span><span class="p">.</span><span class="mi">446604</span><span class="n">ms</span><span class="p">,</span> <span class="n">p95</span><span class="p">:</span><span class="mi">546</span><span class="p">.</span><span class="mi">15945</span><span class="n">ms</span><span class="p">,</span> <span class="n">proc</span> <span class="n">keys</span> <span class="k">max</span><span class="p">:</span><span class="mi">255761</span><span class="p">,</span> <span class="n">p95</span><span class="p">:</span><span class="mi">178374</span> <span class="o">|</span> <span class="k">data</span><span class="p">:</span><span class="n">TableFullScan_9</span>                                                                         <span class="o">|</span> <span class="mi">113</span><span class="p">.</span><span class="mi">44037055969238</span> <span class="n">MB</span> <span class="o">|</span> <span class="n">N</span><span class="o">/</span><span class="n">A</span>  <span class="o">|</span>
-<span class="o">|</span>       <span class="err">└─</span><span class="n">TableFullScan_9</span>     <span class="o">|</span> <span class="mi">100036000</span><span class="p">.</span><span class="mi">00</span> <span class="o">|</span> <span class="mi">100036000</span> <span class="o">|</span> <span class="n">cop</span><span class="p">[</span><span class="n">tikv</span><span class="p">]</span> <span class="o">|</span> <span class="k">table</span><span class="p">:</span><span class="n">account</span> <span class="o">|</span> <span class="n">proc</span> <span class="k">max</span><span class="p">:</span><span class="mi">659</span><span class="n">ms</span><span class="p">,</span> <span class="k">min</span><span class="p">:</span><span class="mi">65</span><span class="n">ms</span><span class="p">,</span> <span class="n">p80</span><span class="p">:</span><span class="mi">459</span><span class="n">ms</span><span class="p">,</span> <span class="n">p95</span><span class="p">:</span><span class="mi">529</span><span class="n">ms</span><span class="p">,</span> <span class="n">iters</span><span class="p">:</span><span class="mi">100403</span><span class="p">,</span> <span class="n">tasks</span><span class="p">:</span><span class="mi">560</span>                                                                                                    <span class="o">|</span> <span class="n">keep</span> <span class="k">order</span><span class="p">:</span><span class="k">false</span>                                                                             <span class="o">|</span> <span class="n">N</span><span class="o">/</span><span class="n">A</span>                   <span class="o">|</span> <span class="n">N</span><span class="o">/</span><span class="n">A</span>  <span class="o">|</span>
-<span class="o">+</span><span class="c1">-----------------------------+--------------+-----------+-----------+---------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------+-----------------------+------+
-</span><span class="c1"></span><span class="mi">5</span> <span class="k">rows</span> <span class="k">in</span> <span class="k">set</span> <span class="p">(</span><span class="mi">18</span><span class="p">.</span><span class="mi">98</span> <span class="n">sec</span><span class="p">)</span>
-</code></pre></td></tr></table>
-</div>
-</div><h3 id="trace">Trace</h3>
-<p><a href="https://docs.pingcap.com/zh/tidb/v4.0/sql-statement-trace#trace">PingCAP 官网-Trace</a>；TRACE 语句用于提供查询执行的详细信息，可通过 TiDB 服务器状态端口所公开的图形界面进行查看。</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-sql" data-lang="sql"><span class="n">trace</span> <span class="n">format</span> <span class="o">=</span> <span class="s1">&#39;row&#39;</span> <span class="k">select</span> <span class="n">id</span> <span class="k">from</span> <span class="n">T_DATA_0210</span>  <span class="k">WHERE</span> <span class="p">(</span><span class="o">`</span><span class="n">id</span><span class="o">`=</span><span class="s1">&#39;800764181&#39;</span><span class="p">);</span>
-<span class="o">+</span><span class="c1">---------------------------+-----------------+------------+
-</span><span class="c1"></span><span class="o">|</span> <span class="k">operation</span>                 <span class="o">|</span> <span class="n">startTS</span>         <span class="o">|</span> <span class="n">duration</span>   <span class="o">|</span>
-<span class="o">+</span><span class="c1">---------------------------+-----------------+------------+
-</span><span class="c1"></span><span class="o">|</span> <span class="k">session</span><span class="p">.</span><span class="n">getTxnFuture</span>      <span class="o">|</span> <span class="mi">17</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">42</span><span class="p">.</span><span class="mi">721708</span> <span class="o">|</span> <span class="mi">10</span><span class="p">.</span><span class="mi">991</span><span class="err">µ</span><span class="n">s</span>   <span class="o">|</span>
-<span class="o">|</span>   <span class="err">├─</span><span class="k">session</span><span class="p">.</span><span class="k">Execute</span>       <span class="o">|</span> <span class="mi">17</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">42</span><span class="p">.</span><span class="mi">721705</span> <span class="o">|</span> <span class="mi">978</span><span class="p">.</span><span class="mi">341</span><span class="err">µ</span><span class="n">s</span>  <span class="o">|</span>
-<span class="o">|</span>   <span class="err">├─</span><span class="k">session</span><span class="p">.</span><span class="n">ParseSQL</span>      <span class="o">|</span> <span class="mi">17</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">42</span><span class="p">.</span><span class="mi">722064</span> <span class="o">|</span> <span class="mi">28</span><span class="p">.</span><span class="mi">325</span><span class="err">µ</span><span class="n">s</span>   <span class="o">|</span>
-<span class="o">|</span>   <span class="err">├─</span><span class="n">executor</span><span class="p">.</span><span class="n">Compile</span>      <span class="o">|</span> <span class="mi">17</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">42</span><span class="p">.</span><span class="mi">722106</span> <span class="o">|</span> <span class="mi">191</span><span class="p">.</span><span class="mi">556</span><span class="err">µ</span><span class="n">s</span>  <span class="o">|</span>
-<span class="o">|</span>   <span class="err">├─</span><span class="k">session</span><span class="p">.</span><span class="n">runStmt</span>       <span class="o">|</span> <span class="mi">17</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">42</span><span class="p">.</span><span class="mi">722318</span> <span class="o">|</span> <span class="mi">314</span><span class="p">.</span><span class="mi">567</span><span class="err">µ</span><span class="n">s</span>  <span class="o">|</span>
-<span class="o">|</span>   <span class="err">├─</span><span class="k">session</span><span class="p">.</span><span class="n">CommitTxn</span>     <span class="o">|</span> <span class="mi">17</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">42</span><span class="p">.</span><span class="mi">722616</span> <span class="o">|</span> <span class="mi">2</span><span class="p">.</span><span class="mi">942</span><span class="err">µ</span><span class="n">s</span>    <span class="o">|</span>
-<span class="o">|</span>   <span class="err">├─</span><span class="n">recordSet</span><span class="p">.</span><span class="k">Next</span>        <span class="o">|</span> <span class="mi">17</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">42</span><span class="p">.</span><span class="mi">722694</span> <span class="o">|</span> <span class="mi">812</span><span class="p">.</span><span class="mi">092</span><span class="err">µ</span><span class="n">s</span>  <span class="o">|</span>
-<span class="o">|</span>   <span class="err">├─</span><span class="n">projection</span><span class="p">.</span><span class="k">Next</span>       <span class="o">|</span> <span class="mi">17</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">42</span><span class="p">.</span><span class="mi">722696</span> <span class="o">|</span> <span class="mi">801</span><span class="p">.</span><span class="mi">486</span><span class="err">µ</span><span class="n">s</span>  <span class="o">|</span>
-<span class="o">|</span>   <span class="err">├─</span><span class="n">tableReader</span><span class="p">.</span><span class="k">Next</span>      <span class="o">|</span> <span class="mi">17</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">42</span><span class="p">.</span><span class="mi">723073</span> <span class="o">|</span> <span class="mi">394</span><span class="p">.</span><span class="mi">131</span><span class="err">µ</span><span class="n">s</span>  <span class="o">|</span>
-<span class="o">|</span>   <span class="err">├─</span><span class="n">tableReader</span><span class="p">.</span><span class="k">Next</span>      <span class="o">|</span> <span class="mi">17</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">42</span><span class="p">.</span><span class="mi">723484</span> <span class="o">|</span> <span class="mi">947</span><span class="n">ns</span>      <span class="o">|</span>
-<span class="o">|</span>   <span class="err">├─</span><span class="n">recordSet</span><span class="p">.</span><span class="k">Next</span>        <span class="o">|</span> <span class="mi">17</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">42</span><span class="p">.</span><span class="mi">723516</span> <span class="o">|</span> <span class="mi">12</span><span class="p">.</span><span class="mi">577</span><span class="err">µ</span><span class="n">s</span>   <span class="o">|</span>
-<span class="o">|</span>   <span class="err">└─</span><span class="n">projection</span><span class="p">.</span><span class="k">Next</span>       <span class="o">|</span> <span class="mi">17</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">42</span><span class="p">.</span><span class="mi">723518</span> <span class="o">|</span> <span class="mi">1</span><span class="p">.</span><span class="mi">747</span><span class="err">µ</span><span class="n">s</span>    <span class="o">|</span>
-<span class="o">+</span><span class="c1">---------------------------+-----------------+------------+
-</span><span class="c1"></span><span class="mi">12</span> <span class="k">rows</span> <span class="k">in</span> <span class="k">set</span> <span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">01</span> <span class="n">sec</span><span class="p">)</span>
-</code></pre></td></tr></table>
-</div>
-</div><div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span><span class="lnt">33
-</span><span class="lnt">34
-</span><span class="lnt">35
-</span><span class="lnt">36
-</span><span class="lnt">37
-</span><span class="lnt">38
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-sql" data-lang="sql"><span class="o">//</span> <span class="err">以下信息省略</span> <span class="mi">19</span> <span class="err">万行，通过</span> <span class="n">trace</span> <span class="err">清晰的发现</span> <span class="n">tidb</span> <span class="err">与</span> <span class="n">tikv</span> <span class="err">之间的网络交互频率</span>
-<span class="n">trace</span> <span class="n">format</span> <span class="o">=</span> <span class="s1">&#39;row&#39;</span> <span class="k">select</span> <span class="k">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="o">/</span><span class="k">count</span><span class="p">(</span><span class="k">distinct</span> <span class="n">date_format</span><span class="p">(</span><span class="n">account_mdate</span><span class="p">,</span><span class="s1">&#39;%Y-%m-%d&#39;</span><span class="p">))</span> <span class="k">from</span> <span class="n">account</span><span class="p">;</span>
-<span class="o">+</span><span class="c1">------------------------------------------------------+-----------------+-----------------+
-</span><span class="c1"></span><span class="o">|</span> <span class="k">operation</span>                                            <span class="o">|</span> <span class="n">startTS</span>         <span class="o">|</span> <span class="n">duration</span>        <span class="o">|</span>
-<span class="o">+</span><span class="c1">------------------------------------------------------+-----------------+-----------------+
-</span><span class="c1"></span><span class="o">|</span> <span class="n">trace</span>                                                <span class="o">|</span> <span class="mi">11</span><span class="p">:</span><span class="mi">37</span><span class="p">:</span><span class="mi">08</span><span class="p">.</span><span class="mi">052125</span> <span class="o">|</span> <span class="mi">3</span><span class="n">m58</span><span class="p">.</span><span class="mi">620078133</span><span class="n">s</span> <span class="o">|</span>
-<span class="o">|</span>   <span class="err">├─</span><span class="k">session</span><span class="p">.</span><span class="k">Execute</span>                                  <span class="o">|</span> <span class="mi">11</span><span class="p">:</span><span class="mi">37</span><span class="p">:</span><span class="mi">08</span><span class="p">.</span><span class="mi">052129</span> <span class="o">|</span> <span class="mi">1</span><span class="p">.</span><span class="mi">714218</span><span class="n">ms</span>      <span class="o">|</span>
-<span class="o">|</span>   <span class="err">│</span> <span class="err">├─</span><span class="k">session</span><span class="p">.</span><span class="n">ParseSQL</span>                               <span class="o">|</span> <span class="mi">11</span><span class="p">:</span><span class="mi">37</span><span class="p">:</span><span class="mi">08</span><span class="p">.</span><span class="mi">052134</span> <span class="o">|</span> <span class="mi">21</span><span class="p">.</span><span class="mi">379</span><span class="err">µ</span><span class="n">s</span>        <span class="o">|</span>
-<span class="o">|</span>   <span class="err">│</span> <span class="err">├─</span><span class="n">executor</span><span class="p">.</span><span class="n">Compile</span>                               <span class="o">|</span> <span class="mi">11</span><span class="p">:</span><span class="mi">37</span><span class="p">:</span><span class="mi">08</span><span class="p">.</span><span class="mi">052177</span> <span class="o">|</span> <span class="mi">270</span><span class="p">.</span><span class="mi">936</span><span class="err">µ</span><span class="n">s</span>       <span class="o">|</span>
-<span class="o">|</span>   <span class="err">│</span> <span class="err">│</span> <span class="err">└─</span><span class="k">session</span><span class="p">.</span><span class="n">getTxnFuture</span>                         <span class="o">|</span> <span class="mi">11</span><span class="p">:</span><span class="mi">37</span><span class="p">:</span><span class="mi">08</span><span class="p">.</span><span class="mi">052184</span> <span class="o">|</span> <span class="mi">2</span><span class="p">.</span><span class="mi">886</span><span class="err">µ</span><span class="n">s</span>         <span class="o">|</span>
-<span class="o">|</span>   <span class="err">│</span> <span class="err">└─</span><span class="k">session</span><span class="p">.</span><span class="n">runStmt</span>                                <span class="o">|</span> <span class="mi">11</span><span class="p">:</span><span class="mi">37</span><span class="p">:</span><span class="mi">08</span><span class="p">.</span><span class="mi">052468</span> <span class="o">|</span> <span class="mi">1</span><span class="p">.</span><span class="mi">353082</span><span class="n">ms</span>      <span class="o">|</span>
-<span class="o">|</span>   <span class="err">│</span>   <span class="err">├─</span><span class="n">TableReaderExecutor</span><span class="p">.</span><span class="k">Open</span>                     <span class="o">|</span> <span class="mi">11</span><span class="p">:</span><span class="mi">37</span><span class="p">:</span><span class="mi">08</span><span class="p">.</span><span class="mi">052518</span> <span class="o">|</span> <span class="mi">1</span><span class="p">.</span><span class="mi">215215</span><span class="n">ms</span>      <span class="o">|</span>
-<span class="o">|</span>   <span class="err">│</span>   <span class="err">│</span> <span class="err">└─</span><span class="n">distsql</span><span class="p">.</span><span class="k">Select</span>                             <span class="o">|</span> <span class="mi">11</span><span class="p">:</span><span class="mi">37</span><span class="p">:</span><span class="mi">08</span><span class="p">.</span><span class="mi">052529</span> <span class="o">|</span> <span class="mi">1</span><span class="p">.</span><span class="mi">193386</span><span class="n">ms</span>      <span class="o">|</span>
-<span class="o">|</span>   <span class="err">│</span>   <span class="err">│</span>   <span class="err">├─</span><span class="n">rpcClient</span><span class="p">.</span><span class="n">SendRequest</span>                    <span class="o">|</span> <span class="mi">11</span><span class="p">:</span><span class="mi">37</span><span class="p">:</span><span class="mi">08</span><span class="p">.</span><span class="mi">053832</span> <span class="o">|</span> <span class="mi">404</span><span class="p">.</span><span class="mi">531258</span><span class="n">ms</span>    <span class="o">|</span>
-<span class="o">|</span>   <span class="err">│</span>   <span class="err">│</span>   <span class="err">├─</span><span class="n">rpcClient</span><span class="p">.</span><span class="n">SendRequest</span>                    <span class="o">|</span> <span class="mi">11</span><span class="p">:</span><span class="mi">39</span><span class="p">:</span><span class="mi">53</span><span class="p">.</span><span class="mi">082502</span> <span class="o">|</span> <span class="mi">269</span><span class="p">.</span><span class="mi">187122</span><span class="n">ms</span>    <span class="o">|</span>
-<span class="o">|</span>   <span class="err">│</span>   <span class="err">│</span>   <span class="err">├─</span><span class="n">rpcClient</span><span class="p">.</span><span class="n">SendRequest</span>                    <span class="o">|</span> <span class="mi">11</span><span class="p">:</span><span class="mi">39</span><span class="p">:</span><span class="mi">53</span><span class="p">.</span><span class="mi">785311</span> <span class="o">|</span> <span class="mi">240</span><span class="p">.</span><span class="mi">928959</span><span class="n">ms</span>    <span class="o">|</span>
-<span class="o">|</span>   <span class="err">│</span>   <span class="err">│</span>   <span class="err">└─</span><span class="n">rpcClient</span><span class="p">.</span><span class="n">SendRequest</span> <span class="o">*</span> <span class="n">N</span>                <span class="o">|</span> <span class="mi">11</span><span class="p">:</span><span class="mi">39</span><span class="p">:</span><span class="mi">54</span><span class="p">.</span><span class="mi">539536</span> <span class="o">|</span> <span class="mi">331</span><span class="p">.</span><span class="mi">98845</span><span class="n">ms</span>     <span class="o">|</span>
-<span class="o">|</span>   <span class="err">│</span>   <span class="err">└─</span><span class="k">session</span><span class="p">.</span><span class="n">CommitTxn</span>                            <span class="o">|</span> <span class="mi">11</span><span class="p">:</span><span class="mi">37</span><span class="p">:</span><span class="mi">08</span><span class="p">.</span><span class="mi">053803</span> <span class="o">|</span> <span class="mi">13</span><span class="p">.</span><span class="mi">513</span><span class="err">µ</span><span class="n">s</span>        <span class="o">|</span>
-<span class="o">|</span>   <span class="err">│</span>     <span class="err">└─</span><span class="k">session</span><span class="p">.</span><span class="n">doCommitWitRetry</span>                   <span class="o">|</span> <span class="mi">11</span><span class="p">:</span><span class="mi">37</span><span class="p">:</span><span class="mi">08</span><span class="p">.</span><span class="mi">053806</span> <span class="o">|</span> <span class="mi">2</span><span class="p">.</span><span class="mi">235</span><span class="err">µ</span><span class="n">s</span>         <span class="o">|</span>
-<span class="o">|</span>   <span class="err">├─</span><span class="o">*</span><span class="n">executor</span><span class="p">.</span><span class="n">ProjectionExec</span><span class="p">.</span><span class="k">Next</span>                    <span class="o">|</span> <span class="mi">11</span><span class="p">:</span><span class="mi">37</span><span class="p">:</span><span class="mi">08</span><span class="p">.</span><span class="mi">053865</span> <span class="o">|</span> <span class="mi">3</span><span class="n">m58</span><span class="p">.</span><span class="mi">617880366</span><span class="n">s</span> <span class="o">|</span>
-<span class="o">|</span>   <span class="err">│</span> <span class="err">└─</span><span class="o">*</span><span class="n">executor</span><span class="p">.</span><span class="n">StreamAggExec</span><span class="p">.</span><span class="k">Next</span>                   <span class="o">|</span> <span class="mi">11</span><span class="p">:</span><span class="mi">37</span><span class="p">:</span><span class="mi">08</span><span class="p">.</span><span class="mi">053867</span> <span class="o">|</span> <span class="mi">3</span><span class="n">m58</span><span class="p">.</span><span class="mi">614767904</span><span class="n">s</span> <span class="o">|</span>
-<span class="o">|</span>   <span class="err">│</span>   <span class="err">├─</span><span class="o">*</span><span class="n">executor</span><span class="p">.</span><span class="n">ProjectionExec</span><span class="p">.</span><span class="k">Next</span>                <span class="o">|</span> <span class="mi">11</span><span class="p">:</span><span class="mi">37</span><span class="p">:</span><span class="mi">08</span><span class="p">.</span><span class="mi">053869</span> <span class="o">|</span> <span class="mi">26</span><span class="p">.</span><span class="mi">269835</span><span class="n">ms</span>     <span class="o">|</span>
-<span class="o">|</span>   <span class="err">│</span>   <span class="err">│</span> <span class="err">├─</span><span class="o">*</span><span class="n">executor</span><span class="p">.</span><span class="n">TableReaderExecutor</span><span class="p">.</span><span class="k">Next</span>         <span class="o">|</span> <span class="mi">11</span><span class="p">:</span><span class="mi">37</span><span class="p">:</span><span class="mi">08</span><span class="p">.</span><span class="mi">053915</span> <span class="o">|</span> <span class="mi">25</span><span class="p">.</span><span class="mi">530341</span><span class="n">ms</span>     <span class="o">|</span>
-<span class="o">|</span>   <span class="err">│</span>   <span class="err">│</span> <span class="err">├─</span><span class="o">*</span><span class="n">executor</span><span class="p">.</span><span class="n">TableReaderExecutor</span><span class="p">.</span><span class="k">Next</span>         <span class="o">|</span> <span class="mi">11</span><span class="p">:</span><span class="mi">37</span><span class="p">:</span><span class="mi">08</span><span class="p">.</span><span class="mi">079471</span> <span class="o">|</span> <span class="mi">8</span><span class="p">.</span><span class="mi">329</span><span class="err">µ</span><span class="n">s</span>         <span class="o">|</span>
-<span class="o">|</span>   <span class="err">│</span>   <span class="err">│</span> <span class="err">├─</span><span class="o">*</span><span class="n">executor</span><span class="p">.</span><span class="n">TableReaderExecutor</span><span class="p">.</span><span class="k">Next</span>         <span class="o">|</span> <span class="mi">11</span><span class="p">:</span><span class="mi">37</span><span class="p">:</span><span class="mi">08</span><span class="p">.</span><span class="mi">079491</span> <span class="o">|</span> <span class="mi">3</span><span class="p">.</span><span class="mi">369</span><span class="err">µ</span><span class="n">s</span>         <span class="o">|</span>
-<span class="o">|</span>   <span class="err">│</span>   <span class="err">│</span> <span class="err">├─</span><span class="o">*</span><span class="n">executor</span><span class="p">.</span><span class="n">TableReaderExecutor</span><span class="p">.</span><span class="k">Next</span>         <span class="o">|</span> <span class="mi">11</span><span class="p">:</span><span class="mi">41</span><span class="p">:</span><span class="mi">06</span><span class="p">.</span><span class="mi">572221</span> <span class="o">|</span> <span class="mi">14</span><span class="p">.</span><span class="mi">026</span><span class="err">µ</span><span class="n">s</span>        <span class="o">|</span>
-<span class="o">|</span>   <span class="err">│</span>   <span class="err">│</span> <span class="err">├─</span><span class="o">*</span><span class="n">executor</span><span class="p">.</span><span class="n">TableReaderExecutor</span><span class="p">.</span><span class="k">Next</span>         <span class="o">|</span> <span class="mi">11</span><span class="p">:</span><span class="mi">41</span><span class="p">:</span><span class="mi">06</span><span class="p">.</span><span class="mi">577805</span> <span class="o">|</span> <span class="mi">31</span><span class="p">.</span><span class="mi">832</span><span class="err">µ</span><span class="n">s</span>        <span class="o">|</span>
-<span class="o">|</span>   <span class="err">│</span>   <span class="err">│</span> <span class="err">└─</span><span class="o">*</span><span class="n">executor</span><span class="p">.</span><span class="n">TableReaderExecutor</span><span class="p">.</span><span class="k">Next</span>  <span class="o">*</span> <span class="n">N</span>    <span class="o">|</span> <span class="mi">11</span><span class="p">:</span><span class="mi">41</span><span class="p">:</span><span class="mi">06</span><span class="p">.</span><span class="mi">583194</span> <span class="o">|</span> <span class="mi">19</span><span class="p">.</span><span class="mi">7</span><span class="err">µ</span><span class="n">s</span>          <span class="o">|</span>
-<span class="o">|</span>   <span class="err">│</span>   <span class="err">├─</span><span class="o">*</span><span class="n">executor</span><span class="p">.</span><span class="n">ProjectionExec</span><span class="p">.</span><span class="k">Next</span>                <span class="o">|</span> <span class="mi">11</span><span class="p">:</span><span class="mi">37</span><span class="p">:</span><span class="mi">08</span><span class="p">.</span><span class="mi">080339</span> <span class="o">|</span> <span class="mi">5</span><span class="p">.</span><span class="mi">499</span><span class="err">µ</span><span class="n">s</span>         <span class="o">|</span>
-<span class="o">|</span>   <span class="err">│</span>   <span class="err">├─</span><span class="o">*</span><span class="n">executor</span><span class="p">.</span><span class="n">ProjectionExec</span><span class="p">.</span><span class="k">Next</span>                <span class="o">|</span> <span class="mi">11</span><span class="p">:</span><span class="mi">37</span><span class="p">:</span><span class="mi">08</span><span class="p">.</span><span class="mi">080509</span> <span class="o">|</span> <span class="mi">5</span><span class="p">.</span><span class="mi">065</span><span class="err">µ</span><span class="n">s</span>         <span class="o">|</span>
-<span class="o">|</span>   <span class="err">│</span>   <span class="err">├─</span><span class="o">*</span><span class="n">executor</span><span class="p">.</span><span class="n">ProjectionExec</span><span class="p">.</span><span class="k">Next</span>                <span class="o">|</span> <span class="mi">11</span><span class="p">:</span><span class="mi">37</span><span class="p">:</span><span class="mi">08</span><span class="p">.</span><span class="mi">080681</span> <span class="o">|</span> <span class="mi">5</span><span class="p">.</span><span class="mi">46</span><span class="err">µ</span><span class="n">s</span>          <span class="o">|</span>
-<span class="o">|</span>   <span class="err">│</span>   <span class="err">├─</span><span class="o">*</span><span class="n">executor</span><span class="p">.</span><span class="n">ProjectionExec</span><span class="p">.</span><span class="k">Next</span>                <span class="o">|</span> <span class="mi">11</span><span class="p">:</span><span class="mi">37</span><span class="p">:</span><span class="mi">08</span><span class="p">.</span><span class="mi">080855</span> <span class="o">|</span> <span class="mi">9</span><span class="p">.</span><span class="mi">297</span><span class="err">µ</span><span class="n">s</span>         <span class="o">|</span>
-<span class="o">|</span>   <span class="err">│</span>   <span class="err">├─</span><span class="o">*</span><span class="n">executor</span><span class="p">.</span><span class="n">ProjectionExec</span><span class="p">.</span><span class="k">Next</span>                <span class="o">|</span> <span class="mi">11</span><span class="p">:</span><span class="mi">41</span><span class="p">:</span><span class="mi">06</span><span class="p">.</span><span class="mi">663323</span> <span class="o">|</span> <span class="mi">2</span><span class="p">.</span><span class="mi">028</span><span class="err">µ</span><span class="n">s</span>         <span class="o">|</span>
-<span class="o">|</span>   <span class="err">│</span>   <span class="err">└─</span><span class="o">*</span><span class="n">executor</span><span class="p">.</span><span class="n">ProjectionExec</span><span class="p">.</span><span class="k">Next</span>  <span class="o">*</span> <span class="n">N</span>           <span class="o">|</span> <span class="mi">11</span><span class="p">:</span><span class="mi">41</span><span class="p">:</span><span class="mi">06</span><span class="p">.</span><span class="mi">665968</span> <span class="o">|</span> <span class="mi">1</span><span class="p">.</span><span class="mi">844</span><span class="err">µ</span><span class="n">s</span>         <span class="o">|</span>
-<span class="o">|</span>   <span class="err">└─</span><span class="o">*</span><span class="n">executor</span><span class="p">.</span><span class="n">ProjectionExec</span><span class="p">.</span><span class="k">Next</span>                    <span class="o">|</span> <span class="mi">11</span><span class="p">:</span><span class="mi">41</span><span class="p">:</span><span class="mi">06</span><span class="p">.</span><span class="mi">671764</span> <span class="o">|</span> <span class="mi">11</span><span class="p">.</span><span class="mi">448</span><span class="err">µ</span><span class="n">s</span>        <span class="o">|</span>
-<span class="o">|</span>     <span class="err">└─</span><span class="o">*</span><span class="n">executor</span><span class="p">.</span><span class="n">StreamAggExec</span><span class="p">.</span><span class="k">Next</span>                   <span class="o">|</span> <span class="mi">11</span><span class="p">:</span><span class="mi">41</span><span class="p">:</span><span class="mi">06</span><span class="p">.</span><span class="mi">671767</span> <span class="o">|</span> <span class="mi">568</span><span class="n">ns</span>           <span class="o">|</span>
-<span class="o">+</span><span class="c1">------------------------------------------------------+-----------------+-----------------+
-</span><span class="c1"></span><span class="mi">196901</span> <span class="k">rows</span> <span class="k">in</span> <span class="k">set</span> <span class="p">(</span><span class="mi">5</span> <span class="k">min</span> <span class="mi">56</span><span class="p">.</span><span class="mi">31</span> <span class="n">sec</span><span class="p">)</span>
-</code></pre></td></tr></table>
-</div>
-</div><h2 id="0x02-ssr">0x02 SSR</h2>
-<ul>
-<li>Cluster info</li>
-</ul>
-<p><a href="https://docs.pingcap.com/zh/tidb/v4.0/system-table-cluster-info">PingCAP 官网-Cluster info</a>；集群拓扑表 CLUSTER_INFO 提供集群当前的拓扑信息，以及各个节点的版本信息、版本对应的 Git Hash、各节点的启动时间、各实例的运行时间。</p>
-<ul>
-<li>TiDB-dashboard</li>
-</ul>
-<p><a href="https://docs.pingcap.com/zh/tidb/v4.0/dashboard-intro#tidb-dashboard-%E4%BB%8B%E7%BB%8D">TiDB Dashboard</a>是 TiDB 自 4.0 版本起提供的图形化界面，可用于监控及诊断 TiDB 集群。TiDB Dashboard 内置于 TiDB 的 PD 组件中，无需独立部署。</p>
-<h2 id="0x03-profile">0x03 Profile</h2>
-<blockquote>
-<p>Profile 用于分析函数占用内存、CPU 资源信息，TiDB 4.0 版本可以在 tidb-dashboard 上一键获取；以下为分析 tidb-dashboard 后挖掘到的 HTTP API 信息</p>
-</blockquote>
-<ul>
-<li>获取 PD-server Profile
-<ul>
-<li>内容来自 <a href="https://github.com/pingcap/pd/blob/master/server/api/router.go">PD 代码</a></li>
-</ul>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-json" data-lang="json"><span class="err">curl</span> <span class="err">http://</span><span class="p">{</span><span class="err">PD</span> <span class="err">IP</span><span class="p">}</span><span class="err">:</span><span class="p">{</span><span class="err">PD</span> <span class="err">2379</span><span class="p">}</span><span class="err">/pd/api/v</span><span class="mi">1</span><span class="err">/debug/pprof/profile?seconds=</span><span class="p">{</span><span class="err">int</span><span class="p">}</span> <span class="err">&gt;</span> <span class="err">CPU-profile</span>
-<span class="err">//</span> <span class="err">上述命令获取</span> <span class="err">CPU</span> <span class="err">profile</span> <span class="err">信息</span>
-
-<span class="err">//</span> <span class="err">PD</span> <span class="err">所有</span> <span class="err">Profile</span> <span class="err">api</span> <span class="err">请求，每条</span> <span class="err">api</span> <span class="err">输出后二进制文件，使用</span> <span class="err">go</span> <span class="err">tool</span> <span class="err">pprof</span> <span class="err">解析</span>
-<span class="err">apiRouter.HandleFunc(</span><span class="s2">&#34;/debug/pprof/profile&#34;</span><span class="err">,</span> <span class="err">pprof.Profile)</span>
-<span class="err">apiRouter.Handle(</span><span class="s2">&#34;/debug/pprof/heap&#34;</span><span class="err">,</span> <span class="err">pprof.Handler(</span><span class="s2">&#34;heap&#34;</span><span class="err">))</span>
-<span class="err">apiRouter.Handle(</span><span class="s2">&#34;/debug/pprof/mutex&#34;</span><span class="err">,</span> <span class="err">pprof.Handler(</span><span class="s2">&#34;mutex&#34;</span><span class="err">))</span>
-<span class="err">apiRouter.Handle(</span><span class="s2">&#34;/debug/pprof/allocs&#34;</span><span class="err">,</span> <span class="err">pprof.Handler(</span><span class="s2">&#34;allocs&#34;</span><span class="err">))</span>
-<span class="err">apiRouter.Handle(</span><span class="s2">&#34;/debug/pprof/block&#34;</span><span class="err">,</span> <span class="err">pprof.Handler(</span><span class="s2">&#34;block&#34;</span><span class="err">))</span>
-<span class="err">apiRouter.Handle(</span><span class="s2">&#34;/debug/pprof/goroutine&#34;</span><span class="err">,</span> <span class="err">pprof.Handler(</span><span class="s2">&#34;goroutine&#34;</span><span class="err">))</span>
-</code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>获取 TiDB-server Profile
-<ul>
-<li>该接口可以获取 tidb-server profile 压缩包，内涵 cpu、内存等信息</li>
-<li>内容来自 <a href="https://github.com/pingcap/tidb/blob/master/docs/tidb_http_api.md">TiDB http api 文档</a> Download TiDB debug info</li>
-</ul>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-bash" data-lang="bash">curl http://<span class="o">{</span>TiDB IP<span class="o">}</span>:<span class="o">{</span>TiDB status_port<span class="o">}</span>/debug/pprof/profile?seconds<span class="o">={</span>int<span class="o">}</span> &gt; debug.zip
-
-// zip file will include:
-// Go heap pprof<span class="o">(</span>after GC<span class="o">)</span>
-// Go cpu pprof<span class="o">(</span>10s<span class="o">)</span>
-// Go mutex pprof
-// Full goroutine
-// TiDB config and version
-// Param:
-// seconds: profile time<span class="o">(</span>s<span class="o">)</span>, default is 10s.
-</code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>获取 TiKV-server Profile
-<ul>
-<li>该接口获取为 svg 图片内容；内容来自 <a href="https://github.com/tikv/tikv/pull/4600">TiKV issue #4600</a></li>
-<li>2020 年以后发布的版本支持该功能</li>
-</ul>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-bash" data-lang="bash">curl http://<span class="o">{</span>TiKV IP<span class="o">}</span>:<span class="o">{</span>TiKV status_port<span class="o">}</span>/debug/pprof/profile?seconds<span class="o">={</span>int<span class="o">}</span> &gt; tikv.svg
-</code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>查看 Profile</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-bash" data-lang="bash">yum install go
-// 安装 go 程序环境
-
-go tool pprof -http 172.16.4.51:890 &lt;profile-name&gt;
-// 使用 go tool pprof 工具解析 profile 数据，并开启一个网页以便在浏览器上查看
-
-浏览器打开该网页访问并分析信息 http://172.16.4.51:890/
-</code></pre></td></tr></table>
-</div>
-</div><h2 id="0x04-linux">0x04 Linux</h2>
-<ul>
-<li>vmstat / top / htop</li>
-<li>dstat / iotop / iostat</li>
-<li>lsof</li>
-<li>pstack // 该命令会阻断程序正常运行，禁止在 TiKV 使用；会导致 tikv 状态变为 Disconnected，从而丢失所有 region leader</li>
-<li>strace</li>
-<li>gdb</li>
-</ul>
-<h3 id="sar">Sar</h3>
-<p>SAR（System Activity Reporter），可以从 14 个大方面对系统的活动进行报告，包括文件的读写情况、系统调用的使用情况、串口、CPU 效率、内存使用状况、进程活动及 IPC 有关的活动等，使用也是较为复杂。</p>
-<ul>
-<li>
-<p>追溯过去的统计数据（默认）</p>
-</li>
-<li>
-<p>周期性的查看当前数据</p>
-</li>
-<li>
-<p>怀疑 CPU 存在瓶颈，可用 sar -u 和 sar -q 等来查看</p>
-</li>
-<li>
-<p>怀疑内存存在瓶颈，可用 sar -B、sar -r 和 sar -W 等来查看</p>
-</li>
-<li>
-<p>怀疑 I/O 存在瓶颈，可用 sar -b、sar -u 和 sar -d 等来查看</p>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-bash" data-lang="bash">-A 汇总所有的报告
--a 报告文件读写使用情况
--B 报告附加的缓存的使用情况
--b 报告缓存的使用情况
--c 报告系统调用的使用情况
--d 报告磁盘的使用情况
--g 报告串口的使用情况
--h 报告关于 buffer 使用的统计数据
--m 报告 IPC 消息队列和信号量的使用情况
--n 报告命名 cache 的使用情况
--p 报告调页活动的使用情况
--q 报告运行队列和交换队列的平均长度
--R 报告进程的活动情况
--r 报告没有使用的内存页面和硬盘块
--u 报告 CPU 的利用率
--v 报告进程、i 节点、文件和锁表状态
--w 报告系统交换活动状况
--y 报告 TTY 设备活动状况
-</code></pre></td></tr></table>
-</div>
-</div><h2 id="0x05-不友好的">0x05 不友好的</h2>
-<ul>
-<li>useCursorFetch=True&amp;defaultFetchSize&gt;0</li>
-<li>update batchexecutor</li>
-</ul>
-
-    </div>
-
-    <div class="post-copyright">
-  <p class="copyright-item">
-    <span class="item-title">Author</span>
-    <span class="item-content">Jeff</span>
-  </p>
-  <p class="copyright-item">
-    <span class="item-title">LastMod</span>
-    <span class="item-content">
-        2020-07-03
-        
-    </span>
-  </p>
-  
-  <p class="copyright-item">
-    <span class="item-title">License</span>
-    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span>
-  </p>
-</div>
-<footer class="post-footer">
-      <div class="post-tags">
-          <a href="/tags/airplan/">AirPlan</a>
-          </div>
-      <nav class="post-nav">
-        <a class="prev" href="/post/202007017-29-region-merge/">
-            <i class="iconfont icon-left"></i>
-            <span class="prev-text nav-default">TiDB - PD Region Merge 食草兽</span>
-            <span class="prev-text nav-mobile">Prev</span>
-          </a>
-        <a class="next" href="/post/20200618-25-br-rc/">
-            <span class="next-text nav-default">TiDB - Backup/Restore 测试</span>
-            <span class="next-text nav-mobile">Next</span>
-            <i class="iconfont icon-right"></i>
-          </a>
-      </nav>
-    </footer>
-  </article>
-        </div>
-        
-
-  
-
-  
-
-      </div>
-    </main>
-
-    <footer id="footer" class="footer">
-      <div class="social-links">
-      <a href="https://github.com/BigerCAP/TiDB-AirPlan/issues" class="iconfont icon-github" title="github"></a>
-  <a href="https://ap.tidb.cc/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
-</div>
-
-<div class="copyright">
-  <span class="power-by">
-    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
-  </span>
-  <span class="division">|</span>
-  <span class="theme-info">
-    Theme - 
-    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
-  </span>
-
-  <div class="busuanzi-footer">
-    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
-      <span class="division">|</span>
-    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
-  </div>
-
-  <span class="copyright-year">
-    &copy; 
-    2017 - 
-    2020
-    <span class="heart">
-      <i class="iconfont icon-heart"></i>
-    </span>
-    <span class="author">TiDB - AirPlan</span>
-  </span>
-</div>
-    </footer>
-
-    <div class="back-to-top" id="back-to-top">
-      <i class="iconfont icon-up"></i>
-    </div>
-  </div>
-  
-  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js" integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js" integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin="anonymous"></script>
-  <script><!-- NOTE: timeago.js uses the language code format like "zh_CN" (underscore and case sensitive) -->
-    var languageCode = "en".replace(/-/g, '_').replace(/_(.*)/, function ($0, $1) {return $0.replace($1, $1.toUpperCase());});
-    timeago().render(document.querySelectorAll('.timeago'), languageCode);
-    timeago.cancel();  
-  </script>
-<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
-
-
-
-
-
-
-
-
-</body>
-</html>
+程序和系统一起在干什么？比如 disk util 高的原因？CPU / MEM 占用高的原因？</p><p>重点回顾；《一条 SQL 的使命》</p></blockquote><ul><li>TiDB<ul><li>QPS / duration / statement / slow query</li><li>parser / compile / PD tso query</li><li>kv count / kv error / kv duration</li></ul></li><li>TiKV<ul><li>GRPC「TiKV 进出口港」 / thread cpu / cluster / error</li><li>coprocessor / schedule prewrite & commit<ul><li>coprocessor 与 store readpool 是两种查询方式，store readpool 主要应用<strong>不回表主键点查</strong></li></ul></li><li>task / Raft / RocksDB</li></ul></li><li>overview<ul><li>CPU / Memory / Disk performance / OPEN FD / Network IO</li></ul></li><li>SQL 在 TiDB cluster 内运行的过程均有打点记录，资源/耗时 可在 Grafana 上分析后查证</li><li>SQL 进入 TiDB 之前、TiKV 与磁盘的交互；该怎么和 SQL 做一一对应呢？</li></ul><h2 id=0x01-slow-query>0x01 Slow Query</h2><p>slow query 文件支持 <a href=https://www.percona.com/doc/percona-toolkit/LATEST/pt-query-digest.html>pt-query-digest</a> 工具分析<br><a href=https://docs.pingcap.com/zh/tidb/dev/identify-slow-queries>PingCAP 官网-slow query 慢日志</a>；TiDB 会将执行时间超过 slow-threshold（默认值为 300 毫秒）的语句输出到 slow-query-file（默认值：&ldquo;tidb-slow.log&rdquo;）日志文件中，用于帮助用户定位慢查询语句，分析和解决 SQL 执行的性能问题</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=o>#</span><span class=w> </span><span class=n>Time</span><span class=p>:</span><span class=w> </span><span class=mi>2020</span><span class=o>-</span><span class=mi>07</span><span class=o>-</span><span class=mi>02</span><span class=n>T16</span><span class=p>:</span><span class=mi>45</span><span class=p>:</span><span class=mi>48</span><span class=p>.</span><span class=mi>948834124</span><span class=o>+</span><span class=mi>08</span><span class=p>:</span><span class=mi>00</span><span class=w>  </span><span class=o>//</span><span class=w> </span><span class=err>执行</span><span class=w> </span><span class=n>query</span><span class=w> </span><span class=err>时间</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>#</span><span class=w> </span><span class=n>Txn_start_ts</span><span class=p>:</span><span class=w> </span><span class=mi>417773531665268886</span><span class=w>          </span><span class=o>//</span><span class=w> </span><span class=err>事物</span><span class=w> </span><span class=n>tso</span><span class=w>  </span><span class=err>，类似</span><span class=w>  </span><span class=n>mysql</span><span class=w> </span><span class=n>gtid</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>#</span><span class=w> </span><span class=k>User</span><span class=p>:</span><span class=w> </span><span class=n>dms</span><span class=o>@</span><span class=mi>172</span><span class=p>.</span><span class=mi>16</span><span class=p>.</span><span class=mi>4</span><span class=p>.</span><span class=mi>51</span><span class=w>                     </span><span class=o>//</span><span class=w> </span><span class=err>执行用户与客户端</span><span class=w> </span><span class=n>IP</span><span class=err>「前置为</span><span class=w> </span><span class=n>Proxy</span><span class=w> </span><span class=err>时，此处显示</span><span class=w> </span><span class=n>Proxy</span><span class=w> </span><span class=n>IP</span><span class=err>」</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>#</span><span class=w> </span><span class=n>Conn_ID</span><span class=p>:</span><span class=w> </span><span class=mi>327382</span><span class=w>                           </span><span class=o>//</span><span class=w> </span><span class=err>链接</span><span class=w> </span><span class=n>ID</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>#</span><span class=w> </span><span class=n>Query_time</span><span class=p>:</span><span class=w> </span><span class=mi>32</span><span class=p>.</span><span class=mi>452025271</span><span class=w>                  </span><span class=o>//</span><span class=w> </span><span class=n>query</span><span class=w> </span><span class=err>从</span><span class=w> </span><span class=k>begin</span><span class=w> </span><span class=err>至</span><span class=w> </span><span class=k>commit</span><span class=w> </span><span class=err>总时长，</span><span class=k>begin</span><span class=w> </span><span class=err>开启后发送</span><span class=w> </span><span class=k>select</span><span class=w> </span><span class=err>语句后，空置一段时间后提交也会被计入</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>#</span><span class=w> </span><span class=n>Parse_time</span><span class=p>:</span><span class=w> </span><span class=mi>0</span><span class=p>.</span><span class=mi>056166789</span><span class=w>                   </span><span class=o>//</span><span class=w> </span><span class=n>TiDB</span><span class=o>-</span><span class=n>server</span><span class=w> </span><span class=n>AST</span><span class=w> </span><span class=err>解析</span><span class=w> </span><span class=nb>text</span><span class=w> </span><span class=k>to</span><span class=w> </span><span class=k>sql</span><span class=w> </span><span class=err>耗时</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>#</span><span class=w> </span><span class=n>Compile_time</span><span class=p>:</span><span class=w> </span><span class=mi>0</span><span class=p>.</span><span class=mi>000314969</span><span class=w>                 </span><span class=o>//</span><span class=w> </span><span class=n>TiDB</span><span class=o>-</span><span class=n>server</span><span class=w> </span><span class=n>Plan</span><span class=w> </span><span class=err>编译耗时</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>#</span><span class=w> </span><span class=n>Process_time</span><span class=p>:</span><span class=w> </span><span class=mi>0</span><span class=p>.</span><span class=mi>001</span><span class=w> </span><span class=n>Wait_time</span><span class=p>:</span><span class=w> </span><span class=mi>0</span><span class=p>.</span><span class=mi>001</span><span class=w> </span><span class=n>Request_count</span><span class=p>:</span><span class=w> </span><span class=mi>2</span><span class=w> </span><span class=n>Prewrite_time</span><span class=p>:</span><span class=w> </span><span class=mi>0</span><span class=p>.</span><span class=mi>003820812</span><span class=w> </span><span class=n>Commit_time</span><span class=p>:</span><span class=w> </span><span class=mi>0</span><span class=p>.</span><span class=mi>003007832</span><span class=w> </span><span class=n>Get_commit_ts_time</span><span class=p>:</span><span class=w> </span><span class=mi>0</span><span class=p>.</span><span class=mi>000107308</span><span class=w> </span><span class=n>Write_keys</span><span class=p>:</span><span class=w> </span><span class=mi>1</span><span class=w> </span><span class=n>Write_size</span><span class=p>:</span><span class=w> </span><span class=mi>539</span><span class=w> </span><span class=n>Prewrite_region</span><span class=p>:</span><span class=w> </span><span class=mi>1</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>#</span><span class=w> </span><span class=n>DB</span><span class=p>:</span><span class=w> </span><span class=n>dms</span><span class=w>                                     </span><span class=o>//</span><span class=w> </span><span class=err>数据库信息</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>#</span><span class=w> </span><span class=n>Index_names</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=n>t_data_0210</span><span class=p>:</span><span class=n>index_id</span><span class=p>]</span><span class=w>        </span><span class=o>//</span><span class=w> </span><span class=k>index</span><span class=w> </span><span class=err>使用信息</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>#</span><span class=w> </span><span class=n>Is_internal</span><span class=p>:</span><span class=w> </span><span class=k>false</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>#</span><span class=w> </span><span class=n>Digest</span><span class=p>:</span><span class=w> </span><span class=mi>26</span><span class=n>becfd8135c8f31011bdb317406018a8de4473c26af18180ef97a91c224a77e</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>#</span><span class=w> </span><span class=n>Stats</span><span class=p>:</span><span class=w> </span><span class=n>t_data_0210</span><span class=p>:</span><span class=n>pseudo</span><span class=w>  </span><span class=o>//</span><span class=w> </span><span class=o>#</span><span class=w> </span><span class=n>Stats</span><span class=p>:</span><span class=w> </span><span class=n>t_data_0210</span><span class=p>:</span><span class=mi>417773784057512074</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>#</span><span class=w> </span><span class=n>Num_cop_tasks</span><span class=p>:</span><span class=w> </span><span class=mi>2</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>#</span><span class=w> </span><span class=n>Cop_proc_avg</span><span class=p>:</span><span class=w> </span><span class=mi>0</span><span class=p>.</span><span class=mi>0005</span><span class=w> </span><span class=n>Cop_proc_p90</span><span class=p>:</span><span class=w> </span><span class=mi>0</span><span class=p>.</span><span class=mi>001</span><span class=w> </span><span class=n>Cop_proc_max</span><span class=p>:</span><span class=w> </span><span class=mi>0</span><span class=p>.</span><span class=mi>001</span><span class=w> </span><span class=n>Cop_proc_addr</span><span class=p>:</span><span class=w> </span><span class=mi>172</span><span class=p>.</span><span class=mi>16</span><span class=p>.</span><span class=mi>4</span><span class=p>.</span><span class=mi>51</span><span class=p>:</span><span class=mi>20160</span><span class=w>  </span><span class=o>//</span><span class=w> </span><span class=n>store</span><span class=w> </span><span class=n>readpool</span><span class=w> </span><span class=err>不显示该部分信息</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>#</span><span class=w> </span><span class=n>Cop_wait_avg</span><span class=p>:</span><span class=w> </span><span class=mi>0</span><span class=p>.</span><span class=mi>0005</span><span class=w> </span><span class=n>Cop_wait_p90</span><span class=p>:</span><span class=w> </span><span class=mi>0</span><span class=p>.</span><span class=mi>001</span><span class=w> </span><span class=n>Cop_wait_max</span><span class=p>:</span><span class=w> </span><span class=mi>0</span><span class=p>.</span><span class=mi>001</span><span class=w> </span><span class=n>Cop_wait_addr</span><span class=p>:</span><span class=w> </span><span class=mi>172</span><span class=p>.</span><span class=mi>16</span><span class=p>.</span><span class=mi>4</span><span class=p>.</span><span class=mi>51</span><span class=p>:</span><span class=mi>20160</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>#</span><span class=w> </span><span class=n>Mem_max</span><span class=p>:</span><span class=w> </span><span class=mi>27644</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>#</span><span class=w> </span><span class=n>Prepared</span><span class=p>:</span><span class=w> </span><span class=k>false</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>#</span><span class=w> </span><span class=n>Has_more_results</span><span class=p>:</span><span class=w> </span><span class=k>false</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>#</span><span class=w> </span><span class=n>Succ</span><span class=p>:</span><span class=w> </span><span class=k>true</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>#</span><span class=w> </span><span class=n>Plan</span><span class=p>:</span><span class=w> </span><span class=n>tidb_decode_plan</span><span class=p>(</span><span class=s1>&#39;2gHwaTAJMzFfNgkwCTEJCjEJMTNfNAkxCTEJdGFibGU6VF9EQVRBXzAyMTkxMDE3MDc0NDk4NjAsIGluZGV4OmRldmljZV9pZCwgcmFuZ2U6WyIyMDAxMTgwMDc2NDE4MSIsIjIwMDExODAwNzYFEYBdLCBrZWVwIG9yZGVyOmZhbHNlLCBzdGF0czpwc2V1ZG8BhQgwXzWOhQB6SQA=&#39;</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>UPDATE</span><span class=w> </span><span class=n>t_data_0210</span><span class=w> </span><span class=k>SET</span><span class=w> </span><span class=o>`</span><span class=n>pos</span><span class=o>`=</span><span class=s1>&#39;114&#39;</span><span class=w> </span><span class=k>WHERE</span><span class=w> </span><span class=p>(</span><span class=o>`</span><span class=n>id</span><span class=o>`=</span><span class=s1>&#39;800764181&#39;</span><span class=p>);</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><h3 id=explan>exPlan</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=p>(</span><span class=n>root</span><span class=o>@</span><span class=mi>127</span><span class=p>.</span><span class=mi>0</span><span class=p>.</span><span class=mi>0</span><span class=p>.</span><span class=mi>1</span><span class=p>)</span><span class=w> </span><span class=p>[(</span><span class=k>none</span><span class=p>)]</span><span class=o>&gt;</span><span class=k>select</span><span class=w> </span><span class=n>tidb_decode_plan</span><span class=p>(</span><span class=s1>&#39;2gHwaTAJMzFfNgkwCTEJCjEJMTNfNAkxCTEJdGFibGU6VF9EQVRBXzAyMTkxMDE3MDc0NDk4NjAsIGluZGV4OmRldmljZV9pZCwgcmFuZ2U6WyIyMDAxMTgwMDc2NDE4MSIsIjIwMDExODAwNzYFEYBdLCBrZWVwIG9yZGVyOmZhbHNlLCBzdGF0czpwc2V1ZG8BhQgwXzWOhQB6SQA=&#39;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=n>tidb_decode_plan</span><span class=p>(</span><span class=s1>&#39;2gHwaTAJMzFfNgkwCTEJCjEJMTNfNAkxCTEJdGFibGU6VF9EQVRBXzAyMTkxMDE3MDc0NDk4NjAsIGluZGV4OmRldmljZV9pZCwgcmFuZ2U6WyIyMDAxMTgwMDc2NDE4MSIsIjIwMDExODAwNzYFEYBdLCBrZWVwIG9yZGVyOmZhbHNlLCBzdGF0czpwc2V1ZG8BhQgwXzWOhQB6SQA=&#39;</span><span class=p>)</span><span class=w>                           </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> 	</span><span class=n>TableReader_6</span><span class=w>	</span><span class=n>root</span><span class=w>	</span><span class=mi>1</span><span class=w>	
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=err>├─</span><span class=n>IndexScan_4</span><span class=w>	</span><span class=n>cop</span><span class=w> 	</span><span class=mi>1</span><span class=w>	</span><span class=k>table</span><span class=p>:</span><span class=n>t_data_0210</span><span class=p>,</span><span class=w> </span><span class=k>index</span><span class=p>:</span><span class=n>id</span><span class=p>,</span><span class=w> </span><span class=n>range</span><span class=p>:[</span><span class=s2>&#34;800764181&#34;</span><span class=p>,</span><span class=s2>&#34;800764181&#34;</span><span class=p>],</span><span class=w> </span><span class=n>keep</span><span class=w> </span><span class=k>order</span><span class=p>:</span><span class=k>false</span><span class=p>,</span><span class=w> </span><span class=n>stats</span><span class=p>:</span><span class=n>pseudo</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=err>└─</span><span class=n>TableScan_5</span><span class=w>	</span><span class=n>cop</span><span class=w> 	</span><span class=mi>1</span><span class=w>	</span><span class=k>table</span><span class=p>:</span><span class=n>t_data_0210</span><span class=p>,</span><span class=w> </span><span class=n>keep</span><span class=w> </span><span class=k>order</span><span class=p>:</span><span class=k>false</span><span class=p>,</span><span class=w> </span><span class=n>stats</span><span class=p>:</span><span class=n>pseudo</span><span class=w>         </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=mi>1</span><span class=w> </span><span class=k>row</span><span class=w> </span><span class=k>in</span><span class=w> </span><span class=k>set</span><span class=w> </span><span class=p>(</span><span class=mi>0</span><span class=p>.</span><span class=mi>00</span><span class=w> </span><span class=n>sec</span><span class=p>)</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><h3 id=analyze>Analyze</h3><p><a href=https://docs.pingcap.com/zh/tidb/v4.0/sql-statement-explain-analyze>PingCAP 官网-Analyze</a>；EXPLAIN ANALYZE 语句的工作方式类似于 EXPLAIN，主要区别在于前者实际上会执行语句。这样可以将查询计划中的估计值与执行时所遇到的实际值进行比较。如果估计值与实际值显著不同，那么应考虑在受影响的表上运行 ANALYZE TABLE。</p><blockquote><p>explain analyze 是将 SQL 语句在数据库中执行了一遍，然后通过打点收集到的数据；如果是 insert / update /delete 会被实际运行并且操作数据</p></blockquote><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=k>explain</span><span class=w> </span><span class=k>analyze</span><span class=w> </span><span class=k>select</span><span class=w> </span><span class=n>id</span><span class=w> </span><span class=k>from</span><span class=w> </span><span class=n>T_DATA_0210</span><span class=w>  </span><span class=k>WHERE</span><span class=w> </span><span class=p>(</span><span class=o>`</span><span class=n>id</span><span class=o>`=</span><span class=s1>&#39;800764181&#39;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>---------------------+-------+------+-------------------------------------------------------------------------------------------------------------+----------------------------------+---------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=n>id</span><span class=w>                  </span><span class=o>|</span><span class=w> </span><span class=k>count</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=n>task</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=k>operator</span><span class=w> </span><span class=n>info</span><span class=w>                                                                                               </span><span class=o>|</span><span class=w> </span><span class=n>execution</span><span class=w> </span><span class=n>info</span><span class=w>                   </span><span class=o>|</span><span class=w> </span><span class=n>memory</span><span class=w>  </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>---------------------+-------+------+-------------------------------------------------------------------------------------------------------------+----------------------------------+---------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=n>Projection_4</span><span class=w>        </span><span class=o>|</span><span class=w> </span><span class=mi>2</span><span class=p>.</span><span class=mi>00</span><span class=w>  </span><span class=o>|</span><span class=w> </span><span class=n>root</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=n>paas_dms</span><span class=p>.</span><span class=n>t_data_0210</span><span class=p>.</span><span class=n>id</span><span class=w>                                                                         </span><span class=o>|</span><span class=w> </span><span class=n>time</span><span class=p>:</span><span class=mi>1</span><span class=p>.</span><span class=mi>195879</span><span class=n>ms</span><span class=p>,</span><span class=w> </span><span class=n>loops</span><span class=p>:</span><span class=mi>2</span><span class=p>,</span><span class=w> </span><span class=k>rows</span><span class=p>:</span><span class=mi>1</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=n>N</span><span class=o>/</span><span class=n>A</span><span class=w>     </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w> </span><span class=err>└─</span><span class=n>IndexLookUp_7</span><span class=w>     </span><span class=o>|</span><span class=w> </span><span class=mi>2</span><span class=p>.</span><span class=mi>00</span><span class=w>  </span><span class=o>|</span><span class=w> </span><span class=n>root</span><span class=w> </span><span class=o>|</span><span class=w>                                                                                                             </span><span class=o>|</span><span class=w> </span><span class=n>time</span><span class=p>:</span><span class=mi>1</span><span class=p>.</span><span class=mi>189899</span><span class=n>ms</span><span class=p>,</span><span class=w> </span><span class=n>loops</span><span class=p>:</span><span class=mi>2</span><span class=p>,</span><span class=w> </span><span class=k>rows</span><span class=p>:</span><span class=mi>1</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>1</span><span class=p>.</span><span class=mi>25</span><span class=w> </span><span class=n>KB</span><span class=w> </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>├─</span><span class=n>IndexScan_5</span><span class=w>     </span><span class=o>|</span><span class=w> </span><span class=mi>2</span><span class=p>.</span><span class=mi>00</span><span class=w>  </span><span class=o>|</span><span class=w> </span><span class=n>cop</span><span class=w>  </span><span class=o>|</span><span class=w> </span><span class=k>table</span><span class=p>:</span><span class=n>t_data_0210</span><span class=p>,</span><span class=w> </span><span class=k>index</span><span class=p>:</span><span class=n>id</span><span class=p>,</span><span class=w> </span><span class=n>range</span><span class=p>:[</span><span class=s2>&#34;800764181&#34;</span><span class=p>,</span><span class=s2>&#34;800764181&#34;</span><span class=p>],</span><span class=w> </span><span class=n>keep</span><span class=w> </span><span class=k>order</span><span class=p>:</span><span class=k>false</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=n>time</span><span class=p>:</span><span class=mi>0</span><span class=n>s</span><span class=p>,</span><span class=w> </span><span class=n>loops</span><span class=p>:</span><span class=mi>1</span><span class=p>,</span><span class=w> </span><span class=k>rows</span><span class=p>:</span><span class=mi>1</span><span class=w>         </span><span class=o>|</span><span class=w> </span><span class=n>N</span><span class=o>/</span><span class=n>A</span><span class=w>     </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>└─</span><span class=n>TableScan_6</span><span class=w>     </span><span class=o>|</span><span class=w> </span><span class=mi>2</span><span class=p>.</span><span class=mi>00</span><span class=w>  </span><span class=o>|</span><span class=w> </span><span class=n>cop</span><span class=w>  </span><span class=o>|</span><span class=w> </span><span class=k>table</span><span class=p>:</span><span class=n>t_data_0210</span><span class=p>,</span><span class=w> </span><span class=n>keep</span><span class=w> </span><span class=k>order</span><span class=p>:</span><span class=k>false</span><span class=w>                                                             </span><span class=o>|</span><span class=w> </span><span class=n>time</span><span class=p>:</span><span class=mi>0</span><span class=n>s</span><span class=p>,</span><span class=w> </span><span class=n>loops</span><span class=p>:</span><span class=mi>1</span><span class=p>,</span><span class=w> </span><span class=k>rows</span><span class=p>:</span><span class=mi>1</span><span class=w>         </span><span class=o>|</span><span class=w> </span><span class=n>N</span><span class=o>/</span><span class=n>A</span><span class=w>     </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>---------------------+-------+------+-------------------------------------------------------------------------------------------------------------+----------------------------------+---------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=mi>4</span><span class=w> </span><span class=k>rows</span><span class=w> </span><span class=k>in</span><span class=w> </span><span class=k>set</span><span class=w> </span><span class=p>(</span><span class=mi>0</span><span class=p>.</span><span class=mi>00</span><span class=w> </span><span class=n>sec</span><span class=p>)</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=o>//</span><span class=w> </span><span class=k>explain</span><span class=w> </span><span class=k>analyze</span><span class=w> </span><span class=k>select</span><span class=w> </span><span class=k>count</span><span class=p>(</span><span class=o>*</span><span class=p>)</span><span class=o>/</span><span class=k>count</span><span class=p>(</span><span class=k>distinct</span><span class=w> </span><span class=n>date_format</span><span class=p>(</span><span class=n>account_mdate</span><span class=p>,</span><span class=s1>&#39;%Y-%m-%d&#39;</span><span class=p>))</span><span class=w> </span><span class=k>from</span><span class=w> </span><span class=n>account</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>//</span><span class=w> </span><span class=err>看起来只做了一次</span><span class=w> </span><span class=k>table</span><span class=w> </span><span class=k>full</span><span class=w> </span><span class=n>scan</span><span class=err>、同时</span><span class=w> </span><span class=k>distinct</span><span class=w> </span><span class=err>与</span><span class=w> </span><span class=n>date_format</span><span class=w> </span><span class=err>无法下推到</span><span class=w> </span><span class=n>tikv</span><span class=w> </span><span class=err>上执行</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>-----------------------------+--------------+-----------+-----------+---------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------+-----------------------+------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=n>id</span><span class=w>                          </span><span class=o>|</span><span class=w> </span><span class=n>estRows</span><span class=w>      </span><span class=o>|</span><span class=w> </span><span class=n>actRows</span><span class=w>   </span><span class=o>|</span><span class=w> </span><span class=n>task</span><span class=w>      </span><span class=o>|</span><span class=w> </span><span class=k>access</span><span class=w> </span><span class=k>object</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=n>execution</span><span class=w> </span><span class=n>info</span><span class=w>                                                                                                                                                             </span><span class=o>|</span><span class=w> </span><span class=k>operator</span><span class=w> </span><span class=n>info</span><span class=w>                                                                                </span><span class=o>|</span><span class=w> </span><span class=n>memory</span><span class=w>                </span><span class=o>|</span><span class=w> </span><span class=n>disk</span><span class=w> </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>-----------------------------+--------------+-----------+-----------+---------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------+-----------------------+------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=n>Projection_4</span><span class=w>                </span><span class=o>|</span><span class=w> </span><span class=mi>1</span><span class=p>.</span><span class=mi>00</span><span class=w>         </span><span class=o>|</span><span class=w> </span><span class=mi>1</span><span class=w>         </span><span class=o>|</span><span class=w> </span><span class=n>root</span><span class=w>      </span><span class=o>|</span><span class=w>               </span><span class=o>|</span><span class=w> </span><span class=n>time</span><span class=p>:</span><span class=mi>18</span><span class=p>.</span><span class=mi>899834996</span><span class=n>s</span><span class=p>,</span><span class=w> </span><span class=n>loops</span><span class=p>:</span><span class=mi>2</span><span class=p>,</span><span class=w> </span><span class=n>Concurrency</span><span class=p>:</span><span class=k>OFF</span><span class=w>                                                                                                                               </span><span class=o>|</span><span class=w> </span><span class=n>div</span><span class=p>(</span><span class=k>cast</span><span class=p>(</span><span class=k>Column</span><span class=o>#</span><span class=mi>19</span><span class=p>,</span><span class=w> </span><span class=nb>decimal</span><span class=p>(</span><span class=mi>20</span><span class=p>,</span><span class=mi>0</span><span class=p>)</span><span class=w> </span><span class=nb>BINARY</span><span class=p>),</span><span class=w> </span><span class=k>cast</span><span class=p>(</span><span class=k>Column</span><span class=o>#</span><span class=mi>20</span><span class=p>,</span><span class=w> </span><span class=nb>decimal</span><span class=p>(</span><span class=mi>20</span><span class=p>,</span><span class=mi>0</span><span class=p>)</span><span class=w> </span><span class=nb>BINARY</span><span class=p>))</span><span class=o>-&gt;</span><span class=k>Column</span><span class=o>#</span><span class=mi>21</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>744</span><span class=w> </span><span class=n>Bytes</span><span class=w>             </span><span class=o>|</span><span class=w> </span><span class=n>N</span><span class=o>/</span><span class=n>A</span><span class=w>  </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w> </span><span class=err>└─</span><span class=n>StreamAgg_6</span><span class=w>               </span><span class=o>|</span><span class=w> </span><span class=mi>1</span><span class=p>.</span><span class=mi>00</span><span class=w>         </span><span class=o>|</span><span class=w> </span><span class=mi>1</span><span class=w>         </span><span class=o>|</span><span class=w> </span><span class=n>root</span><span class=w>      </span><span class=o>|</span><span class=w>               </span><span class=o>|</span><span class=w> </span><span class=n>time</span><span class=p>:</span><span class=mi>18</span><span class=p>.</span><span class=mi>899801597</span><span class=n>s</span><span class=p>,</span><span class=w> </span><span class=n>loops</span><span class=p>:</span><span class=mi>2</span><span class=w>                                                                                                                                                </span><span class=o>|</span><span class=w> </span><span class=n>funcs</span><span class=p>:</span><span class=k>count</span><span class=p>(</span><span class=mi>1</span><span class=p>)</span><span class=o>-&gt;</span><span class=k>Column</span><span class=o>#</span><span class=mi>19</span><span class=p>,</span><span class=w> </span><span class=n>funcs</span><span class=p>:</span><span class=k>count</span><span class=p>(</span><span class=k>distinct</span><span class=w> </span><span class=k>Column</span><span class=o>#</span><span class=mi>23</span><span class=p>)</span><span class=o>-&gt;</span><span class=k>Column</span><span class=o>#</span><span class=mi>20</span><span class=w>                        </span><span class=o>|</span><span class=w> </span><span class=mi>17</span><span class=p>.</span><span class=mi>5087890625</span><span class=w> </span><span class=n>KB</span><span class=w>      </span><span class=o>|</span><span class=w> </span><span class=n>N</span><span class=o>/</span><span class=n>A</span><span class=w>  </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>└─</span><span class=n>Projection_11</span><span class=w>           </span><span class=o>|</span><span class=w> </span><span class=mi>100036000</span><span class=p>.</span><span class=mi>00</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>100036000</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=n>root</span><span class=w>      </span><span class=o>|</span><span class=w>               </span><span class=o>|</span><span class=w> </span><span class=n>time</span><span class=p>:</span><span class=mi>670</span><span class=p>.</span><span class=mi>978479</span><span class=n>ms</span><span class=p>,</span><span class=w> </span><span class=n>loops</span><span class=p>:</span><span class=mi>98163</span><span class=p>,</span><span class=w> </span><span class=n>Concurrency</span><span class=p>:</span><span class=mi>8</span><span class=w>                                                                                                                              </span><span class=o>|</span><span class=w> </span><span class=n>date_format</span><span class=p>(</span><span class=n>findpt</span><span class=p>.</span><span class=n>account</span><span class=p>.</span><span class=n>account_mdate</span><span class=p>,</span><span class=w> </span><span class=o>%</span><span class=n>Y</span><span class=o>-%</span><span class=n>m</span><span class=o>-%</span><span class=n>d</span><span class=p>)</span><span class=o>-&gt;</span><span class=k>Column</span><span class=o>#</span><span class=mi>23</span><span class=w>                               </span><span class=o>|</span><span class=w> </span><span class=mi>208</span><span class=p>.</span><span class=mi>76953125</span><span class=w> </span><span class=n>KB</span><span class=w>       </span><span class=o>|</span><span class=w> </span><span class=n>N</span><span class=o>/</span><span class=n>A</span><span class=w>  </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>     </span><span class=err>└─</span><span class=n>TableReader_10</span><span class=w>        </span><span class=o>|</span><span class=w> </span><span class=mi>100036000</span><span class=p>.</span><span class=mi>00</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>100036000</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=n>root</span><span class=w>      </span><span class=o>|</span><span class=w>               </span><span class=o>|</span><span class=w> </span><span class=n>time</span><span class=p>:</span><span class=mi>528</span><span class=p>.</span><span class=mi>386518</span><span class=n>ms</span><span class=p>,</span><span class=w> </span><span class=n>loops</span><span class=p>:</span><span class=mi>98163</span><span class=p>,</span><span class=w> </span><span class=n>rpc</span><span class=w> </span><span class=n>num</span><span class=p>:</span><span class=w> </span><span class=mi>560</span><span class=p>,</span><span class=w> </span><span class=n>rpc</span><span class=w> </span><span class=k>max</span><span class=p>:</span><span class=mi>684</span><span class=p>.</span><span class=mi>898903</span><span class=n>ms</span><span class=p>,</span><span class=w> </span><span class=k>min</span><span class=p>:</span><span class=mi>70</span><span class=p>.</span><span class=mi>020085</span><span class=n>ms</span><span class=p>,</span><span class=w> </span><span class=k>avg</span><span class=p>:</span><span class=mi>427</span><span class=p>.</span><span class=mi>347923</span><span class=n>ms</span><span class=p>,</span><span class=w> </span><span class=n>p80</span><span class=p>:</span><span class=mi>474</span><span class=p>.</span><span class=mi>446604</span><span class=n>ms</span><span class=p>,</span><span class=w> </span><span class=n>p95</span><span class=p>:</span><span class=mi>546</span><span class=p>.</span><span class=mi>15945</span><span class=n>ms</span><span class=p>,</span><span class=w> </span><span class=n>proc</span><span class=w> </span><span class=n>keys</span><span class=w> </span><span class=k>max</span><span class=p>:</span><span class=mi>255761</span><span class=p>,</span><span class=w> </span><span class=n>p95</span><span class=p>:</span><span class=mi>178374</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=k>data</span><span class=p>:</span><span class=n>TableFullScan_9</span><span class=w>                                                                         </span><span class=o>|</span><span class=w> </span><span class=mi>113</span><span class=p>.</span><span class=mi>44037055969238</span><span class=w> </span><span class=n>MB</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=n>N</span><span class=o>/</span><span class=n>A</span><span class=w>  </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>       </span><span class=err>└─</span><span class=n>TableFullScan_9</span><span class=w>     </span><span class=o>|</span><span class=w> </span><span class=mi>100036000</span><span class=p>.</span><span class=mi>00</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>100036000</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=n>cop</span><span class=p>[</span><span class=n>tikv</span><span class=p>]</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=k>table</span><span class=p>:</span><span class=n>account</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=n>proc</span><span class=w> </span><span class=k>max</span><span class=p>:</span><span class=mi>659</span><span class=n>ms</span><span class=p>,</span><span class=w> </span><span class=k>min</span><span class=p>:</span><span class=mi>65</span><span class=n>ms</span><span class=p>,</span><span class=w> </span><span class=n>p80</span><span class=p>:</span><span class=mi>459</span><span class=n>ms</span><span class=p>,</span><span class=w> </span><span class=n>p95</span><span class=p>:</span><span class=mi>529</span><span class=n>ms</span><span class=p>,</span><span class=w> </span><span class=n>iters</span><span class=p>:</span><span class=mi>100403</span><span class=p>,</span><span class=w> </span><span class=n>tasks</span><span class=p>:</span><span class=mi>560</span><span class=w>                                                                                                    </span><span class=o>|</span><span class=w> </span><span class=n>keep</span><span class=w> </span><span class=k>order</span><span class=p>:</span><span class=k>false</span><span class=w>                                                                             </span><span class=o>|</span><span class=w> </span><span class=n>N</span><span class=o>/</span><span class=n>A</span><span class=w>                   </span><span class=o>|</span><span class=w> </span><span class=n>N</span><span class=o>/</span><span class=n>A</span><span class=w>  </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>-----------------------------+--------------+-----------+-----------+---------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------+-----------------------+------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=mi>5</span><span class=w> </span><span class=k>rows</span><span class=w> </span><span class=k>in</span><span class=w> </span><span class=k>set</span><span class=w> </span><span class=p>(</span><span class=mi>18</span><span class=p>.</span><span class=mi>98</span><span class=w> </span><span class=n>sec</span><span class=p>)</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><h3 id=trace>Trace</h3><p><a href=https://docs.pingcap.com/zh/tidb/v4.0/sql-statement-trace#trace>PingCAP 官网-Trace</a>；TRACE 语句用于提供查询执行的详细信息，可通过 TiDB 服务器状态端口所公开的图形界面进行查看。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=n>trace</span><span class=w> </span><span class=n>format</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s1>&#39;row&#39;</span><span class=w> </span><span class=k>select</span><span class=w> </span><span class=n>id</span><span class=w> </span><span class=k>from</span><span class=w> </span><span class=n>T_DATA_0210</span><span class=w>  </span><span class=k>WHERE</span><span class=w> </span><span class=p>(</span><span class=o>`</span><span class=n>id</span><span class=o>`=</span><span class=s1>&#39;800764181&#39;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>---------------------------+-----------------+------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=k>operation</span><span class=w>                 </span><span class=o>|</span><span class=w> </span><span class=n>startTS</span><span class=w>         </span><span class=o>|</span><span class=w> </span><span class=n>duration</span><span class=w>   </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>---------------------------+-----------------+------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=k>session</span><span class=p>.</span><span class=n>getTxnFuture</span><span class=w>      </span><span class=o>|</span><span class=w> </span><span class=mi>17</span><span class=p>:</span><span class=mi>10</span><span class=p>:</span><span class=mi>42</span><span class=p>.</span><span class=mi>721708</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>10</span><span class=p>.</span><span class=mi>991</span><span class=err>µ</span><span class=n>s</span><span class=w>   </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>├─</span><span class=k>session</span><span class=p>.</span><span class=k>Execute</span><span class=w>       </span><span class=o>|</span><span class=w> </span><span class=mi>17</span><span class=p>:</span><span class=mi>10</span><span class=p>:</span><span class=mi>42</span><span class=p>.</span><span class=mi>721705</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>978</span><span class=p>.</span><span class=mi>341</span><span class=err>µ</span><span class=n>s</span><span class=w>  </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>├─</span><span class=k>session</span><span class=p>.</span><span class=n>ParseSQL</span><span class=w>      </span><span class=o>|</span><span class=w> </span><span class=mi>17</span><span class=p>:</span><span class=mi>10</span><span class=p>:</span><span class=mi>42</span><span class=p>.</span><span class=mi>722064</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>28</span><span class=p>.</span><span class=mi>325</span><span class=err>µ</span><span class=n>s</span><span class=w>   </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>├─</span><span class=n>executor</span><span class=p>.</span><span class=n>Compile</span><span class=w>      </span><span class=o>|</span><span class=w> </span><span class=mi>17</span><span class=p>:</span><span class=mi>10</span><span class=p>:</span><span class=mi>42</span><span class=p>.</span><span class=mi>722106</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>191</span><span class=p>.</span><span class=mi>556</span><span class=err>µ</span><span class=n>s</span><span class=w>  </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>├─</span><span class=k>session</span><span class=p>.</span><span class=n>runStmt</span><span class=w>       </span><span class=o>|</span><span class=w> </span><span class=mi>17</span><span class=p>:</span><span class=mi>10</span><span class=p>:</span><span class=mi>42</span><span class=p>.</span><span class=mi>722318</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>314</span><span class=p>.</span><span class=mi>567</span><span class=err>µ</span><span class=n>s</span><span class=w>  </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>├─</span><span class=k>session</span><span class=p>.</span><span class=n>CommitTxn</span><span class=w>     </span><span class=o>|</span><span class=w> </span><span class=mi>17</span><span class=p>:</span><span class=mi>10</span><span class=p>:</span><span class=mi>42</span><span class=p>.</span><span class=mi>722616</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>2</span><span class=p>.</span><span class=mi>942</span><span class=err>µ</span><span class=n>s</span><span class=w>    </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>├─</span><span class=n>recordSet</span><span class=p>.</span><span class=k>Next</span><span class=w>        </span><span class=o>|</span><span class=w> </span><span class=mi>17</span><span class=p>:</span><span class=mi>10</span><span class=p>:</span><span class=mi>42</span><span class=p>.</span><span class=mi>722694</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>812</span><span class=p>.</span><span class=mi>092</span><span class=err>µ</span><span class=n>s</span><span class=w>  </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>├─</span><span class=n>projection</span><span class=p>.</span><span class=k>Next</span><span class=w>       </span><span class=o>|</span><span class=w> </span><span class=mi>17</span><span class=p>:</span><span class=mi>10</span><span class=p>:</span><span class=mi>42</span><span class=p>.</span><span class=mi>722696</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>801</span><span class=p>.</span><span class=mi>486</span><span class=err>µ</span><span class=n>s</span><span class=w>  </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>├─</span><span class=n>tableReader</span><span class=p>.</span><span class=k>Next</span><span class=w>      </span><span class=o>|</span><span class=w> </span><span class=mi>17</span><span class=p>:</span><span class=mi>10</span><span class=p>:</span><span class=mi>42</span><span class=p>.</span><span class=mi>723073</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>394</span><span class=p>.</span><span class=mi>131</span><span class=err>µ</span><span class=n>s</span><span class=w>  </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>├─</span><span class=n>tableReader</span><span class=p>.</span><span class=k>Next</span><span class=w>      </span><span class=o>|</span><span class=w> </span><span class=mi>17</span><span class=p>:</span><span class=mi>10</span><span class=p>:</span><span class=mi>42</span><span class=p>.</span><span class=mi>723484</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>947</span><span class=n>ns</span><span class=w>      </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>├─</span><span class=n>recordSet</span><span class=p>.</span><span class=k>Next</span><span class=w>        </span><span class=o>|</span><span class=w> </span><span class=mi>17</span><span class=p>:</span><span class=mi>10</span><span class=p>:</span><span class=mi>42</span><span class=p>.</span><span class=mi>723516</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>12</span><span class=p>.</span><span class=mi>577</span><span class=err>µ</span><span class=n>s</span><span class=w>   </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>└─</span><span class=n>projection</span><span class=p>.</span><span class=k>Next</span><span class=w>       </span><span class=o>|</span><span class=w> </span><span class=mi>17</span><span class=p>:</span><span class=mi>10</span><span class=p>:</span><span class=mi>42</span><span class=p>.</span><span class=mi>723518</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>1</span><span class=p>.</span><span class=mi>747</span><span class=err>µ</span><span class=n>s</span><span class=w>    </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>---------------------------+-----------------+------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=mi>12</span><span class=w> </span><span class=k>rows</span><span class=w> </span><span class=k>in</span><span class=w> </span><span class=k>set</span><span class=w> </span><span class=p>(</span><span class=mi>0</span><span class=p>.</span><span class=mi>01</span><span class=w> </span><span class=n>sec</span><span class=p>)</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=o>//</span><span class=w> </span><span class=err>以下信息省略</span><span class=w> </span><span class=mi>19</span><span class=w> </span><span class=err>万行，通过</span><span class=w> </span><span class=n>trace</span><span class=w> </span><span class=err>清晰的发现</span><span class=w> </span><span class=n>tidb</span><span class=w> </span><span class=err>与</span><span class=w> </span><span class=n>tikv</span><span class=w> </span><span class=err>之间的网络交互频率</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>trace</span><span class=w> </span><span class=n>format</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s1>&#39;row&#39;</span><span class=w> </span><span class=k>select</span><span class=w> </span><span class=k>count</span><span class=p>(</span><span class=o>*</span><span class=p>)</span><span class=o>/</span><span class=k>count</span><span class=p>(</span><span class=k>distinct</span><span class=w> </span><span class=n>date_format</span><span class=p>(</span><span class=n>account_mdate</span><span class=p>,</span><span class=s1>&#39;%Y-%m-%d&#39;</span><span class=p>))</span><span class=w> </span><span class=k>from</span><span class=w> </span><span class=n>account</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>------------------------------------------------------+-----------------+-----------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=k>operation</span><span class=w>                                            </span><span class=o>|</span><span class=w> </span><span class=n>startTS</span><span class=w>         </span><span class=o>|</span><span class=w> </span><span class=n>duration</span><span class=w>        </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>------------------------------------------------------+-----------------+-----------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=n>trace</span><span class=w>                                                </span><span class=o>|</span><span class=w> </span><span class=mi>11</span><span class=p>:</span><span class=mi>37</span><span class=p>:</span><span class=mi>08</span><span class=p>.</span><span class=mi>052125</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>3</span><span class=n>m58</span><span class=p>.</span><span class=mi>620078133</span><span class=n>s</span><span class=w> </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>├─</span><span class=k>session</span><span class=p>.</span><span class=k>Execute</span><span class=w>                                  </span><span class=o>|</span><span class=w> </span><span class=mi>11</span><span class=p>:</span><span class=mi>37</span><span class=p>:</span><span class=mi>08</span><span class=p>.</span><span class=mi>052129</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>1</span><span class=p>.</span><span class=mi>714218</span><span class=n>ms</span><span class=w>      </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>│</span><span class=w> </span><span class=err>├─</span><span class=k>session</span><span class=p>.</span><span class=n>ParseSQL</span><span class=w>                               </span><span class=o>|</span><span class=w> </span><span class=mi>11</span><span class=p>:</span><span class=mi>37</span><span class=p>:</span><span class=mi>08</span><span class=p>.</span><span class=mi>052134</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>21</span><span class=p>.</span><span class=mi>379</span><span class=err>µ</span><span class=n>s</span><span class=w>        </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>│</span><span class=w> </span><span class=err>├─</span><span class=n>executor</span><span class=p>.</span><span class=n>Compile</span><span class=w>                               </span><span class=o>|</span><span class=w> </span><span class=mi>11</span><span class=p>:</span><span class=mi>37</span><span class=p>:</span><span class=mi>08</span><span class=p>.</span><span class=mi>052177</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>270</span><span class=p>.</span><span class=mi>936</span><span class=err>µ</span><span class=n>s</span><span class=w>       </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>│</span><span class=w> </span><span class=err>│</span><span class=w> </span><span class=err>└─</span><span class=k>session</span><span class=p>.</span><span class=n>getTxnFuture</span><span class=w>                         </span><span class=o>|</span><span class=w> </span><span class=mi>11</span><span class=p>:</span><span class=mi>37</span><span class=p>:</span><span class=mi>08</span><span class=p>.</span><span class=mi>052184</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>2</span><span class=p>.</span><span class=mi>886</span><span class=err>µ</span><span class=n>s</span><span class=w>         </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>│</span><span class=w> </span><span class=err>└─</span><span class=k>session</span><span class=p>.</span><span class=n>runStmt</span><span class=w>                                </span><span class=o>|</span><span class=w> </span><span class=mi>11</span><span class=p>:</span><span class=mi>37</span><span class=p>:</span><span class=mi>08</span><span class=p>.</span><span class=mi>052468</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>1</span><span class=p>.</span><span class=mi>353082</span><span class=n>ms</span><span class=w>      </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>│</span><span class=w>   </span><span class=err>├─</span><span class=n>TableReaderExecutor</span><span class=p>.</span><span class=k>Open</span><span class=w>                     </span><span class=o>|</span><span class=w> </span><span class=mi>11</span><span class=p>:</span><span class=mi>37</span><span class=p>:</span><span class=mi>08</span><span class=p>.</span><span class=mi>052518</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>1</span><span class=p>.</span><span class=mi>215215</span><span class=n>ms</span><span class=w>      </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>│</span><span class=w>   </span><span class=err>│</span><span class=w> </span><span class=err>└─</span><span class=n>distsql</span><span class=p>.</span><span class=k>Select</span><span class=w>                             </span><span class=o>|</span><span class=w> </span><span class=mi>11</span><span class=p>:</span><span class=mi>37</span><span class=p>:</span><span class=mi>08</span><span class=p>.</span><span class=mi>052529</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>1</span><span class=p>.</span><span class=mi>193386</span><span class=n>ms</span><span class=w>      </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>│</span><span class=w>   </span><span class=err>│</span><span class=w>   </span><span class=err>├─</span><span class=n>rpcClient</span><span class=p>.</span><span class=n>SendRequest</span><span class=w>                    </span><span class=o>|</span><span class=w> </span><span class=mi>11</span><span class=p>:</span><span class=mi>37</span><span class=p>:</span><span class=mi>08</span><span class=p>.</span><span class=mi>053832</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>404</span><span class=p>.</span><span class=mi>531258</span><span class=n>ms</span><span class=w>    </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>│</span><span class=w>   </span><span class=err>│</span><span class=w>   </span><span class=err>├─</span><span class=n>rpcClient</span><span class=p>.</span><span class=n>SendRequest</span><span class=w>                    </span><span class=o>|</span><span class=w> </span><span class=mi>11</span><span class=p>:</span><span class=mi>39</span><span class=p>:</span><span class=mi>53</span><span class=p>.</span><span class=mi>082502</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>269</span><span class=p>.</span><span class=mi>187122</span><span class=n>ms</span><span class=w>    </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>│</span><span class=w>   </span><span class=err>│</span><span class=w>   </span><span class=err>├─</span><span class=n>rpcClient</span><span class=p>.</span><span class=n>SendRequest</span><span class=w>                    </span><span class=o>|</span><span class=w> </span><span class=mi>11</span><span class=p>:</span><span class=mi>39</span><span class=p>:</span><span class=mi>53</span><span class=p>.</span><span class=mi>785311</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>240</span><span class=p>.</span><span class=mi>928959</span><span class=n>ms</span><span class=w>    </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>│</span><span class=w>   </span><span class=err>│</span><span class=w>   </span><span class=err>└─</span><span class=n>rpcClient</span><span class=p>.</span><span class=n>SendRequest</span><span class=w> </span><span class=o>*</span><span class=w> </span><span class=n>N</span><span class=w>                </span><span class=o>|</span><span class=w> </span><span class=mi>11</span><span class=p>:</span><span class=mi>39</span><span class=p>:</span><span class=mi>54</span><span class=p>.</span><span class=mi>539536</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>331</span><span class=p>.</span><span class=mi>98845</span><span class=n>ms</span><span class=w>     </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>│</span><span class=w>   </span><span class=err>└─</span><span class=k>session</span><span class=p>.</span><span class=n>CommitTxn</span><span class=w>                            </span><span class=o>|</span><span class=w> </span><span class=mi>11</span><span class=p>:</span><span class=mi>37</span><span class=p>:</span><span class=mi>08</span><span class=p>.</span><span class=mi>053803</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>13</span><span class=p>.</span><span class=mi>513</span><span class=err>µ</span><span class=n>s</span><span class=w>        </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>│</span><span class=w>     </span><span class=err>└─</span><span class=k>session</span><span class=p>.</span><span class=n>doCommitWitRetry</span><span class=w>                   </span><span class=o>|</span><span class=w> </span><span class=mi>11</span><span class=p>:</span><span class=mi>37</span><span class=p>:</span><span class=mi>08</span><span class=p>.</span><span class=mi>053806</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>2</span><span class=p>.</span><span class=mi>235</span><span class=err>µ</span><span class=n>s</span><span class=w>         </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>├─</span><span class=o>*</span><span class=n>executor</span><span class=p>.</span><span class=n>ProjectionExec</span><span class=p>.</span><span class=k>Next</span><span class=w>                    </span><span class=o>|</span><span class=w> </span><span class=mi>11</span><span class=p>:</span><span class=mi>37</span><span class=p>:</span><span class=mi>08</span><span class=p>.</span><span class=mi>053865</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>3</span><span class=n>m58</span><span class=p>.</span><span class=mi>617880366</span><span class=n>s</span><span class=w> </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>│</span><span class=w> </span><span class=err>└─</span><span class=o>*</span><span class=n>executor</span><span class=p>.</span><span class=n>StreamAggExec</span><span class=p>.</span><span class=k>Next</span><span class=w>                   </span><span class=o>|</span><span class=w> </span><span class=mi>11</span><span class=p>:</span><span class=mi>37</span><span class=p>:</span><span class=mi>08</span><span class=p>.</span><span class=mi>053867</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>3</span><span class=n>m58</span><span class=p>.</span><span class=mi>614767904</span><span class=n>s</span><span class=w> </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>│</span><span class=w>   </span><span class=err>├─</span><span class=o>*</span><span class=n>executor</span><span class=p>.</span><span class=n>ProjectionExec</span><span class=p>.</span><span class=k>Next</span><span class=w>                </span><span class=o>|</span><span class=w> </span><span class=mi>11</span><span class=p>:</span><span class=mi>37</span><span class=p>:</span><span class=mi>08</span><span class=p>.</span><span class=mi>053869</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>26</span><span class=p>.</span><span class=mi>269835</span><span class=n>ms</span><span class=w>     </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>│</span><span class=w>   </span><span class=err>│</span><span class=w> </span><span class=err>├─</span><span class=o>*</span><span class=n>executor</span><span class=p>.</span><span class=n>TableReaderExecutor</span><span class=p>.</span><span class=k>Next</span><span class=w>         </span><span class=o>|</span><span class=w> </span><span class=mi>11</span><span class=p>:</span><span class=mi>37</span><span class=p>:</span><span class=mi>08</span><span class=p>.</span><span class=mi>053915</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>25</span><span class=p>.</span><span class=mi>530341</span><span class=n>ms</span><span class=w>     </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>│</span><span class=w>   </span><span class=err>│</span><span class=w> </span><span class=err>├─</span><span class=o>*</span><span class=n>executor</span><span class=p>.</span><span class=n>TableReaderExecutor</span><span class=p>.</span><span class=k>Next</span><span class=w>         </span><span class=o>|</span><span class=w> </span><span class=mi>11</span><span class=p>:</span><span class=mi>37</span><span class=p>:</span><span class=mi>08</span><span class=p>.</span><span class=mi>079471</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>8</span><span class=p>.</span><span class=mi>329</span><span class=err>µ</span><span class=n>s</span><span class=w>         </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>│</span><span class=w>   </span><span class=err>│</span><span class=w> </span><span class=err>├─</span><span class=o>*</span><span class=n>executor</span><span class=p>.</span><span class=n>TableReaderExecutor</span><span class=p>.</span><span class=k>Next</span><span class=w>         </span><span class=o>|</span><span class=w> </span><span class=mi>11</span><span class=p>:</span><span class=mi>37</span><span class=p>:</span><span class=mi>08</span><span class=p>.</span><span class=mi>079491</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>3</span><span class=p>.</span><span class=mi>369</span><span class=err>µ</span><span class=n>s</span><span class=w>         </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>│</span><span class=w>   </span><span class=err>│</span><span class=w> </span><span class=err>├─</span><span class=o>*</span><span class=n>executor</span><span class=p>.</span><span class=n>TableReaderExecutor</span><span class=p>.</span><span class=k>Next</span><span class=w>         </span><span class=o>|</span><span class=w> </span><span class=mi>11</span><span class=p>:</span><span class=mi>41</span><span class=p>:</span><span class=mi>06</span><span class=p>.</span><span class=mi>572221</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>14</span><span class=p>.</span><span class=mi>026</span><span class=err>µ</span><span class=n>s</span><span class=w>        </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>│</span><span class=w>   </span><span class=err>│</span><span class=w> </span><span class=err>├─</span><span class=o>*</span><span class=n>executor</span><span class=p>.</span><span class=n>TableReaderExecutor</span><span class=p>.</span><span class=k>Next</span><span class=w>         </span><span class=o>|</span><span class=w> </span><span class=mi>11</span><span class=p>:</span><span class=mi>41</span><span class=p>:</span><span class=mi>06</span><span class=p>.</span><span class=mi>577805</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>31</span><span class=p>.</span><span class=mi>832</span><span class=err>µ</span><span class=n>s</span><span class=w>        </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>│</span><span class=w>   </span><span class=err>│</span><span class=w> </span><span class=err>└─</span><span class=o>*</span><span class=n>executor</span><span class=p>.</span><span class=n>TableReaderExecutor</span><span class=p>.</span><span class=k>Next</span><span class=w>  </span><span class=o>*</span><span class=w> </span><span class=n>N</span><span class=w>    </span><span class=o>|</span><span class=w> </span><span class=mi>11</span><span class=p>:</span><span class=mi>41</span><span class=p>:</span><span class=mi>06</span><span class=p>.</span><span class=mi>583194</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>19</span><span class=p>.</span><span class=mi>7</span><span class=err>µ</span><span class=n>s</span><span class=w>          </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>│</span><span class=w>   </span><span class=err>├─</span><span class=o>*</span><span class=n>executor</span><span class=p>.</span><span class=n>ProjectionExec</span><span class=p>.</span><span class=k>Next</span><span class=w>                </span><span class=o>|</span><span class=w> </span><span class=mi>11</span><span class=p>:</span><span class=mi>37</span><span class=p>:</span><span class=mi>08</span><span class=p>.</span><span class=mi>080339</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>5</span><span class=p>.</span><span class=mi>499</span><span class=err>µ</span><span class=n>s</span><span class=w>         </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>│</span><span class=w>   </span><span class=err>├─</span><span class=o>*</span><span class=n>executor</span><span class=p>.</span><span class=n>ProjectionExec</span><span class=p>.</span><span class=k>Next</span><span class=w>                </span><span class=o>|</span><span class=w> </span><span class=mi>11</span><span class=p>:</span><span class=mi>37</span><span class=p>:</span><span class=mi>08</span><span class=p>.</span><span class=mi>080509</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>5</span><span class=p>.</span><span class=mi>065</span><span class=err>µ</span><span class=n>s</span><span class=w>         </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>│</span><span class=w>   </span><span class=err>├─</span><span class=o>*</span><span class=n>executor</span><span class=p>.</span><span class=n>ProjectionExec</span><span class=p>.</span><span class=k>Next</span><span class=w>                </span><span class=o>|</span><span class=w> </span><span class=mi>11</span><span class=p>:</span><span class=mi>37</span><span class=p>:</span><span class=mi>08</span><span class=p>.</span><span class=mi>080681</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>5</span><span class=p>.</span><span class=mi>46</span><span class=err>µ</span><span class=n>s</span><span class=w>          </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>│</span><span class=w>   </span><span class=err>├─</span><span class=o>*</span><span class=n>executor</span><span class=p>.</span><span class=n>ProjectionExec</span><span class=p>.</span><span class=k>Next</span><span class=w>                </span><span class=o>|</span><span class=w> </span><span class=mi>11</span><span class=p>:</span><span class=mi>37</span><span class=p>:</span><span class=mi>08</span><span class=p>.</span><span class=mi>080855</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>9</span><span class=p>.</span><span class=mi>297</span><span class=err>µ</span><span class=n>s</span><span class=w>         </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>│</span><span class=w>   </span><span class=err>├─</span><span class=o>*</span><span class=n>executor</span><span class=p>.</span><span class=n>ProjectionExec</span><span class=p>.</span><span class=k>Next</span><span class=w>                </span><span class=o>|</span><span class=w> </span><span class=mi>11</span><span class=p>:</span><span class=mi>41</span><span class=p>:</span><span class=mi>06</span><span class=p>.</span><span class=mi>663323</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>2</span><span class=p>.</span><span class=mi>028</span><span class=err>µ</span><span class=n>s</span><span class=w>         </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>│</span><span class=w>   </span><span class=err>└─</span><span class=o>*</span><span class=n>executor</span><span class=p>.</span><span class=n>ProjectionExec</span><span class=p>.</span><span class=k>Next</span><span class=w>  </span><span class=o>*</span><span class=w> </span><span class=n>N</span><span class=w>           </span><span class=o>|</span><span class=w> </span><span class=mi>11</span><span class=p>:</span><span class=mi>41</span><span class=p>:</span><span class=mi>06</span><span class=p>.</span><span class=mi>665968</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>1</span><span class=p>.</span><span class=mi>844</span><span class=err>µ</span><span class=n>s</span><span class=w>         </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=err>└─</span><span class=o>*</span><span class=n>executor</span><span class=p>.</span><span class=n>ProjectionExec</span><span class=p>.</span><span class=k>Next</span><span class=w>                    </span><span class=o>|</span><span class=w> </span><span class=mi>11</span><span class=p>:</span><span class=mi>41</span><span class=p>:</span><span class=mi>06</span><span class=p>.</span><span class=mi>671764</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>11</span><span class=p>.</span><span class=mi>448</span><span class=err>µ</span><span class=n>s</span><span class=w>        </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>     </span><span class=err>└─</span><span class=o>*</span><span class=n>executor</span><span class=p>.</span><span class=n>StreamAggExec</span><span class=p>.</span><span class=k>Next</span><span class=w>                   </span><span class=o>|</span><span class=w> </span><span class=mi>11</span><span class=p>:</span><span class=mi>41</span><span class=p>:</span><span class=mi>06</span><span class=p>.</span><span class=mi>671767</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>568</span><span class=n>ns</span><span class=w>           </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>------------------------------------------------------+-----------------+-----------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=mi>196901</span><span class=w> </span><span class=k>rows</span><span class=w> </span><span class=k>in</span><span class=w> </span><span class=k>set</span><span class=w> </span><span class=p>(</span><span class=mi>5</span><span class=w> </span><span class=k>min</span><span class=w> </span><span class=mi>56</span><span class=p>.</span><span class=mi>31</span><span class=w> </span><span class=n>sec</span><span class=p>)</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><h2 id=0x02-ssr>0x02 SSR</h2><ul><li>Cluster info</li></ul><p><a href=https://docs.pingcap.com/zh/tidb/v4.0/system-table-cluster-info>PingCAP 官网-Cluster info</a>；集群拓扑表 CLUSTER_INFO 提供集群当前的拓扑信息，以及各个节点的版本信息、版本对应的 Git Hash、各节点的启动时间、各实例的运行时间。</p><ul><li>TiDB-dashboard</li></ul><p><a href=https://docs.pingcap.com/zh/tidb/v4.0/dashboard-intro#tidb-dashboard-%E4%BB%8B%E7%BB%8D>TiDB Dashboard</a>是 TiDB 自 4.0 版本起提供的图形化界面，可用于监控及诊断 TiDB 集群。TiDB Dashboard 内置于 TiDB 的 PD 组件中，无需独立部署。</p><h2 id=0x03-profile>0x03 Profile</h2><blockquote><p>Profile 用于分析函数占用内存、CPU 资源信息，TiDB 4.0 版本可以在 tidb-dashboard 上一键获取；以下为分析 tidb-dashboard 后挖掘到的 HTTP API 信息</p></blockquote><ul><li>获取 PD-server Profile<ul><li>内容来自 <a href=https://github.com/pingcap/pd/blob/master/server/api/router.go>PD 代码</a></li></ul></li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-json data-lang=json><span class=line><span class=cl><span class=err>curl</span> <span class=err>http:</span><span class=c1>//{PD IP}:{PD 2379}/pd/api/v1/debug/pprof/profile?seconds={int} &gt; CPU-profile
+</span></span></span><span class=line><span class=cl><span class=c1>// 上述命令获取 CPU profile 信息
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl><span class=c1>// PD 所有 Profile api 请求，每条 api 输出后二进制文件，使用 go tool pprof 解析
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=err>apiRouter.HandleFunc(</span><span class=s2>&#34;/debug/pprof/profile&#34;</span><span class=err>,</span> <span class=err>pprof.Profile)</span>
+</span></span><span class=line><span class=cl><span class=err>apiRouter.Handle(</span><span class=s2>&#34;/debug/pprof/heap&#34;</span><span class=err>,</span> <span class=err>pprof.Handler(</span><span class=s2>&#34;heap&#34;</span><span class=err>))</span>
+</span></span><span class=line><span class=cl><span class=err>apiRouter.Handle(</span><span class=s2>&#34;/debug/pprof/mutex&#34;</span><span class=err>,</span> <span class=err>pprof.Handler(</span><span class=s2>&#34;mutex&#34;</span><span class=err>))</span>
+</span></span><span class=line><span class=cl><span class=err>apiRouter.Handle(</span><span class=s2>&#34;/debug/pprof/allocs&#34;</span><span class=err>,</span> <span class=err>pprof.Handler(</span><span class=s2>&#34;allocs&#34;</span><span class=err>))</span>
+</span></span><span class=line><span class=cl><span class=err>apiRouter.Handle(</span><span class=s2>&#34;/debug/pprof/block&#34;</span><span class=err>,</span> <span class=err>pprof.Handler(</span><span class=s2>&#34;block&#34;</span><span class=err>))</span>
+</span></span><span class=line><span class=cl><span class=err>apiRouter.Handle(</span><span class=s2>&#34;/debug/pprof/goroutine&#34;</span><span class=err>,</span> <span class=err>pprof.Handler(</span><span class=s2>&#34;goroutine&#34;</span><span class=err>))</span>
+</span></span></code></pre></td></tr></table></div></div><ul><li>获取 TiDB-server Profile<ul><li>该接口可以获取 tidb-server profile 压缩包，内涵 cpu、内存等信息</li><li>内容来自 <a href=https://github.com/pingcap/tidb/blob/master/docs/tidb_http_api.md>TiDB http api 文档</a> Download TiDB debug info</li></ul></li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>curl http://<span class=o>{</span>TiDB IP<span class=o>}</span>:<span class=o>{</span>TiDB status_port<span class=o>}</span>/debug/pprof/profile?seconds<span class=o>={</span>int<span class=o>}</span> &gt; debug.zip
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>// zip file will include:
+</span></span><span class=line><span class=cl>// Go heap pprof<span class=o>(</span>after GC<span class=o>)</span>
+</span></span><span class=line><span class=cl>// Go cpu pprof<span class=o>(</span>10s<span class=o>)</span>
+</span></span><span class=line><span class=cl>// Go mutex pprof
+</span></span><span class=line><span class=cl>// Full goroutine
+</span></span><span class=line><span class=cl>// TiDB config and version
+</span></span><span class=line><span class=cl>// Param:
+</span></span><span class=line><span class=cl>// seconds: profile time<span class=o>(</span>s<span class=o>)</span>, default is 10s.
+</span></span></code></pre></td></tr></table></div></div><ul><li>获取 TiKV-server Profile<ul><li>该接口获取为 svg 图片内容；内容来自 <a href=https://github.com/tikv/tikv/pull/4600>TiKV issue #4600</a></li><li>2020 年以后发布的版本支持该功能</li></ul></li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>curl http://<span class=o>{</span>TiKV IP<span class=o>}</span>:<span class=o>{</span>TiKV status_port<span class=o>}</span>/debug/pprof/profile?seconds<span class=o>={</span>int<span class=o>}</span> &gt; tikv.svg
+</span></span></code></pre></td></tr></table></div></div><ul><li>查看 Profile</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>yum install go
+</span></span><span class=line><span class=cl>// 安装 go 程序环境
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>go tool pprof -http 172.16.4.51:890 &lt;profile-name&gt;
+</span></span><span class=line><span class=cl>// 使用 go tool pprof 工具解析 profile 数据，并开启一个网页以便在浏览器上查看
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>浏览器打开该网页访问并分析信息 http://172.16.4.51:890/
+</span></span></code></pre></td></tr></table></div></div><h2 id=0x04-linux>0x04 Linux</h2><ul><li>vmstat / top / htop</li><li>dstat / iotop / iostat</li><li>lsof</li><li>pstack // 该命令会阻断程序正常运行，禁止在 TiKV 使用；会导致 tikv 状态变为 Disconnected，从而丢失所有 region leader</li><li>strace</li><li>gdb</li></ul><h3 id=sar>Sar</h3><p>SAR（System Activity Reporter），可以从 14 个大方面对系统的活动进行报告，包括文件的读写情况、系统调用的使用情况、串口、CPU 效率、内存使用状况、进程活动及 IPC 有关的活动等，使用也是较为复杂。</p><ul><li><p>追溯过去的统计数据（默认）</p></li><li><p>周期性的查看当前数据</p></li><li><p>怀疑 CPU 存在瓶颈，可用 sar -u 和 sar -q 等来查看</p></li><li><p>怀疑内存存在瓶颈，可用 sar -B、sar -r 和 sar -W 等来查看</p></li><li><p>怀疑 I/O 存在瓶颈，可用 sar -b、sar -u 和 sar -d 等来查看</p></li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>-A 汇总所有的报告
+</span></span><span class=line><span class=cl>-a 报告文件读写使用情况
+</span></span><span class=line><span class=cl>-B 报告附加的缓存的使用情况
+</span></span><span class=line><span class=cl>-b 报告缓存的使用情况
+</span></span><span class=line><span class=cl>-c 报告系统调用的使用情况
+</span></span><span class=line><span class=cl>-d 报告磁盘的使用情况
+</span></span><span class=line><span class=cl>-g 报告串口的使用情况
+</span></span><span class=line><span class=cl>-h 报告关于 buffer 使用的统计数据
+</span></span><span class=line><span class=cl>-m 报告 IPC 消息队列和信号量的使用情况
+</span></span><span class=line><span class=cl>-n 报告命名 cache 的使用情况
+</span></span><span class=line><span class=cl>-p 报告调页活动的使用情况
+</span></span><span class=line><span class=cl>-q 报告运行队列和交换队列的平均长度
+</span></span><span class=line><span class=cl>-R 报告进程的活动情况
+</span></span><span class=line><span class=cl>-r 报告没有使用的内存页面和硬盘块
+</span></span><span class=line><span class=cl>-u 报告 CPU 的利用率
+</span></span><span class=line><span class=cl>-v 报告进程、i 节点、文件和锁表状态
+</span></span><span class=line><span class=cl>-w 报告系统交换活动状况
+</span></span><span class=line><span class=cl>-y 报告 TTY 设备活动状况
+</span></span></code></pre></td></tr></table></div></div><h2 id=0x05-不友好的>0x05 不友好的</h2><ul><li>useCursorFetch=True&defaultFetchSize>0</li><li>update batchexecutor</li></ul></div><div class=post-copyright><p class=copyright-item><span class=item-title>Author</span>
+<span class=item-content>Jeff</span></p><p class=copyright-item><span class=item-title>LastMod</span>
+<span class=item-content>2020-07-03</span></p><p class=copyright-item><span class=item-title>License</span>
+<span class=item-content><a rel="license noopener" href=https://creativecommons.org/licenses/by-nc-nd/4.0/ target=_blank>CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span></p></div><footer class=post-footer><div class=post-tags><a href=/tags/airplan/>AirPlan</a></div><nav class=post-nav><a class=prev href=/post/202007017-29-region-merge/><i class="iconfont icon-left"></i>
+<span class="prev-text nav-default">TiDB - PD Region Merge 食草兽</span>
+<span class="prev-text nav-mobile">Prev</span></a>
+<a class=next href=/post/20200618-25-br-rc/><span class="next-text nav-default">TiDB - Backup/Restore 测试</span>
+<span class="next-text nav-mobile">Next</span>
+<i class="iconfont icon-right"></i></a></nav></footer></article></div></div></main><footer id=footer class=footer><div class=social-links><a href=https://github.com/BigerCAP/TiDB-AirPlan/issues class="iconfont icon-github" title=github></a>
+<a href=https://ap.biger.cc/index.xml type=application/rss+xml class="iconfont icon-rss" title=rss></a></div><div class=copyright><span class=power-by>Powered by <a class=hexo-link href=https://gohugo.io>Hugo</a></span>
+<span class=division>|</span>
+<span class=theme-info>Theme -
+<a class=theme-link href=https://github.com/olOwOlo/hugo-theme-even>Even</a></span><div class=busuanzi-footer><span id=busuanzi_container_site_pv>site pv: <span id=busuanzi_value_site_pv><img src=/img/spinner.svg alt=spinner.svg></span></span>
+<span class=division>|</span>
+<span id=busuanzi_container_site_uv>site uv: <span id=busuanzi_value_site_uv><img src=/img/spinner.svg alt=spinner.svg></span></span></div><span class=copyright-year>&copy;
+2017 -
+2023
+<span class=heart><i class="iconfont icon-heart"></i></span>
+<span class=author>DB - AirPlan</span></span></div></footer><div class=back-to-top id=back-to-top><i class="iconfont icon-up"></i></div></div><script src=https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin=anonymous></script>
+<script>var languageCode="en".replace(/-/g,"_").replace(/_(.*)/,function(e,t){return e.replace(t,t.toUpperCase())});timeago().render(document.querySelectorAll(".timeago"),languageCode),timeago.cancel()</script><script type=text/javascript src=/dist/even.26188efa.min.js></script></body></html>

@@ -1,325 +1,39 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>序列化事物 ID 策略 - TSO - TiDB AirPlan - A biger solution</title>
-  <meta name="renderer" content="webkit" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-
-<meta http-equiv="Cache-Control" content="no-transform" />
-<meta http-equiv="Cache-Control" content="no-siteapp" />
-
-<meta name="theme-color" content="#f8f5ec" />
-<meta name="msapplication-navbutton-color" content="#f8f5ec">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
-
-
-<meta name="author" content="Jeff" /><meta name="description" content="0x00 院子 MySQL 有个东东的叫 GTID（GTID = server_uuid:transaction_id）；它在 Binlog 文件中大概长这样【3E11FA55-7" /><meta name="keywords" content="TiDB, AirPlan, TiDB OPS, tidb-operator, 2pc, raft, databases, mysql, htap" />
-
-
-
-
-
-
-<meta name="generator" content="Hugo 0.78.2 with theme even" />
-
-
-<link rel="canonical" href="https://ap.tidb.cc/post/20190201-5-pd-tso/" />
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="manifest" href="/manifest.json">
-<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
-
-<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-<link href="/dist/even.04bd84cd.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
-
-
-<meta property="og:title" content="序列化事物 ID 策略 - TSO" />
-<meta property="og:description" content="0x00 院子 MySQL 有个东东的叫 GTID（GTID = server_uuid:transaction_id）；它在 Binlog 文件中大概长这样【3E11FA55-7" />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://ap.tidb.cc/post/20190201-5-pd-tso/" />
-<meta property="article:published_time" content="2019-02-01T00:00:00+08:00" />
-<meta property="article:modified_time" content="2019-02-01T00:00:00+08:00" />
-<meta itemprop="name" content="序列化事物 ID 策略 - TSO">
-<meta itemprop="description" content="0x00 院子 MySQL 有个东东的叫 GTID（GTID = server_uuid:transaction_id）；它在 Binlog 文件中大概长这样【3E11FA55-7">
-<meta itemprop="datePublished" content="2019-02-01T00:00:00+08:00" />
-<meta itemprop="dateModified" content="2019-02-01T00:00:00+08:00" />
-<meta itemprop="wordCount" content="768">
-
-
-
-<meta itemprop="keywords" content="TSO,PD," />
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="序列化事物 ID 策略 - TSO"/>
-<meta name="twitter:description" content="0x00 院子 MySQL 有个东东的叫 GTID（GTID = server_uuid:transaction_id）；它在 Binlog 文件中大概长这样【3E11FA55-7"/>
-
-<!--[if lte IE 9]>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
-<![endif]-->
-
-<!--[if lt IE 9]>
-  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
-<![endif]-->
-
-</head>
-<body>
-  <div id="mobile-navbar" class="mobile-navbar">
-  <div class="mobile-header-logo">
-    <a href="/" class="logo">TiDB AirPlan</a>
-  </div>
-  <div class="mobile-navbar-icon">
-    <span></span>
-    <span></span>
-    <span></span>
-  </div>
-</div>
-<nav id="mobile-menu" class="mobile-menu slideout-menu">
-  <ul class="mobile-menu-list">
-    <a href="/post/">
-        <li class="mobile-menu-item">Blog</li>
-      </a><a href="/look/">
-        <li class="mobile-menu-item">Look</li>
-      </a><a href="/tags/">
-        <li class="mobile-menu-item">Tags</li>
-      </a><a href="/categories/">
-        <li class="mobile-menu-item">Categories</li>
-      </a><a href="/about/">
-        <li class="mobile-menu-item">About</li>
-      </a>
-  </ul>
-</nav>
-  <div class="container" id="mobile-panel">
-    <header id="header" class="header">
-        <div class="logo-wrapper">
-  <a href="/" class="logo">TiDB AirPlan</a>
-</div>
-
-<nav class="site-navbar">
-  <ul id="menu" class="menu">
-    <li class="menu-item">
-        <a class="menu-item-link" href="/post/">Blog</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/look/">Look</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/tags/">Tags</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/categories/">Categories</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/about/">About</a>
-      </li>
-  </ul>
-</nav>
-    </header>
-
-    <main id="main" class="main">
-      <div class="content-wrapper">
-        <div id="content" class="content">
-          <article class="post">
-    
-    <header class="post-header">
-      <h1 class="post-title">序列化事物 ID 策略 - TSO</h1>
-
-      <div class="post-meta">
-        <span class="post-time"> 2019-02-01 </span>
-        <div class="post-category">
-            <a href="/categories/tidb/"> TiDB </a>
-            </div>
-          <span class="more-meta"> 768 words </span>
-          <span class="more-meta"> 2 mins read </span>
-        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
-      </div>
-    </header>
-
-    <div class="post-toc" id="post-toc">
-  <h2 class="post-toc-title">Contents</h2>
-  <div class="post-toc-content">
-    <nav id="TableOfContents">
-  <ul>
-    <li><a href="#0x00-院子">0x00 院子</a>
-      <ul>
-        <li><a href="#灌水">灌水</a></li>
-      </ul>
-    </li>
-    <li><a href="#0x01-院中">0x01 院中</a></li>
-    <li><a href="#0x02-烧水">0x02 烧水</a></li>
-  </ul>
-</nav>
-  </div>
-</div>
-  <div class="post-outdated">
-    <div class="warn">
-      <p>[NOTE] Updated <span class="timeago" datetime="2019-02-01T00:00:00" title="February 1, 2019">February 1, 2019</span>. This article may have outdated content or subject matter.</p>
-    </div>
-  </div>
-    <div class="post-content">
-      <h2 id="0x00-院子">0x00 院子</h2>
-<p>MySQL 有个东东的叫 GTID（GTID = server_uuid:transaction_id）；它在 Binlog 文件中大概长这样【3E11FA55-71CA-99E1-9E10-C80AA9444562:10】.用于管理 MySQL 事物的状态和校验数据在事物之间的正确性。</p>
-<p>TiDB 数据库有个类似的东东，由 PD 组件管理和发放。它叫做 TSO（timestamp oracle），长成这样的一个东东【395181938313123110】，是由 physical time + logical time 信息组合计算得到的东东。</p>
-<blockquote>
-<p>PD 的 TSO 使用的是中心式的混合逻辑时钟。PD 通过集成了 etcd ，保证了持久化数据的强一致性并且可以做到 auto failover，解决了集中式服务带来的单点故障问题。<br>
-<img src="./pd-auto-failover.png" alt="pd-auto-failover" title="ap.tidb.cc 序列化事物 ID 策略 - TSO"><br>
-其使用 64 位表示一个时间，其中低 18 位代表逻辑时钟部分，剩余部分代表物理时钟部分，其结构如下图所示。由于其逻辑部分为 18 位，因此理论上每秒可以分配时间戳为 218 * 1000 = 262144000 个，即每秒可以产生 2.6 亿个时间戳。<br>
-<img src="./tso.png" alt="tso" title="ap.tidb.cc 序列化事物 ID 策略 - TSO"></p>
-</blockquote>
-<h3 id="灌水">灌水</h3>
-<p>分布式数据库要实现全局一致性快照，需要解决不同节点之间时钟一致的问题。工业界目前有3种解决方案：</p>
-<ol>
-<li>全局集中式授时服务，对网络要求比较高，不能跨地域，理论上可以做到外部一致性【TSO 家族】</li>
-<li>混合逻辑时钟（HLC），可以保证同一个进程内部事件的时钟顺序，但是解决不了系统外事件发生的逻辑前后顺序与物理时间前后顺序的一致性，因此做不到 Linearizability，也就做不到外部一致性【比如隔壁小强家】</li>
-<li>Google 的物理时钟 Turetime API，可以做到外部一致性，同时能做到全球化部署【土豪专属：卫星 GPS + 原子钟（硬件设备）】</li>
-</ol>
-<h2 id="0x01-院中">0x01 院中</h2>
-<blockquote>
-<p>本文没 TSO 原理，聊聊使用场景就好了。</p>
-</blockquote>
-<ul>
-<li><input disabled="" type="checkbox"> 放空</li>
-</ul>
-<h2 id="0x02-烧水">0x02 烧水</h2>
-<ul>
-<li>
-<p>通过 tso 解析为物理时间</p>
-<ul>
-<li>通过 pd-ctl 工具可以解析 tso 信息，并且可以得到 logic 位置点</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-bash" data-lang="bash">&gt;&gt; tso <span class="m">395181938313123110</span>
-
-system:  2017-10-09 05:50:59 +0800 CST
-logic:  <span class="m">120102</span>
-</code></pre></td></tr></table>
-</div>
-</div></li>
-<li>
-<p>通过物理时间模糊计算 TSO 范围</p>
-<ul>
-<li><code>timestamp * (2^18*10^3)</code> 可以得到一个模糊的 TSO</li>
-<li>比如 <code>1588232534 * (2^18*10^3) = 416345629392896000</code></li>
-<li>linux 命令可以用 <code>date -d '01/12/2019 07:21:22' +&quot;%s&quot;</code></li>
-<li>macos 可以用 <code>date -j -f &quot;%Y-%m-%d %H:%M:%S&quot; &quot;2019-01-13 18:02:00&quot; &quot;+%s&quot;</code></li>
-</ul>
-</li>
-</ul>
-<p><img src="/global/helpertools.jpg" alt="ap.tidb.cc"></p>
-
-    </div>
-
-    <div class="post-copyright">
-  <p class="copyright-item">
-    <span class="item-title">Author</span>
-    <span class="item-content">Jeff</span>
-  </p>
-  <p class="copyright-item">
-    <span class="item-title">LastMod</span>
-    <span class="item-content">
-        2019-02-01
-        
-    </span>
-  </p>
-  
-  <p class="copyright-item">
-    <span class="item-title">License</span>
-    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span>
-  </p>
-</div>
-<footer class="post-footer">
-      <div class="post-tags">
-          <a href="/tags/tso/">TSO</a>
-          <a href="/tags/pd/">PD</a>
-          </div>
-      <nav class="post-nav">
-        <a class="prev" href="/post/20190306-10-precheck/">
-            <i class="iconfont icon-left"></i>
-            <span class="prev-text nav-default">入库检查 - 物理机 &amp; 系统安装数据库前预检查</span>
-            <span class="prev-text nav-mobile">Prev</span>
-          </a>
-        <a class="next" href="/post/20181126-48-not-leader/">
-            <span class="next-text nav-default">School - TiKV not leader</span>
-            <span class="next-text nav-mobile">Next</span>
-            <i class="iconfont icon-right"></i>
-          </a>
-      </nav>
-    </footer>
-  </article>
-        </div>
-        
-
-  
-
-  
-
-      </div>
-    </main>
-
-    <footer id="footer" class="footer">
-      <div class="social-links">
-      <a href="https://github.com/BigerCAP/TiDB-AirPlan/issues" class="iconfont icon-github" title="github"></a>
-  <a href="https://ap.tidb.cc/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
-</div>
-
-<div class="copyright">
-  <span class="power-by">
-    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
-  </span>
-  <span class="division">|</span>
-  <span class="theme-info">
-    Theme - 
-    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
-  </span>
-
-  <div class="busuanzi-footer">
-    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
-      <span class="division">|</span>
-    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
-  </div>
-
-  <span class="copyright-year">
-    &copy; 
-    2017 - 
-    2020
-    <span class="heart">
-      <i class="iconfont icon-heart"></i>
-    </span>
-    <span class="author">TiDB - AirPlan</span>
-  </span>
-</div>
-    </footer>
-
-    <div class="back-to-top" id="back-to-top">
-      <i class="iconfont icon-up"></i>
-    </div>
-  </div>
-  
-  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js" integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js" integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin="anonymous"></script>
-  <script><!-- NOTE: timeago.js uses the language code format like "zh_CN" (underscore and case sensitive) -->
-    var languageCode = "en".replace(/-/g, '_').replace(/_(.*)/, function ($0, $1) {return $0.replace($1, $1.toUpperCase());});
-    timeago().render(document.querySelectorAll('.timeago'), languageCode);
-    timeago.cancel();  
-  </script>
-<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
-
-
-
-
-
-
-
-
-</body>
-</html>
+<!doctype html><html lang=en><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge,chrome=1"><title>序列化事物 ID 策略 - TSO - AirPlan - A biger solution</title><meta name=renderer content="webkit"><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta http-equiv=cache-control content="no-transform"><meta http-equiv=cache-control content="no-siteapp"><meta name=theme-color content="#f8f5ec"><meta name=msapplication-navbutton-color content="#f8f5ec"><meta name=apple-mobile-web-app-capable content="yes"><meta name=apple-mobile-web-app-status-bar-style content="#f8f5ec"><meta name=author content="Jeff"><meta name=description content="0x00 院子 MySQL 有个东东的叫 GTID（GTID = server_uuid:transaction_id）；它在 Binlog 文件中大概长这样【3E11FA55-7"><meta name=keywords content="TiDB,AirPlan,TiDB OPS,tidb-operator,2pc,raft,databases,mysql,htap"><meta name=generator content="Hugo 0.110.0 with theme even"><link rel=canonical href=https://ap.biger.cc/post/20190201-5-pd-tso/><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/manifest.json><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><script async src=//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js></script>
+<link href=/dist/even.04bd84cd.min.css rel=stylesheet><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin=anonymous><meta property="og:title" content="序列化事物 ID 策略 - TSO"><meta property="og:description" content="0x00 院子 MySQL 有个东东的叫 GTID（GTID = server_uuid:transaction_id）；它在 Binlog 文件中大概长这样【3E11FA55-7"><meta property="og:type" content="article"><meta property="og:url" content="https://ap.biger.cc/post/20190201-5-pd-tso/"><meta property="article:section" content="post"><meta property="article:published_time" content="2019-02-01T00:00:00+08:00"><meta property="article:modified_time" content="2019-02-01T00:00:00+08:00"><meta itemprop=name content="序列化事物 ID 策略 - TSO"><meta itemprop=description content="0x00 院子 MySQL 有个东东的叫 GTID（GTID = server_uuid:transaction_id）；它在 Binlog 文件中大概长这样【3E11FA55-7"><meta itemprop=datePublished content="2019-02-01T00:00:00+08:00"><meta itemprop=dateModified content="2019-02-01T00:00:00+08:00"><meta itemprop=wordCount content="768"><meta itemprop=keywords content="TSO,PD,"><meta name=twitter:card content="summary"><meta name=twitter:title content="序列化事物 ID 策略 - TSO"><meta name=twitter:description content="0x00 院子 MySQL 有个东东的叫 GTID（GTID = server_uuid:transaction_id）；它在 Binlog 文件中大概长这样【3E11FA55-7"><!--[if lte IE 9]><script src=https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js></script><![endif]--><!--[if lt IE 9]><script src=https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js></script>
+<script src=https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js></script><![endif]--></head><body><div id=mobile-navbar class=mobile-navbar><div class=mobile-header-logo><a href=/ class=logo>AirPlan</a></div><div class=mobile-navbar-icon><span></span>
+<span></span>
+<span></span></div></div><nav id=mobile-menu class="mobile-menu slideout-menu"><ul class=mobile-menu-list><a href=/post/><li class=mobile-menu-item>Blog</li></a><a href=/look/><li class=mobile-menu-item>Look</li></a><a href=/tags/><li class=mobile-menu-item>Tags</li></a><a href=/categories/><li class=mobile-menu-item>Categories</li></a><a href=/about/><li class=mobile-menu-item>About</li></a></ul></nav><div class=container id=mobile-panel><header id=header class=header><div class=logo-wrapper><a href=/ class=logo>AirPlan</a></div><nav class=site-navbar><ul id=menu class=menu><li class=menu-item><a class=menu-item-link href=/post/>Blog</a></li><li class=menu-item><a class=menu-item-link href=/look/>Look</a></li><li class=menu-item><a class=menu-item-link href=/tags/>Tags</a></li><li class=menu-item><a class=menu-item-link href=/categories/>Categories</a></li><li class=menu-item><a class=menu-item-link href=/about/>About</a></li></ul></nav></header><main id=main class=main><div class=content-wrapper><div id=content class=content><article class=post><header class=post-header><h1 class=post-title>序列化事物 ID 策略 - TSO</h1><div class=post-meta><span class=post-time>2019-02-01</span><div class=post-category><a href=/categories/tidb/>TiDB</a></div><span class=more-meta>768 words</span>
+<span class=more-meta>2 mins read</span>
+<span id=busuanzi_container_page_pv class=more-meta><span id=busuanzi_value_page_pv><img src=/img/spinner.svg alt=spinner.svg></span> times read</span></div></header><div class=post-toc id=post-toc><h2 class=post-toc-title>Contents</h2><div class=post-toc-content><nav id=TableOfContents><ul><li><a href=#0x00-院子>0x00 院子</a><ul><li><a href=#灌水>灌水</a></li></ul></li><li><a href=#0x01-院中>0x01 院中</a></li><li><a href=#0x02-烧水>0x02 烧水</a></li></ul></nav></div></div><div class=post-outdated><div class=warn><p>[NOTE] Updated <span class=timeago datetime=2019-02-01T00:00:00 title="February 1, 2019">February 1, 2019</span>. This article may have outdated content or subject matter.</p></div></div><div class=post-content><h2 id=0x00-院子>0x00 院子</h2><p>MySQL 有个东东的叫 GTID（GTID = server_uuid:transaction_id）；它在 Binlog 文件中大概长这样【3E11FA55-71CA-99E1-9E10-C80AA9444562:10】.用于管理 MySQL 事物的状态和校验数据在事物之间的正确性。</p><p>TiDB 数据库有个类似的东东，由 PD 组件管理和发放。它叫做 TSO（timestamp oracle），长成这样的一个东东【395181938313123110】，是由 physical time + logical time 信息组合计算得到的东东。</p><blockquote><p>PD 的 TSO 使用的是中心式的混合逻辑时钟。PD 通过集成了 etcd ，保证了持久化数据的强一致性并且可以做到 auto failover，解决了集中式服务带来的单点故障问题。<br><img src=./pd-auto-failover.png alt=pd-auto-failover title="ap.tidb.cc 序列化事物 ID 策略 - TSO"><br>其使用 64 位表示一个时间，其中低 18 位代表逻辑时钟部分，剩余部分代表物理时钟部分，其结构如下图所示。由于其逻辑部分为 18 位，因此理论上每秒可以分配时间戳为 218 * 1000 = 262144000 个，即每秒可以产生 2.6 亿个时间戳。<br><img src=./tso.png alt=tso title="ap.tidb.cc 序列化事物 ID 策略 - TSO"></p></blockquote><h3 id=灌水>灌水</h3><p>分布式数据库要实现全局一致性快照，需要解决不同节点之间时钟一致的问题。工业界目前有3种解决方案：</p><ol><li>全局集中式授时服务，对网络要求比较高，不能跨地域，理论上可以做到外部一致性【TSO 家族】</li><li>混合逻辑时钟（HLC），可以保证同一个进程内部事件的时钟顺序，但是解决不了系统外事件发生的逻辑前后顺序与物理时间前后顺序的一致性，因此做不到 Linearizability，也就做不到外部一致性【比如隔壁小强家】</li><li>Google 的物理时钟 Turetime API，可以做到外部一致性，同时能做到全球化部署【土豪专属：卫星 GPS + 原子钟（硬件设备）】</li></ol><h2 id=0x01-院中>0x01 院中</h2><blockquote><p>本文没 TSO 原理，聊聊使用场景就好了。</p></blockquote><ul><li><input disabled type=checkbox> 放空</li></ul><h2 id=0x02-烧水>0x02 烧水</h2><ul><li><p>通过 tso 解析为物理时间</p><ul><li>通过 pd-ctl 工具可以解析 tso 信息，并且可以得到 logic 位置点</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>&gt;&gt; tso <span class=m>395181938313123110</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>system:  2017-10-09 05:50:59 +0800 CST
+</span></span><span class=line><span class=cl>logic:  <span class=m>120102</span>
+</span></span></code></pre></td></tr></table></div></div></li><li><p>通过物理时间模糊计算 TSO 范围</p><ul><li><code>timestamp * (2^18*10^3)</code> 可以得到一个模糊的 TSO</li><li>比如 <code>1588232534 * (2^18*10^3) = 416345629392896000</code></li><li>linux 命令可以用 <code>date -d '01/12/2019 07:21:22' +"%s"</code></li><li>macos 可以用 <code>date -j -f "%Y-%m-%d %H:%M:%S" "2019-01-13 18:02:00" "+%s"</code></li></ul></li></ul><p><img src=/global/helpertools.jpg alt=ap.tidb.cc></p></div><div class=post-copyright><p class=copyright-item><span class=item-title>Author</span>
+<span class=item-content>Jeff</span></p><p class=copyright-item><span class=item-title>LastMod</span>
+<span class=item-content>2019-02-01</span></p><p class=copyright-item><span class=item-title>License</span>
+<span class=item-content><a rel="license noopener" href=https://creativecommons.org/licenses/by-nc-nd/4.0/ target=_blank>CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span></p></div><footer class=post-footer><div class=post-tags><a href=/tags/tso/>TSO</a>
+<a href=/tags/pd/>PD</a></div><nav class=post-nav><a class=prev href=/post/20190306-10-precheck/><i class="iconfont icon-left"></i>
+<span class="prev-text nav-default">入库检查 - 物理机 & 系统安装数据库前预检查</span>
+<span class="prev-text nav-mobile">Prev</span></a>
+<a class=next href=/post/20181126-48-not-leader/><span class="next-text nav-default">School - TiKV not leader</span>
+<span class="next-text nav-mobile">Next</span>
+<i class="iconfont icon-right"></i></a></nav></footer></article></div></div></main><footer id=footer class=footer><div class=social-links><a href=https://github.com/BigerCAP/TiDB-AirPlan/issues class="iconfont icon-github" title=github></a>
+<a href=https://ap.biger.cc/index.xml type=application/rss+xml class="iconfont icon-rss" title=rss></a></div><div class=copyright><span class=power-by>Powered by <a class=hexo-link href=https://gohugo.io>Hugo</a></span>
+<span class=division>|</span>
+<span class=theme-info>Theme -
+<a class=theme-link href=https://github.com/olOwOlo/hugo-theme-even>Even</a></span><div class=busuanzi-footer><span id=busuanzi_container_site_pv>site pv: <span id=busuanzi_value_site_pv><img src=/img/spinner.svg alt=spinner.svg></span></span>
+<span class=division>|</span>
+<span id=busuanzi_container_site_uv>site uv: <span id=busuanzi_value_site_uv><img src=/img/spinner.svg alt=spinner.svg></span></span></div><span class=copyright-year>&copy;
+2017 -
+2023
+<span class=heart><i class="iconfont icon-heart"></i></span>
+<span class=author>DB - AirPlan</span></span></div></footer><div class=back-to-top id=back-to-top><i class="iconfont icon-up"></i></div></div><script src=https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin=anonymous></script>
+<script>var languageCode="en".replace(/-/g,"_").replace(/_(.*)/,function(e,t){return e.replace(t,t.toUpperCase())});timeago().render(document.querySelectorAll(".timeago"),languageCode),timeago.cancel()</script><script type=text/javascript src=/dist/even.26188efa.min.js></script></body></html>

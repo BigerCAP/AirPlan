@@ -1,670 +1,255 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>TiDB - CDC RC1 测试 - TiDB AirPlan - A biger solution</title>
-  <meta name="renderer" content="webkit" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-
-<meta http-equiv="Cache-Control" content="no-transform" />
-<meta http-equiv="Cache-Control" content="no-siteapp" />
-
-<meta name="theme-color" content="#f8f5ec" />
-<meta name="msapplication-navbutton-color" content="#f8f5ec">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
-
-
-<meta name="author" content="Jeff" /><meta name="description" content="0x00 CDC 嗯，同场竞技 Binlog 与 CDC 组件 本页内容仅针对 v4.0.0-rc.1-25 版本，不对后续版本做任何预测性的评论 // 最终解释权归制图者 参考各种文档 官网文档 安装部署 Github Repo TiCDC Improve usability in cdc" /><meta name="keywords" content="TiDB, AirPlan, TiDB OPS, tidb-operator, 2pc, raft, databases, mysql, htap" />
-
-
-
-
-
-
-<meta name="generator" content="Hugo 0.78.2 with theme even" />
-
-
-<link rel="canonical" href="https://ap.tidb.cc/post/20200601-23-cdc-4.0rc1/" />
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="manifest" href="/manifest.json">
-<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
-
-<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-<link href="/dist/even.04bd84cd.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
-
-
-<meta property="og:title" content="TiDB - CDC RC1 测试" />
-<meta property="og:description" content="0x00 CDC 嗯，同场竞技 Binlog 与 CDC 组件 本页内容仅针对 v4.0.0-rc.1-25 版本，不对后续版本做任何预测性的评论 // 最终解释权归制图者 参考各种文档 官网文档 安装部署 Github Repo TiCDC Improve usability in cdc" />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://ap.tidb.cc/post/20200601-23-cdc-4.0rc1/" />
-<meta property="article:published_time" content="2020-06-01T00:00:00+08:00" />
-<meta property="article:modified_time" content="2020-06-01T00:00:00+08:00" />
-<meta itemprop="name" content="TiDB - CDC RC1 测试">
-<meta itemprop="description" content="0x00 CDC 嗯，同场竞技 Binlog 与 CDC 组件 本页内容仅针对 v4.0.0-rc.1-25 版本，不对后续版本做任何预测性的评论 // 最终解释权归制图者 参考各种文档 官网文档 安装部署 Github Repo TiCDC Improve usability in cdc">
-<meta itemprop="datePublished" content="2020-06-01T00:00:00+08:00" />
-<meta itemprop="dateModified" content="2020-06-01T00:00:00+08:00" />
-<meta itemprop="wordCount" content="1534">
-
-
-
-<meta itemprop="keywords" content="AirPlan,CDC," />
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="TiDB - CDC RC1 测试"/>
-<meta name="twitter:description" content="0x00 CDC 嗯，同场竞技 Binlog 与 CDC 组件 本页内容仅针对 v4.0.0-rc.1-25 版本，不对后续版本做任何预测性的评论 // 最终解释权归制图者 参考各种文档 官网文档 安装部署 Github Repo TiCDC Improve usability in cdc"/>
-
-<!--[if lte IE 9]>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
-<![endif]-->
-
-<!--[if lt IE 9]>
-  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
-<![endif]-->
-
-</head>
-<body>
-  <div id="mobile-navbar" class="mobile-navbar">
-  <div class="mobile-header-logo">
-    <a href="/" class="logo">TiDB AirPlan</a>
-  </div>
-  <div class="mobile-navbar-icon">
-    <span></span>
-    <span></span>
-    <span></span>
-  </div>
-</div>
-<nav id="mobile-menu" class="mobile-menu slideout-menu">
-  <ul class="mobile-menu-list">
-    <a href="/post/">
-        <li class="mobile-menu-item">Blog</li>
-      </a><a href="/look/">
-        <li class="mobile-menu-item">Look</li>
-      </a><a href="/tags/">
-        <li class="mobile-menu-item">Tags</li>
-      </a><a href="/categories/">
-        <li class="mobile-menu-item">Categories</li>
-      </a><a href="/about/">
-        <li class="mobile-menu-item">About</li>
-      </a>
-  </ul>
-</nav>
-  <div class="container" id="mobile-panel">
-    <header id="header" class="header">
-        <div class="logo-wrapper">
-  <a href="/" class="logo">TiDB AirPlan</a>
-</div>
-
-<nav class="site-navbar">
-  <ul id="menu" class="menu">
-    <li class="menu-item">
-        <a class="menu-item-link" href="/post/">Blog</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/look/">Look</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/tags/">Tags</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/categories/">Categories</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/about/">About</a>
-      </li>
-  </ul>
-</nav>
-    </header>
-
-    <main id="main" class="main">
-      <div class="content-wrapper">
-        <div id="content" class="content">
-          <article class="post">
-    
-    <header class="post-header">
-      <h1 class="post-title">TiDB - CDC RC1 测试</h1>
-
-      <div class="post-meta">
-        <span class="post-time"> 2020-06-01 </span>
-        <div class="post-category">
-            <a href="/categories/tidb/"> TiDB </a>
-            </div>
-          <span class="more-meta"> 1534 words </span>
-          <span class="more-meta"> 4 mins read </span>
-        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
-      </div>
-    </header>
-
-    <div class="post-toc" id="post-toc">
-  <h2 class="post-toc-title">Contents</h2>
-  <div class="post-toc-content">
-    <nav id="TableOfContents">
-  <ul>
-    <li><a href="#0x00-cdc">0x00 CDC</a></li>
-    <li><a href="#0x01-gc-safepoint">0x01 GC safepoint</a></li>
-    <li><a href="#0x02-case">0x02 CASE</a></li>
-    <li><a href="#0x03-faq">0x03 FAQ</a></li>
-  </ul>
-</nav>
-  </div>
-</div>
-  <div class="post-outdated">
-    <div class="hint">
-      <p>[NOTE] Updated <span class="timeago" datetime="2020-06-01T00:00:00" title="June 1, 2020">June 1, 2020</span>. This article may have outdated content or subject matter.</p>
-    </div>
-  </div>
-    <div class="post-content">
-      <h2 id="0x00-cdc">0x00 CDC</h2>
-<blockquote>
-<p>嗯，同场竞技 Binlog 与 CDC 组件<br>
-本页内容仅针对 v4.0.0-rc.1-25 版本，不对后续版本做任何预测性的评论 //  最终解释权归制图者</p>
-</blockquote>
-<ul>
-<li>参考各种文档
-<ul>
-<li>官网文档 <a href="https://pingcap.com/docs-cn/stable/ticdc/ticdc-overview/">安装部署</a></li>
-<li>Github Repo <a href="https://github.com/pingcap/ticdc">TiCDC</a>
-<ul>
-<li>Improve usability in cdc client <a href="https://github.com/pingcap/ticdc/issues/542">Issue 542</a></li>
-</ul>
-</li>
-<li>官网文档 TiKV <a href="https://pingcap.com/docs-cn/stable/garbage-collection-overview/">GC 机制介绍</a></li>
-<li>官网文档 <a href="https://pingcap.com/docs-cn/stable/tidb-binlog/tidb-binlog-overview/">TiDB Binlog 简介</a></li>
-</ul>
-</li>
-</ul>
-<p><img src="./CDC.png" alt="CDC 测试脑图"></p>
-<ul>
-<li>测试状态 lastdate 20200707
-<ul>
-<li><input disabled="" type="checkbox"> 主从跨机房部署</li>
-<li><input disabled="" type="checkbox"> 事物一致性还原（过程一致性、最终一致性）</li>
-<li><input disabled="" type="checkbox"> 主备灾难时 CDC 状态</li>
-<li><input checked="" disabled="" type="checkbox"> CDC 自定义数据源输出；支持 canal 协议「写入到 kafka」</li>
-<li><input checked="" disabled="" type="checkbox"> db/table 过滤；支持完整的 <a href="https://github.com/pingcap/tidb-tools/blob/master/pkg/table-filter/README.md#wildcards">Wildcards</a></li>
-<li><input checked="" disabled="" type="checkbox"> 支持环形复制</li>
-</ul>
-</li>
-</ul>
-<h2 id="0x01-gc-safepoint">0x01 GC safepoint</h2>
-<blockquote>
-<p>通过 <code>max(tikv_gcworker_autogc_safe_point) by (instance) / (2^18)</code> 可以在 Grafana 或者 Prometheus 查看 TiKV 最后一次的 GC 时间。<br>
-或者在数据库中通过 <code>select * from mysql.tidb</code> 查询</p>
-</blockquote>
-<p><img src="./gc-safepoint.png" alt="gc-safepoint"></p>
-<p>当 CDC 运行状态中，<strong>checkpoint ts &gt; gc safe point ts</strong> 正常现象，默认 “启动 CDC server 时可以通过 gc-ttl 指定 GC safepoint 的 TTL，这个值的含义是当 TiCDC 服务全部挂掉后，由 TiCDC 在 PD 所设置的 GC safepoint 保存的最长时间，该值默认为 86400 秒。（<a href="https://pingcap.com/docs-cn/stable/ticdc/troubleshoot-ticdc/#gc-ttl-%E5%92%8C%E6%96%87%E4%BB%B6%E6%8E%92%E5%BA%8F">来自 PingCAP 官网</a>）”<br>
-该场景可能会导致 <strong>TiKV_GC_can_not_work</strong> 告警 <code>sum(increase(tikv_gcworker_gc_tasks_vec{task=&quot;gc&quot;}[1d])) &lt; 1</code> ; 该告警提示最近 1 天 TiKV GC 没有工作，可能会造成过多的 MVCC 版本从而影响读性能</p>
-<p><img src="./GC.png" alt="GC"></p>
-<blockquote>
-<p>通过 etcd-ctl 获取 ctcd 中的信息，etcd-ctl 通过 <a href="https://github.com/etcd-io/etcd/releases">Github etcd</a> 下载<br>
-执行命令：<code>./etcdctl --endpoints=http://10.10.10.10:14379 get /tidb/cdc --prefix</code></p>
-</blockquote>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-json" data-lang="json"><span class="err">/tidb/store/gcworker/saved_safe_point</span>
-<span class="mi">416997967863480321</span>
-</code></pre></td></tr></table>
-</div>
-</div><h2 id="0x02-case">0x02 CASE</h2>
-<ul>
-<li>
-<p>创建一个同步任务</p>
-<ul>
-<li>tpcc.history 表没有 PK 或者 UK，CDC 无法同步类似表</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-json" data-lang="json"><span class="err">./cdc</span> <span class="err">cli</span> <span class="err">--pd</span> <span class="err">http://</span><span class="mf">10.10</span><span class="err">.</span><span class="mf">10.10</span><span class="err">:</span><span class="mi">14379</span> <span class="err">changefeed</span> <span class="err">create</span> <span class="err">--sink-uri=</span><span class="s2">&#34;mysql://root:root@127.0.0.1:44/?worker-count=1&amp;max-txn-row=50&#34;</span>
-<span class="p">[</span><span class="err">WARN</span><span class="p">]</span> <span class="err">some</span> <span class="err">tables</span> <span class="err">are</span> <span class="err">not</span> <span class="err">eligible</span> <span class="err">to</span> <span class="err">replicate,</span> <span class="p">[]</span><span class="err">entry.TableName</span><span class="p">{</span><span class="err">entry.TableName{Schema:</span><span class="nt">&#34;tpcc&#34;</span><span class="p">,</span> <span class="err">Table:</span><span class="nt">&#34;history&#34;</span><span class="p">}</span><span class="err">}</span>
-<span class="err">Could</span> <span class="err">you</span> <span class="err">agree</span> <span class="err">to</span> <span class="err">ignore</span> <span class="err">those</span> <span class="err">tables,</span> <span class="err">and</span> <span class="err">continue</span> <span class="err">to</span> <span class="err">replicate</span> <span class="p">[</span><span class="err">Y/N</span><span class="p">]</span>
-<span class="err">y</span>
-<span class="err">Create</span> <span class="err">changefeed</span> <span class="err">successfully!</span>
-<span class="err">ID:</span> <span class="err">ac</span><span class="mi">6</span><span class="err">d</span><span class="mi">034</span><span class="err">a-c</span><span class="mi">2</span><span class="err">b</span><span class="mi">4-41</span><span class="err">bf</span><span class="mi">-801</span><span class="err">a</span><span class="mi">-798</span><span class="err">bb</span><span class="mi">1390734</span>
-<span class="err">Info:</span> <span class="p">{</span><span class="nt">&#34;sink-uri&#34;</span><span class="p">:</span><span class="s2">&#34;mysql://root:root@127.0.0.1:44/?worker-count=1\u0026max-txn-row=50&#34;</span><span class="p">,</span><span class="nt">&#34;opts&#34;</span><span class="p">:{},</span><span class="nt">&#34;create-time&#34;</span><span class="p">:</span><span class="s2">&#34;2020-05-27T16:14:08.529050855+08:00&#34;</span><span class="p">,</span><span class="nt">&#34;start-ts&#34;</span><span class="p">:</span><span class="mi">416957660797337610</span><span class="p">,</span><span class="nt">&#34;target-ts&#34;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="nt">&#34;admin-job-type&#34;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="nt">&#34;sort-engine&#34;</span><span class="p">:</span><span class="s2">&#34;memory&#34;</span><span class="p">,</span><span class="nt">&#34;sort-dir&#34;</span><span class="p">:</span><span class="s2">&#34;.&#34;</span><span class="p">,</span><span class="nt">&#34;config&#34;</span><span class="p">:{</span><span class="nt">&#34;ddl-white-list&#34;</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span><span class="nt">&#34;filter-case-sensitive&#34;</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span><span class="nt">&#34;filter-rules&#34;</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span><span class="nt">&#34;ignore-txn-commit-ts&#34;</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span><span class="nt">&#34;sink-dispatch-rules&#34;</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span><span class="nt">&#34;mounter-worker-num&#34;</span><span class="p">:</span><span class="mi">0</span><span class="p">}}</span>
-</code></pre></td></tr></table>
-</div>
-</div></li>
-<li>
-<p>各种查看</p>
-<ul>
-<li>capture / 间接等于一个 CDC server</li>
-<li>change feed / 等于一个同步任务</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-json" data-lang="json"><span class="err">$</span> <span class="err">./cdc</span> <span class="err">cli</span> <span class="err">--pd</span> <span class="err">http://</span><span class="mf">10.10</span><span class="err">.</span><span class="mf">10.10</span><span class="err">:</span><span class="mi">14379</span> <span class="err">capture</span> <span class="err">list</span>
-<span class="p">[</span>
-  <span class="p">{</span>
-    <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="s2">&#34;7a8e4800-56ae-46a5-a1a6-3eb57b6ce935&#34;</span><span class="p">,</span>
-    <span class="nt">&#34;is-owner&#34;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-    <span class="nt">&#34;address&#34;</span><span class="p">:</span> <span class="s2">&#34;10.10.10.10:14800&#34;</span>
-  <span class="p">}</span>
-<span class="p">]</span>
-
-<span class="err">$</span> <span class="err">./cdc</span> <span class="err">cli</span> <span class="err">--pd</span> <span class="err">http://</span><span class="mf">10.10</span><span class="err">.</span><span class="mf">10.10</span><span class="err">:</span><span class="mi">14379</span> <span class="err">changefeed</span> <span class="err">list</span>
-<span class="p">[</span>
-  <span class="p">{</span>
-    <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="s2">&#34;ac6d034a-c2b4-41bf-801a-798bb1390734&#34;</span>
-  <span class="p">}</span>
-<span class="p">]</span>
-</code></pre></td></tr></table>
-</div>
-</div></li>
-<li>
-<p>查看上下游同步延迟</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-json" data-lang="json"><span class="err">./cdc</span> <span class="err">cli</span> <span class="err">--pd</span> <span class="err">http://</span><span class="mf">10.10</span><span class="err">.</span><span class="mf">10.10</span><span class="err">:</span><span class="mi">14379</span> <span class="err">changefeed</span> <span class="err">statistics</span>  <span class="err">--changefeed-id=</span><span class="s2">&#34;ac6d034a-c2b4-41bf-801a-798bb1390734&#34;</span>
-<span class="p">{</span>
-  <span class="nt">&#34;ops&#34;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-  <span class="nt">&#34;count&#34;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-  <span class="nt">&#34;sink_gap&#34;</span><span class="p">:</span> <span class="s2">&#34;1389300ms&#34;</span><span class="p">,</span>
-  <span class="nt">&#34;replication_gap&#34;</span><span class="p">:</span> <span class="s2">&#34;1391250ms&#34;</span>
-<span class="p">}</span>
-<span class="p">{</span>
-  <span class="nt">&#34;ops&#34;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-  <span class="nt">&#34;count&#34;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-  <span class="nt">&#34;sink_gap&#34;</span><span class="p">:</span> <span class="s2">&#34;1399300ms&#34;</span><span class="p">,</span>
-  <span class="nt">&#34;replication_gap&#34;</span><span class="p">:</span> <span class="s2">&#34;1401250ms&#34;</span>
-<span class="p">}</span>
-<span class="p">{</span>
-  <span class="nt">&#34;ops&#34;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-  <span class="nt">&#34;count&#34;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-  <span class="nt">&#34;sink_gap&#34;</span><span class="p">:</span> <span class="s2">&#34;1409351ms&#34;</span><span class="p">,</span>
-  <span class="nt">&#34;replication_gap&#34;</span><span class="p">:</span> <span class="s2">&#34;1411250ms&#34;</span>
-<span class="p">}</span>
-</code></pre></td></tr></table>
-</div>
-</div></li>
-<li>
-<p>delete meta 操作</p>
-<ul>
-<li>cdc stop 时不会删除 change feed 信息，会删除 capture 信息</li>
-<li><strong>操作不可逆，谨慎执行</strong>，主要是 checkpoint ts 信息</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-json" data-lang="json"> <span class="err">./cdc</span> <span class="err">cli</span> <span class="err">--pd</span> <span class="err">http://</span><span class="mf">10.10</span><span class="err">.</span><span class="mf">10.10</span><span class="err">:</span><span class="mi">14379</span> <span class="err">changefeed</span> <span class="err">list</span>
-<span class="p">[</span>
-  <span class="p">{</span>
-    <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="s2">&#34;f96916c7-1f55-41b5-9d16-406e51aab6d4&#34;</span>
-  <span class="p">},</span>
-  <span class="p">{</span>
-    <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="s2">&#34;3e943df4-6950-4568-84c8-d81fd83de2d8&#34;</span>
-  <span class="p">},</span>
-  <span class="p">{</span>
-    <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="s2">&#34;7de99356-8389-4644-b71b-dc7b6ba7389e&#34;</span>
-  <span class="p">}</span>
-<span class="p">]</span>
- <span class="err">./cdc</span> <span class="err">cli</span> <span class="err">--pd</span> <span class="err">http://</span><span class="mf">10.10</span><span class="err">.</span><span class="mf">10.10</span><span class="err">:</span><span class="mi">14379</span> <span class="err">meta</span> <span class="err">delete</span>
-<span class="err">already</span> <span class="err">truncate</span> <span class="err">all</span> <span class="err">meta</span> <span class="err">in</span> <span class="err">etcd!</span>
-
- <span class="err">./cdc</span> <span class="err">cli</span> <span class="err">--pd</span> <span class="err">http://</span><span class="mf">10.10</span><span class="err">.</span><span class="mf">10.10</span><span class="err">:</span><span class="mi">14379</span> <span class="err">changefeed</span> <span class="err">list</span>
-<span class="p">[]</span>
-</code></pre></td></tr></table>
-</div>
-</div><div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-json" data-lang="json"><span class="err">/tidb/cdc/changefeed/info/</span><span class="mf">3e943</span><span class="err">df</span><span class="mi">4-6950-4568-84</span><span class="err">c</span><span class="mi">8</span><span class="err">-d</span><span class="mi">81</span><span class="err">fd</span><span class="mi">83</span><span class="err">de</span><span class="mi">2</span><span class="err">d</span><span class="mi">8</span>
-<span class="p">{</span><span class="nt">&#34;sink-uri&#34;</span><span class="p">:</span><span class="s2">&#34;mysql://root:root@127.0.0.1:44/?worker-count=16\u0026max-txn-row=50&#34;</span><span class="p">,</span><span class="nt">&#34;opts&#34;</span><span class="p">:{},</span><span class="nt">&#34;create-time&#34;</span><span class="p">:</span><span class="s2">&#34;2020-05-28T17:36:26.62800987+08:00&#34;</span><span class="p">,</span><span class="nt">&#34;start-ts&#34;</span><span class="p">:</span><span class="mi">416981604520427521</span><span class="p">,</span><span class="nt">&#34;target-ts&#34;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="nt">&#34;admin-job-type&#34;</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span><span class="nt">&#34;sort-engine&#34;</span><span class="p">:</span><span class="s2">&#34;memory&#34;</span><span class="p">,</span><span class="nt">&#34;sort-dir&#34;</span><span class="p">:</span><span class="s2">&#34;.&#34;</span><span class="p">,</span><span class="nt">&#34;config&#34;</span><span class="p">:{</span><span class="nt">&#34;ddl-white-list&#34;</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span><span class="nt">&#34;filter-case-sensitive&#34;</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span><span class="nt">&#34;filter-rules&#34;</span><span class="p">:{</span><span class="nt">&#34;do-tables&#34;</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span><span class="nt">&#34;do-dbs&#34;</span><span class="p">:[</span><span class="s2">&#34;br&#34;</span><span class="p">],</span><span class="nt">&#34;ignore-tables&#34;</span><span class="p">:[{</span><span class="nt">&#34;db-name&#34;</span><span class="p">:</span><span class="s2">&#34;br&#34;</span><span class="p">,</span><span class="nt">&#34;tbl-name&#34;</span><span class="p">:</span><span class="s2">&#34;history&#34;</span><span class="p">}],</span><span class="nt">&#34;ignore-dbs&#34;</span><span class="p">:[</span><span class="s2">&#34;tpcc&#34;</span><span class="p">,</span><span class="s2">&#34;tpch&#34;</span><span class="p">,</span><span class="s2">&#34;mysql&#34;</span><span class="p">,</span><span class="s2">&#34;test&#34;</span><span class="p">]},</span><span class="nt">&#34;ignore-txn-commit-ts&#34;</span><span class="p">:[],</span><span class="nt">&#34;sink-dispatch-rules&#34;</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span><span class="nt">&#34;mounter-worker-num&#34;</span><span class="p">:</span><span class="mi">0</span><span class="p">}}</span>
-<span class="err">/tidb/cdc/changefeed/info/</span><span class="mi">7</span><span class="err">de</span><span class="mi">99356-8389-4644</span><span class="err">-b</span><span class="mi">71</span><span class="err">b-dc</span><span class="mi">7</span><span class="err">b</span><span class="mi">6</span><span class="err">ba</span><span class="mi">7389</span><span class="err">e</span>
-<span class="p">{</span><span class="nt">&#34;sink-uri&#34;</span><span class="p">:</span><span class="s2">&#34;mysql://root:root@127.0.0.1:44/?worker-count=16\u0026max-txn-row=50&#34;</span><span class="p">,</span><span class="nt">&#34;opts&#34;</span><span class="p">:{},</span><span class="nt">&#34;create-time&#34;</span><span class="p">:</span><span class="s2">&#34;2020-05-29T11:24:24.682842675+08:00&#34;</span><span class="p">,</span><span class="nt">&#34;start-ts&#34;</span><span class="p">:</span><span class="mi">416997967863480321</span><span class="p">,</span><span class="nt">&#34;target-ts&#34;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="nt">&#34;admin-job-type&#34;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="nt">&#34;sort-engine&#34;</span><span class="p">:</span><span class="s2">&#34;memory&#34;</span><span class="p">,</span><span class="nt">&#34;sort-dir&#34;</span><span class="p">:</span><span class="s2">&#34;.&#34;</span><span class="p">,</span><span class="nt">&#34;config&#34;</span><span class="p">:{</span><span class="nt">&#34;ddl-white-list&#34;</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span><span class="nt">&#34;filter-case-sensitive&#34;</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span><span class="nt">&#34;filter-rules&#34;</span><span class="p">:{</span><span class="nt">&#34;do-tables&#34;</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span><span class="nt">&#34;do-dbs&#34;</span><span class="p">:[</span><span class="s2">&#34;br&#34;</span><span class="p">],</span><span class="nt">&#34;ignore-tables&#34;</span><span class="p">:[{</span><span class="nt">&#34;db-name&#34;</span><span class="p">:</span><span class="s2">&#34;br&#34;</span><span class="p">,</span><span class="nt">&#34;tbl-name&#34;</span><span class="p">:</span><span class="s2">&#34;history&#34;</span><span class="p">}],</span><span class="nt">&#34;ignore-dbs&#34;</span><span class="p">:[</span><span class="s2">&#34;tpcc&#34;</span><span class="p">,</span><span class="s2">&#34;tpch&#34;</span><span class="p">,</span><span class="s2">&#34;mysql&#34;</span><span class="p">,</span><span class="s2">&#34;test&#34;</span><span class="p">]},</span><span class="nt">&#34;ignore-txn-commit-ts&#34;</span><span class="p">:[],</span><span class="nt">&#34;sink-dispatch-rules&#34;</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span><span class="nt">&#34;mounter-worker-num&#34;</span><span class="p">:</span><span class="mi">0</span><span class="p">}}</span>
-<span class="err">/tidb/cdc/changefeed/info/f</span><span class="mi">96916</span><span class="err">c</span><span class="mi">7-1</span><span class="err">f</span><span class="mi">55-41</span><span class="err">b</span><span class="mi">5-9</span><span class="err">d</span><span class="mi">16</span><span class="mf">-406e51</span><span class="err">aab</span><span class="mi">6</span><span class="err">d</span><span class="mi">4</span>
-<span class="p">{</span><span class="nt">&#34;sink-uri&#34;</span><span class="p">:</span><span class="s2">&#34;mysql://root:root@127.0.0.1:44/?worker-count=16\u0026max-txn-row=50&#34;</span><span class="p">,</span><span class="nt">&#34;opts&#34;</span><span class="p">:{},</span><span class="nt">&#34;create-time&#34;</span><span class="p">:</span><span class="s2">&#34;2020-06-01T10:52:23.204398589+08:00&#34;</span><span class="p">,</span><span class="nt">&#34;start-ts&#34;</span><span class="p">:</span><span class="mi">416997967863480321</span><span class="p">,</span><span class="nt">&#34;target-ts&#34;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="nt">&#34;admin-job-type&#34;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="nt">&#34;sort-engine&#34;</span><span class="p">:</span><span class="s2">&#34;memory&#34;</span><span class="p">,</span><span class="nt">&#34;sort-dir&#34;</span><span class="p">:</span><span class="s2">&#34;.&#34;</span><span class="p">,</span><span class="nt">&#34;config&#34;</span><span class="p">:{</span><span class="nt">&#34;ddl-white-list&#34;</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span><span class="nt">&#34;filter-case-sensitive&#34;</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span><span class="nt">&#34;filter-rules&#34;</span><span class="p">:{</span><span class="nt">&#34;do-tables&#34;</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span><span class="nt">&#34;do-dbs&#34;</span><span class="p">:[</span><span class="s2">&#34;br&#34;</span><span class="p">],</span><span class="nt">&#34;ignore-tables&#34;</span><span class="p">:[{</span><span class="nt">&#34;db-name&#34;</span><span class="p">:</span><span class="s2">&#34;br&#34;</span><span class="p">,</span><span class="nt">&#34;tbl-name&#34;</span><span class="p">:</span><span class="s2">&#34;history&#34;</span><span class="p">}],</span><span class="nt">&#34;ignore-dbs&#34;</span><span class="p">:[</span><span class="s2">&#34;tpcc&#34;</span><span class="p">,</span><span class="s2">&#34;tpch&#34;</span><span class="p">,</span><span class="s2">&#34;mysql&#34;</span><span class="p">,</span><span class="s2">&#34;test&#34;</span><span class="p">]},</span><span class="nt">&#34;ignore-txn-commit-ts&#34;</span><span class="p">:[],</span><span class="nt">&#34;sink-dispatch-rules&#34;</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span><span class="nt">&#34;mounter-worker-num&#34;</span><span class="p">:</span><span class="mi">0</span><span class="p">}}</span>
-<span class="err">/tidb/cdc/job/</span><span class="mi">0240</span><span class="err">d</span><span class="mi">5</span><span class="err">b</span><span class="mi">9</span><span class="err">-a</span><span class="mi">81</span><span class="err">f</span><span class="mi">-417</span><span class="err">c</span><span class="mi">-834</span><span class="err">b-e</span><span class="mi">16329</span><span class="err">eba</span><span class="mi">09</span><span class="err">b</span>
-<span class="p">{</span><span class="nt">&#34;resolved-ts&#34;</span><span class="p">:</span><span class="mi">416958926651392001</span><span class="p">,</span><span class="nt">&#34;checkpoint-ts&#34;</span><span class="p">:</span><span class="mi">416958926389248001</span><span class="p">,</span><span class="nt">&#34;admin-job-type&#34;</span><span class="p">:</span><span class="mi">3</span><span class="p">}</span>
-<span class="err">/tidb/cdc/job/</span><span class="mf">3e943</span><span class="err">df</span><span class="mi">4-6950-4568-84</span><span class="err">c</span><span class="mi">8</span><span class="err">-d</span><span class="mi">81</span><span class="err">fd</span><span class="mi">83</span><span class="err">de</span><span class="mi">2</span><span class="err">d</span><span class="mi">8</span>
-<span class="p">{</span><span class="nt">&#34;resolved-ts&#34;</span><span class="p">:</span><span class="mi">416997967863480321</span><span class="p">,</span><span class="nt">&#34;checkpoint-ts&#34;</span><span class="p">:</span><span class="mi">416997967863480321</span><span class="p">,</span><span class="nt">&#34;admin-job-type&#34;</span><span class="p">:</span><span class="mi">0</span><span class="p">}</span>
-<span class="err">/tidb/cdc/job/</span><span class="mi">6281</span><span class="err">d</span><span class="mi">51</span><span class="err">f-f</span><span class="mi">62</span><span class="err">c</span><span class="mi">-46</span><span class="err">c</span><span class="mi">6</span><span class="err">-b</span><span class="mf">10e-33013470</span><span class="err">fbaa</span>
-<span class="p">{</span><span class="nt">&#34;resolved-ts&#34;</span><span class="p">:</span><span class="mi">416974641884037174</span><span class="p">,</span><span class="nt">&#34;checkpoint-ts&#34;</span><span class="p">:</span><span class="mi">416974641884037174</span><span class="p">,</span><span class="nt">&#34;admin-job-type&#34;</span><span class="p">:</span><span class="mi">3</span><span class="p">}</span>
-<span class="err">/tidb/cdc/job/</span><span class="mi">7</span><span class="err">de</span><span class="mi">99356-8389-4644</span><span class="err">-b</span><span class="mi">71</span><span class="err">b-dc</span><span class="mi">7</span><span class="err">b</span><span class="mi">6</span><span class="err">ba</span><span class="mi">7389</span><span class="err">e</span>
-<span class="p">{</span><span class="nt">&#34;resolved-ts&#34;</span><span class="p">:</span><span class="mi">416997967863480321</span><span class="p">,</span><span class="nt">&#34;checkpoint-ts&#34;</span><span class="p">:</span><span class="mi">416997967863480321</span><span class="p">,</span><span class="nt">&#34;admin-job-type&#34;</span><span class="p">:</span><span class="mi">0</span><span class="p">}</span>
-<span class="err">/tidb/cdc/job/ac</span><span class="mi">6</span><span class="err">d</span><span class="mi">034</span><span class="err">a-c</span><span class="mi">2</span><span class="err">b</span><span class="mi">4-41</span><span class="err">bf</span><span class="mi">-801</span><span class="err">a</span><span class="mi">-798</span><span class="err">bb</span><span class="mi">1390734</span>
-<span class="p">{</span><span class="nt">&#34;resolved-ts&#34;</span><span class="p">:</span><span class="mi">416958671598387201</span><span class="p">,</span><span class="nt">&#34;checkpoint-ts&#34;</span><span class="p">:</span><span class="mi">416957660797337610</span><span class="p">,</span><span class="nt">&#34;admin-job-type&#34;</span><span class="p">:</span><span class="mi">3</span><span class="p">}</span>
-<span class="err">/tidb/cdc/job/e</span><span class="mi">01</span><span class="err">adb</span><span class="mi">9</span><span class="err">c</span><span class="mi">-70</span><span class="err">ad</span><span class="mi">-4600</span><span class="err">-b</span><span class="mi">4</span><span class="err">de-d</span><span class="mi">20</span><span class="err">da</span><span class="mi">914</span><span class="err">bd</span><span class="mi">9</span><span class="err">a</span>
-<span class="p">{</span><span class="nt">&#34;resolved-ts&#34;</span><span class="p">:</span><span class="mi">416975975436779549</span><span class="p">,</span><span class="nt">&#34;checkpoint-ts&#34;</span><span class="p">:</span><span class="mi">416975975436779549</span><span class="p">,</span><span class="nt">&#34;admin-job-type&#34;</span><span class="p">:</span><span class="mi">3</span><span class="p">}</span>
-<span class="err">/tidb/cdc/job/f</span><span class="mi">96916</span><span class="err">c</span><span class="mi">7-1</span><span class="err">f</span><span class="mi">55-41</span><span class="err">b</span><span class="mi">5-9</span><span class="err">d</span><span class="mi">16</span><span class="mf">-406e51</span><span class="err">aab</span><span class="mi">6</span><span class="err">d</span><span class="mi">4</span>
-<span class="p">{</span><span class="nt">&#34;resolved-ts&#34;</span><span class="p">:</span><span class="mi">416997967863480321</span><span class="p">,</span><span class="nt">&#34;checkpoint-ts&#34;</span><span class="p">:</span><span class="mi">416997967863480321</span><span class="p">,</span><span class="nt">&#34;admin-job-type&#34;</span><span class="p">:</span><span class="mi">0</span><span class="p">}</span>
-<span class="err">/tidb/cdc/task/position/a</span><span class="mi">99683</span><span class="err">bc</span><span class="mi">-4</span><span class="err">af</span><span class="mi">4-45</span><span class="err">d</span><span class="mi">3</span><span class="err">-aa</span><span class="mi">7</span><span class="err">b</span><span class="mi">-5</span><span class="err">bbd</span><span class="mi">398</span><span class="err">fb</span><span class="mi">6</span><span class="err">b</span><span class="mi">5</span><span class="err">/</span><span class="mf">3e943</span><span class="err">df</span><span class="mi">4-6950-4568-84</span><span class="err">c</span><span class="mi">8</span><span class="err">-d</span><span class="mi">81</span><span class="err">fd</span><span class="mi">83</span><span class="err">de</span><span class="mi">2</span><span class="err">d</span><span class="mi">8</span>
-<span class="p">{</span><span class="nt">&#34;checkpoint-ts&#34;</span><span class="p">:</span><span class="mi">417002603526225942</span><span class="p">,</span><span class="nt">&#34;resolved-ts&#34;</span><span class="p">:</span><span class="mi">416997967863480321</span><span class="p">,</span><span class="nt">&#34;count&#34;</span><span class="p">:</span><span class="mi">0</span><span class="p">}</span>
-<span class="err">/tidb/cdc/task/position/a</span><span class="mi">99683</span><span class="err">bc</span><span class="mi">-4</span><span class="err">af</span><span class="mi">4-45</span><span class="err">d</span><span class="mi">3</span><span class="err">-aa</span><span class="mi">7</span><span class="err">b</span><span class="mi">-5</span><span class="err">bbd</span><span class="mi">398</span><span class="err">fb</span><span class="mi">6</span><span class="err">b</span><span class="mi">5</span><span class="err">/</span><span class="mi">7</span><span class="err">de</span><span class="mi">99356-8389-4644</span><span class="err">-b</span><span class="mi">71</span><span class="err">b-dc</span><span class="mi">7</span><span class="err">b</span><span class="mi">6</span><span class="err">ba</span><span class="mi">7389</span><span class="err">e</span>
-<span class="p">{</span><span class="nt">&#34;checkpoint-ts&#34;</span><span class="p">:</span><span class="mi">416997967863480321</span><span class="p">,</span><span class="nt">&#34;resolved-ts&#34;</span><span class="p">:</span><span class="mi">416997967863480321</span><span class="p">,</span><span class="nt">&#34;count&#34;</span><span class="p">:</span><span class="mi">0</span><span class="p">}</span>
-<span class="err">/tidb/cdc/task/position/a</span><span class="mi">99683</span><span class="err">bc</span><span class="mi">-4</span><span class="err">af</span><span class="mi">4-45</span><span class="err">d</span><span class="mi">3</span><span class="err">-aa</span><span class="mi">7</span><span class="err">b</span><span class="mi">-5</span><span class="err">bbd</span><span class="mi">398</span><span class="err">fb</span><span class="mi">6</span><span class="err">b</span><span class="mi">5</span><span class="err">/f</span><span class="mi">96916</span><span class="err">c</span><span class="mi">7-1</span><span class="err">f</span><span class="mi">55-41</span><span class="err">b</span><span class="mi">5-9</span><span class="err">d</span><span class="mi">16</span><span class="mf">-406e51</span><span class="err">aab</span><span class="mi">6</span><span class="err">d</span><span class="mi">4</span>
-<span class="p">{</span><span class="nt">&#34;checkpoint-ts&#34;</span><span class="p">:</span><span class="mi">417002603526225942</span><span class="p">,</span><span class="nt">&#34;resolved-ts&#34;</span><span class="p">:</span><span class="mi">416997967863480321</span><span class="p">,</span><span class="nt">&#34;count&#34;</span><span class="p">:</span><span class="mi">0</span><span class="p">}</span>
-<span class="err">/tidb/cdc/task/status/a</span><span class="mi">99683</span><span class="err">bc</span><span class="mi">-4</span><span class="err">af</span><span class="mi">4-45</span><span class="err">d</span><span class="mi">3</span><span class="err">-aa</span><span class="mi">7</span><span class="err">b</span><span class="mi">-5</span><span class="err">bbd</span><span class="mi">398</span><span class="err">fb</span><span class="mi">6</span><span class="err">b</span><span class="mi">5</span><span class="err">/</span><span class="mf">3e943</span><span class="err">df</span><span class="mi">4-6950-4568-84</span><span class="err">c</span><span class="mi">8</span><span class="err">-d</span><span class="mi">81</span><span class="err">fd</span><span class="mi">83</span><span class="err">de</span><span class="mi">2</span><span class="err">d</span><span class="mi">8</span>
-<span class="p">{</span><span class="nt">&#34;table-infos&#34;</span><span class="p">:[{</span><span class="nt">&#34;id&#34;</span><span class="p">:</span><span class="mi">7441</span><span class="p">,</span><span class="nt">&#34;start-ts&#34;</span><span class="p">:</span><span class="mi">416997967863480321</span><span class="p">},{</span><span class="nt">&#34;id&#34;</span><span class="p">:</span><span class="mi">7443</span><span class="p">,</span><span class="nt">&#34;start-ts&#34;</span><span class="p">:</span><span class="mi">416997967863480321</span><span class="p">},{</span><span class="nt">&#34;id&#34;</span><span class="p">:</span><span class="mi">7445</span><span class="p">,</span><span class="nt">&#34;start-ts&#34;</span><span class="p">:</span><span class="mi">416997967863480321</span><span class="p">},{</span><span class="nt">&#34;id&#34;</span><span class="p">:</span><span class="mi">7449</span><span class="p">,</span><span class="nt">&#34;start-ts&#34;</span><span class="p">:</span><span class="mi">416997967863480321</span><span class="p">},{</span><span class="nt">&#34;id&#34;</span><span class="p">:</span><span class="mi">7451</span><span class="p">,</span><span class="nt">&#34;start-ts&#34;</span><span class="p">:</span><span class="mi">416997967863480321</span><span class="p">},{</span><span class="nt">&#34;id&#34;</span><span class="p">:</span><span class="mi">7453</span><span class="p">,</span><span class="nt">&#34;start-ts&#34;</span><span class="p">:</span><span class="mi">416997967863480321</span><span class="p">},{</span><span class="nt">&#34;id&#34;</span><span class="p">:</span><span class="mi">7455</span><span class="p">,</span><span class="nt">&#34;start-ts&#34;</span><span class="p">:</span><span class="mi">416997967863480321</span><span class="p">},{</span><span class="nt">&#34;id&#34;</span><span class="p">:</span><span class="mi">7457</span><span class="p">,</span><span class="nt">&#34;start-ts&#34;</span><span class="p">:</span><span class="mi">416997967863480321</span><span class="p">}],</span><span class="nt">&#34;table-p-lock&#34;</span><span class="p">:{</span><span class="nt">&#34;ts&#34;</span><span class="p">:</span><span class="mi">417160718610857984</span><span class="p">,</span><span class="nt">&#34;creator-id&#34;</span><span class="p">:</span><span class="s2">&#34;a99683bc-4af4-45d3-aa7b-5bbd398fb6b5&#34;</span><span class="p">,</span><span class="nt">&#34;checkpoint-ts&#34;</span><span class="p">:</span><span class="mi">0</span><span class="p">},</span><span class="nt">&#34;table-c-lock&#34;</span><span class="p">:{</span><span class="nt">&#34;ts&#34;</span><span class="p">:</span><span class="mi">417160718610857984</span><span class="p">,</span><span class="nt">&#34;creator-id&#34;</span><span class="p">:</span><span class="s2">&#34;&#34;</span><span class="p">,</span><span class="nt">&#34;checkpoint-ts&#34;</span><span class="p">:</span><span class="mi">417002603526225942</span><span class="p">},</span><span class="nt">&#34;admin-job-type&#34;</span><span class="p">:</span><span class="mi">0</span><span class="p">}</span>
-<span class="err">/tidb/cdc/task/status/a</span><span class="mi">99683</span><span class="err">bc</span><span class="mi">-4</span><span class="err">af</span><span class="mi">4-45</span><span class="err">d</span><span class="mi">3</span><span class="err">-aa</span><span class="mi">7</span><span class="err">b</span><span class="mi">-5</span><span class="err">bbd</span><span class="mi">398</span><span class="err">fb</span><span class="mi">6</span><span class="err">b</span><span class="mi">5</span><span class="err">/</span><span class="mi">7</span><span class="err">de</span><span class="mi">99356-8389-4644</span><span class="err">-b</span><span class="mi">71</span><span class="err">b-dc</span><span class="mi">7</span><span class="err">b</span><span class="mi">6</span><span class="err">ba</span><span class="mi">7389</span><span class="err">e</span>
-<span class="p">{</span><span class="nt">&#34;table-infos&#34;</span><span class="p">:[{</span><span class="nt">&#34;id&#34;</span><span class="p">:</span><span class="mi">7441</span><span class="p">,</span><span class="nt">&#34;start-ts&#34;</span><span class="p">:</span><span class="mi">416997967863480321</span><span class="p">},{</span><span class="nt">&#34;id&#34;</span><span class="p">:</span><span class="mi">7443</span><span class="p">,</span><span class="nt">&#34;start-ts&#34;</span><span class="p">:</span><span class="mi">416997967863480321</span><span class="p">},{</span><span class="nt">&#34;id&#34;</span><span class="p">:</span><span class="mi">7445</span><span class="p">,</span><span class="nt">&#34;start-ts&#34;</span><span class="p">:</span><span class="mi">416997967863480321</span><span class="p">},{</span><span class="nt">&#34;id&#34;</span><span class="p">:</span><span class="mi">7449</span><span class="p">,</span><span class="nt">&#34;start-ts&#34;</span><span class="p">:</span><span class="mi">416997967863480321</span><span class="p">},{</span><span class="nt">&#34;id&#34;</span><span class="p">:</span><span class="mi">7451</span><span class="p">,</span><span class="nt">&#34;start-ts&#34;</span><span class="p">:</span><span class="mi">416997967863480321</span><span class="p">},{</span><span class="nt">&#34;id&#34;</span><span class="p">:</span><span class="mi">7453</span><span class="p">,</span><span class="nt">&#34;start-ts&#34;</span><span class="p">:</span><span class="mi">416997967863480321</span><span class="p">},{</span><span class="nt">&#34;id&#34;</span><span class="p">:</span><span class="mi">7455</span><span class="p">,</span><span class="nt">&#34;start-ts&#34;</span><span class="p">:</span><span class="mi">416997967863480321</span><span class="p">},{</span><span class="nt">&#34;id&#34;</span><span class="p">:</span><span class="mi">7457</span><span class="p">,</span><span class="nt">&#34;start-ts&#34;</span><span class="p">:</span><span class="mi">416997967863480321</span><span class="p">}],</span><span class="nt">&#34;table-p-lock&#34;</span><span class="p">:{</span><span class="nt">&#34;ts&#34;</span><span class="p">:</span><span class="mi">417160718611382272</span><span class="p">,</span><span class="nt">&#34;creator-id&#34;</span><span class="p">:</span><span class="s2">&#34;a99683bc-4af4-45d3-aa7b-5bbd398fb6b5&#34;</span><span class="p">,</span><span class="nt">&#34;checkpoint-ts&#34;</span><span class="p">:</span><span class="mi">0</span><span class="p">},</span><span class="nt">&#34;table-c-lock&#34;</span><span class="p">:{</span><span class="nt">&#34;ts&#34;</span><span class="p">:</span><span class="mi">417160718611382272</span><span class="p">,</span><span class="nt">&#34;creator-id&#34;</span><span class="p">:</span><span class="s2">&#34;&#34;</span><span class="p">,</span><span class="nt">&#34;checkpoint-ts&#34;</span><span class="p">:</span><span class="mi">416997967863480321</span><span class="p">},</span><span class="nt">&#34;admin-job-type&#34;</span><span class="p">:</span><span class="mi">0</span><span class="p">}</span>
-<span class="err">/tidb/cdc/task/status/a</span><span class="mi">99683</span><span class="err">bc</span><span class="mi">-4</span><span class="err">af</span><span class="mi">4-45</span><span class="err">d</span><span class="mi">3</span><span class="err">-aa</span><span class="mi">7</span><span class="err">b</span><span class="mi">-5</span><span class="err">bbd</span><span class="mi">398</span><span class="err">fb</span><span class="mi">6</span><span class="err">b</span><span class="mi">5</span><span class="err">/f</span><span class="mi">96916</span><span class="err">c</span><span class="mi">7-1</span><span class="err">f</span><span class="mi">55-41</span><span class="err">b</span><span class="mi">5-9</span><span class="err">d</span><span class="mi">16</span><span class="mf">-406e51</span><span class="err">aab</span><span class="mi">6</span><span class="err">d</span><span class="mi">4</span>
-<span class="p">{</span><span class="nt">&#34;table-infos&#34;</span><span class="p">:[{</span><span class="nt">&#34;id&#34;</span><span class="p">:</span><span class="mi">7441</span><span class="p">,</span><span class="nt">&#34;start-ts&#34;</span><span class="p">:</span><span class="mi">416997967863480321</span><span class="p">},{</span><span class="nt">&#34;id&#34;</span><span class="p">:</span><span class="mi">7443</span><span class="p">,</span><span class="nt">&#34;start-ts&#34;</span><span class="p">:</span><span class="mi">416997967863480321</span><span class="p">},{</span><span class="nt">&#34;id&#34;</span><span class="p">:</span><span class="mi">7445</span><span class="p">,</span><span class="nt">&#34;start-ts&#34;</span><span class="p">:</span><span class="mi">416997967863480321</span><span class="p">},{</span><span class="nt">&#34;id&#34;</span><span class="p">:</span><span class="mi">7449</span><span class="p">,</span><span class="nt">&#34;start-ts&#34;</span><span class="p">:</span><span class="mi">416997967863480321</span><span class="p">},{</span><span class="nt">&#34;id&#34;</span><span class="p">:</span><span class="mi">7451</span><span class="p">,</span><span class="nt">&#34;start-ts&#34;</span><span class="p">:</span><span class="mi">416997967863480321</span><span class="p">},{</span><span class="nt">&#34;id&#34;</span><span class="p">:</span><span class="mi">7453</span><span class="p">,</span><span class="nt">&#34;start-ts&#34;</span><span class="p">:</span><span class="mi">416997967863480321</span><span class="p">},{</span><span class="nt">&#34;id&#34;</span><span class="p">:</span><span class="mi">7455</span><span class="p">,</span><span class="nt">&#34;start-ts&#34;</span><span class="p">:</span><span class="mi">416997967863480321</span><span class="p">},{</span><span class="nt">&#34;id&#34;</span><span class="p">:</span><span class="mi">7457</span><span class="p">,</span><span class="nt">&#34;start-ts&#34;</span><span class="p">:</span><span class="mi">416997967863480321</span><span class="p">}],</span><span class="nt">&#34;table-p-lock&#34;</span><span class="p">:{</span><span class="nt">&#34;ts&#34;</span><span class="p">:</span><span class="mi">417160718611644416</span><span class="p">,</span><span class="nt">&#34;creator-id&#34;</span><span class="p">:</span><span class="s2">&#34;a99683bc-4af4-45d3-aa7b-5bbd398fb6b5&#34;</span><span class="p">,</span><span class="nt">&#34;checkpoint-ts&#34;</span><span class="p">:</span><span class="mi">0</span><span class="p">},</span><span class="nt">&#34;table-c-lock&#34;</span><span class="p">:{</span><span class="nt">&#34;ts&#34;</span><span class="p">:</span><span class="mi">417160718611644416</span><span class="p">,</span><span class="nt">&#34;creator-id&#34;</span><span class="p">:</span><span class="s2">&#34;&#34;</span><span class="p">,</span><span class="nt">&#34;checkpoint-ts&#34;</span><span class="p">:</span><span class="mi">417002603526225942</span><span class="p">},</span><span class="nt">&#34;admin-job-type&#34;</span><span class="p">:</span><span class="mi">0</span><span class="p">}</span>
-</code></pre></td></tr></table>
-</div>
-</div></li>
-</ul>
-<h2 id="0x03-faq">0x03 FAQ</h2>
-<blockquote>
-<p>测试时问题处理思路</p>
-</blockquote>
-<ul>
-<li>GC not work 告警
-<ul>
-<li>影响：MVCC 版本过多，TikV 数据存储空间变大</li>
-<li>原因：changefeed 依赖 TiKV MVCC + Raft log 解析数据，mvcc 数据在未同步到下游时被 GC 删除会导致数据同步丢失；
-<ul>
-<li>场景 1：changefeed 同步的快慢与 GC worker 有关系，怎么解决 change feed 同步速度问题；手下要了解 change feed 怎么来的
-<ol>
-<li>CDC 链接 PD 获取 TiKV 节点信息</li>
-<li>CDC 创建 change feed，change feed 信息存储在 PD etcd 中「cdc 高可用中心节点」</li>
-<li>CDC 接受 TiKV 主动推送数据「与 change feed 有关系」放在 <strong>cdc 内存</strong> 里解析、转换 SQL「数据量过大可能造成 OOM，官网有解决方案」「此处非全局有序（单个 change feed 可以放在多个 CDC 上负载方式运行）」</li>
-<li>CDC 将 SQL 写入到下游 TiDB「并发由 worker-count&amp;max-txn-row 控制」「不支持同步无主键或无唯一索引的表」</li>
-<li>回顾下：CDC 个数、下游的吞吐能力、上下游网络延迟 决定了同步速度快慢（隐藏条件 CDC 内存处理性能）</li>
-</ol>
-</li>
-<li>场景 2：CDC 创建多个 change feed 任务，其中有任务状态为 pause（<a href="https://pingcap.com/docs-cn/stable/ticdc/manage-ticdc/#%E6%9F%A5%E8%AF%A2%E7%89%B9%E5%AE%9A%E5%90%8C%E6%AD%A5%E4%BB%BB%E5%8A%A1">admin job type</a> = 1）；
-<ul>
-<li>pause 状态下防止丢失“数据窗口”信息，会停止 MVCC 数据 GC 直到状态更改为 remove（3）或者等 resume（2）正常消费</li>
-<li>使用 <code>cdc cli changefeed query</code> 查看</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<blockquote>
-<p>其他</p>
-</blockquote>
-<ul>
-<li>创建一条 changefeed 过程</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-go" data-lang="go"><span class="p">[</span><span class="nx">owner</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">822</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;watch capture exited&#34;</span><span class="p">]</span>
-<span class="p">[</span><span class="nx">server</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">159</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;campaign owner successfully&#34;</span><span class="p">]</span> <span class="p">[</span><span class="nx">capture</span><span class="p">=</span><span class="nx">fde93803</span><span class="o">-</span><span class="nx">d051</span><span class="o">-</span><span class="mi">42</span><span class="nx">f6</span><span class="o">-</span><span class="mi">92</span><span class="nx">c9</span><span class="o">-</span><span class="nx">dfa7896a4b71</span><span class="p">]</span>
-<span class="p">[</span><span class="nx">client</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">141</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;[pd] create pd client with endpoints&#34;</span><span class="p">]</span> <span class="p">[</span><span class="nx">pd</span><span class="o">-</span><span class="nx">address</span><span class="p">=</span><span class="s">&#34;[http://172.16.4.51:14379]&#34;</span><span class="p">]</span>
-<span class="p">[</span><span class="nx">base_client</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">242</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;[pd] switch leader&#34;</span><span class="p">]</span> <span class="p">[</span><span class="nx">new</span><span class="o">-</span><span class="nx">leader</span><span class="p">=</span><span class="nx">http</span><span class="p">:</span><span class="c1">//172.16.4.51:14379] [old-leader=]
-</span><span class="c1"></span><span class="p">[</span><span class="nx">base_client</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">92</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;[pd] init cluster id&#34;</span><span class="p">]</span> <span class="p">[</span><span class="nx">cluster</span><span class="o">-</span><span class="nx">id</span><span class="p">=</span><span class="mi">6826949771068502967</span><span class="p">]</span>
-<span class="p">[</span><span class="nx">owner</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">810</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;start to watch captures&#34;</span><span class="p">]</span>
-<span class="p">[</span><span class="nx">owner</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">740</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;monitoring captures&#34;</span><span class="p">]</span> <span class="p">[</span><span class="nx">key</span><span class="p">=</span><span class="o">/</span><span class="nx">tidb</span><span class="o">/</span><span class="nx">cdc</span><span class="o">/</span><span class="nx">capture</span><span class="p">]</span> <span class="p">[</span><span class="nx">rev</span><span class="p">=</span><span class="mi">1574342</span><span class="p">]</span>
-<span class="p">[</span><span class="nx">owner</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">416</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;handle admin job&#34;</span><span class="p">]</span> <span class="p">[</span><span class="nx">changefeed</span><span class="p">=</span><span class="mi">6281</span><span class="nx">d51f</span><span class="o">-</span><span class="nx">f62c</span><span class="o">-</span><span class="mi">46</span><span class="nx">c6</span><span class="o">-</span><span class="nx">b10e</span><span class="o">-</span><span class="mi">33013470</span><span class="nx">fbaa</span><span class="p">]</span> <span class="p">[</span><span class="kd">type</span><span class="p">=</span><span class="s">&#34;resume changefeed&#34;</span><span class="p">]</span>
-<span class="p">[</span><span class="nx">owner</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">159</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;Find new changefeed&#34;</span><span class="p">]</span> <span class="p">[</span><span class="nx">info</span><span class="p">=</span><span class="s">&#34;{\&#34;sink-uri\&#34;:\&#34;mysql://root:root@127.0.0.1:44/?worker-count=1\\u0026max-txn-row=50\&#34;,\&#34;opts\&#34;:{},\&#34;create-time\&#34;:\&#34;2020-05-27T17:34:43.836728552+08:00\&#34;,\&#34;start-ts\&#34;:416958928342220801,\&#34;target-ts\&#34;:0,\&#34;admin-job-type\&#34;:2,\&#34;sort-engine\&#34;:\&#34;memory\&#34;,\&#34;sort-dir\&#34;:\&#34;.\&#34;,\&#34;config\&#34;:{\&#34;ddl-white-list\&#34;:null,\&#34;filter-case-sensitive\&#34;:false,\&#34;filter-rules\&#34;:{\&#34;do-tables\&#34;:null,\&#34;do-dbs\&#34;:[\&#34;ddcc\&#34;],\&#34;ignore-tables\&#34;:null,\&#34;ignore-dbs\&#34;:[\&#34;tpcc\&#34;,\&#34;tpch\&#34;,\&#34;mysql\&#34;,\&#34;test\&#34;]},\&#34;ignore-txn-commit-ts\&#34;:[],\&#34;sink-dispatch-rules\&#34;:null,\&#34;mounter-worker-num\&#34;:0}}&#34;</span><span class="p">]</span> <span class="p">[</span><span class="nx">id</span><span class="p">=</span><span class="mi">6281</span><span class="nx">d51f</span><span class="o">-</span><span class="nx">f62c</span><span class="o">-</span><span class="mi">46</span><span class="nx">c6</span><span class="o">-</span><span class="nx">b10e</span><span class="o">-</span><span class="mi">33013470</span><span class="nx">fbaa</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;checkpoint ts&#34;</span><span class="p">=</span><span class="mi">416974641884037174</span><span class="p">]</span>
-<span class="p">[</span><span class="nx">store</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">68</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;new store&#34;</span><span class="p">]</span> <span class="p">[</span><span class="nx">path</span><span class="p">=</span><span class="s">&#34;tikv://172.16.4.51:14379?disableGC=true&#34;</span><span class="p">]</span>
-<span class="p">[</span><span class="nx">client</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">141</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;[pd] create pd client with endpoints&#34;</span><span class="p">]</span> <span class="p">[</span><span class="nx">pd</span><span class="o">-</span><span class="nx">address</span><span class="p">=</span><span class="s">&#34;[172.16.4.51:14379]&#34;</span><span class="p">]</span>
-<span class="p">[</span><span class="nx">base_client</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">242</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;[pd] switch leader&#34;</span><span class="p">]</span> <span class="p">[</span><span class="nx">new</span><span class="o">-</span><span class="nx">leader</span><span class="p">=</span><span class="nx">http</span><span class="p">:</span><span class="c1">//172.16.4.51:14379] [old-leader=]
-</span><span class="c1"></span><span class="p">[</span><span class="nx">base_client</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">92</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;[pd] init cluster id&#34;</span><span class="p">]</span> <span class="p">[</span><span class="nx">cluster</span><span class="o">-</span><span class="nx">id</span><span class="p">=</span><span class="mi">6826949771068502967</span><span class="p">]</span>
-<span class="p">[</span><span class="nx">store</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">74</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;new store with retry success&#34;</span><span class="p">]</span>
-<span class="p">[</span><span class="nx">client_batch</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">628</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;recycle idle connection&#34;</span><span class="p">]</span> <span class="p">[</span><span class="nx">target</span><span class="p">=</span><span class="mf">172.16.4.53</span><span class="p">:</span><span class="mi">15160</span><span class="p">]</span>
-<span class="p">[</span><span class="nx">client_batch</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">628</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;recycle idle connection&#34;</span><span class="p">]</span> <span class="p">[</span><span class="nx">target</span><span class="p">=</span><span class="mf">172.16.4.52</span><span class="p">:</span><span class="mi">15160</span><span class="p">]</span>
-<span class="p">[</span><span class="nx">client_batch</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">628</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;recycle idle connection&#34;</span><span class="p">]</span> <span class="p">[</span><span class="nx">target</span><span class="p">=</span><span class="mf">172.16.4.51</span><span class="p">:</span><span class="mi">14160</span><span class="p">]</span>
-</code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>指定一个错误或者小于当前 savepoint 的方式启动 CDC changefeed
-<ul>
-<li><code>GC life time is shorter than transaction duration, transaction starts at 2020-05-28 10:13:46.23 +0800 CST, GC safe point is 2020-05-28 11:38:33.33 +0800 CST</code></li>
-</ul>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-go" data-lang="go"><span class="p">[</span><span class="mi">2020</span><span class="o">/</span><span class="mo">05</span><span class="o">/</span><span class="mi">28</span> <span class="mi">17</span><span class="p">:</span><span class="mo">02</span><span class="p">:</span><span class="mf">26.760</span> <span class="o">+</span><span class="mi">08</span><span class="p">:</span><span class="mo">00</span><span class="p">]</span> <span class="p">[</span><span class="nx">ERROR</span><span class="p">]</span> <span class="p">[</span><span class="nx">owner</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">539</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;owner exited with error&#34;</span><span class="p">]</span> <span class="p">[</span><span class="kt">error</span><span class="p">=</span><span class="s">&#34;create change feed 6281d51f-f62c-46c6-b10e-33013470fbaa: [tikv:9006]GC life time is shorter than transaction duration, transaction starts at 2020-05-28 10:13:46.23 +0800 CST, GC safe point is 2020-05-28 11:38:33.33 +0800 CST&#34;</span><span class="p">]</span> <span class="p">[</span><span class="nx">errorVerbose</span><span class="p">=</span><span class="s">&#34;[tikv:9006]GC life time is shorter than transaction duration, transaction starts at 2020-05-28 10:13:46.23 +0800 CST, GC safe point is 2020-05-28 11:38:33.33 +0800 CST\ngithub.com/pingcap/errors.AddStack\n\tgithub.com/pingcap/errors@v0.11.5-0.20190809092503-95897b64e011/errors.go:174\ngithub.com/pingcap/parser/terror.(*Error).GenWithStackByArgs\n\tgithub.com/pingcap/parser@v0.0.0-20200422082501-7329d80eaf2c/terror/terror.go:243\ngithub.com/pingcap/tidb/store/tikv.(*tikvStore).CheckVisibility\n\tgithub.com/pingcap/tidb@v1.1.0-beta.0.20200424111313-5e4a6948977f/store/tikv/kv.go:189\ngithub.com/pingcap/tidb/store/tikv.(*Scanner).getData\n\tgithub.com/pingcap/tidb@v1.1.0-beta.0.20200424111313-5e4a6948977f/store/tikv/scan.go:227\ngithub.com/pingcap/tidb/store/tikv.(*Scanner).Next\n\tgithub.com/pingcap/tidb@v1.1.0-beta.0.20200424111313-5e4a6948977f/store/tikv/scan.go:101\ngithub.com/pingcap/tidb/store/tikv.newScanner\n\tgithub.com/pingcap/tidb@v1.1.0-beta.0.20200424111313-5e4a6948977f/store/tikv/scan.go:59\ngithub.com/pingcap/tidb/store/tikv.(*tikvSnapshot).Iter\n\tgithub.com/pingcap/tidb@v1.1.0-beta.0.20200424111313-5e4a6948977f/store/tikv/snapshot.go:390\ngithub.com/pingcap/tidb/structure.(*TxStructure).iterateHash\n\tgithub.com/pingcap/tidb@v1.1.0-beta.0.20200424111313-5e4a6948977f/structure/hash.go:259\ngithub.com/pingcap/tidb/structure.(*TxStructure).HGetAll\n\tgithub.com/pingcap/tidb@v1.1.0-beta.0.20200424111313-5e4a6948977f/structure/hash.go:208\ngithub.com/pingcap/tidb/meta.(*Meta).ListDatabases\n\tgithub.com/pingcap/tidb@v1.1.0-beta.0.20200424111313-5e4a6948977f/meta/meta.go:494\ngithub.com/pingcap/ticdc/cdc/entry.newSchemaSnapshotFromMeta\n\tgithub.com/pingcap/ticdc@/cdc/entry/schema_storage.go:81\ngithub.com/pingcap/ticdc/cdc/entry.NewSingleSchemaSnapshotFromMeta\n\tgithub.com/pingcap/ticdc@/cdc/entry/schema_storage.go:63\ngithub.com/pingcap/ticdc/cdc.(*Owner).newChangeFeed\n\tgithub.com/pingcap/ticdc@/cdc/owner.go:171\ngithub.com/pingcap/ticdc/cdc.(*Owner).loadChangeFeeds\n\tgithub.com/pingcap/ticdc@/cdc/owner.go:303\ngithub.com/pingcap/ticdc/cdc.(*Owner).run\n\tgithub.com/pingcap/ticdc@/cdc/owner.go:584\ngithub.com/pingcap/ticdc/cdc.(*Owner).Run\n\tgithub.com/pingcap/ticdc@/cdc/owner.go:536\ngithub.com/pingcap/ticdc/cdc.(*Server).campaignOwnerLoop\n\tgithub.com/pingcap/ticdc@/cdc/server.go:167\ngithub.com/pingcap/ticdc/cdc.(*Server).run.func1\n\tgithub.com/pingcap/ticdc@/cdc/server.go:199\ngolang.org/x/sync/errgroup.(*Group).Go.func1\n\tgolang.org/x/sync@v0.0.0-20190911185100-cd5d95a43a6e/errgroup/errgroup.go:57\nruntime.goexit\n\truntime/asm_amd64.s:1357\ncreate change feed 6281d51f-f62c-46c6-b10e-33013470fbaa&#34;</span><span class="p">]</span>
-</code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>下游未创建目标数据库
-<ul>
-<li><code>Error 1146: Table 'tpcc.district' doesn't exist</code></li>
-</ul>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-go" data-lang="go"><span class="p">[</span><span class="nx">INFO</span><span class="p">]</span> <span class="p">[</span><span class="nx">client</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">642</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;start new request&#34;</span><span class="p">]</span> <span class="p">[</span><span class="nx">request</span><span class="p">=</span><span class="s">&#34;{\&#34;header\&#34;:{\&#34;cluster_id\&#34;:6826949771068502967},\&#34;region_id\&#34;:56301,\&#34;region_epoch\&#34;:{\&#34;conf_ver\&#34;:14,\&#34;version\&#34;:203},\&#34; checkpoint_ts\&#34;:416957675215257608,\&#34;start_key\&#34;:\&#34;dIAAAAAAAAD/PV9ygAAAAAj/aLrDAAAAAAD6\&#34;,\&#34;end_key\&#34;:\&#34;dIAAAAAAAAD/PV9ygAAAAAj/bdPyAAAAAAD6\&#34;,\&#34;request_id\&#34;:988}&#34;</span><span class="p">]</span> <span class="p">[</span><span class="nx">addr</span><span class="p">=</span><span class="mf">172.16.4.52</span><span class="p">:</span><span class="mi">15160</span><span class="p">]</span>
-<span class="p">[</span><span class="nx">WARN</span><span class="p">]</span> <span class="p">[</span><span class="nx">mysql</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">445</span><span class="p">]</span> <span class="p">[</span><span class="s">&#34;execute DMLs with error, retry later&#34;</span><span class="p">]</span> <span class="p">[</span><span class="kt">error</span><span class="p">=</span><span class="s">&#34;Error 1146: Table &#39;tpcc.district&#39; doesn&#39;t exist&#34;</span><span class="p">]</span> <span class="p">[</span><span class="nx">errorVerbose</span><span class="p">=</span><span class="s">&#34;Error 1146: Table &#39;tpcc.district&#39; doesn&#39;t exist\ngithub.com/pingcap/errors.AddStack\n\tgithub.com/pingcap/errors@v0.11.5-0.20190809092503-95897b64e011/errors.go:174\ngithub.com/pingcap/errors.Trace\n\tgithub.com/pingcap/errors@v0.11.5-0.20190809092503 -95897b64e011/juju_adaptor.go:15\ngithub.com/pingcap/ticdc/cdc/sink.(*mysqlSink).execDMLWithMaxRetries.func2.2\n\tgithub.com/pingcap/ticdc@/cdc/sink/mysql.go:461\ngithub.com/pingcap/ticdc/cdc/sink.(*Statistics) .RecordBatchExecution\n\tgithub.com/pingcap/ticdc@/cdc/sink/statistics.go:47\ngithub.com/pingcap/ticdc/cdc/sink.(*mysqlSink).execDMLWithMaxRetries.func2\n\tgithub.com/pingcap/ticdc@/cdc/sink/mysql.go:453\ngithu b.com/pingcap/ticdc/pkg/retry.Run.func1\n\tgithub.com/pingcap/ticdc@/pkg/retry/retry.go:31\ngithub.com/cenkalti/backoff.RetryNotify\n\tgithub.com/cenkalti/backoff@v2.2.1+incompatible/retry.go:37\ngithub.com/cen kalti/backoff.Retry\n\tgithub.com/cenkalti/backoff@v2.2.1+incompatible/retry.go:24\ngithub.com/pingcap/ticdc/pkg/retry.Run\n\tgithub.com/pingcap/ticdc@/pkg/retry/retry.go:30\ngithub.com/pingcap/ticdc/cdc/sink.( *mysqlSink).execDMLWithMaxRetries\n\tgithub.com/pingcap/ticdc@/cdc/sink/mysql.go:448\ngithub.com/pingcap/ticdc/cdc/sink.(*mysqlSink).execDMLs\n\tgithub.com/pingcap/ticdc@/cdc/sink/mysql.go:506\ngithub.com/pingc ap/ticdc/cdc/sink.(*mysqlSinkWorker).run\n\tgithub.com/pingcap/ticdc@/cdc/sink/mysql.go:399\nruntime.goexit\n\truntime/asm_amd64.s:1357&#34;</span><span class="p">]</span>
-</code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>附图两张</li>
-</ul>
-<p><img src="./cdc-memory.png" alt="cdc-memroy ap.tidb.cc" title="cdc ap.tidb.cc"><br>
-<img src="./cdc-uptime.png" alt="cdc-uptime ap.tidb.cc" title="ap.tidb.cc cdc"></p>
-
-    </div>
-
-    <div class="post-copyright">
-  <p class="copyright-item">
-    <span class="item-title">Author</span>
-    <span class="item-content">Jeff</span>
-  </p>
-  <p class="copyright-item">
-    <span class="item-title">LastMod</span>
-    <span class="item-content">
-        2020-06-01
-        
-    </span>
-  </p>
-  
-  <p class="copyright-item">
-    <span class="item-title">License</span>
-    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span>
-  </p>
-</div>
-<footer class="post-footer">
-      <div class="post-tags">
-          <a href="/tags/airplan/">AirPlan</a>
-          <a href="/tags/cdc/">CDC</a>
-          </div>
-      <nav class="post-nav">
-        <a class="prev" href="/post/20200612-24-minio/">
-            <i class="iconfont icon-left"></i>
-            <span class="prev-text nav-default">软件测试 - S3 协议与 minio</span>
-            <span class="prev-text nav-mobile">Prev</span>
-          </a>
-        <a class="next" href="/post/20200529-22-tidb-4.0/">
-            <span class="next-text nav-default">TiDB - 4.0 版图分析</span>
-            <span class="next-text nav-mobile">Next</span>
-            <i class="iconfont icon-right"></i>
-          </a>
-      </nav>
-    </footer>
-  </article>
-        </div>
-        
-
-  
-
-  
-
-      </div>
-    </main>
-
-    <footer id="footer" class="footer">
-      <div class="social-links">
-      <a href="https://github.com/BigerCAP/TiDB-AirPlan/issues" class="iconfont icon-github" title="github"></a>
-  <a href="https://ap.tidb.cc/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
-</div>
-
-<div class="copyright">
-  <span class="power-by">
-    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
-  </span>
-  <span class="division">|</span>
-  <span class="theme-info">
-    Theme - 
-    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
-  </span>
-
-  <div class="busuanzi-footer">
-    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
-      <span class="division">|</span>
-    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
-  </div>
-
-  <span class="copyright-year">
-    &copy; 
-    2017 - 
-    2020
-    <span class="heart">
-      <i class="iconfont icon-heart"></i>
-    </span>
-    <span class="author">TiDB - AirPlan</span>
-  </span>
-</div>
-    </footer>
-
-    <div class="back-to-top" id="back-to-top">
-      <i class="iconfont icon-up"></i>
-    </div>
-  </div>
-  
-  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js" integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js" integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin="anonymous"></script>
-  <script><!-- NOTE: timeago.js uses the language code format like "zh_CN" (underscore and case sensitive) -->
-    var languageCode = "en".replace(/-/g, '_').replace(/_(.*)/, function ($0, $1) {return $0.replace($1, $1.toUpperCase());});
-    timeago().render(document.querySelectorAll('.timeago'), languageCode);
-    timeago.cancel();  
-  </script>
-<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
-
-
-
-
-
-
-
-
-</body>
-</html>
+<!doctype html><html lang=en><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge,chrome=1"><title>TiDB - CDC RC1 测试 - AirPlan - A biger solution</title><meta name=renderer content="webkit"><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta http-equiv=cache-control content="no-transform"><meta http-equiv=cache-control content="no-siteapp"><meta name=theme-color content="#f8f5ec"><meta name=msapplication-navbutton-color content="#f8f5ec"><meta name=apple-mobile-web-app-capable content="yes"><meta name=apple-mobile-web-app-status-bar-style content="#f8f5ec"><meta name=author content="Jeff"><meta name=description content="0x00 CDC 嗯，同场竞技 Binlog 与 CDC 组件 本页内容仅针对 v4.0.0-rc.1-25 版本，不对后续版本做任何预测性的评论 // 最终解释权归制图者 参考各种文档 官网文档 安装部署 Github Repo TiCDC Improve usability in cdc"><meta name=keywords content="TiDB,AirPlan,TiDB OPS,tidb-operator,2pc,raft,databases,mysql,htap"><meta name=generator content="Hugo 0.110.0 with theme even"><link rel=canonical href=https://ap.biger.cc/post/20200601-23-cdc-4.0rc1/><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/manifest.json><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><script async src=//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js></script>
+<link href=/dist/even.04bd84cd.min.css rel=stylesheet><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin=anonymous><meta property="og:title" content="TiDB - CDC RC1 测试"><meta property="og:description" content="0x00 CDC 嗯，同场竞技 Binlog 与 CDC 组件 本页内容仅针对 v4.0.0-rc.1-25 版本，不对后续版本做任何预测性的评论 // 最终解释权归制图者 参考各种文档 官网文档 安装部署 Github Repo TiCDC Improve usability in cdc"><meta property="og:type" content="article"><meta property="og:url" content="https://ap.biger.cc/post/20200601-23-cdc-4.0rc1/"><meta property="article:section" content="post"><meta property="article:published_time" content="2020-06-01T00:00:00+08:00"><meta property="article:modified_time" content="2020-06-01T00:00:00+08:00"><meta itemprop=name content="TiDB - CDC RC1 测试"><meta itemprop=description content="0x00 CDC 嗯，同场竞技 Binlog 与 CDC 组件 本页内容仅针对 v4.0.0-rc.1-25 版本，不对后续版本做任何预测性的评论 // 最终解释权归制图者 参考各种文档 官网文档 安装部署 Github Repo TiCDC Improve usability in cdc"><meta itemprop=datePublished content="2020-06-01T00:00:00+08:00"><meta itemprop=dateModified content="2020-06-01T00:00:00+08:00"><meta itemprop=wordCount content="1534"><meta itemprop=keywords content="AirPlan,CDC,"><meta name=twitter:card content="summary"><meta name=twitter:title content="TiDB - CDC RC1 测试"><meta name=twitter:description content="0x00 CDC 嗯，同场竞技 Binlog 与 CDC 组件 本页内容仅针对 v4.0.0-rc.1-25 版本，不对后续版本做任何预测性的评论 // 最终解释权归制图者 参考各种文档 官网文档 安装部署 Github Repo TiCDC Improve usability in cdc"><!--[if lte IE 9]><script src=https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js></script><![endif]--><!--[if lt IE 9]><script src=https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js></script>
+<script src=https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js></script><![endif]--></head><body><div id=mobile-navbar class=mobile-navbar><div class=mobile-header-logo><a href=/ class=logo>AirPlan</a></div><div class=mobile-navbar-icon><span></span>
+<span></span>
+<span></span></div></div><nav id=mobile-menu class="mobile-menu slideout-menu"><ul class=mobile-menu-list><a href=/post/><li class=mobile-menu-item>Blog</li></a><a href=/look/><li class=mobile-menu-item>Look</li></a><a href=/tags/><li class=mobile-menu-item>Tags</li></a><a href=/categories/><li class=mobile-menu-item>Categories</li></a><a href=/about/><li class=mobile-menu-item>About</li></a></ul></nav><div class=container id=mobile-panel><header id=header class=header><div class=logo-wrapper><a href=/ class=logo>AirPlan</a></div><nav class=site-navbar><ul id=menu class=menu><li class=menu-item><a class=menu-item-link href=/post/>Blog</a></li><li class=menu-item><a class=menu-item-link href=/look/>Look</a></li><li class=menu-item><a class=menu-item-link href=/tags/>Tags</a></li><li class=menu-item><a class=menu-item-link href=/categories/>Categories</a></li><li class=menu-item><a class=menu-item-link href=/about/>About</a></li></ul></nav></header><main id=main class=main><div class=content-wrapper><div id=content class=content><article class=post><header class=post-header><h1 class=post-title>TiDB - CDC RC1 测试</h1><div class=post-meta><span class=post-time>2020-06-01</span><div class=post-category><a href=/categories/tidb/>TiDB</a></div><span class=more-meta>1534 words</span>
+<span class=more-meta>4 mins read</span>
+<span id=busuanzi_container_page_pv class=more-meta><span id=busuanzi_value_page_pv><img src=/img/spinner.svg alt=spinner.svg></span> times read</span></div></header><div class=post-toc id=post-toc><h2 class=post-toc-title>Contents</h2><div class=post-toc-content><nav id=TableOfContents><ul><li><a href=#0x00-cdc>0x00 CDC</a></li><li><a href=#0x01-gc-safepoint>0x01 GC safepoint</a></li><li><a href=#0x02-case>0x02 CASE</a></li><li><a href=#0x03-faq>0x03 FAQ</a></li></ul></nav></div></div><div class=post-outdated><div class=warn><p>[NOTE] Updated <span class=timeago datetime=2020-06-01T00:00:00 title="June 1, 2020">June 1, 2020</span>. This article may have outdated content or subject matter.</p></div></div><div class=post-content><h2 id=0x00-cdc>0x00 CDC</h2><blockquote><p>嗯，同场竞技 Binlog 与 CDC 组件<br>本页内容仅针对 v4.0.0-rc.1-25 版本，不对后续版本做任何预测性的评论 // 最终解释权归制图者</p></blockquote><ul><li>参考各种文档<ul><li>官网文档 <a href=https://pingcap.com/docs-cn/stable/ticdc/ticdc-overview/>安装部署</a></li><li>Github Repo <a href=https://github.com/pingcap/ticdc>TiCDC</a><ul><li>Improve usability in cdc client <a href=https://github.com/pingcap/ticdc/issues/542>Issue 542</a></li></ul></li><li>官网文档 TiKV <a href=https://pingcap.com/docs-cn/stable/garbage-collection-overview/>GC 机制介绍</a></li><li>官网文档 <a href=https://pingcap.com/docs-cn/stable/tidb-binlog/tidb-binlog-overview/>TiDB Binlog 简介</a></li></ul></li></ul><p><img src=./CDC.png alt="CDC 测试脑图"></p><ul><li>测试状态 lastdate 20200707<ul><li><input disabled type=checkbox> 主从跨机房部署</li><li><input disabled type=checkbox> 事物一致性还原（过程一致性、最终一致性）</li><li><input disabled type=checkbox> 主备灾难时 CDC 状态</li><li><input checked disabled type=checkbox> CDC 自定义数据源输出；支持 canal 协议「写入到 kafka」</li><li><input checked disabled type=checkbox> db/table 过滤；支持完整的 <a href=https://github.com/pingcap/tidb-tools/blob/master/pkg/table-filter/README.md#wildcards>Wildcards</a></li><li><input checked disabled type=checkbox> 支持环形复制</li></ul></li></ul><h2 id=0x01-gc-safepoint>0x01 GC safepoint</h2><blockquote><p>通过 <code>max(tikv_gcworker_autogc_safe_point) by (instance) / (2^18)</code> 可以在 Grafana 或者 Prometheus 查看 TiKV 最后一次的 GC 时间。<br>或者在数据库中通过 <code>select * from mysql.tidb</code> 查询</p></blockquote><p><img src=./gc-safepoint.png alt=gc-safepoint></p><p>当 CDC 运行状态中，<strong>checkpoint ts > gc safe point ts</strong> 正常现象，默认 “启动 CDC server 时可以通过 gc-ttl 指定 GC safepoint 的 TTL，这个值的含义是当 TiCDC 服务全部挂掉后，由 TiCDC 在 PD 所设置的 GC safepoint 保存的最长时间，该值默认为 86400 秒。（<a href=https://pingcap.com/docs-cn/stable/ticdc/troubleshoot-ticdc/#gc-ttl-%E5%92%8C%E6%96%87%E4%BB%B6%E6%8E%92%E5%BA%8F>来自 PingCAP 官网</a>）”<br>该场景可能会导致 <strong>TiKV_GC_can_not_work</strong> 告警 <code>sum(increase(tikv_gcworker_gc_tasks_vec{task="gc"}[1d])) &lt; 1</code> ; 该告警提示最近 1 天 TiKV GC 没有工作，可能会造成过多的 MVCC 版本从而影响读性能</p><p><img src=./GC.png alt=GC></p><blockquote><p>通过 etcd-ctl 获取 ctcd 中的信息，etcd-ctl 通过 <a href=https://github.com/etcd-io/etcd/releases>Github etcd</a> 下载<br>执行命令：<code>./etcdctl --endpoints=http://10.10.10.10:14379 get /tidb/cdc --prefix</code></p></blockquote><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-json data-lang=json><span class=line><span class=cl><span class=err>/tidb/store/gcworker/saved_safe_point</span>
+</span></span><span class=line><span class=cl><span class=mi>416997967863480321</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=0x02-case>0x02 CASE</h2><ul><li><p>创建一个同步任务</p><ul><li>tpcc.history 表没有 PK 或者 UK，CDC 无法同步类似表</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-json data-lang=json><span class=line><span class=cl><span class=err>./cdc</span> <span class=err>cli</span> <span class=err>--pd</span> <span class=err>http:</span><span class=c1>//10.10.10.10:14379 changefeed create --sink-uri=&#34;mysql://root:root@127.0.0.1:44/?worker-count=1&amp;max-txn-row=50&#34;
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>[</span><span class=err>WARN</span><span class=p>]</span> <span class=err>some</span> <span class=err>tables</span> <span class=err>are</span> <span class=err>not</span> <span class=err>eligible</span> <span class=err>to</span> <span class=err>replicate,</span> <span class=p>[]</span><span class=err>entry.TableName</span><span class=p>{</span><span class=err>entry.TableName{Schema:</span><span class=nt>&#34;tpcc&#34;</span><span class=p>,</span> <span class=err>Table:</span><span class=nt>&#34;history&#34;</span><span class=p>}</span><span class=err>}</span>
+</span></span><span class=line><span class=cl><span class=err>Could</span> <span class=err>you</span> <span class=err>agree</span> <span class=err>to</span> <span class=err>ignore</span> <span class=err>those</span> <span class=err>tables,</span> <span class=err>and</span> <span class=err>continue</span> <span class=err>to</span> <span class=err>replicate</span> <span class=p>[</span><span class=err>Y/N</span><span class=p>]</span>
+</span></span><span class=line><span class=cl><span class=err>y</span>
+</span></span><span class=line><span class=cl><span class=err>Create</span> <span class=err>changefeed</span> <span class=err>successfully!</span>
+</span></span><span class=line><span class=cl><span class=err>ID:</span> <span class=err>ac</span><span class=mi>6</span><span class=err>d</span><span class=mi>034</span><span class=err>a-c</span><span class=mi>2</span><span class=err>b</span><span class=mi>4-41</span><span class=err>bf</span><span class=mi>-801</span><span class=err>a</span><span class=mi>-798</span><span class=err>bb</span><span class=mi>1390734</span>
+</span></span><span class=line><span class=cl><span class=err>Info:</span> <span class=p>{</span><span class=nt>&#34;sink-uri&#34;</span><span class=p>:</span><span class=s2>&#34;mysql://root:root@127.0.0.1:44/?worker-count=1\u0026max-txn-row=50&#34;</span><span class=p>,</span><span class=nt>&#34;opts&#34;</span><span class=p>:{},</span><span class=nt>&#34;create-time&#34;</span><span class=p>:</span><span class=s2>&#34;2020-05-27T16:14:08.529050855+08:00&#34;</span><span class=p>,</span><span class=nt>&#34;start-ts&#34;</span><span class=p>:</span><span class=mi>416957660797337610</span><span class=p>,</span><span class=nt>&#34;target-ts&#34;</span><span class=p>:</span><span class=mi>0</span><span class=p>,</span><span class=nt>&#34;admin-job-type&#34;</span><span class=p>:</span><span class=mi>0</span><span class=p>,</span><span class=nt>&#34;sort-engine&#34;</span><span class=p>:</span><span class=s2>&#34;memory&#34;</span><span class=p>,</span><span class=nt>&#34;sort-dir&#34;</span><span class=p>:</span><span class=s2>&#34;.&#34;</span><span class=p>,</span><span class=nt>&#34;config&#34;</span><span class=p>:{</span><span class=nt>&#34;ddl-white-list&#34;</span><span class=p>:</span><span class=kc>null</span><span class=p>,</span><span class=nt>&#34;filter-case-sensitive&#34;</span><span class=p>:</span><span class=kc>false</span><span class=p>,</span><span class=nt>&#34;filter-rules&#34;</span><span class=p>:</span><span class=kc>null</span><span class=p>,</span><span class=nt>&#34;ignore-txn-commit-ts&#34;</span><span class=p>:</span><span class=kc>null</span><span class=p>,</span><span class=nt>&#34;sink-dispatch-rules&#34;</span><span class=p>:</span><span class=kc>null</span><span class=p>,</span><span class=nt>&#34;mounter-worker-num&#34;</span><span class=p>:</span><span class=mi>0</span><span class=p>}}</span>
+</span></span></code></pre></td></tr></table></div></div></li><li><p>各种查看</p><ul><li>capture / 间接等于一个 CDC server</li><li>change feed / 等于一个同步任务</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-json data-lang=json><span class=line><span class=cl><span class=err>$</span> <span class=err>./cdc</span> <span class=err>cli</span> <span class=err>--pd</span> <span class=err>http:</span><span class=c1>//10.10.10.10:14379 capture list
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>[</span>
+</span></span><span class=line><span class=cl>  <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;id&#34;</span><span class=p>:</span> <span class=s2>&#34;7a8e4800-56ae-46a5-a1a6-3eb57b6ce935&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;is-owner&#34;</span><span class=p>:</span> <span class=kc>true</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;address&#34;</span><span class=p>:</span> <span class=s2>&#34;10.10.10.10:14800&#34;</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>]</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=err>$</span> <span class=err>./cdc</span> <span class=err>cli</span> <span class=err>--pd</span> <span class=err>http:</span><span class=c1>//10.10.10.10:14379 changefeed list
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>[</span>
+</span></span><span class=line><span class=cl>  <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;id&#34;</span><span class=p>:</span> <span class=s2>&#34;ac6d034a-c2b4-41bf-801a-798bb1390734&#34;</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>]</span>
+</span></span></code></pre></td></tr></table></div></div></li><li><p>查看上下游同步延迟</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-json data-lang=json><span class=line><span class=cl><span class=err>./cdc</span> <span class=err>cli</span> <span class=err>--pd</span> <span class=err>http:</span><span class=c1>//10.10.10.10:14379 changefeed statistics  --changefeed-id=&#34;ac6d034a-c2b4-41bf-801a-798bb1390734&#34;
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=nt>&#34;ops&#34;</span><span class=p>:</span> <span class=mi>0</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>  <span class=nt>&#34;count&#34;</span><span class=p>:</span> <span class=mi>0</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>  <span class=nt>&#34;sink_gap&#34;</span><span class=p>:</span> <span class=s2>&#34;1389300ms&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>  <span class=nt>&#34;replication_gap&#34;</span><span class=p>:</span> <span class=s2>&#34;1391250ms&#34;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=nt>&#34;ops&#34;</span><span class=p>:</span> <span class=mi>0</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>  <span class=nt>&#34;count&#34;</span><span class=p>:</span> <span class=mi>0</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>  <span class=nt>&#34;sink_gap&#34;</span><span class=p>:</span> <span class=s2>&#34;1399300ms&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>  <span class=nt>&#34;replication_gap&#34;</span><span class=p>:</span> <span class=s2>&#34;1401250ms&#34;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=nt>&#34;ops&#34;</span><span class=p>:</span> <span class=mi>0</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>  <span class=nt>&#34;count&#34;</span><span class=p>:</span> <span class=mi>0</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>  <span class=nt>&#34;sink_gap&#34;</span><span class=p>:</span> <span class=s2>&#34;1409351ms&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>  <span class=nt>&#34;replication_gap&#34;</span><span class=p>:</span> <span class=s2>&#34;1411250ms&#34;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div></li><li><p>delete meta 操作</p><ul><li>cdc stop 时不会删除 change feed 信息，会删除 capture 信息</li><li><strong>操作不可逆，谨慎执行</strong>，主要是 checkpoint ts 信息</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-json data-lang=json><span class=line><span class=cl> <span class=err>./cdc</span> <span class=err>cli</span> <span class=err>--pd</span> <span class=err>http:</span><span class=c1>//10.10.10.10:14379 changefeed list
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>[</span>
+</span></span><span class=line><span class=cl>  <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;id&#34;</span><span class=p>:</span> <span class=s2>&#34;f96916c7-1f55-41b5-9d16-406e51aab6d4&#34;</span>
+</span></span><span class=line><span class=cl>  <span class=p>},</span>
+</span></span><span class=line><span class=cl>  <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;id&#34;</span><span class=p>:</span> <span class=s2>&#34;3e943df4-6950-4568-84c8-d81fd83de2d8&#34;</span>
+</span></span><span class=line><span class=cl>  <span class=p>},</span>
+</span></span><span class=line><span class=cl>  <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;id&#34;</span><span class=p>:</span> <span class=s2>&#34;7de99356-8389-4644-b71b-dc7b6ba7389e&#34;</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>]</span>
+</span></span><span class=line><span class=cl> <span class=err>./cdc</span> <span class=err>cli</span> <span class=err>--pd</span> <span class=err>http:</span><span class=c1>//10.10.10.10:14379 meta delete
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=err>already</span> <span class=err>truncate</span> <span class=err>all</span> <span class=err>meta</span> <span class=err>in</span> <span class=err>etcd!</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl> <span class=err>./cdc</span> <span class=err>cli</span> <span class=err>--pd</span> <span class=err>http:</span><span class=c1>//10.10.10.10:14379 changefeed list
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>[]</span>
+</span></span></code></pre></td></tr></table></div></div><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-json data-lang=json><span class=line><span class=cl><span class=err>/tidb/cdc/changefeed/info/</span><span class=mf>3e943</span><span class=err>df</span><span class=mi>4-6950-4568-84</span><span class=err>c</span><span class=mi>8</span><span class=err>-d</span><span class=mi>81</span><span class=err>fd</span><span class=mi>83</span><span class=err>de</span><span class=mi>2</span><span class=err>d</span><span class=mi>8</span>
+</span></span><span class=line><span class=cl><span class=p>{</span><span class=nt>&#34;sink-uri&#34;</span><span class=p>:</span><span class=s2>&#34;mysql://root:root@127.0.0.1:44/?worker-count=16\u0026max-txn-row=50&#34;</span><span class=p>,</span><span class=nt>&#34;opts&#34;</span><span class=p>:{},</span><span class=nt>&#34;create-time&#34;</span><span class=p>:</span><span class=s2>&#34;2020-05-28T17:36:26.62800987+08:00&#34;</span><span class=p>,</span><span class=nt>&#34;start-ts&#34;</span><span class=p>:</span><span class=mi>416981604520427521</span><span class=p>,</span><span class=nt>&#34;target-ts&#34;</span><span class=p>:</span><span class=mi>0</span><span class=p>,</span><span class=nt>&#34;admin-job-type&#34;</span><span class=p>:</span><span class=mi>2</span><span class=p>,</span><span class=nt>&#34;sort-engine&#34;</span><span class=p>:</span><span class=s2>&#34;memory&#34;</span><span class=p>,</span><span class=nt>&#34;sort-dir&#34;</span><span class=p>:</span><span class=s2>&#34;.&#34;</span><span class=p>,</span><span class=nt>&#34;config&#34;</span><span class=p>:{</span><span class=nt>&#34;ddl-white-list&#34;</span><span class=p>:</span><span class=kc>null</span><span class=p>,</span><span class=nt>&#34;filter-case-sensitive&#34;</span><span class=p>:</span><span class=kc>false</span><span class=p>,</span><span class=nt>&#34;filter-rules&#34;</span><span class=p>:{</span><span class=nt>&#34;do-tables&#34;</span><span class=p>:</span><span class=kc>null</span><span class=p>,</span><span class=nt>&#34;do-dbs&#34;</span><span class=p>:[</span><span class=s2>&#34;br&#34;</span><span class=p>],</span><span class=nt>&#34;ignore-tables&#34;</span><span class=p>:[{</span><span class=nt>&#34;db-name&#34;</span><span class=p>:</span><span class=s2>&#34;br&#34;</span><span class=p>,</span><span class=nt>&#34;tbl-name&#34;</span><span class=p>:</span><span class=s2>&#34;history&#34;</span><span class=p>}],</span><span class=nt>&#34;ignore-dbs&#34;</span><span class=p>:[</span><span class=s2>&#34;tpcc&#34;</span><span class=p>,</span><span class=s2>&#34;tpch&#34;</span><span class=p>,</span><span class=s2>&#34;mysql&#34;</span><span class=p>,</span><span class=s2>&#34;test&#34;</span><span class=p>]},</span><span class=nt>&#34;ignore-txn-commit-ts&#34;</span><span class=p>:[],</span><span class=nt>&#34;sink-dispatch-rules&#34;</span><span class=p>:</span><span class=kc>null</span><span class=p>,</span><span class=nt>&#34;mounter-worker-num&#34;</span><span class=p>:</span><span class=mi>0</span><span class=p>}}</span>
+</span></span><span class=line><span class=cl><span class=err>/tidb/cdc/changefeed/info/</span><span class=mi>7</span><span class=err>de</span><span class=mi>99356-8389-4644</span><span class=err>-b</span><span class=mi>71</span><span class=err>b-dc</span><span class=mi>7</span><span class=err>b</span><span class=mi>6</span><span class=err>ba</span><span class=mi>7389</span><span class=err>e</span>
+</span></span><span class=line><span class=cl><span class=p>{</span><span class=nt>&#34;sink-uri&#34;</span><span class=p>:</span><span class=s2>&#34;mysql://root:root@127.0.0.1:44/?worker-count=16\u0026max-txn-row=50&#34;</span><span class=p>,</span><span class=nt>&#34;opts&#34;</span><span class=p>:{},</span><span class=nt>&#34;create-time&#34;</span><span class=p>:</span><span class=s2>&#34;2020-05-29T11:24:24.682842675+08:00&#34;</span><span class=p>,</span><span class=nt>&#34;start-ts&#34;</span><span class=p>:</span><span class=mi>416997967863480321</span><span class=p>,</span><span class=nt>&#34;target-ts&#34;</span><span class=p>:</span><span class=mi>0</span><span class=p>,</span><span class=nt>&#34;admin-job-type&#34;</span><span class=p>:</span><span class=mi>0</span><span class=p>,</span><span class=nt>&#34;sort-engine&#34;</span><span class=p>:</span><span class=s2>&#34;memory&#34;</span><span class=p>,</span><span class=nt>&#34;sort-dir&#34;</span><span class=p>:</span><span class=s2>&#34;.&#34;</span><span class=p>,</span><span class=nt>&#34;config&#34;</span><span class=p>:{</span><span class=nt>&#34;ddl-white-list&#34;</span><span class=p>:</span><span class=kc>null</span><span class=p>,</span><span class=nt>&#34;filter-case-sensitive&#34;</span><span class=p>:</span><span class=kc>false</span><span class=p>,</span><span class=nt>&#34;filter-rules&#34;</span><span class=p>:{</span><span class=nt>&#34;do-tables&#34;</span><span class=p>:</span><span class=kc>null</span><span class=p>,</span><span class=nt>&#34;do-dbs&#34;</span><span class=p>:[</span><span class=s2>&#34;br&#34;</span><span class=p>],</span><span class=nt>&#34;ignore-tables&#34;</span><span class=p>:[{</span><span class=nt>&#34;db-name&#34;</span><span class=p>:</span><span class=s2>&#34;br&#34;</span><span class=p>,</span><span class=nt>&#34;tbl-name&#34;</span><span class=p>:</span><span class=s2>&#34;history&#34;</span><span class=p>}],</span><span class=nt>&#34;ignore-dbs&#34;</span><span class=p>:[</span><span class=s2>&#34;tpcc&#34;</span><span class=p>,</span><span class=s2>&#34;tpch&#34;</span><span class=p>,</span><span class=s2>&#34;mysql&#34;</span><span class=p>,</span><span class=s2>&#34;test&#34;</span><span class=p>]},</span><span class=nt>&#34;ignore-txn-commit-ts&#34;</span><span class=p>:[],</span><span class=nt>&#34;sink-dispatch-rules&#34;</span><span class=p>:</span><span class=kc>null</span><span class=p>,</span><span class=nt>&#34;mounter-worker-num&#34;</span><span class=p>:</span><span class=mi>0</span><span class=p>}}</span>
+</span></span><span class=line><span class=cl><span class=err>/tidb/cdc/changefeed/info/f</span><span class=mi>96916</span><span class=err>c</span><span class=mi>7-1</span><span class=err>f</span><span class=mi>55-41</span><span class=err>b</span><span class=mi>5-9</span><span class=err>d</span><span class=mi>16</span><span class=mf>-406e51</span><span class=err>aab</span><span class=mi>6</span><span class=err>d</span><span class=mi>4</span>
+</span></span><span class=line><span class=cl><span class=p>{</span><span class=nt>&#34;sink-uri&#34;</span><span class=p>:</span><span class=s2>&#34;mysql://root:root@127.0.0.1:44/?worker-count=16\u0026max-txn-row=50&#34;</span><span class=p>,</span><span class=nt>&#34;opts&#34;</span><span class=p>:{},</span><span class=nt>&#34;create-time&#34;</span><span class=p>:</span><span class=s2>&#34;2020-06-01T10:52:23.204398589+08:00&#34;</span><span class=p>,</span><span class=nt>&#34;start-ts&#34;</span><span class=p>:</span><span class=mi>416997967863480321</span><span class=p>,</span><span class=nt>&#34;target-ts&#34;</span><span class=p>:</span><span class=mi>0</span><span class=p>,</span><span class=nt>&#34;admin-job-type&#34;</span><span class=p>:</span><span class=mi>0</span><span class=p>,</span><span class=nt>&#34;sort-engine&#34;</span><span class=p>:</span><span class=s2>&#34;memory&#34;</span><span class=p>,</span><span class=nt>&#34;sort-dir&#34;</span><span class=p>:</span><span class=s2>&#34;.&#34;</span><span class=p>,</span><span class=nt>&#34;config&#34;</span><span class=p>:{</span><span class=nt>&#34;ddl-white-list&#34;</span><span class=p>:</span><span class=kc>null</span><span class=p>,</span><span class=nt>&#34;filter-case-sensitive&#34;</span><span class=p>:</span><span class=kc>false</span><span class=p>,</span><span class=nt>&#34;filter-rules&#34;</span><span class=p>:{</span><span class=nt>&#34;do-tables&#34;</span><span class=p>:</span><span class=kc>null</span><span class=p>,</span><span class=nt>&#34;do-dbs&#34;</span><span class=p>:[</span><span class=s2>&#34;br&#34;</span><span class=p>],</span><span class=nt>&#34;ignore-tables&#34;</span><span class=p>:[{</span><span class=nt>&#34;db-name&#34;</span><span class=p>:</span><span class=s2>&#34;br&#34;</span><span class=p>,</span><span class=nt>&#34;tbl-name&#34;</span><span class=p>:</span><span class=s2>&#34;history&#34;</span><span class=p>}],</span><span class=nt>&#34;ignore-dbs&#34;</span><span class=p>:[</span><span class=s2>&#34;tpcc&#34;</span><span class=p>,</span><span class=s2>&#34;tpch&#34;</span><span class=p>,</span><span class=s2>&#34;mysql&#34;</span><span class=p>,</span><span class=s2>&#34;test&#34;</span><span class=p>]},</span><span class=nt>&#34;ignore-txn-commit-ts&#34;</span><span class=p>:[],</span><span class=nt>&#34;sink-dispatch-rules&#34;</span><span class=p>:</span><span class=kc>null</span><span class=p>,</span><span class=nt>&#34;mounter-worker-num&#34;</span><span class=p>:</span><span class=mi>0</span><span class=p>}}</span>
+</span></span><span class=line><span class=cl><span class=err>/tidb/cdc/job/</span><span class=mi>0240</span><span class=err>d</span><span class=mi>5</span><span class=err>b</span><span class=mi>9</span><span class=err>-a</span><span class=mi>81</span><span class=err>f</span><span class=mi>-417</span><span class=err>c</span><span class=mi>-834</span><span class=err>b-e</span><span class=mi>16329</span><span class=err>eba</span><span class=mi>09</span><span class=err>b</span>
+</span></span><span class=line><span class=cl><span class=p>{</span><span class=nt>&#34;resolved-ts&#34;</span><span class=p>:</span><span class=mi>416958926651392001</span><span class=p>,</span><span class=nt>&#34;checkpoint-ts&#34;</span><span class=p>:</span><span class=mi>416958926389248001</span><span class=p>,</span><span class=nt>&#34;admin-job-type&#34;</span><span class=p>:</span><span class=mi>3</span><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=err>/tidb/cdc/job/</span><span class=mf>3e943</span><span class=err>df</span><span class=mi>4-6950-4568-84</span><span class=err>c</span><span class=mi>8</span><span class=err>-d</span><span class=mi>81</span><span class=err>fd</span><span class=mi>83</span><span class=err>de</span><span class=mi>2</span><span class=err>d</span><span class=mi>8</span>
+</span></span><span class=line><span class=cl><span class=p>{</span><span class=nt>&#34;resolved-ts&#34;</span><span class=p>:</span><span class=mi>416997967863480321</span><span class=p>,</span><span class=nt>&#34;checkpoint-ts&#34;</span><span class=p>:</span><span class=mi>416997967863480321</span><span class=p>,</span><span class=nt>&#34;admin-job-type&#34;</span><span class=p>:</span><span class=mi>0</span><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=err>/tidb/cdc/job/</span><span class=mi>6281</span><span class=err>d</span><span class=mi>51</span><span class=err>f-f</span><span class=mi>62</span><span class=err>c</span><span class=mi>-46</span><span class=err>c</span><span class=mi>6</span><span class=err>-b</span><span class=mf>10e-33013470</span><span class=err>fbaa</span>
+</span></span><span class=line><span class=cl><span class=p>{</span><span class=nt>&#34;resolved-ts&#34;</span><span class=p>:</span><span class=mi>416974641884037174</span><span class=p>,</span><span class=nt>&#34;checkpoint-ts&#34;</span><span class=p>:</span><span class=mi>416974641884037174</span><span class=p>,</span><span class=nt>&#34;admin-job-type&#34;</span><span class=p>:</span><span class=mi>3</span><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=err>/tidb/cdc/job/</span><span class=mi>7</span><span class=err>de</span><span class=mi>99356-8389-4644</span><span class=err>-b</span><span class=mi>71</span><span class=err>b-dc</span><span class=mi>7</span><span class=err>b</span><span class=mi>6</span><span class=err>ba</span><span class=mi>7389</span><span class=err>e</span>
+</span></span><span class=line><span class=cl><span class=p>{</span><span class=nt>&#34;resolved-ts&#34;</span><span class=p>:</span><span class=mi>416997967863480321</span><span class=p>,</span><span class=nt>&#34;checkpoint-ts&#34;</span><span class=p>:</span><span class=mi>416997967863480321</span><span class=p>,</span><span class=nt>&#34;admin-job-type&#34;</span><span class=p>:</span><span class=mi>0</span><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=err>/tidb/cdc/job/ac</span><span class=mi>6</span><span class=err>d</span><span class=mi>034</span><span class=err>a-c</span><span class=mi>2</span><span class=err>b</span><span class=mi>4-41</span><span class=err>bf</span><span class=mi>-801</span><span class=err>a</span><span class=mi>-798</span><span class=err>bb</span><span class=mi>1390734</span>
+</span></span><span class=line><span class=cl><span class=p>{</span><span class=nt>&#34;resolved-ts&#34;</span><span class=p>:</span><span class=mi>416958671598387201</span><span class=p>,</span><span class=nt>&#34;checkpoint-ts&#34;</span><span class=p>:</span><span class=mi>416957660797337610</span><span class=p>,</span><span class=nt>&#34;admin-job-type&#34;</span><span class=p>:</span><span class=mi>3</span><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=err>/tidb/cdc/job/e</span><span class=mi>01</span><span class=err>adb</span><span class=mi>9</span><span class=err>c</span><span class=mi>-70</span><span class=err>ad</span><span class=mi>-4600</span><span class=err>-b</span><span class=mi>4</span><span class=err>de-d</span><span class=mi>20</span><span class=err>da</span><span class=mi>914</span><span class=err>bd</span><span class=mi>9</span><span class=err>a</span>
+</span></span><span class=line><span class=cl><span class=p>{</span><span class=nt>&#34;resolved-ts&#34;</span><span class=p>:</span><span class=mi>416975975436779549</span><span class=p>,</span><span class=nt>&#34;checkpoint-ts&#34;</span><span class=p>:</span><span class=mi>416975975436779549</span><span class=p>,</span><span class=nt>&#34;admin-job-type&#34;</span><span class=p>:</span><span class=mi>3</span><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=err>/tidb/cdc/job/f</span><span class=mi>96916</span><span class=err>c</span><span class=mi>7-1</span><span class=err>f</span><span class=mi>55-41</span><span class=err>b</span><span class=mi>5-9</span><span class=err>d</span><span class=mi>16</span><span class=mf>-406e51</span><span class=err>aab</span><span class=mi>6</span><span class=err>d</span><span class=mi>4</span>
+</span></span><span class=line><span class=cl><span class=p>{</span><span class=nt>&#34;resolved-ts&#34;</span><span class=p>:</span><span class=mi>416997967863480321</span><span class=p>,</span><span class=nt>&#34;checkpoint-ts&#34;</span><span class=p>:</span><span class=mi>416997967863480321</span><span class=p>,</span><span class=nt>&#34;admin-job-type&#34;</span><span class=p>:</span><span class=mi>0</span><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=err>/tidb/cdc/task/position/a</span><span class=mi>99683</span><span class=err>bc</span><span class=mi>-4</span><span class=err>af</span><span class=mi>4-45</span><span class=err>d</span><span class=mi>3</span><span class=err>-aa</span><span class=mi>7</span><span class=err>b</span><span class=mi>-5</span><span class=err>bbd</span><span class=mi>398</span><span class=err>fb</span><span class=mi>6</span><span class=err>b</span><span class=mi>5</span><span class=err>/</span><span class=mf>3e943</span><span class=err>df</span><span class=mi>4-6950-4568-84</span><span class=err>c</span><span class=mi>8</span><span class=err>-d</span><span class=mi>81</span><span class=err>fd</span><span class=mi>83</span><span class=err>de</span><span class=mi>2</span><span class=err>d</span><span class=mi>8</span>
+</span></span><span class=line><span class=cl><span class=p>{</span><span class=nt>&#34;checkpoint-ts&#34;</span><span class=p>:</span><span class=mi>417002603526225942</span><span class=p>,</span><span class=nt>&#34;resolved-ts&#34;</span><span class=p>:</span><span class=mi>416997967863480321</span><span class=p>,</span><span class=nt>&#34;count&#34;</span><span class=p>:</span><span class=mi>0</span><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=err>/tidb/cdc/task/position/a</span><span class=mi>99683</span><span class=err>bc</span><span class=mi>-4</span><span class=err>af</span><span class=mi>4-45</span><span class=err>d</span><span class=mi>3</span><span class=err>-aa</span><span class=mi>7</span><span class=err>b</span><span class=mi>-5</span><span class=err>bbd</span><span class=mi>398</span><span class=err>fb</span><span class=mi>6</span><span class=err>b</span><span class=mi>5</span><span class=err>/</span><span class=mi>7</span><span class=err>de</span><span class=mi>99356-8389-4644</span><span class=err>-b</span><span class=mi>71</span><span class=err>b-dc</span><span class=mi>7</span><span class=err>b</span><span class=mi>6</span><span class=err>ba</span><span class=mi>7389</span><span class=err>e</span>
+</span></span><span class=line><span class=cl><span class=p>{</span><span class=nt>&#34;checkpoint-ts&#34;</span><span class=p>:</span><span class=mi>416997967863480321</span><span class=p>,</span><span class=nt>&#34;resolved-ts&#34;</span><span class=p>:</span><span class=mi>416997967863480321</span><span class=p>,</span><span class=nt>&#34;count&#34;</span><span class=p>:</span><span class=mi>0</span><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=err>/tidb/cdc/task/position/a</span><span class=mi>99683</span><span class=err>bc</span><span class=mi>-4</span><span class=err>af</span><span class=mi>4-45</span><span class=err>d</span><span class=mi>3</span><span class=err>-aa</span><span class=mi>7</span><span class=err>b</span><span class=mi>-5</span><span class=err>bbd</span><span class=mi>398</span><span class=err>fb</span><span class=mi>6</span><span class=err>b</span><span class=mi>5</span><span class=err>/f</span><span class=mi>96916</span><span class=err>c</span><span class=mi>7-1</span><span class=err>f</span><span class=mi>55-41</span><span class=err>b</span><span class=mi>5-9</span><span class=err>d</span><span class=mi>16</span><span class=mf>-406e51</span><span class=err>aab</span><span class=mi>6</span><span class=err>d</span><span class=mi>4</span>
+</span></span><span class=line><span class=cl><span class=p>{</span><span class=nt>&#34;checkpoint-ts&#34;</span><span class=p>:</span><span class=mi>417002603526225942</span><span class=p>,</span><span class=nt>&#34;resolved-ts&#34;</span><span class=p>:</span><span class=mi>416997967863480321</span><span class=p>,</span><span class=nt>&#34;count&#34;</span><span class=p>:</span><span class=mi>0</span><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=err>/tidb/cdc/task/status/a</span><span class=mi>99683</span><span class=err>bc</span><span class=mi>-4</span><span class=err>af</span><span class=mi>4-45</span><span class=err>d</span><span class=mi>3</span><span class=err>-aa</span><span class=mi>7</span><span class=err>b</span><span class=mi>-5</span><span class=err>bbd</span><span class=mi>398</span><span class=err>fb</span><span class=mi>6</span><span class=err>b</span><span class=mi>5</span><span class=err>/</span><span class=mf>3e943</span><span class=err>df</span><span class=mi>4-6950-4568-84</span><span class=err>c</span><span class=mi>8</span><span class=err>-d</span><span class=mi>81</span><span class=err>fd</span><span class=mi>83</span><span class=err>de</span><span class=mi>2</span><span class=err>d</span><span class=mi>8</span>
+</span></span><span class=line><span class=cl><span class=p>{</span><span class=nt>&#34;table-infos&#34;</span><span class=p>:[{</span><span class=nt>&#34;id&#34;</span><span class=p>:</span><span class=mi>7441</span><span class=p>,</span><span class=nt>&#34;start-ts&#34;</span><span class=p>:</span><span class=mi>416997967863480321</span><span class=p>},{</span><span class=nt>&#34;id&#34;</span><span class=p>:</span><span class=mi>7443</span><span class=p>,</span><span class=nt>&#34;start-ts&#34;</span><span class=p>:</span><span class=mi>416997967863480321</span><span class=p>},{</span><span class=nt>&#34;id&#34;</span><span class=p>:</span><span class=mi>7445</span><span class=p>,</span><span class=nt>&#34;start-ts&#34;</span><span class=p>:</span><span class=mi>416997967863480321</span><span class=p>},{</span><span class=nt>&#34;id&#34;</span><span class=p>:</span><span class=mi>7449</span><span class=p>,</span><span class=nt>&#34;start-ts&#34;</span><span class=p>:</span><span class=mi>416997967863480321</span><span class=p>},{</span><span class=nt>&#34;id&#34;</span><span class=p>:</span><span class=mi>7451</span><span class=p>,</span><span class=nt>&#34;start-ts&#34;</span><span class=p>:</span><span class=mi>416997967863480321</span><span class=p>},{</span><span class=nt>&#34;id&#34;</span><span class=p>:</span><span class=mi>7453</span><span class=p>,</span><span class=nt>&#34;start-ts&#34;</span><span class=p>:</span><span class=mi>416997967863480321</span><span class=p>},{</span><span class=nt>&#34;id&#34;</span><span class=p>:</span><span class=mi>7455</span><span class=p>,</span><span class=nt>&#34;start-ts&#34;</span><span class=p>:</span><span class=mi>416997967863480321</span><span class=p>},{</span><span class=nt>&#34;id&#34;</span><span class=p>:</span><span class=mi>7457</span><span class=p>,</span><span class=nt>&#34;start-ts&#34;</span><span class=p>:</span><span class=mi>416997967863480321</span><span class=p>}],</span><span class=nt>&#34;table-p-lock&#34;</span><span class=p>:{</span><span class=nt>&#34;ts&#34;</span><span class=p>:</span><span class=mi>417160718610857984</span><span class=p>,</span><span class=nt>&#34;creator-id&#34;</span><span class=p>:</span><span class=s2>&#34;a99683bc-4af4-45d3-aa7b-5bbd398fb6b5&#34;</span><span class=p>,</span><span class=nt>&#34;checkpoint-ts&#34;</span><span class=p>:</span><span class=mi>0</span><span class=p>},</span><span class=nt>&#34;table-c-lock&#34;</span><span class=p>:{</span><span class=nt>&#34;ts&#34;</span><span class=p>:</span><span class=mi>417160718610857984</span><span class=p>,</span><span class=nt>&#34;creator-id&#34;</span><span class=p>:</span><span class=s2>&#34;&#34;</span><span class=p>,</span><span class=nt>&#34;checkpoint-ts&#34;</span><span class=p>:</span><span class=mi>417002603526225942</span><span class=p>},</span><span class=nt>&#34;admin-job-type&#34;</span><span class=p>:</span><span class=mi>0</span><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=err>/tidb/cdc/task/status/a</span><span class=mi>99683</span><span class=err>bc</span><span class=mi>-4</span><span class=err>af</span><span class=mi>4-45</span><span class=err>d</span><span class=mi>3</span><span class=err>-aa</span><span class=mi>7</span><span class=err>b</span><span class=mi>-5</span><span class=err>bbd</span><span class=mi>398</span><span class=err>fb</span><span class=mi>6</span><span class=err>b</span><span class=mi>5</span><span class=err>/</span><span class=mi>7</span><span class=err>de</span><span class=mi>99356-8389-4644</span><span class=err>-b</span><span class=mi>71</span><span class=err>b-dc</span><span class=mi>7</span><span class=err>b</span><span class=mi>6</span><span class=err>ba</span><span class=mi>7389</span><span class=err>e</span>
+</span></span><span class=line><span class=cl><span class=p>{</span><span class=nt>&#34;table-infos&#34;</span><span class=p>:[{</span><span class=nt>&#34;id&#34;</span><span class=p>:</span><span class=mi>7441</span><span class=p>,</span><span class=nt>&#34;start-ts&#34;</span><span class=p>:</span><span class=mi>416997967863480321</span><span class=p>},{</span><span class=nt>&#34;id&#34;</span><span class=p>:</span><span class=mi>7443</span><span class=p>,</span><span class=nt>&#34;start-ts&#34;</span><span class=p>:</span><span class=mi>416997967863480321</span><span class=p>},{</span><span class=nt>&#34;id&#34;</span><span class=p>:</span><span class=mi>7445</span><span class=p>,</span><span class=nt>&#34;start-ts&#34;</span><span class=p>:</span><span class=mi>416997967863480321</span><span class=p>},{</span><span class=nt>&#34;id&#34;</span><span class=p>:</span><span class=mi>7449</span><span class=p>,</span><span class=nt>&#34;start-ts&#34;</span><span class=p>:</span><span class=mi>416997967863480321</span><span class=p>},{</span><span class=nt>&#34;id&#34;</span><span class=p>:</span><span class=mi>7451</span><span class=p>,</span><span class=nt>&#34;start-ts&#34;</span><span class=p>:</span><span class=mi>416997967863480321</span><span class=p>},{</span><span class=nt>&#34;id&#34;</span><span class=p>:</span><span class=mi>7453</span><span class=p>,</span><span class=nt>&#34;start-ts&#34;</span><span class=p>:</span><span class=mi>416997967863480321</span><span class=p>},{</span><span class=nt>&#34;id&#34;</span><span class=p>:</span><span class=mi>7455</span><span class=p>,</span><span class=nt>&#34;start-ts&#34;</span><span class=p>:</span><span class=mi>416997967863480321</span><span class=p>},{</span><span class=nt>&#34;id&#34;</span><span class=p>:</span><span class=mi>7457</span><span class=p>,</span><span class=nt>&#34;start-ts&#34;</span><span class=p>:</span><span class=mi>416997967863480321</span><span class=p>}],</span><span class=nt>&#34;table-p-lock&#34;</span><span class=p>:{</span><span class=nt>&#34;ts&#34;</span><span class=p>:</span><span class=mi>417160718611382272</span><span class=p>,</span><span class=nt>&#34;creator-id&#34;</span><span class=p>:</span><span class=s2>&#34;a99683bc-4af4-45d3-aa7b-5bbd398fb6b5&#34;</span><span class=p>,</span><span class=nt>&#34;checkpoint-ts&#34;</span><span class=p>:</span><span class=mi>0</span><span class=p>},</span><span class=nt>&#34;table-c-lock&#34;</span><span class=p>:{</span><span class=nt>&#34;ts&#34;</span><span class=p>:</span><span class=mi>417160718611382272</span><span class=p>,</span><span class=nt>&#34;creator-id&#34;</span><span class=p>:</span><span class=s2>&#34;&#34;</span><span class=p>,</span><span class=nt>&#34;checkpoint-ts&#34;</span><span class=p>:</span><span class=mi>416997967863480321</span><span class=p>},</span><span class=nt>&#34;admin-job-type&#34;</span><span class=p>:</span><span class=mi>0</span><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=err>/tidb/cdc/task/status/a</span><span class=mi>99683</span><span class=err>bc</span><span class=mi>-4</span><span class=err>af</span><span class=mi>4-45</span><span class=err>d</span><span class=mi>3</span><span class=err>-aa</span><span class=mi>7</span><span class=err>b</span><span class=mi>-5</span><span class=err>bbd</span><span class=mi>398</span><span class=err>fb</span><span class=mi>6</span><span class=err>b</span><span class=mi>5</span><span class=err>/f</span><span class=mi>96916</span><span class=err>c</span><span class=mi>7-1</span><span class=err>f</span><span class=mi>55-41</span><span class=err>b</span><span class=mi>5-9</span><span class=err>d</span><span class=mi>16</span><span class=mf>-406e51</span><span class=err>aab</span><span class=mi>6</span><span class=err>d</span><span class=mi>4</span>
+</span></span><span class=line><span class=cl><span class=p>{</span><span class=nt>&#34;table-infos&#34;</span><span class=p>:[{</span><span class=nt>&#34;id&#34;</span><span class=p>:</span><span class=mi>7441</span><span class=p>,</span><span class=nt>&#34;start-ts&#34;</span><span class=p>:</span><span class=mi>416997967863480321</span><span class=p>},{</span><span class=nt>&#34;id&#34;</span><span class=p>:</span><span class=mi>7443</span><span class=p>,</span><span class=nt>&#34;start-ts&#34;</span><span class=p>:</span><span class=mi>416997967863480321</span><span class=p>},{</span><span class=nt>&#34;id&#34;</span><span class=p>:</span><span class=mi>7445</span><span class=p>,</span><span class=nt>&#34;start-ts&#34;</span><span class=p>:</span><span class=mi>416997967863480321</span><span class=p>},{</span><span class=nt>&#34;id&#34;</span><span class=p>:</span><span class=mi>7449</span><span class=p>,</span><span class=nt>&#34;start-ts&#34;</span><span class=p>:</span><span class=mi>416997967863480321</span><span class=p>},{</span><span class=nt>&#34;id&#34;</span><span class=p>:</span><span class=mi>7451</span><span class=p>,</span><span class=nt>&#34;start-ts&#34;</span><span class=p>:</span><span class=mi>416997967863480321</span><span class=p>},{</span><span class=nt>&#34;id&#34;</span><span class=p>:</span><span class=mi>7453</span><span class=p>,</span><span class=nt>&#34;start-ts&#34;</span><span class=p>:</span><span class=mi>416997967863480321</span><span class=p>},{</span><span class=nt>&#34;id&#34;</span><span class=p>:</span><span class=mi>7455</span><span class=p>,</span><span class=nt>&#34;start-ts&#34;</span><span class=p>:</span><span class=mi>416997967863480321</span><span class=p>},{</span><span class=nt>&#34;id&#34;</span><span class=p>:</span><span class=mi>7457</span><span class=p>,</span><span class=nt>&#34;start-ts&#34;</span><span class=p>:</span><span class=mi>416997967863480321</span><span class=p>}],</span><span class=nt>&#34;table-p-lock&#34;</span><span class=p>:{</span><span class=nt>&#34;ts&#34;</span><span class=p>:</span><span class=mi>417160718611644416</span><span class=p>,</span><span class=nt>&#34;creator-id&#34;</span><span class=p>:</span><span class=s2>&#34;a99683bc-4af4-45d3-aa7b-5bbd398fb6b5&#34;</span><span class=p>,</span><span class=nt>&#34;checkpoint-ts&#34;</span><span class=p>:</span><span class=mi>0</span><span class=p>},</span><span class=nt>&#34;table-c-lock&#34;</span><span class=p>:{</span><span class=nt>&#34;ts&#34;</span><span class=p>:</span><span class=mi>417160718611644416</span><span class=p>,</span><span class=nt>&#34;creator-id&#34;</span><span class=p>:</span><span class=s2>&#34;&#34;</span><span class=p>,</span><span class=nt>&#34;checkpoint-ts&#34;</span><span class=p>:</span><span class=mi>417002603526225942</span><span class=p>},</span><span class=nt>&#34;admin-job-type&#34;</span><span class=p>:</span><span class=mi>0</span><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div></li></ul><h2 id=0x03-faq>0x03 FAQ</h2><blockquote><p>测试时问题处理思路</p></blockquote><ul><li>GC not work 告警<ul><li>影响：MVCC 版本过多，TikV 数据存储空间变大</li><li>原因：changefeed 依赖 TiKV MVCC + Raft log 解析数据，mvcc 数据在未同步到下游时被 GC 删除会导致数据同步丢失；<ul><li>场景 1：changefeed 同步的快慢与 GC worker 有关系，怎么解决 change feed 同步速度问题；手下要了解 change feed 怎么来的<ol><li>CDC 链接 PD 获取 TiKV 节点信息</li><li>CDC 创建 change feed，change feed 信息存储在 PD etcd 中「cdc 高可用中心节点」</li><li>CDC 接受 TiKV 主动推送数据「与 change feed 有关系」放在 <strong>cdc 内存</strong> 里解析、转换 SQL「数据量过大可能造成 OOM，官网有解决方案」「此处非全局有序（单个 change feed 可以放在多个 CDC 上负载方式运行）」</li><li>CDC 将 SQL 写入到下游 TiDB「并发由 worker-count&max-txn-row 控制」「不支持同步无主键或无唯一索引的表」</li><li>回顾下：CDC 个数、下游的吞吐能力、上下游网络延迟 决定了同步速度快慢（隐藏条件 CDC 内存处理性能）</li></ol></li><li>场景 2：CDC 创建多个 change feed 任务，其中有任务状态为 pause（<a href=https://pingcap.com/docs-cn/stable/ticdc/manage-ticdc/#%E6%9F%A5%E8%AF%A2%E7%89%B9%E5%AE%9A%E5%90%8C%E6%AD%A5%E4%BB%BB%E5%8A%A1>admin job type</a> = 1）；<ul><li>pause 状态下防止丢失“数据窗口”信息，会停止 MVCC 数据 GC 直到状态更改为 remove（3）或者等 resume（2）正常消费</li><li>使用 <code>cdc cli changefeed query</code> 查看</li></ul></li></ul></li></ul></li></ul><blockquote><p>其他</p></blockquote><ul><li>创建一条 changefeed 过程</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-go data-lang=go><span class=line><span class=cl><span class=p>[</span><span class=nx>owner</span><span class=p>.</span><span class=k>go</span><span class=p>:</span><span class=mi>822</span><span class=p>]</span> <span class=p>[</span><span class=s>&#34;watch capture exited&#34;</span><span class=p>]</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=nx>server</span><span class=p>.</span><span class=k>go</span><span class=p>:</span><span class=mi>159</span><span class=p>]</span> <span class=p>[</span><span class=s>&#34;campaign owner successfully&#34;</span><span class=p>]</span> <span class=p>[</span><span class=nx>capture</span><span class=p>=</span><span class=nx>fde93803</span><span class=o>-</span><span class=nx>d051</span><span class=o>-</span><span class=mi>42</span><span class=nx>f6</span><span class=o>-</span><span class=mi>92</span><span class=nx>c9</span><span class=o>-</span><span class=nx>dfa7896a4b71</span><span class=p>]</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=nx>client</span><span class=p>.</span><span class=k>go</span><span class=p>:</span><span class=mi>141</span><span class=p>]</span> <span class=p>[</span><span class=s>&#34;[pd] create pd client with endpoints&#34;</span><span class=p>]</span> <span class=p>[</span><span class=nx>pd</span><span class=o>-</span><span class=nx>address</span><span class=p>=</span><span class=s>&#34;[http://172.16.4.51:14379]&#34;</span><span class=p>]</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=nx>base_client</span><span class=p>.</span><span class=k>go</span><span class=p>:</span><span class=mi>242</span><span class=p>]</span> <span class=p>[</span><span class=s>&#34;[pd] switch leader&#34;</span><span class=p>]</span> <span class=p>[</span><span class=nx>new</span><span class=o>-</span><span class=nx>leader</span><span class=p>=</span><span class=nx>http</span><span class=p>:</span><span class=c1>//172.16.4.51:14379] [old-leader=]
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>[</span><span class=nx>base_client</span><span class=p>.</span><span class=k>go</span><span class=p>:</span><span class=mi>92</span><span class=p>]</span> <span class=p>[</span><span class=s>&#34;[pd] init cluster id&#34;</span><span class=p>]</span> <span class=p>[</span><span class=nx>cluster</span><span class=o>-</span><span class=nx>id</span><span class=p>=</span><span class=mi>6826949771068502967</span><span class=p>]</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=nx>owner</span><span class=p>.</span><span class=k>go</span><span class=p>:</span><span class=mi>810</span><span class=p>]</span> <span class=p>[</span><span class=s>&#34;start to watch captures&#34;</span><span class=p>]</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=nx>owner</span><span class=p>.</span><span class=k>go</span><span class=p>:</span><span class=mi>740</span><span class=p>]</span> <span class=p>[</span><span class=s>&#34;monitoring captures&#34;</span><span class=p>]</span> <span class=p>[</span><span class=nx>key</span><span class=p>=</span><span class=o>/</span><span class=nx>tidb</span><span class=o>/</span><span class=nx>cdc</span><span class=o>/</span><span class=nx>capture</span><span class=p>]</span> <span class=p>[</span><span class=nx>rev</span><span class=p>=</span><span class=mi>1574342</span><span class=p>]</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=nx>owner</span><span class=p>.</span><span class=k>go</span><span class=p>:</span><span class=mi>416</span><span class=p>]</span> <span class=p>[</span><span class=s>&#34;handle admin job&#34;</span><span class=p>]</span> <span class=p>[</span><span class=nx>changefeed</span><span class=p>=</span><span class=mi>6281</span><span class=nx>d51f</span><span class=o>-</span><span class=nx>f62c</span><span class=o>-</span><span class=mi>46</span><span class=nx>c6</span><span class=o>-</span><span class=nx>b10e</span><span class=o>-</span><span class=mi>33013470</span><span class=nx>fbaa</span><span class=p>]</span> <span class=p>[</span><span class=kd>type</span><span class=p>=</span><span class=s>&#34;resume changefeed&#34;</span><span class=p>]</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=nx>owner</span><span class=p>.</span><span class=k>go</span><span class=p>:</span><span class=mi>159</span><span class=p>]</span> <span class=p>[</span><span class=s>&#34;Find new changefeed&#34;</span><span class=p>]</span> <span class=p>[</span><span class=nx>info</span><span class=p>=</span><span class=s>&#34;{\&#34;sink-uri\&#34;:\&#34;mysql://root:root@127.0.0.1:44/?worker-count=1\\u0026max-txn-row=50\&#34;,\&#34;opts\&#34;:{},\&#34;create-time\&#34;:\&#34;2020-05-27T17:34:43.836728552+08:00\&#34;,\&#34;start-ts\&#34;:416958928342220801,\&#34;target-ts\&#34;:0,\&#34;admin-job-type\&#34;:2,\&#34;sort-engine\&#34;:\&#34;memory\&#34;,\&#34;sort-dir\&#34;:\&#34;.\&#34;,\&#34;config\&#34;:{\&#34;ddl-white-list\&#34;:null,\&#34;filter-case-sensitive\&#34;:false,\&#34;filter-rules\&#34;:{\&#34;do-tables\&#34;:null,\&#34;do-dbs\&#34;:[\&#34;ddcc\&#34;],\&#34;ignore-tables\&#34;:null,\&#34;ignore-dbs\&#34;:[\&#34;tpcc\&#34;,\&#34;tpch\&#34;,\&#34;mysql\&#34;,\&#34;test\&#34;]},\&#34;ignore-txn-commit-ts\&#34;:[],\&#34;sink-dispatch-rules\&#34;:null,\&#34;mounter-worker-num\&#34;:0}}&#34;</span><span class=p>]</span> <span class=p>[</span><span class=nx>id</span><span class=p>=</span><span class=mi>6281</span><span class=nx>d51f</span><span class=o>-</span><span class=nx>f62c</span><span class=o>-</span><span class=mi>46</span><span class=nx>c6</span><span class=o>-</span><span class=nx>b10e</span><span class=o>-</span><span class=mi>33013470</span><span class=nx>fbaa</span><span class=p>]</span> <span class=p>[</span><span class=s>&#34;checkpoint ts&#34;</span><span class=p>=</span><span class=mi>416974641884037174</span><span class=p>]</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=nx>store</span><span class=p>.</span><span class=k>go</span><span class=p>:</span><span class=mi>68</span><span class=p>]</span> <span class=p>[</span><span class=s>&#34;new store&#34;</span><span class=p>]</span> <span class=p>[</span><span class=nx>path</span><span class=p>=</span><span class=s>&#34;tikv://172.16.4.51:14379?disableGC=true&#34;</span><span class=p>]</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=nx>client</span><span class=p>.</span><span class=k>go</span><span class=p>:</span><span class=mi>141</span><span class=p>]</span> <span class=p>[</span><span class=s>&#34;[pd] create pd client with endpoints&#34;</span><span class=p>]</span> <span class=p>[</span><span class=nx>pd</span><span class=o>-</span><span class=nx>address</span><span class=p>=</span><span class=s>&#34;[172.16.4.51:14379]&#34;</span><span class=p>]</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=nx>base_client</span><span class=p>.</span><span class=k>go</span><span class=p>:</span><span class=mi>242</span><span class=p>]</span> <span class=p>[</span><span class=s>&#34;[pd] switch leader&#34;</span><span class=p>]</span> <span class=p>[</span><span class=nx>new</span><span class=o>-</span><span class=nx>leader</span><span class=p>=</span><span class=nx>http</span><span class=p>:</span><span class=c1>//172.16.4.51:14379] [old-leader=]
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>[</span><span class=nx>base_client</span><span class=p>.</span><span class=k>go</span><span class=p>:</span><span class=mi>92</span><span class=p>]</span> <span class=p>[</span><span class=s>&#34;[pd] init cluster id&#34;</span><span class=p>]</span> <span class=p>[</span><span class=nx>cluster</span><span class=o>-</span><span class=nx>id</span><span class=p>=</span><span class=mi>6826949771068502967</span><span class=p>]</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=nx>store</span><span class=p>.</span><span class=k>go</span><span class=p>:</span><span class=mi>74</span><span class=p>]</span> <span class=p>[</span><span class=s>&#34;new store with retry success&#34;</span><span class=p>]</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=nx>client_batch</span><span class=p>.</span><span class=k>go</span><span class=p>:</span><span class=mi>628</span><span class=p>]</span> <span class=p>[</span><span class=s>&#34;recycle idle connection&#34;</span><span class=p>]</span> <span class=p>[</span><span class=nx>target</span><span class=p>=</span><span class=mf>172.16.4.53</span><span class=p>:</span><span class=mi>15160</span><span class=p>]</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=nx>client_batch</span><span class=p>.</span><span class=k>go</span><span class=p>:</span><span class=mi>628</span><span class=p>]</span> <span class=p>[</span><span class=s>&#34;recycle idle connection&#34;</span><span class=p>]</span> <span class=p>[</span><span class=nx>target</span><span class=p>=</span><span class=mf>172.16.4.52</span><span class=p>:</span><span class=mi>15160</span><span class=p>]</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=nx>client_batch</span><span class=p>.</span><span class=k>go</span><span class=p>:</span><span class=mi>628</span><span class=p>]</span> <span class=p>[</span><span class=s>&#34;recycle idle connection&#34;</span><span class=p>]</span> <span class=p>[</span><span class=nx>target</span><span class=p>=</span><span class=mf>172.16.4.51</span><span class=p>:</span><span class=mi>14160</span><span class=p>]</span>
+</span></span></code></pre></td></tr></table></div></div><ul><li>指定一个错误或者小于当前 savepoint 的方式启动 CDC changefeed<ul><li><code>GC life time is shorter than transaction duration, transaction starts at 2020-05-28 10:13:46.23 +0800 CST, GC safe point is 2020-05-28 11:38:33.33 +0800 CST</code></li></ul></li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-go data-lang=go><span class=line><span class=cl><span class=p>[</span><span class=mi>2020</span><span class=o>/</span><span class=mo>05</span><span class=o>/</span><span class=mi>28</span> <span class=mi>17</span><span class=p>:</span><span class=mo>02</span><span class=p>:</span><span class=mf>26.760</span> <span class=o>+</span><span class=mi>08</span><span class=p>:</span><span class=mo>00</span><span class=p>]</span> <span class=p>[</span><span class=nx>ERROR</span><span class=p>]</span> <span class=p>[</span><span class=nx>owner</span><span class=p>.</span><span class=k>go</span><span class=p>:</span><span class=mi>539</span><span class=p>]</span> <span class=p>[</span><span class=s>&#34;owner exited with error&#34;</span><span class=p>]</span> <span class=p>[</span><span class=kt>error</span><span class=p>=</span><span class=s>&#34;create change feed 6281d51f-f62c-46c6-b10e-33013470fbaa: [tikv:9006]GC life time is shorter than transaction duration, transaction starts at 2020-05-28 10:13:46.23 +0800 CST, GC safe point is 2020-05-28 11:38:33.33 +0800 CST&#34;</span><span class=p>]</span> <span class=p>[</span><span class=nx>errorVerbose</span><span class=p>=</span><span class=s>&#34;[tikv:9006]GC life time is shorter than transaction duration, transaction starts at 2020-05-28 10:13:46.23 +0800 CST, GC safe point is 2020-05-28 11:38:33.33 +0800 CST\ngithub.com/pingcap/errors.AddStack\n\tgithub.com/pingcap/errors@v0.11.5-0.20190809092503-95897b64e011/errors.go:174\ngithub.com/pingcap/parser/terror.(*Error).GenWithStackByArgs\n\tgithub.com/pingcap/parser@v0.0.0-20200422082501-7329d80eaf2c/terror/terror.go:243\ngithub.com/pingcap/tidb/store/tikv.(*tikvStore).CheckVisibility\n\tgithub.com/pingcap/tidb@v1.1.0-beta.0.20200424111313-5e4a6948977f/store/tikv/kv.go:189\ngithub.com/pingcap/tidb/store/tikv.(*Scanner).getData\n\tgithub.com/pingcap/tidb@v1.1.0-beta.0.20200424111313-5e4a6948977f/store/tikv/scan.go:227\ngithub.com/pingcap/tidb/store/tikv.(*Scanner).Next\n\tgithub.com/pingcap/tidb@v1.1.0-beta.0.20200424111313-5e4a6948977f/store/tikv/scan.go:101\ngithub.com/pingcap/tidb/store/tikv.newScanner\n\tgithub.com/pingcap/tidb@v1.1.0-beta.0.20200424111313-5e4a6948977f/store/tikv/scan.go:59\ngithub.com/pingcap/tidb/store/tikv.(*tikvSnapshot).Iter\n\tgithub.com/pingcap/tidb@v1.1.0-beta.0.20200424111313-5e4a6948977f/store/tikv/snapshot.go:390\ngithub.com/pingcap/tidb/structure.(*TxStructure).iterateHash\n\tgithub.com/pingcap/tidb@v1.1.0-beta.0.20200424111313-5e4a6948977f/structure/hash.go:259\ngithub.com/pingcap/tidb/structure.(*TxStructure).HGetAll\n\tgithub.com/pingcap/tidb@v1.1.0-beta.0.20200424111313-5e4a6948977f/structure/hash.go:208\ngithub.com/pingcap/tidb/meta.(*Meta).ListDatabases\n\tgithub.com/pingcap/tidb@v1.1.0-beta.0.20200424111313-5e4a6948977f/meta/meta.go:494\ngithub.com/pingcap/ticdc/cdc/entry.newSchemaSnapshotFromMeta\n\tgithub.com/pingcap/ticdc@/cdc/entry/schema_storage.go:81\ngithub.com/pingcap/ticdc/cdc/entry.NewSingleSchemaSnapshotFromMeta\n\tgithub.com/pingcap/ticdc@/cdc/entry/schema_storage.go:63\ngithub.com/pingcap/ticdc/cdc.(*Owner).newChangeFeed\n\tgithub.com/pingcap/ticdc@/cdc/owner.go:171\ngithub.com/pingcap/ticdc/cdc.(*Owner).loadChangeFeeds\n\tgithub.com/pingcap/ticdc@/cdc/owner.go:303\ngithub.com/pingcap/ticdc/cdc.(*Owner).run\n\tgithub.com/pingcap/ticdc@/cdc/owner.go:584\ngithub.com/pingcap/ticdc/cdc.(*Owner).Run\n\tgithub.com/pingcap/ticdc@/cdc/owner.go:536\ngithub.com/pingcap/ticdc/cdc.(*Server).campaignOwnerLoop\n\tgithub.com/pingcap/ticdc@/cdc/server.go:167\ngithub.com/pingcap/ticdc/cdc.(*Server).run.func1\n\tgithub.com/pingcap/ticdc@/cdc/server.go:199\ngolang.org/x/sync/errgroup.(*Group).Go.func1\n\tgolang.org/x/sync@v0.0.0-20190911185100-cd5d95a43a6e/errgroup/errgroup.go:57\nruntime.goexit\n\truntime/asm_amd64.s:1357\ncreate change feed 6281d51f-f62c-46c6-b10e-33013470fbaa&#34;</span><span class=p>]</span>
+</span></span></code></pre></td></tr></table></div></div><ul><li>下游未创建目标数据库<ul><li><code>Error 1146: Table 'tpcc.district' doesn't exist</code></li></ul></li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-go data-lang=go><span class=line><span class=cl><span class=p>[</span><span class=nx>INFO</span><span class=p>]</span> <span class=p>[</span><span class=nx>client</span><span class=p>.</span><span class=k>go</span><span class=p>:</span><span class=mi>642</span><span class=p>]</span> <span class=p>[</span><span class=s>&#34;start new request&#34;</span><span class=p>]</span> <span class=p>[</span><span class=nx>request</span><span class=p>=</span><span class=s>&#34;{\&#34;header\&#34;:{\&#34;cluster_id\&#34;:6826949771068502967},\&#34;region_id\&#34;:56301,\&#34;region_epoch\&#34;:{\&#34;conf_ver\&#34;:14,\&#34;version\&#34;:203},\&#34; checkpoint_ts\&#34;:416957675215257608,\&#34;start_key\&#34;:\&#34;dIAAAAAAAAD/PV9ygAAAAAj/aLrDAAAAAAD6\&#34;,\&#34;end_key\&#34;:\&#34;dIAAAAAAAAD/PV9ygAAAAAj/bdPyAAAAAAD6\&#34;,\&#34;request_id\&#34;:988}&#34;</span><span class=p>]</span> <span class=p>[</span><span class=nx>addr</span><span class=p>=</span><span class=mf>172.16.4.52</span><span class=p>:</span><span class=mi>15160</span><span class=p>]</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=nx>WARN</span><span class=p>]</span> <span class=p>[</span><span class=nx>mysql</span><span class=p>.</span><span class=k>go</span><span class=p>:</span><span class=mi>445</span><span class=p>]</span> <span class=p>[</span><span class=s>&#34;execute DMLs with error, retry later&#34;</span><span class=p>]</span> <span class=p>[</span><span class=kt>error</span><span class=p>=</span><span class=s>&#34;Error 1146: Table &#39;tpcc.district&#39; doesn&#39;t exist&#34;</span><span class=p>]</span> <span class=p>[</span><span class=nx>errorVerbose</span><span class=p>=</span><span class=s>&#34;Error 1146: Table &#39;tpcc.district&#39; doesn&#39;t exist\ngithub.com/pingcap/errors.AddStack\n\tgithub.com/pingcap/errors@v0.11.5-0.20190809092503-95897b64e011/errors.go:174\ngithub.com/pingcap/errors.Trace\n\tgithub.com/pingcap/errors@v0.11.5-0.20190809092503 -95897b64e011/juju_adaptor.go:15\ngithub.com/pingcap/ticdc/cdc/sink.(*mysqlSink).execDMLWithMaxRetries.func2.2\n\tgithub.com/pingcap/ticdc@/cdc/sink/mysql.go:461\ngithub.com/pingcap/ticdc/cdc/sink.(*Statistics) .RecordBatchExecution\n\tgithub.com/pingcap/ticdc@/cdc/sink/statistics.go:47\ngithub.com/pingcap/ticdc/cdc/sink.(*mysqlSink).execDMLWithMaxRetries.func2\n\tgithub.com/pingcap/ticdc@/cdc/sink/mysql.go:453\ngithu b.com/pingcap/ticdc/pkg/retry.Run.func1\n\tgithub.com/pingcap/ticdc@/pkg/retry/retry.go:31\ngithub.com/cenkalti/backoff.RetryNotify\n\tgithub.com/cenkalti/backoff@v2.2.1+incompatible/retry.go:37\ngithub.com/cen kalti/backoff.Retry\n\tgithub.com/cenkalti/backoff@v2.2.1+incompatible/retry.go:24\ngithub.com/pingcap/ticdc/pkg/retry.Run\n\tgithub.com/pingcap/ticdc@/pkg/retry/retry.go:30\ngithub.com/pingcap/ticdc/cdc/sink.( *mysqlSink).execDMLWithMaxRetries\n\tgithub.com/pingcap/ticdc@/cdc/sink/mysql.go:448\ngithub.com/pingcap/ticdc/cdc/sink.(*mysqlSink).execDMLs\n\tgithub.com/pingcap/ticdc@/cdc/sink/mysql.go:506\ngithub.com/pingc ap/ticdc/cdc/sink.(*mysqlSinkWorker).run\n\tgithub.com/pingcap/ticdc@/cdc/sink/mysql.go:399\nruntime.goexit\n\truntime/asm_amd64.s:1357&#34;</span><span class=p>]</span>
+</span></span></code></pre></td></tr></table></div></div><ul><li>附图两张</li></ul><p><img src=./cdc-memory.png alt="cdc-memroy ap.tidb.cc" title="cdc ap.tidb.cc"><br><img src=./cdc-uptime.png alt="cdc-uptime ap.tidb.cc" title="ap.tidb.cc cdc"></p></div><div class=post-copyright><p class=copyright-item><span class=item-title>Author</span>
+<span class=item-content>Jeff</span></p><p class=copyright-item><span class=item-title>LastMod</span>
+<span class=item-content>2020-06-01</span></p><p class=copyright-item><span class=item-title>License</span>
+<span class=item-content><a rel="license noopener" href=https://creativecommons.org/licenses/by-nc-nd/4.0/ target=_blank>CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span></p></div><footer class=post-footer><div class=post-tags><a href=/tags/airplan/>AirPlan</a>
+<a href=/tags/cdc/>CDC</a></div><nav class=post-nav><a class=prev href=/post/20200612-24-minio/><i class="iconfont icon-left"></i>
+<span class="prev-text nav-default">软件测试 - S3 协议与 minio</span>
+<span class="prev-text nav-mobile">Prev</span></a>
+<a class=next href=/post/20200529-22-tidb-4.0/><span class="next-text nav-default">TiDB - 4.0 版图分析</span>
+<span class="next-text nav-mobile">Next</span>
+<i class="iconfont icon-right"></i></a></nav></footer></article></div></div></main><footer id=footer class=footer><div class=social-links><a href=https://github.com/BigerCAP/TiDB-AirPlan/issues class="iconfont icon-github" title=github></a>
+<a href=https://ap.biger.cc/index.xml type=application/rss+xml class="iconfont icon-rss" title=rss></a></div><div class=copyright><span class=power-by>Powered by <a class=hexo-link href=https://gohugo.io>Hugo</a></span>
+<span class=division>|</span>
+<span class=theme-info>Theme -
+<a class=theme-link href=https://github.com/olOwOlo/hugo-theme-even>Even</a></span><div class=busuanzi-footer><span id=busuanzi_container_site_pv>site pv: <span id=busuanzi_value_site_pv><img src=/img/spinner.svg alt=spinner.svg></span></span>
+<span class=division>|</span>
+<span id=busuanzi_container_site_uv>site uv: <span id=busuanzi_value_site_uv><img src=/img/spinner.svg alt=spinner.svg></span></span></div><span class=copyright-year>&copy;
+2017 -
+2023
+<span class=heart><i class="iconfont icon-heart"></i></span>
+<span class=author>DB - AirPlan</span></span></div></footer><div class=back-to-top id=back-to-top><i class="iconfont icon-up"></i></div></div><script src=https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin=anonymous></script>
+<script>var languageCode="en".replace(/-/g,"_").replace(/_(.*)/,function(e,t){return e.replace(t,t.toUpperCase())});timeago().render(document.querySelectorAll(".timeago"),languageCode),timeago.cancel()</script><script type=text/javascript src=/dist/even.26188efa.min.js></script></body></html>

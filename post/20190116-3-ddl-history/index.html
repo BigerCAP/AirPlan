@@ -1,560 +1,256 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>School - TiDB table info &amp; DDL history - TiDB AirPlan - A biger solution</title>
-  <meta name="renderer" content="webkit" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-
-<meta http-equiv="Cache-Control" content="no-transform" />
-<meta http-equiv="Cache-Control" content="no-siteapp" />
-
-<meta name="theme-color" content="#f8f5ec" />
-<meta name="msapplication-navbutton-color" content="#f8f5ec">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
-
-
-<meta name="author" content="Jeff" /><meta name="description" content="0x00 元 tidb ddl 3.0 版本之前只有一个队列提供服务，所有 ddl 都要在这个队列阻塞 多个 TiDB-server 会先选举 DDL owner TiDB 配置文件中的 run-ddl = false 该节点不支持运行 DDL DDL owner 处理所有 DDL 信息 更" /><meta name="keywords" content="TiDB, AirPlan, TiDB OPS, tidb-operator, 2pc, raft, databases, mysql, htap" />
-
-
-
-
-
-
-<meta name="generator" content="Hugo 0.78.2 with theme even" />
-
-
-<link rel="canonical" href="https://ap.tidb.cc/post/20190116-3-ddl-history/" />
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="manifest" href="/manifest.json">
-<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
-
-<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-<link href="/dist/even.04bd84cd.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
-
-
-<meta property="og:title" content="School - TiDB table info &amp; DDL history" />
-<meta property="og:description" content="0x00 元 tidb ddl 3.0 版本之前只有一个队列提供服务，所有 ddl 都要在这个队列阻塞 多个 TiDB-server 会先选举 DDL owner TiDB 配置文件中的 run-ddl = false 该节点不支持运行 DDL DDL owner 处理所有 DDL 信息 更" />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://ap.tidb.cc/post/20190116-3-ddl-history/" />
-<meta property="article:published_time" content="2018-08-24T00:00:00+08:00" />
-<meta property="article:modified_time" content="2018-08-24T00:00:00+08:00" />
-<meta itemprop="name" content="School - TiDB table info &amp; DDL history">
-<meta itemprop="description" content="0x00 元 tidb ddl 3.0 版本之前只有一个队列提供服务，所有 ddl 都要在这个队列阻塞 多个 TiDB-server 会先选举 DDL owner TiDB 配置文件中的 run-ddl = false 该节点不支持运行 DDL DDL owner 处理所有 DDL 信息 更">
-<meta itemprop="datePublished" content="2018-08-24T00:00:00+08:00" />
-<meta itemprop="dateModified" content="2018-08-24T00:00:00+08:00" />
-<meta itemprop="wordCount" content="1039">
-
-
-
-<meta itemprop="keywords" content="DDL," />
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="School - TiDB table info &amp; DDL history"/>
-<meta name="twitter:description" content="0x00 元 tidb ddl 3.0 版本之前只有一个队列提供服务，所有 ddl 都要在这个队列阻塞 多个 TiDB-server 会先选举 DDL owner TiDB 配置文件中的 run-ddl = false 该节点不支持运行 DDL DDL owner 处理所有 DDL 信息 更"/>
-
-<!--[if lte IE 9]>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
-<![endif]-->
-
-<!--[if lt IE 9]>
-  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
-<![endif]-->
-
-</head>
-<body>
-  <div id="mobile-navbar" class="mobile-navbar">
-  <div class="mobile-header-logo">
-    <a href="/" class="logo">TiDB AirPlan</a>
-  </div>
-  <div class="mobile-navbar-icon">
-    <span></span>
-    <span></span>
-    <span></span>
-  </div>
-</div>
-<nav id="mobile-menu" class="mobile-menu slideout-menu">
-  <ul class="mobile-menu-list">
-    <a href="/post/">
-        <li class="mobile-menu-item">Blog</li>
-      </a><a href="/look/">
-        <li class="mobile-menu-item">Look</li>
-      </a><a href="/tags/">
-        <li class="mobile-menu-item">Tags</li>
-      </a><a href="/categories/">
-        <li class="mobile-menu-item">Categories</li>
-      </a><a href="/about/">
-        <li class="mobile-menu-item">About</li>
-      </a>
-  </ul>
-</nav>
-  <div class="container" id="mobile-panel">
-    <header id="header" class="header">
-        <div class="logo-wrapper">
-  <a href="/" class="logo">TiDB AirPlan</a>
-</div>
-
-<nav class="site-navbar">
-  <ul id="menu" class="menu">
-    <li class="menu-item">
-        <a class="menu-item-link" href="/post/">Blog</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/look/">Look</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/tags/">Tags</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/categories/">Categories</a>
-      </li><li class="menu-item">
-        <a class="menu-item-link" href="/about/">About</a>
-      </li>
-  </ul>
-</nav>
-    </header>
-
-    <main id="main" class="main">
-      <div class="content-wrapper">
-        <div id="content" class="content">
-          <article class="post">
-    
-    <header class="post-header">
-      <h1 class="post-title">School - TiDB table info &amp; DDL history</h1>
-
-      <div class="post-meta">
-        <span class="post-time"> 2018-08-24 </span>
-        <div class="post-category">
-            <a href="/categories/troubleshooting/"> troubleshooting </a>
-            </div>
-          <span class="more-meta"> 1039 words </span>
-          <span class="more-meta"> 3 mins read </span>
-        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
-      </div>
-    </header>
-
-    <div class="post-toc" id="post-toc">
-  <h2 class="post-toc-title">Contents</h2>
-  <div class="post-toc-content">
-    <nav id="TableOfContents">
-  <ul>
-    <li><a href="#0x00-元">0x00 元</a></li>
-    <li><a href="#0x01-admin-show-ddl">0x01 Admin show ddl</a></li>
-    <li><a href="#0x02-truncate">0x02 Truncate</a></li>
-    <li><a href="#0x03-json">0x03 Json</a></li>
-  </ul>
-</nav>
-  </div>
-</div>
-  <div class="post-outdated">
-    <div class="warn">
-      <p>[NOTE] Updated <span class="timeago" datetime="2018-08-24T00:00:00" title="August 24, 2018">August 24, 2018</span>. This article may have outdated content or subject matter.</p>
-    </div>
-  </div>
-    <div class="post-content">
-      <h2 id="0x00-元">0x00 元</h2>
-<blockquote>
-<p>tidb ddl 3.0 版本之前只有一个队列提供服务，所有 ddl 都要在这个队列阻塞</p>
-</blockquote>
-<ul>
-<li>多个 TiDB-server 会先选举 DDL owner
-<ul>
-<li>TiDB 配置文件中的 <code>run-ddl = false</code> 该节点不支持运行 DDL</li>
-</ul>
-</li>
-<li>DDL owner 处理所有 DDL 信息
-<ul>
-<li>更多可阅读 <a href="https://github.com/ngaut/builddatabase/blob/master/f1/schema-change-implement.md">TiDB 异步 schema 变更实现</a> 文档</li>
-<li>add index 是所有 DDL 中最耗时的</li>
-<li>其他 DDL 均为修改元数据信息，秒级以内可返回</li>
-</ul>
-</li>
-</ul>
-<p><img src="./3-ddl.jpg" alt="ap.tidb.cc TiDB 异步 schema 变更实现" title="ap.tidb.cc TiDB 异步 schema 变更实现"></p>
-<blockquote>
-<p>ddl history 功能来自 <a href="https://github.com/pingcap/tidb/blob/master/docs/tidb_http_api.md">TiDB-API</a></p>
-</blockquote>
-<ul>
-<li>通过 API 获取到指定 tidb cluster 集群“自搭建成功”到“现在运行”的所有 DDL 记录
-<ul>
-<li>早前版本数据输出时所有数据「json」都在一行，通过 jq 命令或者 python 格式化之后会比较方便查看信息</li>
-<li><a href="https://github.com/pingcap/tidb/pull/9104">PR #9104</a> 之后的版本优化了「大一行」输出</li>
-<li><del>ddl/history 早前版本获取到 DDL 的信息「不完整」，信息记录了 truncate 当前版本的变更，没有记录 truncate 变更后的信息；问题早已修复</del></li>
-</ul>
-</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-json" data-lang="json"><span class="err">#Get</span> <span class="err">all</span> <span class="err">TiDB</span> <span class="err">DDL</span> <span class="err">job</span> <span class="err">history</span> <span class="err">information.</span>
-
-<span class="err">curl</span> <span class="err">http://</span><span class="p">{</span><span class="err">TiDBIP</span><span class="p">}</span><span class="err">:</span><span class="mi">10080</span><span class="err">/ddl/history</span>
-
-<span class="err">#Get</span> <span class="err">count</span> <span class="p">{</span><span class="err">number</span><span class="p">}</span> <span class="err">TiDB</span> <span class="err">DDL</span> <span class="err">job</span> <span class="err">history</span> <span class="err">information.</span>
-
-<span class="err">curl</span> <span class="err">http://</span><span class="p">{</span><span class="err">TiDBIP</span><span class="p">}</span><span class="err">:</span><span class="mi">10080</span><span class="err">/ddl/history?limit=</span><span class="p">{</span><span class="err">number</span><span class="p">}</span>
-</code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>通过 API 获取指定 db 下所有表、指定 table id、指定 db.table 的 json 元信息</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-json" data-lang="json"><span class="err">#</span> <span class="err">Get</span> <span class="err">schema</span> <span class="err">Information</span> <span class="err">about</span> <span class="err">db</span>
-
-<span class="err">curl</span> <span class="err">http://</span><span class="p">{</span><span class="err">TiDBIP</span><span class="p">}</span><span class="err">:</span><span class="mi">10080</span><span class="err">/schema/</span><span class="p">{</span><span class="err">db</span><span class="p">}</span>
-
-
-<span class="err">#</span> <span class="err">Get</span> <span class="err">schema</span> <span class="err">Information</span> <span class="err">about</span> <span class="err">db.table,</span> <span class="err">and</span> <span class="err">you</span> <span class="err">can</span> <span class="err">get</span> <span class="err">schema</span> <span class="err">info</span> <span class="err">by</span> <span class="err">tableID</span> <span class="err">(tableID</span> <span class="err">is</span> <span class="err">the</span> <span class="err">unique</span> <span class="err">identifier</span> <span class="err">of</span> <span class="err">table</span> <span class="err">in</span> <span class="err">TiDB)</span>
-
-<span class="err">curl</span> <span class="err">http://</span><span class="p">{</span><span class="err">TiDBIP</span><span class="p">}</span><span class="err">:</span><span class="mi">10080</span><span class="err">/schema/</span><span class="p">{</span><span class="err">db</span><span class="p">}</span><span class="err">/</span><span class="p">{</span><span class="err">table</span><span class="p">}</span>
-
-<span class="err">curl</span> <span class="err">http://</span><span class="p">{</span><span class="err">TiDBIP</span><span class="p">}</span><span class="err">:</span><span class="mi">10080</span><span class="err">/schema?table_id=</span><span class="p">{</span><span class="err">tableID</span><span class="p">}</span>
-</code></pre></td></tr></table>
-</div>
-</div><h2 id="0x01-admin-show-ddl">0x01 Admin show ddl</h2>
-<p>TiDB-server 除 API 功能还有个 <a href="https://docs.pingcap.com/tidb/stable/sql-statement-admin#admin-show-ddl">admin show ddl jobs 与 admin show ddl jobs 100</a>(该语句需要 3.0 版本以上，输出最近 100 条信息)</p>
-<p><img src="./2-admin.png" alt="ap.tidb.cc truncare table ddl admin show ddl jobs " title="ap.tidb.cc truncare table ddl admin show ddl jobs"></p>
-<h2 id="0x02-truncate">0x02 Truncate</h2>
-<ul>
-<li>truncate table DDL 操作是通过 DROP table + Create table 组成实现，table id 会紧随更改 「DDL 操作 “元信息” 数据」
-<ul>
-<li>图片中的首行 ID 是 DDL job ID</li>
-<li>每次 truncate table 后的 table_id 会变化「scheme id、table id 、ddl job id 共用同一套计数器」</li>
-</ul>
-</li>
-</ul>
-<p><img src="./1-truncate.png" alt="ap.tidb.cc truncare table ddl" title="ap.tidb.cc truncare table ddl"></p>
-<h2 id="0x03-json">0x03 Json</h2>
-<ul>
-<li>以下为某张表的元信息展示「通过 tidb 4.0 补测」</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span><span class="lnt">33
-</span><span class="lnt">34
-</span><span class="lnt">35
-</span><span class="lnt">36
-</span><span class="lnt">37
-</span><span class="lnt">38
-</span><span class="lnt">39
-</span><span class="lnt">40
-</span><span class="lnt">41
-</span><span class="lnt">42
-</span><span class="lnt">43
-</span><span class="lnt">44
-</span><span class="lnt">45
-</span><span class="lnt">46
-</span><span class="lnt">47
-</span><span class="lnt">48
-</span><span class="lnt">49
-</span><span class="lnt">50
-</span><span class="lnt">51
-</span><span class="lnt">52
-</span><span class="lnt">53
-</span><span class="lnt">54
-</span><span class="lnt">55
-</span><span class="lnt">56
-</span><span class="lnt">57
-</span><span class="lnt">58
-</span><span class="lnt">59
-</span><span class="lnt">60
-</span><span class="lnt">61
-</span><span class="lnt">62
-</span><span class="lnt">63
-</span><span class="lnt">64
-</span><span class="lnt">65
-</span><span class="lnt">66
-</span><span class="lnt">67
-</span><span class="lnt">68
-</span><span class="lnt">69
-</span><span class="lnt">70
-</span><span class="lnt">71
-</span><span class="lnt">72
-</span><span class="lnt">73
-</span><span class="lnt">74
-</span><span class="lnt">75
-</span><span class="lnt">76
-</span><span class="lnt">77
-</span><span class="lnt">78
-</span><span class="lnt">79
-</span><span class="lnt">80
-</span><span class="lnt">81
-</span><span class="lnt">82
-</span><span class="lnt">83
-</span><span class="lnt">84
-</span><span class="lnt">85
-</span><span class="lnt">86
-</span><span class="lnt">87
-</span><span class="lnt">88
-</span><span class="lnt">89
-</span><span class="lnt">90
-</span><span class="lnt">91
-</span><span class="lnt">92
-</span><span class="lnt">93
-</span><span class="lnt">94
-</span><span class="lnt">95
-</span><span class="lnt">96
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-json" data-lang="json"><span class="p">{</span>
- <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="mi">47</span><span class="p">,</span>          <span class="err">//</span> <span class="err">table</span> <span class="err">id</span>
- <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="p">{</span>
-  <span class="nt">&#34;O&#34;</span><span class="p">:</span> <span class="s2">&#34;sbtest1&#34;</span><span class="p">,</span>  <span class="err">//</span> <span class="err">原始输入展示</span>
-  <span class="nt">&#34;L&#34;</span><span class="p">:</span> <span class="s2">&#34;sbtest1&#34;</span>   <span class="err">//</span> <span class="err">程序强转小写展示</span>
- <span class="p">},</span>
- <span class="nt">&#34;charset&#34;</span><span class="p">:</span> <span class="s2">&#34;utf8mb4&#34;</span><span class="p">,</span>
- <span class="nt">&#34;collate&#34;</span><span class="p">:</span> <span class="s2">&#34;utf8mb4_bin&#34;</span><span class="p">,</span>
- <span class="nt">&#34;cols&#34;</span><span class="p">:</span> <span class="p">[</span>
-  <span class="p">{</span>
-   <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>         <span class="err">//</span> <span class="err">列</span> <span class="err">id</span>
-   <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="p">{</span>        <span class="err">//</span> <span class="err">列名</span>
-    <span class="nt">&#34;O&#34;</span><span class="p">:</span> <span class="s2">&#34;k&#34;</span><span class="p">,</span>
-    <span class="nt">&#34;L&#34;</span><span class="p">:</span> <span class="s2">&#34;k&#34;</span>
-   <span class="p">},</span>
-   <span class="nt">&#34;offset&#34;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>     <span class="err">//</span> <span class="err">以下为</span> <span class="err">列关键特性</span>
-   <span class="nt">&#34;origin_default&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-   <span class="nt">&#34;origin_default_bit&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-   <span class="nt">&#34;default&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-   <span class="nt">&#34;default_bit&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-   <span class="nt">&#34;default_is_expr&#34;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-   <span class="nt">&#34;generated_expr_string&#34;</span><span class="p">:</span> <span class="s2">&#34;&#34;</span><span class="p">,</span>
-   <span class="nt">&#34;generated_stored&#34;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-   <span class="nt">&#34;dependences&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-   <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="p">{</span>
-    <span class="nt">&#34;Tp&#34;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
-    <span class="nt">&#34;Flag&#34;</span><span class="p">:</span> <span class="mi">515</span><span class="p">,</span>
-    <span class="nt">&#34;Flen&#34;</span><span class="p">:</span> <span class="mi">11</span><span class="p">,</span>
-    <span class="nt">&#34;Decimal&#34;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-    <span class="nt">&#34;Charset&#34;</span><span class="p">:</span> <span class="s2">&#34;binary&#34;</span><span class="p">,</span>
-    <span class="nt">&#34;Collate&#34;</span><span class="p">:</span> <span class="s2">&#34;binary&#34;</span><span class="p">,</span>
-    <span class="nt">&#34;Elems&#34;</span><span class="p">:</span> <span class="kc">null</span>
-   <span class="p">},</span>
-   <span class="nt">&#34;state&#34;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-   <span class="nt">&#34;comment&#34;</span><span class="p">:</span> <span class="s2">&#34;&#34;</span><span class="p">,</span>
-   <span class="nt">&#34;hidden&#34;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-   <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="mi">2</span>
-  <span class="p">},</span>
-
- <span class="p">],</span>
- <span class="nt">&#34;index_info&#34;</span><span class="p">:</span> <span class="p">[</span>        <span class="err">//</span> <span class="err">index</span> <span class="err">信息</span>
-  <span class="p">{</span>
-   <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-   <span class="nt">&#34;idx_name&#34;</span><span class="p">:</span> <span class="p">{</span>
-    <span class="nt">&#34;O&#34;</span><span class="p">:</span> <span class="s2">&#34;k_1&#34;</span><span class="p">,</span>
-    <span class="nt">&#34;L&#34;</span><span class="p">:</span> <span class="s2">&#34;k_1&#34;</span>
-   <span class="p">},</span>
-   <span class="nt">&#34;tbl_name&#34;</span><span class="p">:</span> <span class="p">{</span>
-    <span class="nt">&#34;O&#34;</span><span class="p">:</span> <span class="s2">&#34;&#34;</span><span class="p">,</span>
-    <span class="nt">&#34;L&#34;</span><span class="p">:</span> <span class="s2">&#34;&#34;</span>
-   <span class="p">},</span>
-   <span class="nt">&#34;idx_cols&#34;</span><span class="p">:</span> <span class="p">[</span>
-    <span class="p">{</span>
-     <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="p">{</span>
-      <span class="nt">&#34;O&#34;</span><span class="p">:</span> <span class="s2">&#34;k&#34;</span><span class="p">,</span>
-      <span class="nt">&#34;L&#34;</span><span class="p">:</span> <span class="s2">&#34;k&#34;</span>
-     <span class="p">},</span>
-     <span class="nt">&#34;offset&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-     <span class="nt">&#34;length&#34;</span><span class="p">:</span> <span class="mi">-1</span>
-    <span class="p">}</span>
-   <span class="p">],</span>
-   <span class="nt">&#34;state&#34;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-   <span class="nt">&#34;comment&#34;</span><span class="p">:</span> <span class="s2">&#34;&#34;</span><span class="p">,</span>
-   <span class="nt">&#34;index_type&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-   <span class="nt">&#34;is_unique&#34;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-   <span class="nt">&#34;is_primary&#34;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-   <span class="nt">&#34;is_invisible&#34;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-   <span class="nt">&#34;is_global&#34;</span><span class="p">:</span> <span class="kc">false</span>
-  <span class="p">}</span>
- <span class="p">],</span>                             <span class="err">//</span> <span class="err">以下为</span> <span class="err">tidb</span> <span class="err">在</span> <span class="err">table</span> <span class="err">级别的特性</span>
- <span class="nt">&#34;constraint_info&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>       <span class="err">//</span> <span class="err">4.0</span> <span class="err">的新字符集架构</span>
- <span class="nt">&#34;fk_info&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>               <span class="err">//</span> <span class="err">盲猜</span> <span class="err">foreign</span> <span class="err">key</span>
- <span class="nt">&#34;state&#34;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
- <span class="nt">&#34;pk_is_handle&#34;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>          <span class="err">//</span> <span class="err">int</span> <span class="err">类型的</span> <span class="err">PK</span> <span class="err">==</span> <span class="err">true</span>
- <span class="nt">&#34;is_common_handle&#34;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>     <span class="err">//</span> <span class="err">varchar</span> <span class="err">类型的</span> <span class="err">PK</span> <span class="err">或者联合主键</span> <span class="err">==</span> <span class="err">true</span>
-                    <span class="err">//</span> <span class="err">表未设置主键时</span> <span class="err">pk_is_handle</span> <span class="err">&amp;</span> <span class="err">is_common_handle</span> <span class="err">均为</span> <span class="err">false</span>
- <span class="nt">&#34;comment&#34;</span><span class="p">:</span> <span class="s2">&#34;&#34;</span><span class="p">,</span>
- <span class="nt">&#34;auto_inc_id&#34;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>          <span class="err">//</span> <span class="err">AUTO_INCREMENT</span> <span class="err">功能</span>
- <span class="nt">&#34;auto_id_cache&#34;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>        <span class="err">//</span> <span class="err">AUTO_ID_CACHE</span> <span class="err">自增</span> <span class="err">ID</span> <span class="err">缓存功能</span>
- <span class="nt">&#34;auto_rand_id&#34;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>         <span class="err">//</span> <span class="err">AUTO_RANDOM</span> <span class="err">功能</span>
- <span class="nt">&#34;max_col_id&#34;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
- <span class="nt">&#34;max_idx_id&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
- <span class="nt">&#34;max_cst_id&#34;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
- <span class="nt">&#34;update_timestamp&#34;</span><span class="p">:</span> <span class="mi">418539877049565193</span><span class="p">,</span>
- <span class="nt">&#34;ShardRowIDBits&#34;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>       <span class="err">//</span> <span class="err">SHARD_ROW_ID_BITS</span> <span class="err">功能</span>
- <span class="nt">&#34;max_shard_row_id_bits&#34;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
- <span class="nt">&#34;auto_random_bits&#34;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>     <span class="err">//</span> <span class="err">与</span> <span class="err">shard</span> <span class="err">row</span> <span class="err">id</span> <span class="err">bits</span> <span class="err">结合使用</span>
- <span class="nt">&#34;pre_split_regions&#34;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>    <span class="err">//</span> <span class="err">pre</span> <span class="err">split</span> <span class="err">预打散</span> <span class="err">table</span> <span class="err">region</span> <span class="err">功能</span>
- <span class="nt">&#34;partition&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>         <span class="err">//</span> <span class="err">是否为分区表</span>
- <span class="nt">&#34;compression&#34;</span><span class="p">:</span> <span class="s2">&#34;&#34;</span><span class="p">,</span>         <span class="err">//</span> <span class="err">该表是否启用</span> <span class="err">「COMPRESSION</span> <span class="err">[=]</span> <span class="err">{&#39;ZLIB&#39;|&#39;LZ4&#39;|&#39;NONE&#39;</span><span class="p">}</span><span class="err">」</span> <span class="err">属性</span>
- <span class="s2">&#34;view&#34;</span><span class="err">:</span> <span class="kc">null</span><span class="err">,</span>              <span class="err">//</span> <span class="err">视图功能</span>
- <span class="s2">&#34;sequence&#34;</span><span class="err">:</span> <span class="kc">null</span><span class="err">,</span>          <span class="err">//</span> <span class="err">sequence</span> <span class="err">功能</span>
- <span class="s2">&#34;Lock&#34;</span><span class="err">:</span> <span class="kc">null</span><span class="err">,</span>              <span class="err">//</span> <span class="err">盲猜</span> <span class="err">table</span> <span class="err">lock，无证实</span>
- <span class="s2">&#34;version&#34;</span><span class="err">:</span> <span class="mi">3</span><span class="err">,</span>
- <span class="s2">&#34;tiflash_replica&#34;</span><span class="err">:</span> <span class="kc">null</span>    <span class="err">//</span> <span class="err">tiflash</span> <span class="err">列存副本</span>
-<span class="err">}</span>
-</code></pre></td></tr></table>
-</div>
-</div>
-    </div>
-
-    <div class="post-copyright">
-  <p class="copyright-item">
-    <span class="item-title">Author</span>
-    <span class="item-content">Jeff</span>
-  </p>
-  <p class="copyright-item">
-    <span class="item-title">LastMod</span>
-    <span class="item-content">
-        2018-08-24
-        
-    </span>
-  </p>
-  
-  <p class="copyright-item">
-    <span class="item-title">License</span>
-    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span>
-  </p>
-</div>
-<footer class="post-footer">
-      <div class="post-tags">
-          <a href="/tags/ddl/">DDL</a>
-          </div>
-      <nav class="post-nav">
-        <a class="prev" href="/post/20180824-34-region-spilt/">
-            <i class="iconfont icon-left"></i>
-            <span class="prev-text nav-default">School - TiDB Region Spilt</span>
-            <span class="prev-text nav-mobile">Prev</span>
-          </a>
-        <a class="next" href="/post/20180807-32-write-stall/">
-            <span class="next-text nav-default">School - TiKV write stall</span>
-            <span class="next-text nav-mobile">Next</span>
-            <i class="iconfont icon-right"></i>
-          </a>
-      </nav>
-    </footer>
-  </article>
-        </div>
-        
-
-  
-
-  
-
-      </div>
-    </main>
-
-    <footer id="footer" class="footer">
-      <div class="social-links">
-      <a href="https://github.com/BigerCAP/TiDB-AirPlan/issues" class="iconfont icon-github" title="github"></a>
-  <a href="https://ap.tidb.cc/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
-</div>
-
-<div class="copyright">
-  <span class="power-by">
-    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
-  </span>
-  <span class="division">|</span>
-  <span class="theme-info">
-    Theme - 
-    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
-  </span>
-
-  <div class="busuanzi-footer">
-    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
-      <span class="division">|</span>
-    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
-  </div>
-
-  <span class="copyright-year">
-    &copy; 
-    2017 - 
-    2020
-    <span class="heart">
-      <i class="iconfont icon-heart"></i>
-    </span>
-    <span class="author">TiDB - AirPlan</span>
-  </span>
-</div>
-    </footer>
-
-    <div class="back-to-top" id="back-to-top">
-      <i class="iconfont icon-up"></i>
-    </div>
-  </div>
-  
-  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js" integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js" integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin="anonymous"></script>
-  <script><!-- NOTE: timeago.js uses the language code format like "zh_CN" (underscore and case sensitive) -->
-    var languageCode = "en".replace(/-/g, '_').replace(/_(.*)/, function ($0, $1) {return $0.replace($1, $1.toUpperCase());});
-    timeago().render(document.querySelectorAll('.timeago'), languageCode);
-    timeago.cancel();  
-  </script>
-<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
-
-
-
-
-
-
-
-
-</body>
-</html>
+<!doctype html><html lang=en><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge,chrome=1"><title>School - TiDB table info & DDL history - AirPlan - A biger solution</title><meta name=renderer content="webkit"><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta http-equiv=cache-control content="no-transform"><meta http-equiv=cache-control content="no-siteapp"><meta name=theme-color content="#f8f5ec"><meta name=msapplication-navbutton-color content="#f8f5ec"><meta name=apple-mobile-web-app-capable content="yes"><meta name=apple-mobile-web-app-status-bar-style content="#f8f5ec"><meta name=author content="Jeff"><meta name=description content="0x00 元 tidb ddl 3.0 版本之前只有一个队列提供服务，所有 ddl 都要在这个队列阻塞 多个 TiDB-server 会先选举 DDL owner TiDB 配置文件中的 run-ddl = false 该节点不支持运行 DDL DDL owner 处理所有 DDL 信息 更"><meta name=keywords content="TiDB,AirPlan,TiDB OPS,tidb-operator,2pc,raft,databases,mysql,htap"><meta name=generator content="Hugo 0.110.0 with theme even"><link rel=canonical href=https://ap.biger.cc/post/20190116-3-ddl-history/><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/manifest.json><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><script async src=//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js></script>
+<link href=/dist/even.04bd84cd.min.css rel=stylesheet><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin=anonymous><meta property="og:title" content="School - TiDB table info & DDL history"><meta property="og:description" content="0x00 元 tidb ddl 3.0 版本之前只有一个队列提供服务，所有 ddl 都要在这个队列阻塞 多个 TiDB-server 会先选举 DDL owner TiDB 配置文件中的 run-ddl = false 该节点不支持运行 DDL DDL owner 处理所有 DDL 信息 更"><meta property="og:type" content="article"><meta property="og:url" content="https://ap.biger.cc/post/20190116-3-ddl-history/"><meta property="article:section" content="post"><meta property="article:published_time" content="2018-08-24T00:00:00+08:00"><meta property="article:modified_time" content="2018-08-24T00:00:00+08:00"><meta itemprop=name content="School - TiDB table info & DDL history"><meta itemprop=description content="0x00 元 tidb ddl 3.0 版本之前只有一个队列提供服务，所有 ddl 都要在这个队列阻塞 多个 TiDB-server 会先选举 DDL owner TiDB 配置文件中的 run-ddl = false 该节点不支持运行 DDL DDL owner 处理所有 DDL 信息 更"><meta itemprop=datePublished content="2018-08-24T00:00:00+08:00"><meta itemprop=dateModified content="2018-08-24T00:00:00+08:00"><meta itemprop=wordCount content="1039"><meta itemprop=keywords content="DDL,"><meta name=twitter:card content="summary"><meta name=twitter:title content="School - TiDB table info & DDL history"><meta name=twitter:description content="0x00 元 tidb ddl 3.0 版本之前只有一个队列提供服务，所有 ddl 都要在这个队列阻塞 多个 TiDB-server 会先选举 DDL owner TiDB 配置文件中的 run-ddl = false 该节点不支持运行 DDL DDL owner 处理所有 DDL 信息 更"><!--[if lte IE 9]><script src=https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js></script><![endif]--><!--[if lt IE 9]><script src=https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js></script>
+<script src=https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js></script><![endif]--></head><body><div id=mobile-navbar class=mobile-navbar><div class=mobile-header-logo><a href=/ class=logo>AirPlan</a></div><div class=mobile-navbar-icon><span></span>
+<span></span>
+<span></span></div></div><nav id=mobile-menu class="mobile-menu slideout-menu"><ul class=mobile-menu-list><a href=/post/><li class=mobile-menu-item>Blog</li></a><a href=/look/><li class=mobile-menu-item>Look</li></a><a href=/tags/><li class=mobile-menu-item>Tags</li></a><a href=/categories/><li class=mobile-menu-item>Categories</li></a><a href=/about/><li class=mobile-menu-item>About</li></a></ul></nav><div class=container id=mobile-panel><header id=header class=header><div class=logo-wrapper><a href=/ class=logo>AirPlan</a></div><nav class=site-navbar><ul id=menu class=menu><li class=menu-item><a class=menu-item-link href=/post/>Blog</a></li><li class=menu-item><a class=menu-item-link href=/look/>Look</a></li><li class=menu-item><a class=menu-item-link href=/tags/>Tags</a></li><li class=menu-item><a class=menu-item-link href=/categories/>Categories</a></li><li class=menu-item><a class=menu-item-link href=/about/>About</a></li></ul></nav></header><main id=main class=main><div class=content-wrapper><div id=content class=content><article class=post><header class=post-header><h1 class=post-title>School - TiDB table info & DDL history</h1><div class=post-meta><span class=post-time>2018-08-24</span><div class=post-category><a href=/categories/troubleshooting/>troubleshooting</a></div><span class=more-meta>1039 words</span>
+<span class=more-meta>3 mins read</span>
+<span id=busuanzi_container_page_pv class=more-meta><span id=busuanzi_value_page_pv><img src=/img/spinner.svg alt=spinner.svg></span> times read</span></div></header><div class=post-toc id=post-toc><h2 class=post-toc-title>Contents</h2><div class=post-toc-content><nav id=TableOfContents><ul><li><a href=#0x00-元>0x00 元</a></li><li><a href=#0x01-admin-show-ddl>0x01 Admin show ddl</a></li><li><a href=#0x02-truncate>0x02 Truncate</a></li><li><a href=#0x03-json>0x03 Json</a></li></ul></nav></div></div><div class=post-outdated><div class=warn><p>[NOTE] Updated <span class=timeago datetime=2018-08-24T00:00:00 title="August 24, 2018">August 24, 2018</span>. This article may have outdated content or subject matter.</p></div></div><div class=post-content><h2 id=0x00-元>0x00 元</h2><blockquote><p>tidb ddl 3.0 版本之前只有一个队列提供服务，所有 ddl 都要在这个队列阻塞</p></blockquote><ul><li>多个 TiDB-server 会先选举 DDL owner<ul><li>TiDB 配置文件中的 <code>run-ddl = false</code> 该节点不支持运行 DDL</li></ul></li><li>DDL owner 处理所有 DDL 信息<ul><li>更多可阅读 <a href=https://github.com/ngaut/builddatabase/blob/master/f1/schema-change-implement.md>TiDB 异步 schema 变更实现</a> 文档</li><li>add index 是所有 DDL 中最耗时的</li><li>其他 DDL 均为修改元数据信息，秒级以内可返回</li></ul></li></ul><p><img src=./3-ddl.jpg alt="ap.tidb.cc TiDB 异步 schema 变更实现" title="ap.tidb.cc TiDB 异步 schema 变更实现"></p><blockquote><p>ddl history 功能来自 <a href=https://github.com/pingcap/tidb/blob/master/docs/tidb_http_api.md>TiDB-API</a></p></blockquote><ul><li>通过 API 获取到指定 tidb cluster 集群“自搭建成功”到“现在运行”的所有 DDL 记录<ul><li>早前版本数据输出时所有数据「json」都在一行，通过 jq 命令或者 python 格式化之后会比较方便查看信息</li><li><a href=https://github.com/pingcap/tidb/pull/9104>PR #9104</a> 之后的版本优化了「大一行」输出</li><li><del>ddl/history 早前版本获取到 DDL 的信息「不完整」，信息记录了 truncate 当前版本的变更，没有记录 truncate 变更后的信息；问题早已修复</del></li></ul></li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-json data-lang=json><span class=line><span class=cl><span class=err>#Get</span> <span class=err>all</span> <span class=err>TiDB</span> <span class=err>DDL</span> <span class=err>job</span> <span class=err>history</span> <span class=err>information.</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=err>curl</span> <span class=err>http:</span><span class=c1>//{TiDBIP}:10080/ddl/history
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl><span class=err>#Get</span> <span class=err>count</span> <span class=p>{</span><span class=err>number</span><span class=p>}</span> <span class=err>TiDB</span> <span class=err>DDL</span> <span class=err>job</span> <span class=err>history</span> <span class=err>information.</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=err>curl</span> <span class=err>http:</span><span class=c1>//{TiDBIP}:10080/ddl/history?limit={number}
+</span></span></span></code></pre></td></tr></table></div></div><ul><li>通过 API 获取指定 db 下所有表、指定 table id、指定 db.table 的 json 元信息</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-json data-lang=json><span class=line><span class=cl><span class=err>#</span> <span class=err>Get</span> <span class=err>schema</span> <span class=err>Information</span> <span class=err>about</span> <span class=err>db</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=err>curl</span> <span class=err>http:</span><span class=c1>//{TiDBIP}:10080/schema/{db}
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=err>#</span> <span class=err>Get</span> <span class=err>schema</span> <span class=err>Information</span> <span class=err>about</span> <span class=err>db.table,</span> <span class=err>and</span> <span class=err>you</span> <span class=err>can</span> <span class=err>get</span> <span class=err>schema</span> <span class=err>info</span> <span class=err>by</span> <span class=err>tableID</span> <span class=err>(tableID</span> <span class=err>is</span> <span class=err>the</span> <span class=err>unique</span> <span class=err>identifier</span> <span class=err>of</span> <span class=err>table</span> <span class=err>in</span> <span class=err>TiDB)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=err>curl</span> <span class=err>http:</span><span class=c1>//{TiDBIP}:10080/schema/{db}/{table}
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl><span class=err>curl</span> <span class=err>http:</span><span class=c1>//{TiDBIP}:10080/schema?table_id={tableID}
+</span></span></span></code></pre></td></tr></table></div></div><h2 id=0x01-admin-show-ddl>0x01 Admin show ddl</h2><p>TiDB-server 除 API 功能还有个 <a href=https://docs.pingcap.com/tidb/stable/sql-statement-admin#admin-show-ddl>admin show ddl jobs 与 admin show ddl jobs 100</a>(该语句需要 3.0 版本以上，输出最近 100 条信息)</p><p><img src=./2-admin.png alt="ap.tidb.cc truncare table ddl admin show ddl jobs " title="ap.tidb.cc truncare table ddl admin show ddl jobs"></p><h2 id=0x02-truncate>0x02 Truncate</h2><ul><li>truncate table DDL 操作是通过 DROP table + Create table 组成实现，table id 会紧随更改 「DDL 操作 “元信息” 数据」<ul><li>图片中的首行 ID 是 DDL job ID</li><li>每次 truncate table 后的 table_id 会变化「scheme id、table id 、ddl job id 共用同一套计数器」</li></ul></li></ul><p><img src=./1-truncate.png alt="ap.tidb.cc truncare table ddl" title="ap.tidb.cc truncare table ddl"></p><h2 id=0x03-json>0x03 Json</h2><ul><li>以下为某张表的元信息展示「通过 tidb 4.0 补测」</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span><span class=lnt>56
+</span><span class=lnt>57
+</span><span class=lnt>58
+</span><span class=lnt>59
+</span><span class=lnt>60
+</span><span class=lnt>61
+</span><span class=lnt>62
+</span><span class=lnt>63
+</span><span class=lnt>64
+</span><span class=lnt>65
+</span><span class=lnt>66
+</span><span class=lnt>67
+</span><span class=lnt>68
+</span><span class=lnt>69
+</span><span class=lnt>70
+</span><span class=lnt>71
+</span><span class=lnt>72
+</span><span class=lnt>73
+</span><span class=lnt>74
+</span><span class=lnt>75
+</span><span class=lnt>76
+</span><span class=lnt>77
+</span><span class=lnt>78
+</span><span class=lnt>79
+</span><span class=lnt>80
+</span><span class=lnt>81
+</span><span class=lnt>82
+</span><span class=lnt>83
+</span><span class=lnt>84
+</span><span class=lnt>85
+</span><span class=lnt>86
+</span><span class=lnt>87
+</span><span class=lnt>88
+</span><span class=lnt>89
+</span><span class=lnt>90
+</span><span class=lnt>91
+</span><span class=lnt>92
+</span><span class=lnt>93
+</span><span class=lnt>94
+</span><span class=lnt>95
+</span><span class=lnt>96
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-json data-lang=json><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl> <span class=nt>&#34;id&#34;</span><span class=p>:</span> <span class=mi>47</span><span class=p>,</span>          <span class=c1>// table id
+</span></span></span><span class=line><span class=cl><span class=c1></span> <span class=nt>&#34;name&#34;</span><span class=p>:</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=nt>&#34;O&#34;</span><span class=p>:</span> <span class=s2>&#34;sbtest1&#34;</span><span class=p>,</span>  <span class=c1>// 原始输入展示
+</span></span></span><span class=line><span class=cl><span class=c1></span>  <span class=nt>&#34;L&#34;</span><span class=p>:</span> <span class=s2>&#34;sbtest1&#34;</span>   <span class=c1>// 程序强转小写展示
+</span></span></span><span class=line><span class=cl><span class=c1></span> <span class=p>},</span>
+</span></span><span class=line><span class=cl> <span class=nt>&#34;charset&#34;</span><span class=p>:</span> <span class=s2>&#34;utf8mb4&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl> <span class=nt>&#34;collate&#34;</span><span class=p>:</span> <span class=s2>&#34;utf8mb4_bin&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl> <span class=nt>&#34;cols&#34;</span><span class=p>:</span> <span class=p>[</span>
+</span></span><span class=line><span class=cl>  <span class=p>{</span>
+</span></span><span class=line><span class=cl>   <span class=nt>&#34;id&#34;</span><span class=p>:</span> <span class=mi>1</span><span class=p>,</span>         <span class=c1>// 列 id
+</span></span></span><span class=line><span class=cl><span class=c1></span>   <span class=nt>&#34;name&#34;</span><span class=p>:</span> <span class=p>{</span>        <span class=c1>// 列名
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=nt>&#34;O&#34;</span><span class=p>:</span> <span class=s2>&#34;k&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;L&#34;</span><span class=p>:</span> <span class=s2>&#34;k&#34;</span>
+</span></span><span class=line><span class=cl>   <span class=p>},</span>
+</span></span><span class=line><span class=cl>   <span class=nt>&#34;offset&#34;</span><span class=p>:</span> <span class=mi>0</span><span class=p>,</span>     <span class=c1>// 以下为 列关键特性
+</span></span></span><span class=line><span class=cl><span class=c1></span>   <span class=nt>&#34;origin_default&#34;</span><span class=p>:</span> <span class=kc>null</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>   <span class=nt>&#34;origin_default_bit&#34;</span><span class=p>:</span> <span class=kc>null</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>   <span class=nt>&#34;default&#34;</span><span class=p>:</span> <span class=kc>null</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>   <span class=nt>&#34;default_bit&#34;</span><span class=p>:</span> <span class=kc>null</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>   <span class=nt>&#34;default_is_expr&#34;</span><span class=p>:</span> <span class=kc>false</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>   <span class=nt>&#34;generated_expr_string&#34;</span><span class=p>:</span> <span class=s2>&#34;&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>   <span class=nt>&#34;generated_stored&#34;</span><span class=p>:</span> <span class=kc>false</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>   <span class=nt>&#34;dependences&#34;</span><span class=p>:</span> <span class=kc>null</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>   <span class=nt>&#34;type&#34;</span><span class=p>:</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;Tp&#34;</span><span class=p>:</span> <span class=mi>3</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;Flag&#34;</span><span class=p>:</span> <span class=mi>515</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;Flen&#34;</span><span class=p>:</span> <span class=mi>11</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;Decimal&#34;</span><span class=p>:</span> <span class=mi>0</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;Charset&#34;</span><span class=p>:</span> <span class=s2>&#34;binary&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;Collate&#34;</span><span class=p>:</span> <span class=s2>&#34;binary&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;Elems&#34;</span><span class=p>:</span> <span class=kc>null</span>
+</span></span><span class=line><span class=cl>   <span class=p>},</span>
+</span></span><span class=line><span class=cl>   <span class=nt>&#34;state&#34;</span><span class=p>:</span> <span class=mi>5</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>   <span class=nt>&#34;comment&#34;</span><span class=p>:</span> <span class=s2>&#34;&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>   <span class=nt>&#34;hidden&#34;</span><span class=p>:</span> <span class=kc>false</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>   <span class=nt>&#34;version&#34;</span><span class=p>:</span> <span class=mi>2</span>
+</span></span><span class=line><span class=cl>  <span class=p>},</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl> <span class=p>],</span>
+</span></span><span class=line><span class=cl> <span class=nt>&#34;index_info&#34;</span><span class=p>:</span> <span class=p>[</span>        <span class=c1>// index 信息
+</span></span></span><span class=line><span class=cl><span class=c1></span>  <span class=p>{</span>
+</span></span><span class=line><span class=cl>   <span class=nt>&#34;id&#34;</span><span class=p>:</span> <span class=mi>1</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>   <span class=nt>&#34;idx_name&#34;</span><span class=p>:</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;O&#34;</span><span class=p>:</span> <span class=s2>&#34;k_1&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;L&#34;</span><span class=p>:</span> <span class=s2>&#34;k_1&#34;</span>
+</span></span><span class=line><span class=cl>   <span class=p>},</span>
+</span></span><span class=line><span class=cl>   <span class=nt>&#34;tbl_name&#34;</span><span class=p>:</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;O&#34;</span><span class=p>:</span> <span class=s2>&#34;&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;L&#34;</span><span class=p>:</span> <span class=s2>&#34;&#34;</span>
+</span></span><span class=line><span class=cl>   <span class=p>},</span>
+</span></span><span class=line><span class=cl>   <span class=nt>&#34;idx_cols&#34;</span><span class=p>:</span> <span class=p>[</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>     <span class=nt>&#34;name&#34;</span><span class=p>:</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>      <span class=nt>&#34;O&#34;</span><span class=p>:</span> <span class=s2>&#34;k&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>      <span class=nt>&#34;L&#34;</span><span class=p>:</span> <span class=s2>&#34;k&#34;</span>
+</span></span><span class=line><span class=cl>     <span class=p>},</span>
+</span></span><span class=line><span class=cl>     <span class=nt>&#34;offset&#34;</span><span class=p>:</span> <span class=mi>1</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>     <span class=nt>&#34;length&#34;</span><span class=p>:</span> <span class=mi>-1</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>   <span class=p>],</span>
+</span></span><span class=line><span class=cl>   <span class=nt>&#34;state&#34;</span><span class=p>:</span> <span class=mi>5</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>   <span class=nt>&#34;comment&#34;</span><span class=p>:</span> <span class=s2>&#34;&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>   <span class=nt>&#34;index_type&#34;</span><span class=p>:</span> <span class=mi>1</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>   <span class=nt>&#34;is_unique&#34;</span><span class=p>:</span> <span class=kc>false</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>   <span class=nt>&#34;is_primary&#34;</span><span class=p>:</span> <span class=kc>false</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>   <span class=nt>&#34;is_invisible&#34;</span><span class=p>:</span> <span class=kc>false</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>   <span class=nt>&#34;is_global&#34;</span><span class=p>:</span> <span class=kc>false</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl> <span class=p>],</span>                             <span class=c1>// 以下为 tidb 在 table 级别的特性
+</span></span></span><span class=line><span class=cl><span class=c1></span> <span class=nt>&#34;constraint_info&#34;</span><span class=p>:</span> <span class=kc>null</span><span class=p>,</span>       <span class=c1>// 4.0 的新字符集架构
+</span></span></span><span class=line><span class=cl><span class=c1></span> <span class=nt>&#34;fk_info&#34;</span><span class=p>:</span> <span class=kc>null</span><span class=p>,</span>               <span class=c1>// 盲猜 foreign key
+</span></span></span><span class=line><span class=cl><span class=c1></span> <span class=nt>&#34;state&#34;</span><span class=p>:</span> <span class=mi>5</span><span class=p>,</span>
+</span></span><span class=line><span class=cl> <span class=nt>&#34;pk_is_handle&#34;</span><span class=p>:</span> <span class=kc>true</span><span class=p>,</span>          <span class=c1>// int 类型的 PK == true
+</span></span></span><span class=line><span class=cl><span class=c1></span> <span class=nt>&#34;is_common_handle&#34;</span><span class=p>:</span> <span class=kc>false</span><span class=p>,</span>     <span class=c1>// varchar 类型的 PK 或者联合主键 == true
+</span></span></span><span class=line><span class=cl><span class=c1></span>                    <span class=c1>// 表未设置主键时 pk_is_handle &amp; is_common_handle 均为 false
+</span></span></span><span class=line><span class=cl><span class=c1></span> <span class=nt>&#34;comment&#34;</span><span class=p>:</span> <span class=s2>&#34;&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl> <span class=nt>&#34;auto_inc_id&#34;</span><span class=p>:</span> <span class=mi>0</span><span class=p>,</span>          <span class=c1>// AUTO_INCREMENT 功能
+</span></span></span><span class=line><span class=cl><span class=c1></span> <span class=nt>&#34;auto_id_cache&#34;</span><span class=p>:</span> <span class=mi>0</span><span class=p>,</span>        <span class=c1>// AUTO_ID_CACHE 自增 ID 缓存功能
+</span></span></span><span class=line><span class=cl><span class=c1></span> <span class=nt>&#34;auto_rand_id&#34;</span><span class=p>:</span> <span class=mi>0</span><span class=p>,</span>         <span class=c1>// AUTO_RANDOM 功能
+</span></span></span><span class=line><span class=cl><span class=c1></span> <span class=nt>&#34;max_col_id&#34;</span><span class=p>:</span> <span class=mi>4</span><span class=p>,</span>
+</span></span><span class=line><span class=cl> <span class=nt>&#34;max_idx_id&#34;</span><span class=p>:</span> <span class=mi>1</span><span class=p>,</span>
+</span></span><span class=line><span class=cl> <span class=nt>&#34;max_cst_id&#34;</span><span class=p>:</span> <span class=mi>0</span><span class=p>,</span>
+</span></span><span class=line><span class=cl> <span class=nt>&#34;update_timestamp&#34;</span><span class=p>:</span> <span class=mi>418539877049565193</span><span class=p>,</span>
+</span></span><span class=line><span class=cl> <span class=nt>&#34;ShardRowIDBits&#34;</span><span class=p>:</span> <span class=mi>0</span><span class=p>,</span>       <span class=c1>// SHARD_ROW_ID_BITS 功能
+</span></span></span><span class=line><span class=cl><span class=c1></span> <span class=nt>&#34;max_shard_row_id_bits&#34;</span><span class=p>:</span> <span class=mi>0</span><span class=p>,</span>
+</span></span><span class=line><span class=cl> <span class=nt>&#34;auto_random_bits&#34;</span><span class=p>:</span> <span class=mi>0</span><span class=p>,</span>     <span class=c1>// 与 shard row id bits 结合使用
+</span></span></span><span class=line><span class=cl><span class=c1></span> <span class=nt>&#34;pre_split_regions&#34;</span><span class=p>:</span> <span class=mi>0</span><span class=p>,</span>    <span class=c1>// pre split 预打散 table region 功能
+</span></span></span><span class=line><span class=cl><span class=c1></span> <span class=nt>&#34;partition&#34;</span><span class=p>:</span> <span class=kc>null</span><span class=p>,</span>         <span class=c1>// 是否为分区表
+</span></span></span><span class=line><span class=cl><span class=c1></span> <span class=nt>&#34;compression&#34;</span><span class=p>:</span> <span class=s2>&#34;&#34;</span><span class=p>,</span>         <span class=c1>// 该表是否启用 「COMPRESSION [=] {&#39;ZLIB&#39;|&#39;LZ4&#39;|&#39;NONE&#39;}」 属性
+</span></span></span><span class=line><span class=cl><span class=c1></span> <span class=nt>&#34;view&#34;</span><span class=p>:</span> <span class=kc>null</span><span class=p>,</span>              <span class=c1>// 视图功能
+</span></span></span><span class=line><span class=cl><span class=c1></span> <span class=nt>&#34;sequence&#34;</span><span class=p>:</span> <span class=kc>null</span><span class=p>,</span>          <span class=c1>// sequence 功能
+</span></span></span><span class=line><span class=cl><span class=c1></span> <span class=nt>&#34;Lock&#34;</span><span class=p>:</span> <span class=kc>null</span><span class=p>,</span>              <span class=c1>// 盲猜 table lock，无证实
+</span></span></span><span class=line><span class=cl><span class=c1></span> <span class=nt>&#34;version&#34;</span><span class=p>:</span> <span class=mi>3</span><span class=p>,</span>
+</span></span><span class=line><span class=cl> <span class=nt>&#34;tiflash_replica&#34;</span><span class=p>:</span> <span class=kc>null</span>    <span class=c1>// tiflash 列存副本
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div></div><div class=post-copyright><p class=copyright-item><span class=item-title>Author</span>
+<span class=item-content>Jeff</span></p><p class=copyright-item><span class=item-title>LastMod</span>
+<span class=item-content>2018-08-24</span></p><p class=copyright-item><span class=item-title>License</span>
+<span class=item-content><a rel="license noopener" href=https://creativecommons.org/licenses/by-nc-nd/4.0/ target=_blank>CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span></p></div><footer class=post-footer><div class=post-tags><a href=/tags/ddl/>DDL</a></div><nav class=post-nav><a class=prev href=/post/20180824-34-region-spilt/><i class="iconfont icon-left"></i>
+<span class="prev-text nav-default">School - TiDB Region Spilt</span>
+<span class="prev-text nav-mobile">Prev</span></a>
+<a class=next href=/post/20180807-32-write-stall/><span class="next-text nav-default">School - TiKV write stall</span>
+<span class="next-text nav-mobile">Next</span>
+<i class="iconfont icon-right"></i></a></nav></footer></article></div></div></main><footer id=footer class=footer><div class=social-links><a href=https://github.com/BigerCAP/TiDB-AirPlan/issues class="iconfont icon-github" title=github></a>
+<a href=https://ap.biger.cc/index.xml type=application/rss+xml class="iconfont icon-rss" title=rss></a></div><div class=copyright><span class=power-by>Powered by <a class=hexo-link href=https://gohugo.io>Hugo</a></span>
+<span class=division>|</span>
+<span class=theme-info>Theme -
+<a class=theme-link href=https://github.com/olOwOlo/hugo-theme-even>Even</a></span><div class=busuanzi-footer><span id=busuanzi_container_site_pv>site pv: <span id=busuanzi_value_site_pv><img src=/img/spinner.svg alt=spinner.svg></span></span>
+<span class=division>|</span>
+<span id=busuanzi_container_site_uv>site uv: <span id=busuanzi_value_site_uv><img src=/img/spinner.svg alt=spinner.svg></span></span></div><span class=copyright-year>&copy;
+2017 -
+2023
+<span class=heart><i class="iconfont icon-heart"></i></span>
+<span class=author>DB - AirPlan</span></span></div></footer><div class=back-to-top id=back-to-top><i class="iconfont icon-up"></i></div></div><script src=https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin=anonymous></script>
+<script>var languageCode="en".replace(/-/g,"_").replace(/_(.*)/,function(e,t){return e.replace(t,t.toUpperCase())});timeago().render(document.querySelectorAll(".timeago"),languageCode),timeago.cancel()</script><script type=text/javascript src=/dist/even.26188efa.min.js></script></body></html>
