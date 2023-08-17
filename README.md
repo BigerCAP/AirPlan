@@ -1,2 +1,2 @@
-# TiDB-AirPlan
+# AirPlan
 AirPlan
