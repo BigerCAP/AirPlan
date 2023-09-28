@@ -1,0 +1,120 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge,chrome=1"><title>Flink Connector 组件功能学习与测试 - AirPlan - A biger solution</title><meta name=renderer content="webkit"><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta http-equiv=cache-control content="no-transform"><meta http-equiv=cache-control content="no-siteapp"><meta name=theme-color content="#f8f5ec"><meta name=msapplication-navbutton-color content="#f8f5ec"><meta name=apple-mobile-web-app-capable content="yes"><meta name=apple-mobile-web-app-status-bar-style content="#f8f5ec"><meta name=author content="Jeff"><meta name=description content="挑选安装版本跳过 下载 Flink 安装包 将 Flink Connector 放到 Flink/lib 目录中 配置 java 环境后，启动 Flink 单机服务 使用 Flink sql 链接该 Flink 服务，当客户端退出后任务失效 提交方式 任务执行方式 Flink"><meta name=keywords content="TiDB,AirPlan,TiDB OPS,tidb-operator,2pc,raft,databases,mysql,htap"><meta name=generator content="Hugo 0.110.0 with theme even"><link rel=canonical href=https://ap.biger.cc/post/20230928-flink-connector/><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/manifest.json><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><script async src=//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js></script>
+<link href=/dist/even.04bd84cd.min.css rel=stylesheet><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin=anonymous><meta property="og:title" content="Flink Connector 组件功能学习与测试"><meta property="og:description" content="挑选安装版本跳过 下载 Flink 安装包 将 Flink Connector 放到 Flink/lib 目录中 配置 java 环境后，启动 Flink 单机服务 使用 Flink sql 链接该 Flink 服务，当客户端退出后任务失效 提交方式 任务执行方式 Flink"><meta property="og:type" content="article"><meta property="og:url" content="https://ap.biger.cc/post/20230928-flink-connector/"><meta property="article:section" content="post"><meta property="article:published_time" content="2023-09-28T00:00:00+08:00"><meta property="article:modified_time" content="2023-09-28T00:00:00+08:00"><meta itemprop=name content="Flink Connector 组件功能学习与测试"><meta itemprop=description content="挑选安装版本跳过 下载 Flink 安装包 将 Flink Connector 放到 Flink/lib 目录中 配置 java 环境后，启动 Flink 单机服务 使用 Flink sql 链接该 Flink 服务，当客户端退出后任务失效 提交方式 任务执行方式 Flink"><meta itemprop=datePublished content="2023-09-28T00:00:00+08:00"><meta itemprop=dateModified content="2023-09-28T00:00:00+08:00"><meta itemprop=wordCount content="653"><meta itemprop=keywords content="Flink,StarRocks,"><meta name=twitter:card content="summary"><meta name=twitter:title content="Flink Connector 组件功能学习与测试"><meta name=twitter:description content="挑选安装版本跳过 下载 Flink 安装包 将 Flink Connector 放到 Flink/lib 目录中 配置 java 环境后，启动 Flink 单机服务 使用 Flink sql 链接该 Flink 服务，当客户端退出后任务失效 提交方式 任务执行方式 Flink"><!--[if lte IE 9]><script src=https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js></script><![endif]--><!--[if lt IE 9]><script src=https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js></script>
+<script src=https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js></script><![endif]--></head><body><div id=mobile-navbar class=mobile-navbar><div class=mobile-header-logo><a href=/ class=logo>AirPlan</a></div><div class=mobile-navbar-icon><span></span>
+<span></span>
+<span></span></div></div><nav id=mobile-menu class="mobile-menu slideout-menu"><ul class=mobile-menu-list><a href=/post/><li class=mobile-menu-item>Blog</li></a><a href=/look/><li class=mobile-menu-item>Look</li></a><a href=/tags/><li class=mobile-menu-item>Tags</li></a><a href=/categories/><li class=mobile-menu-item>Categories</li></a><a href=/about/><li class=mobile-menu-item>About</li></a></ul></nav><div class=container id=mobile-panel><header id=header class=header><div class=logo-wrapper><a href=/ class=logo>AirPlan</a></div><nav class=site-navbar><ul id=menu class=menu><li class=menu-item><a class=menu-item-link href=/post/>Blog</a></li><li class=menu-item><a class=menu-item-link href=/look/>Look</a></li><li class=menu-item><a class=menu-item-link href=/tags/>Tags</a></li><li class=menu-item><a class=menu-item-link href=/categories/>Categories</a></li><li class=menu-item><a class=menu-item-link href=/about/>About</a></li></ul></nav></header><main id=main class=main><div class=content-wrapper><div id=content class=content><article class=post><header class=post-header><h1 class=post-title>Flink Connector 组件功能学习与测试</h1><div class=post-meta><span class=post-time>2023-09-28</span><div class=post-category><a href=/categories/software/>software</a></div><span class=more-meta>653 words</span>
+<span class=more-meta>2 mins read</span>
+<span id=busuanzi_container_page_pv class=more-meta><span id=busuanzi_value_page_pv><img src=/img/spinner.svg alt=spinner.svg></span> times read</span></div></header><div class=post-toc id=post-toc><h2 class=post-toc-title>Contents</h2><div class=post-toc-content><nav id=TableOfContents><ul><li><a href=#提交方式>提交方式</a></li><li><a href=#任务执行方式>任务执行方式</a></li><li><a href=#flink-任务>Flink 任务</a><ul><li><a href=#flink-sql>Flink SQL</a></li><li><a href=#最常见的报错>最常见的报错</a></li></ul></li></ul></nav></div></div><div class=post-content><p>挑选安装版本跳过</p><ol><li>下载 Flink 安装包</li><li>将 Flink Connector 放到 Flink/lib 目录中</li><li>配置 java 环境后，启动 Flink 单机服务</li><li>使用 Flink sql 链接该 Flink 服务，当客户端退出后任务失效</li></ol><h2 id=提交方式>提交方式</h2><p><img src=c0aab60364fa191eb18052049c91600f_MD5.png alt="Flink sink semantic"></p><h2 id=任务执行方式>任务执行方式</h2><p><img src=e6289163c24c2b762956a392a8a76cd3_MD5.jpg alt="Flink 任务提交流程"></p><h2 id=flink-任务>Flink 任务</h2><p><code>MySQL --> Flink cdc --> StarRocks</code></p><p>数据延迟计算：从源到目的地，小数据量情况下可以做到秒级延迟，数据量大时会在 30 秒到分钟级，延迟取决硬盘 iops 写入能力</p><h3 id=flink-sql>Flink SQL</h3><p>简单测试（不包含数据删除，<code>__op</code> 方式删除数据功能参考 <a href=https://docs.starrocks.io/zh-cn/latest/loading/Load_to_Primary_Key_tables#upsert>数据变更</a>文档 ）大致如下：</p><ol><li>SR create table （必须是 Primary Key 模型）</li></ol><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=k>CREATE</span><span class=err> </span><span class=k>TABLE</span><span class=err> </span><span class=n>test</span><span class=p>.</span><span class=n>c101_flink</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>(</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=err>    </span><span class=o>`</span><span class=n>id</span><span class=o>`</span><span class=err> </span><span class=nb>int</span><span class=p>(</span><span class=mi>11</span><span class=p>)</span><span class=err> </span><span class=k>NOT</span><span class=err> </span><span class=k>NULL</span><span class=err> </span><span class=k>COMMENT</span><span class=err> </span><span class=s2>&#34;用户 ID&#34;</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=err>    </span><span class=o>`</span><span class=n>name</span><span class=o>`</span><span class=err> </span><span class=nb>varchar</span><span class=p>(</span><span class=mi>65533</span><span class=p>)</span><span class=err> </span><span class=k>NOT</span><span class=err> </span><span class=k>NULL</span><span class=err> </span><span class=k>COMMENT</span><span class=err> </span><span class=s2>&#34;用户姓名&#34;</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=err>    </span><span class=o>`</span><span class=n>score</span><span class=o>`</span><span class=err> </span><span class=nb>int</span><span class=p>(</span><span class=mi>11</span><span class=p>)</span><span class=err> </span><span class=k>NOT</span><span class=err> </span><span class=k>NULL</span><span class=err> </span><span class=k>COMMENT</span><span class=err> </span><span class=s2>&#34;用户得分&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>ENGINE</span><span class=o>=</span><span class=n>OLAP</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>PRIMARY</span><span class=err> </span><span class=k>KEY</span><span class=p>(</span><span class=o>`</span><span class=n>id</span><span class=o>`</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>DISTRIBUTED</span><span class=err> </span><span class=k>BY</span><span class=err> </span><span class=n>HASH</span><span class=p>(</span><span class=o>`</span><span class=n>id</span><span class=o>`</span><span class=p>);</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><ol start=2><li>Flink SQL 创建 Sink 信息同时使用 insert sql 测试下连接性</li></ol><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=k>CREATE</span><span class=w> </span><span class=k>TABLE</span><span class=w> </span><span class=o>`</span><span class=n>c101_flink</span><span class=o>`</span><span class=w> </span><span class=p>(</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>`</span><span class=n>id</span><span class=o>`</span><span class=w> </span><span class=nb>INT</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>`</span><span class=n>name</span><span class=o>`</span><span class=w> </span><span class=n>STRING</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>`</span><span class=n>score</span><span class=o>`</span><span class=w> </span><span class=nb>INT</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>PRIMARY</span><span class=w> </span><span class=k>KEY</span><span class=w> </span><span class=p>(</span><span class=n>id</span><span class=p>)</span><span class=w> </span><span class=k>NOT</span><span class=w> </span><span class=n>ENFORCED</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>)</span><span class=w> </span><span class=k>WITH</span><span class=w> </span><span class=p>(</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=s1>&#39;connector&#39;</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s1>&#39;starrocks&#39;</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=s1>&#39;jdbc-url&#39;</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s1>&#39;jdbc:mysql://10.10.1.3:9030&#39;</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=s1>&#39;load-url&#39;</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s1>&#39;10.10.1.3:8030&#39;</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=s1>&#39;database-name&#39;</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s1>&#39;test&#39;</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=s1>&#39;table-name&#39;</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s1>&#39;c101_flink&#39;</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=s1>&#39;username&#39;</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s1>&#39;root&#39;</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=s1>&#39;password&#39;</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s1>&#39;test@123&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=c1>--测试下连接性
+</span></span></span><span class=line><span class=cl><span class=c1>-- Flink 执行以下 SQL 后，去 StarRcoks 里查看
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>INSERT</span><span class=w> </span><span class=k>INTO</span><span class=w> </span><span class=o>`</span><span class=n>c101_flink</span><span class=o>`</span><span class=w> </span><span class=err> </span><span class=k>VALUES</span><span class=w> </span><span class=p>(</span><span class=mi>1</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;starrocks&#39;</span><span class=p>,</span><span class=w> </span><span class=mi>100</span><span class=p>),</span><span class=w> </span><span class=p>(</span><span class=mi>2</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;flink&#39;</span><span class=p>,</span><span class=w> </span><span class=mi>100</span><span class=p>);</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><ol start=3><li>Flink SQL 创建 Source 信息，此处使用的 datagen 自动生成的数据，<ul><li>每次生成 10 条，id 相同、name、score 会不断变动</li><li>生成的 id 是相同的，下游数据库只有 10 条数据，数据被原地更新了</li></ul></li></ol><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=k>CREATE</span><span class=w> </span><span class=k>TABLE</span><span class=w> </span><span class=n>source_table</span><span class=w> 
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>(</span><span class=w>    </span><span class=o>`</span><span class=n>id</span><span class=o>`</span><span class=w> </span><span class=nb>INT</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>`</span><span class=n>name</span><span class=o>`</span><span class=w> </span><span class=n>STRING</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>`</span><span class=n>score</span><span class=o>`</span><span class=w> </span><span class=nb>INT</span><span class=p>,</span><span class=w> 
+</span></span></span><span class=line><span class=cl><span class=w>   </span><span class=k>PRIMARY</span><span class=w> </span><span class=k>KEY</span><span class=w> </span><span class=p>(</span><span class=n>id</span><span class=p>)</span><span class=w> </span><span class=k>NOT</span><span class=w> </span><span class=n>ENFORCED</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w> </span><span class=p>)</span><span class=w> </span><span class=k>WITH</span><span class=w> </span><span class=p>(</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=s1>&#39;connector&#39;</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s1>&#39;datagen&#39;</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=s1>&#39;rows-per-second&#39;</span><span class=o>=</span><span class=s1>&#39;5&#39;</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=s1>&#39;fields.id.kind&#39;</span><span class=o>=</span><span class=s1>&#39;sequence&#39;</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=s1>&#39;fields.id.start&#39;</span><span class=o>=</span><span class=s1>&#39;1&#39;</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=s1>&#39;fields.id.end&#39;</span><span class=o>=</span><span class=s1>&#39;10&#39;</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=s1>&#39;fields.score.min&#39;</span><span class=o>=</span><span class=s1>&#39;1&#39;</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=s1>&#39;fields.score.max&#39;</span><span class=o>=</span><span class=s1>&#39;10&#39;</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=s1>&#39;fields.name.length&#39;</span><span class=o>=</span><span class=s1>&#39;10&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w> </span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=c1>-- 执行这个 sql 开启同步
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>insert</span><span class=w> </span><span class=k>into</span><span class=w> </span><span class=o>`</span><span class=n>c101_flink</span><span class=o>`</span><span class=w> </span><span class=err> </span><span class=k>select</span><span class=w> </span><span class=n>id</span><span class=p>,</span><span class=n>name</span><span class=p>,</span><span class=n>score</span><span class=w> </span><span class=k>from</span><span class=w> </span><span class=n>source_table</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><h3 id=最常见的报错>最常见的报错</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>&#34;Message&#34;: &#34;Failed to load data into tablet 13239, because of too many versions, current/limit: 1020/1000. You can reduce the loading job concurrency, or increase loading data batch size. If you are loading data with Routine Load, you can increase FE configs routine_load_task_consume_second and max_routine_load_batch_size,:  be:xxxx&#34;
+</span></span></code></pre></td></tr></table></div></div><p><code>too many versions, current/limit: 1020/1000</code> 参考图二的写入流程，是数据段时间写入频繁的同时后台异步 compaction 线程未能及时合并版本出现的问题。<br>规避方案时调大 <code>checkpoint</code> 刷新时间或者 <code>sink.buffer-flush.interval-ms=300000</code> 时间，<strong>增大每批消费的数据，降低单位时间内提交任务的次数</strong>。</p></div><div class=post-copyright><p class=copyright-item><span class=item-title>Author</span>
+<span class=item-content>Jeff</span></p><p class=copyright-item><span class=item-title>LastMod</span>
+<span class=item-content>2023-09-28</span></p><p class=copyright-item><span class=item-title>License</span>
+<span class=item-content><a rel="license noopener" href=https://creativecommons.org/licenses/by-nc-nd/4.0/ target=_blank>CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span></p></div><footer class=post-footer><div class=post-tags><a href=/tags/flink/>Flink</a>
+<a href=/tags/starrocks/>StarRocks</a></div><nav class=post-nav><a class=next href=/post/20230927-be_mem_tracker/><span class="next-text nav-default">StarRocks BE 进程内存线程占用比例</span>
+<span class="next-text nav-mobile">Next</span>
+<i class="iconfont icon-right"></i></a></nav></footer></article></div></div></main><footer id=footer class=footer><div class=social-links><a href=https://github.com/BigerCAP/TiDB-AirPlan/issues class="iconfont icon-github" title=github></a>
+<a href=https://ap.biger.cc/index.xml type=application/rss+xml class="iconfont icon-rss" title=rss></a></div><div class=copyright><span class=power-by>Powered by <a class=hexo-link href=https://gohugo.io>Hugo</a></span>
+<span class=division>|</span>
+<span class=theme-info>Theme -
+<a class=theme-link href=https://github.com/olOwOlo/hugo-theme-even>Even</a></span><div class=busuanzi-footer><span id=busuanzi_container_site_pv>site pv: <span id=busuanzi_value_site_pv><img src=/img/spinner.svg alt=spinner.svg></span></span>
+<span class=division>|</span>
+<span id=busuanzi_container_site_uv>site uv: <span id=busuanzi_value_site_uv><img src=/img/spinner.svg alt=spinner.svg></span></span></div><span class=copyright-year>&copy;
+2017 -
+2023
+<span class=heart><i class="iconfont icon-heart"></i></span>
+<span class=author>DB - AirPlan</span></span></div></footer><div class=back-to-top id=back-to-top><i class="iconfont icon-up"></i></div></div><script src=https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin=anonymous></script>
+<script>var languageCode="en".replace(/-/g,"_").replace(/_(.*)/,function(e,t){return e.replace(t,t.toUpperCase())});timeago().render(document.querySelectorAll(".timeago"),languageCode),timeago.cancel()</script><script type=text/javascript src=/dist/even.26188efa.min.js></script></body></html>
