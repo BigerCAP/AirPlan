@@ -33,6 +33,11 @@ copyright = "DB - AirPlan"            # default: author.name ↓        # 默认
   weight = 10
   identifier = "自制饭"
   url = "/post/"
+[[menu.main]]            
+  name = "Look"
+  weight = 20
+  identifier = "大眼看世界"
+  url = "/look/"
 [[menu.main]]
   name = "Tags"
   weight = 30
