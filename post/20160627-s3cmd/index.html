@@ -1,0 +1,130 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge,chrome=1"><title>用 s3cmd 挂载云储存服务器 - AirPlan - A biger solution</title><meta name=renderer content="webkit"><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta http-equiv=cache-control content="no-transform"><meta http-equiv=cache-control content="no-siteapp"><meta name=theme-color content="#f8f5ec"><meta name=msapplication-navbutton-color content="#f8f5ec"><meta name=apple-mobile-web-app-capable content="yes"><meta name=apple-mobile-web-app-status-bar-style content="#f8f5ec"><meta name=author content="Atman"><meta name=description content="用 s3cmd 挂载云储存服务器 s3cmd 是亚马逊 s3 的一个命令行工具，稍作修改可以用在国内的云存储。服务器 Centos，如果有 epel 源 的话，可以直接 yum install s3cmd 或者直接去"><meta name=keywords content="TiDB,AirPlan,TiDB OPS,tidb-operator,2pc,raft,databases,mysql,htap,StarRocks,OLAP,OLTP,HTAP"><meta name=generator content="Hugo 0.110.0 with theme even"><link rel=canonical href=https://biger.cc/post/20160627-s3cmd/><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/manifest.json><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link href=/dist/even.04bd84cd.min.css rel=stylesheet><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin=anonymous><meta property="og:title" content="用 s3cmd 挂载云储存服务器"><meta property="og:description" content="用 s3cmd 挂载云储存服务器 s3cmd 是亚马逊 s3 的一个命令行工具，稍作修改可以用在国内的云存储。服务器 Centos，如果有 epel 源 的话，可以直接 yum install s3cmd 或者直接去"><meta property="og:type" content="article"><meta property="og:url" content="https://biger.cc/post/20160627-s3cmd/"><meta property="article:section" content="post"><meta property="article:published_time" content="2016-06-27T00:00:00+08:00"><meta property="article:modified_time" content="2016-06-27T00:00:00+08:00"><meta itemprop=name content="用 s3cmd 挂载云储存服务器"><meta itemprop=description content="用 s3cmd 挂载云储存服务器 s3cmd 是亚马逊 s3 的一个命令行工具，稍作修改可以用在国内的云存储。服务器 Centos，如果有 epel 源 的话，可以直接 yum install s3cmd 或者直接去"><meta itemprop=datePublished content="2016-06-27T00:00:00+08:00"><meta itemprop=dateModified content="2016-06-27T00:00:00+08:00"><meta itemprop=wordCount content="1424"><meta itemprop=keywords content="S3,s3cmd,"><meta name=twitter:card content="summary"><meta name=twitter:title content="用 s3cmd 挂载云储存服务器"><meta name=twitter:description content="用 s3cmd 挂载云储存服务器 s3cmd 是亚马逊 s3 的一个命令行工具，稍作修改可以用在国内的云存储。服务器 Centos，如果有 epel 源 的话，可以直接 yum install s3cmd 或者直接去"><!--[if lte IE 9]><script src=https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js></script><![endif]--><!--[if lt IE 9]><script src=https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js></script>
+<script src=https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js></script><![endif]--></head><body><div id=mobile-navbar class=mobile-navbar><div class=mobile-header-logo><a href=/ class=logo>AirPlan</a></div><div class=mobile-navbar-icon><span></span>
+<span></span>
+<span></span></div></div><nav id=mobile-menu class="mobile-menu slideout-menu"><ul class=mobile-menu-list><a href=/post/><li class=mobile-menu-item>Archive</li></a><a href=/look/><li class=mobile-menu-item>Look</li></a><a href=/tags/><li class=mobile-menu-item>Tags</li></a><a href=/categories/><li class=mobile-menu-item>Categories</li></a><a href=/about/><li class=mobile-menu-item>About</li></a></ul></nav><div class=container id=mobile-panel><header id=header class=header><div class=logo-wrapper><a href=/ class=logo>AirPlan</a></div><nav class=site-navbar><ul id=menu class=menu><li class=menu-item><a class=menu-item-link href=/post/>Archive</a></li><li class=menu-item><a class=menu-item-link href=/look/>Look</a></li><li class=menu-item><a class=menu-item-link href=/tags/>Tags</a></li><li class=menu-item><a class=menu-item-link href=/categories/>Categories</a></li><li class=menu-item><a class=menu-item-link href=/about/>About</a></li></ul></nav></header><main id=main class=main><div class=content-wrapper><div id=content class=content><article class=post><header class=post-header><h1 class=post-title>用 s3cmd 挂载云储存服务器</h1><div class=post-meta><span class=post-time>2016-06-27</span><div class=post-category><a href=/categories/software/>software</a></div><span class=more-meta>1424 words</span>
+<span class=more-meta>3 mins read</span></div></header><div class=post-toc id=post-toc><h2 class=post-toc-title>Contents</h2><div class=post-toc-content><nav id=TableOfContents><ul><li><a href=#用-s3cmd-挂载云储存服务器>用 s3cmd 挂载云储存服务器</a></li></ul></nav></div></div><div class=post-outdated><div class=warn><p>[NOTE] Updated <span class=timeago datetime=2016-06-27T00:00:00 title="June 27, 2016">June 27, 2016</span>. This article may have outdated content or subject matter.</p></div></div><div class=post-content><h2 id=用-s3cmd-挂载云储存服务器>用 s3cmd 挂载云储存服务器</h2><p>s3cmd 是亚马逊 s3 的一个命令行工具，稍作修改可以用在国内的云存储。服务器 Centos，如果有 <strong>epel 源</strong> 的话，可以直接</p><p><code>yum install s3cmd</code></p><p>或者直接去 SF 下载，传送 <a href=http://sourceforge.net/projects/s3tools/files/s3cmd/>s3cmd Projects</a><br>解压软件包，执行 <code>./s3cmd --configure</code>，如果没有 <code>python-dateutil</code>，就会报以下错误。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+</span></span><span class=line><span class=cl>ImportError trying to import dateutil.parser.
+</span></span><span class=line><span class=cl>Please install the python dateutil module:
+</span></span><span class=line><span class=cl>$ sudo apt-get install python-dateutil
+</span></span><span class=line><span class=cl>  or
+</span></span><span class=line><span class=cl>$ sudo yum install python-dateutil
+</span></span><span class=line><span class=cl>  or
+</span></span><span class=line><span class=cl>$ pip install python-dateutil
+</span></span><span class=line><span class=cl>!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+</span></span></code></pre></td></tr></table></div></div><p>我系统 centos，这时候执行 yum install python-dateutil，然后在测试。<br>yum install 安装此软件的，然后：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>s3cmd --configure
+</span></span></code></pre></td></tr></table></div></div><p>用源码包安装的，需要去软件解压目录执行, 类似 windows 下的免安装绿色软件。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>./s3cmd --configure
+</span></span></code></pre></td></tr></table></div></div><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>Enter new values or accept defaults in brackets with Enter.
+</span></span><span class=line><span class=cl>Refer to user manual <span class=k>for</span> detailed description of all options.
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>Access key and Secret key are your identifiers <span class=k>for</span> Amazon S3. Leave them empty <span class=k>for</span> using the env variables.
+</span></span><span class=line><span class=cl>Access Key: 这里输入 AK
+</span></span><span class=line><span class=cl>Secret Key: 这里输入 SK
+</span></span><span class=line><span class=cl>Default Region <span class=o>[</span>US<span class=o>]</span>: CN  <span class=c1>#默认美国市区，可更改</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>Encryption password is used to protect your files from reading
+</span></span><span class=line><span class=cl>by unauthorized persons <span class=k>while</span> in transfer to S3
+</span></span><span class=line><span class=cl>Encryption password: 	<span class=c1># 我理解为一种链接对话加密</span>
+</span></span><span class=line><span class=cl>Path to GPG program <span class=o>[</span>/usr/bin/gpg<span class=o>]</span>: GPG 路劲，没修过可直接回车
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>When using secure HTTPS protocol all communication with Amazon S3
+</span></span><span class=line><span class=cl>servers is protected from 3rd party eavesdropping. This method is
+</span></span><span class=line><span class=cl>slower than plain HTTP, and can only be proxied with Python 2.7 or newer
+</span></span><span class=line><span class=cl>Use HTTPS protocol <span class=o>[</span>No<span class=o>]</span>:  是否使用 https，默认 NO
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>On some networks all internet access must go through a HTTP proxy.
+</span></span><span class=line><span class=cl>Try setting it here <span class=k>if</span> you can<span class=s1>&#39;t connect to S3 directly
+</span></span></span><span class=line><span class=cl><span class=s1>HTTP Proxy server name:  是否使用代理，默认空
+</span></span></span><span class=line><span class=cl><span class=s1>
+</span></span></span><span class=line><span class=cl><span class=s1>New settings:
+</span></span></span><span class=line><span class=cl><span class=s1>  Access Key: 显示你的 AK
+</span></span></span><span class=line><span class=cl><span class=s1>  Secret Key: 显示你的 SK
+</span></span></span><span class=line><span class=cl><span class=s1>  Default Region: CN
+</span></span></span><span class=line><span class=cl><span class=s1>  Encryption password:
+</span></span></span><span class=line><span class=cl><span class=s1>  Path to GPG program: /usr/bin/gpg
+</span></span></span><span class=line><span class=cl><span class=s1>  Use HTTPS protocol: False
+</span></span></span><span class=line><span class=cl><span class=s1>  HTTP Proxy server name:
+</span></span></span><span class=line><span class=cl><span class=s1>  HTTP Proxy server port: 0
+</span></span></span><span class=line><span class=cl><span class=s1>
+</span></span></span><span class=line><span class=cl><span class=s1>Test access with supplied credentials? [Y/n] n	# 是否测试这个链接
+</span></span></span><span class=line><span class=cl><span class=s1>
+</span></span></span><span class=line><span class=cl><span class=s1>Save settings? [y/N] y		# 是否保存文件
+</span></span></span><span class=line><span class=cl><span class=s1>Configuration saved to &#39;</span>/root/.s3cfg<span class=err>&#39;</span>		<span class=c1># 保存文件地址</span>
+</span></span></code></pre></td></tr></table></div></div><p>按照提示，填入密匙，其它选项一路默认回车即可，后面问是不是要测试连接的时候选 No（因为 s3cmd 在修改前默认连接是亚马逊 s3），<br>然后保存，程序会在用户跟目录下生成一个隐藏文件，我们要修改这个配置文件：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>vim ~/.s3cfg
+</span></span></code></pre></td></tr></table></div></div><p>找到 &ldquo;host_base =&rdquo; 和 &ldquo;host_bucket =&rdquo; 这两行，修改至如下：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=nv>host_base</span> <span class=o>=</span> s3.domain.com
+</span></span><span class=line><span class=cl><span class=nv>host_bucket</span> <span class=o>=</span> %<span class=o>(</span>bucket<span class=o>)</span>s.s3.domain.com
+</span></span></code></pre></td></tr></table></div></div><p>好了，现在试试 s3cmd 的一个常用命令：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>s3cmd ls
+</span></span></code></pre></td></tr></table></div></div><hr><p>如果可以看见你在对象云存储里建立的容器，那表示配置成功，另外一些常用的命令如下，用 <strong>s3cmd &ndash;help</strong> 可以查看</p><table><thead><tr><th>动作</th><th>命令</th></tr></thead><tbody><tr><td>创建容器</td><td>s3cmd mb s3://BUCKET</td></tr><tr><td>删除容器</td><td>s3cmd rb s3://BUCKET</td></tr><tr><td>查看容器内的文件</td><td>s3cmd ls s3://BUCKET/path/</td></tr><tr><td>查看所有容器内的所有文件，我测试过只能显示一层目录</td><td>s3cmd la</td></tr><tr><td>把文件从本地上传至云存储的命令</td><td>s3cmd put FILE [FILE&mldr;] s3://BUCKET[/PREFIX]</td></tr><tr><td>从云存储下载文件到本地</td><td>s3cmd get s3://BUCKET/OBJECT LOCAL_FILE</td></tr><tr><td>删除容器内的特定文件</td><td>s3cmd del s3://BUCKET/OBJECT</td></tr><tr><td>如果要删除容器类的整个目录， 可以加参数 -r -f</td><td>s3cmd del -r -f s3:// 容器 / 目录 /</td></tr><tr><td>查看容器所占空间</td><td>s3cmd du [s3://BUCKET[/PREFIX]]</td></tr><tr><td>查看容器或者文件的属性</td><td>s3cmd info s3://BUCKET[/OBJECT]</td></tr><tr><td>云存储中的文件复制命令</td><td>s3cmd cp s3://BUCKET1/OBJECT1 s3://BUCKET2[/OBJECT2]</td></tr><tr><td>移动文件</td><td>s3cmd mv s3://BUCKET1/OBJECT1 s3://BUCKET2[/OBJECT2]</td></tr><tr><td>把本地目录同步到云存储或者从云存储同步到本地</td><td>s3cmd sync LOCAL_DIR s3://BUCKET[/PREFIX] <strong>\or</strong> s3://BUCKET[/PREFIX] LOCAL_DIR</td></tr></tbody></table><hr><blockquote><p>常用的命令如下，复杂一点的可以去啃 s3cmd 官方文档。</p></blockquote><ul><li><p>同步本地至云存储，并在云端删除已经从本地删除的文件</p><p><code>s3cmd sync --delete-removed /path/ s3://bucket/path/</code></p></li><li><p>如果怕错删除，可以再加参数 &ndash;dry-run，它只列出 &ndash;delet-removed 将要删除的文件，但并不会真正的删除</p><p><code>s3cmd sync --dry-run --delete-removed /path/ s3://bucket/path/</code></p></li><li><p>sync 命令默认是要校检本地文件和云存储中文件的 md5 值的，如果不想校检只同步新文件，可以加 &ndash;skip-existing</p><p><code>s3cmd sync --skip-existing /path/ s3://bucket/path/</code></p></li><li><p>还有 &ndash;exclude（不包含） 和 &ndash;include（包含）参数</p><p><code>s3cmd sync --exclude '*.txt' --include 'dir2/*' . s3://bucket/path/</code></p></li><li><p>云存储可以用来存储网站上的静态内容的：.css、.js、.jpg 一类。这类文件加入 Cache-Control header 可以减少请求数量和流量，参数是 &ndash;add-header，命令如下：</p><p><code>s3cmd put --add-header='Cache-Control:max-age=31536000' -M -r jpg_folder s3://domain.com/</code></p></li><li><p>如果想进一步降低流量消耗，可以考虑 gzip 压缩 css 和 js 文件，毕竟流量在云存储里是算钱的，但貌似云存储服务器端并不支持 gzip 压缩，<br>所以我们要预先压缩文件。我的做法是先 &ldquo;gzip -9&rdquo; 压缩 css 文件得到 *.css.gz ，<br>再批量重命名 *.css.gz 为 *.css，最后上传 *.css 文件。这时需要给已经压缩过的文件加 Content-encoding header，<br>否则浏览器读不出来，命令如下：</p><p><code>s3cmd put --add-header='Cache-Control:max-age=31536000' --add-header='Content-encoding:gzip' -M *.css s3://domain.com/css/</code></p></li></ul></div><div class=post-copyright><p class=copyright-item><span class=item-title>Author</span>
+<span class=item-content>Atman</span></p><p class=copyright-item><span class=item-title>LastMod</span>
+<span class=item-content>2016-06-27</span></p><p class=copyright-item><span class=item-title>License</span>
+<span class=item-content><a rel="license noopener" href=https://creativecommons.org/licenses/by-nc-nd/4.0/ target=_blank>CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span></p></div><footer class=post-footer><div class=post-tags><a href=/tags/s3/>S3</a>
+<a href=/tags/s3cmd/>s3cmd</a></div><nav class=post-nav><a class=prev href=/post/20170601-prometheus-grafana/><i class="iconfont icon-left"></i>
+<span class="prev-text nav-default">TiDB 监控架构：Prometheus + Grafana</span>
+<span class="prev-text nav-mobile">Prev</span></a>
+<a class=next href=/post/20160627-s3fs/><span class="next-text nav-default">用 s3fs 挂载云储存服务器</span>
+<span class="next-text nav-mobile">Next</span>
+<i class="iconfont icon-right"></i></a></nav></footer></article></div></div></main><footer id=footer class=footer><div class=social-links><a href=https://github.com/BigerCAP/TiDB-AirPlan/issues class="iconfont icon-github" title=github></a>
+<a href=https://biger.cc/index.xml type=application/rss+xml class="iconfont icon-rss" title=rss></a></div><div class=copyright><span class=power-by>Powered by <a class=hexo-link href=https://gohugo.io>Hugo</a></span>
+<span class=division>|</span>
+<span class=theme-info>Theme -
+<a class=theme-link href=https://github.com/olOwOlo/hugo-theme-even>Even</a></span>
+<span class=copyright-year>&copy;
+2014 -
+2024
+<span class=heart><i class="iconfont icon-heart"></i></span>
+<span class=author>DB - AirPlan</span></span></div></footer><div class=back-to-top id=back-to-top><i class="iconfont icon-up"></i></div></div><script src=https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin=anonymous></script>
+<script>var languageCode="en".replace(/-/g,"_").replace(/_(.*)/,function(e,t){return e.replace(t,t.toUpperCase())});timeago().render(document.querySelectorAll(".timeago"),languageCode),timeago.cancel()</script><script type=text/javascript src=/dist/even.26188efa.min.js></script></body></html>
