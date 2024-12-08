@@ -8,10 +8,10 @@ weight: 66
 ---
 ## About | AirPlan
 
-
-
-- 域名：`biger.cc` 
-  - AirPlan -- A biger solution
+- select `biger.cc`
+  - `atman` as @man 
+  - from `biger.cc` as '体验“小而美”、致敬“大而全”'
+  - where `AirPlan` is '致力于“大而全”的数据解决方案'
 - 主题：日常积攒的使用随想，内容真实性待参考，不作为官方说明（本站内容最终解释权归本站）
   - 使用了 `CC BY-NC-ND 4.0` 协议
   - 单机数据库、分布式数据库、Linux 系统运维、云计算、云基建
