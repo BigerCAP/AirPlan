@@ -1,0 +1,441 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge,chrome=1"><title>StarRocks Flat Json 物化列验证 - AirPlan - A biger solution</title><meta name=renderer content="webkit"><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta http-equiv=cache-control content="no-transform"><meta http-equiv=cache-control content="no-siteapp"><meta name=theme-color content="#f8f5ec"><meta name=msapplication-navbutton-color content="#f8f5ec"><meta name=apple-mobile-web-app-capable content="yes"><meta name=apple-mobile-web-app-status-bar-style content="#f8f5ec"><meta name=author content="Atman"><meta name=description content="0x00 概要 StarRocks 相关文档 https://docs.starrocks.io/zh/docs/using_starrocks/Flat_json/#%E4%BD%BF%E7%94%A8-flat-json 根据数据推算存储类型，使用 varchar、int、json 等不同类型存储 clickhouse 相关文档 https://clickhouse.com/blog/a-new-powerful-json-data-type-for-clickhouse 使用的 Dynamic 和 variant 两种形式存储 对该功能有如下"><meta name=keywords content="TiDB,AirPlan,TiDB OPS,tidb-operator,2pc,raft,databases,mysql,htap,StarRocks,OLAP,OLTP,HTAP"><meta name=generator content="Hugo 0.110.0 with theme even"><link rel=canonical href=https://biger.cc/post/20241114-starrocks-flat-json/><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/manifest.json><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link href=/dist/even.04bd84cd.min.css rel=stylesheet><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin=anonymous><meta property="og:title" content="StarRocks Flat Json 物化列验证"><meta property="og:description" content="0x00 概要 StarRocks 相关文档 https://docs.starrocks.io/zh/docs/using_starrocks/Flat_json/#%E4%BD%BF%E7%94%A8-flat-json 根据数据推算存储类型，使用 varchar、int、json 等不同类型存储 clickhouse 相关文档 https://clickhouse.com/blog/a-new-powerful-json-data-type-for-clickhouse 使用的 Dynamic 和 variant 两种形式存储 对该功能有如下"><meta property="og:type" content="article"><meta property="og:url" content="https://biger.cc/post/20241114-starrocks-flat-json/"><meta property="article:section" content="post"><meta property="article:published_time" content="2024-11-14T00:00:00+08:00"><meta property="article:modified_time" content="2024-11-14T00:00:00+08:00"><meta itemprop=name content="StarRocks Flat Json 物化列验证"><meta itemprop=description content="0x00 概要 StarRocks 相关文档 https://docs.starrocks.io/zh/docs/using_starrocks/Flat_json/#%E4%BD%BF%E7%94%A8-flat-json 根据数据推算存储类型，使用 varchar、int、json 等不同类型存储 clickhouse 相关文档 https://clickhouse.com/blog/a-new-powerful-json-data-type-for-clickhouse 使用的 Dynamic 和 variant 两种形式存储 对该功能有如下"><meta itemprop=datePublished content="2024-11-14T00:00:00+08:00"><meta itemprop=dateModified content="2024-11-14T00:00:00+08:00"><meta itemprop=wordCount content="2843"><meta itemprop=keywords content="StarRocks,Json,"><meta name=twitter:card content="summary"><meta name=twitter:title content="StarRocks Flat Json 物化列验证"><meta name=twitter:description content="0x00 概要 StarRocks 相关文档 https://docs.starrocks.io/zh/docs/using_starrocks/Flat_json/#%E4%BD%BF%E7%94%A8-flat-json 根据数据推算存储类型，使用 varchar、int、json 等不同类型存储 clickhouse 相关文档 https://clickhouse.com/blog/a-new-powerful-json-data-type-for-clickhouse 使用的 Dynamic 和 variant 两种形式存储 对该功能有如下"><!--[if lte IE 9]><script src=https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js></script><![endif]--><!--[if lt IE 9]><script src=https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js></script>
+<script src=https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js></script><![endif]--></head><body><div id=mobile-navbar class=mobile-navbar><div class=mobile-header-logo><a href=/ class=logo>@man</a></div><div class=mobile-navbar-icon><span></span>
+<span></span>
+<span></span></div></div><nav id=mobile-menu class="mobile-menu slideout-menu"><ul class=mobile-menu-list><a href=/post/><li class=mobile-menu-item>Archive</li></a><a href=/look/><li class=mobile-menu-item>Look</li></a><a href=/tags/><li class=mobile-menu-item>Tags</li></a><a href=/categories/><li class=mobile-menu-item>Categories</li></a><a href=/about/><li class=mobile-menu-item>About</li></a></ul></nav><div class=container id=mobile-panel><header id=header class=header><div class=logo-wrapper><a href=/ class=logo>@man</a></div><nav class=site-navbar><ul id=menu class=menu><li class=menu-item><a class=menu-item-link href=/post/>Archive</a></li><li class=menu-item><a class=menu-item-link href=/look/>Look</a></li><li class=menu-item><a class=menu-item-link href=/tags/>Tags</a></li><li class=menu-item><a class=menu-item-link href=/categories/>Categories</a></li><li class=menu-item><a class=menu-item-link href=/about/>About</a></li></ul></nav></header><main id=main class=main><div class=content-wrapper><div id=content class=content><article class=post><header class=post-header><h1 class=post-title>StarRocks Flat Json 物化列验证</h1><div class=post-meta><span class=post-time>2024-11-14</span><div class=post-category><a href=/categories/starrocks/>StarRocks</a></div><span class=more-meta>2843 words</span>
+<span class=more-meta>6 mins read</span></div></header><div class=post-toc id=post-toc><h2 class=post-toc-title>Contents</h2><div class=post-toc-content><nav id=TableOfContents><ul><li><a href=#0x00-概要>0x00 概要</a></li><li><a href=#starrocks-测试>StarRocks 测试</a><ul><li><a href=#测试过程>测试过程</a></li><li><a href=#flat-json-相关参数>flat json 相关参数</a></li></ul></li><li><a href=#starrocks-查询验证>StarRocks 查询验证</a><ul><li><a href=#profile-分析是否命中-flat-json>Profile 分析是否命中 flat json</a></li><li><a href=#json-中的-none-与-字符串-null-sql-null>Json 中的 None 与 字符串 null 、SQL NULL</a></li></ul></li></ul></nav></div></div><div class=post-content><h2 id=0x00-概要>0x00 概要</h2><ul><li>StarRocks 相关文档<ul><li><a href=https://docs.starrocks.io/zh/docs/using_starrocks/Flat_json/#%E4%BD%BF%E7%94%A8-flat-json>https://docs.starrocks.io/zh/docs/using_starrocks/Flat_json/#%E4%BD%BF%E7%94%A8-flat-json</a></li><li>根据数据推算存储类型，使用 varchar、int、json 等不同类型存储</li></ul></li><li>clickhouse 相关文档<ul><li><a href=https://clickhouse.com/blog/a-new-powerful-json-data-type-for-clickhouse>https://clickhouse.com/blog/a-new-powerful-json-data-type-for-clickhouse</a></li><li>使用的 Dynamic 和 variant 两种形式存储</li></ul></li><li>对该功能有如下几个疑问<ul><li>存储空间相比之前存储 json 的变化【本文未验证】</li><li>导入效率慢多少【本文未验证】</li><li>查询效率提升多少【本文未验证】</li><li>单个列 A 有 varchar 和 int 时，按什么推算？<ul><li>insert into 写入的时候是生效？</li><li>NULL 值推算</li><li>如何查看行 json 数据推算效果</li></ul></li><li>二级以上深度的情况下，写放大增加多少？【本文未验证】<ul><li>写放大产生的小文件数量因何而定</li><li>最大支持多少深度？</li></ul></li></ul></li></ul><h2 id=starrocks-测试>StarRocks 测试</h2><p>总结：</p><ul><li>插入数据量非常少，无法测试性能，从功能行为逻辑上可有效提升部分列查询时的效率、谓词过滤能力、避免无效数据参与计算与过滤</li><li>边界测试 <code>k2->'null' = "null"</code> 时，在 json 行为上获取一个不存在的 key 时，会自动返回一个 null；此时在数据库判定时： null is null 会成为 1=1 的效果</li></ul><h3 id=测试过程>测试过程</h3><ul><li>3.3.4 存算一体版本</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=err>查看该功能是否为</span><span class=w> </span><span class=k>true</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>select</span><span class=w> </span><span class=o>*</span><span class=w> </span><span class=k>from</span><span class=w> </span><span class=n>information_schema</span><span class=p>.</span><span class=n>be_configs</span><span class=w> </span><span class=k>where</span><span class=w> </span><span class=n>name</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s2>&#34;enable_json_flat&#34;</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=err>动态开启该功能</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>update</span><span class=w> </span><span class=n>information_schema</span><span class=p>.</span><span class=n>be_configs</span><span class=w>  </span><span class=k>set</span><span class=w> </span><span class=n>VALUE</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s2>&#34;true&#34;</span><span class=w> </span><span class=k>where</span><span class=w> </span><span class=n>name</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s2>&#34;enable_json_flat&#34;</span><span class=p>;</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><ul><li>基于官网文档建表</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=k>CREATE</span><span class=w> </span><span class=k>TABLE</span><span class=w> </span><span class=o>`</span><span class=n>t1</span><span class=o>`</span><span class=w> </span><span class=p>(</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>`</span><span class=n>k1</span><span class=o>`</span><span class=w> </span><span class=nb>int</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>`</span><span class=n>k2</span><span class=o>`</span><span class=w> </span><span class=n>JSON</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>`</span><span class=n>k3</span><span class=o>`</span><span class=w> </span><span class=nb>VARCHAR</span><span class=p>(</span><span class=mi>20</span><span class=p>),</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>`</span><span class=n>k4</span><span class=o>`</span><span class=w> </span><span class=n>JSON</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>)</span><span class=w>             
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>DUPLICATE</span><span class=w> </span><span class=k>KEY</span><span class=p>(</span><span class=o>`</span><span class=n>k1</span><span class=o>`</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>COMMENT</span><span class=w> </span><span class=s2>&#34;OLAP&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>DISTRIBUTED</span><span class=w> </span><span class=k>BY</span><span class=w> </span><span class=n>HASH</span><span class=p>(</span><span class=o>`</span><span class=n>k1</span><span class=o>`</span><span class=p>)</span><span class=w> </span><span class=n>BUCKETS</span><span class=w> </span><span class=mi>1</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>PROPERTIES</span><span class=w> </span><span class=p>(</span><span class=s2>&#34;replication_num&#34;</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s2>&#34;1&#34;</span><span class=p>);</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><ul><li>先写入一行数据，查看对应 <code>FROM t1[_META_];</code><ul><li>数据默认只存储物化后的内容，原始数据不会存储；查询的时候重新拼接成 json 数据</li><li>meta 信息列会跟随数据量、数据内容的变化而不断的推导</li></ul></li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=k>INSERT</span><span class=w> </span><span class=k>INTO</span><span class=w> </span><span class=n>t1</span><span class=w> </span><span class=p>(</span><span class=n>k1</span><span class=p>,</span><span class=n>k2</span><span class=p>)</span><span class=w> </span><span class=k>VALUES</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>(</span><span class=mi>15</span><span class=p>,</span><span class=n>parse_json</span><span class=p>(</span><span class=s1>&#39;{&#34;str&#34;:&#34;test_str0&#34;,&#34;Integer&#34;:11,&#34;Double&#34;:3.14,&#34;Object&#34;:{&#34;a&#34;:&#34;b&#34;},&#34;arr&#34;:[1,2,3],&#34;Bool&#34;:true,&#34;null&#34;:null}&#39;</span><span class=p>));</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-SQL data-lang=SQL><span class=line><span class=cl><span class=err>查看对应</span><span class=w> </span><span class=k>FROM</span><span class=w> </span><span class=n>t1</span><span class=p>[</span><span class=n>_META_</span><span class=p>];</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>[</span><span class=s2>&#34;nulls(TINYINT)&#34;</span><span class=p>,</span><span class=s2>&#34;Bool(JSON)&#34;</span><span class=p>,</span><span class=s2>&#34;Double(DOUBLE)&#34;</span><span class=p>,</span><span class=s2>&#34;Integer(BIGINT)&#34;</span><span class=p>,</span><span class=s2>&#34;Object.a(VARCHAR)&#34;</span><span class=p>,</span><span class=s2>&#34;arr(JSON)&#34;</span><span class=p>,</span><span class=s2>&#34;null(JSON)&#34;</span><span class=p>,</span><span class=s2>&#34;str(VARCHAR)&#34;</span><span class=p>]</span><span class=w> 
+</span></span></span></code></pre></td></tr></table></div></div><blockquote><p>tips：<br>当数据 compact 后，默认将占有达到 90% 的相同数据做物化并做 meta 信息展示<br>在没有 compaction 且数据量较少（ 测试环境是 10 条以内）时，<code>FROM t1[_META_];</code> 可能会返回多条信息</p></blockquote><ul><li>更换内容再写入一行数据，查看对应 <code>FROM t1[_META_];</code><ul><li>只是更换了 key name，没有修改数据类型</li></ul></li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=k>INSERT</span><span class=w> </span><span class=k>INTO</span><span class=w> </span><span class=n>t1</span><span class=w> </span><span class=p>(</span><span class=n>k1</span><span class=p>,</span><span class=n>k2</span><span class=p>)</span><span class=w> </span><span class=k>VALUES</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>(</span><span class=mi>15</span><span class=p>,</span><span class=n>parse_json</span><span class=p>(</span><span class=s1>&#39;{&#34;abc&#34;:&#34;test_str0&#34;,&#34;abd&#34;:11,&#34;abf&#34;:3.14,&#34;abh&#34;:{&#34;a&#34;:&#34;b&#34;},&#34;abr&#34;:[1,2,3],&#34;abb&#34;:true,&#34;abn&#34;:null}&#39;</span><span class=p>));</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-SQL data-lang=SQL><span class=line><span class=cl><span class=err>查看对应</span><span class=w> </span><span class=k>FROM</span><span class=w> </span><span class=n>t1</span><span class=p>[</span><span class=n>_META_</span><span class=p>];</span><span class=err>（截取了</span><span class=w> </span><span class=mi>1</span><span class=w> </span><span class=err>行，此时返回</span><span class=w> </span><span class=mi>2</span><span class=w> </span><span class=err>行数据）</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>[</span><span class=s2>&#34;nulls(TINYINT)&#34;</span><span class=p>,</span><span class=s2>&#34;abb(JSON)&#34;</span><span class=p>,</span><span class=s2>&#34;abc(VARCHAR)&#34;</span><span class=p>,</span><span class=s2>&#34;abd(BIGINT)&#34;</span><span class=p>,</span><span class=s2>&#34;abf(DOUBLE)&#34;</span><span class=p>,</span><span class=s2>&#34;abh.a(VARCHAR)&#34;</span><span class=p>,</span><span class=s2>&#34;abn(JSON)&#34;</span><span class=p>,</span><span class=s2>&#34;abr(JSON)&#34;</span><span class=p>]</span><span class=w> 
+</span></span></span></code></pre></td></tr></table></div></div><ul><li>更换内容后，再写入一行数据，查看对应 <code>FROM t1[_META_];</code><ul><li>更换 key name、修改 value type</li><li>meta 返回为空（此时 3 条数据，不满足 flat json 生成 meta 的阈值，没有建立物化 json 的 meta 信息）</li></ul></li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=k>INSERT</span><span class=w> </span><span class=k>INTO</span><span class=w> </span><span class=n>t1</span><span class=w> </span><span class=p>(</span><span class=n>k1</span><span class=p>,</span><span class=n>k2</span><span class=p>)</span><span class=w> </span><span class=k>VALUES</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>(</span><span class=mi>15</span><span class=p>,</span><span class=n>parse_json</span><span class=p>(</span><span class=s1>&#39;{&#34;abc&#34;:&#34;test_str0&#34;,&#34;abd&#34;:&#34;gooo&#34;,&#34;abf&#34;:&#34;happy&#34;,&#34;abh&#34;:[1,2,3],&#34;abr&#34;:true,&#34;abb&#34;:123,&#34;abn&#34;:null}&#39;</span><span class=p>));</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>mysql</span><span class=o>&gt;</span><span class=w> </span><span class=k>SELECT</span><span class=w> </span><span class=n>flat_json_meta</span><span class=p>(</span><span class=n>k2</span><span class=p>)</span><span class=w> </span><span class=k>FROM</span><span class=w> </span><span class=n>t1</span><span class=p>[</span><span class=n>_META_</span><span class=p>];</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>--------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=n>flat_json_meta</span><span class=p>(</span><span class=n>k2</span><span class=p>)</span><span class=w> </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>--------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=p>[]</span><span class=w>                 </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>--------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=mi>1</span><span class=w> </span><span class=k>row</span><span class=w> </span><span class=k>in</span><span class=w> </span><span class=k>set</span><span class=w> </span><span class=p>(</span><span class=mi>0</span><span class=p>.</span><span class=mi>03</span><span class=w> </span><span class=n>sec</span><span class=p>)</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><ul><li>插入一个不合法的数据（与上述问题相同，实则与数据本身无关），数据在写入过程中转为了 NULL 然后插入(没有开启严格模式 Strict Mode)<ul><li>column 为 NULL 的时候，同样会被 flat json 所计算，会被列入 <code>"nulls(TINYINT)"</code> meta 信息内（当 key 列的数据为 None 或者 null 时也会列入该数据列</li><li>错误原因：value 是字符串的情况下，没有双引号 <code>"abd":gooo,"abf":happy,</code> 导致 json 格式不合法，开启严格模式事物会提交失败</li></ul></li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=k>INSERT</span><span class=w> </span><span class=k>INTO</span><span class=w> </span><span class=n>t1</span><span class=w> </span><span class=p>(</span><span class=n>k1</span><span class=p>,</span><span class=n>k2</span><span class=p>)</span><span class=w> </span><span class=k>VALUES</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>(</span><span class=mi>150</span><span class=p>,</span><span class=n>parse_json</span><span class=p>(</span><span class=s1>&#39;{&#34;abc&#34;:&#34;test_str0&#34;,&#34;abd&#34;:gooo,&#34;abf&#34;:happy,&#34;abh&#34;:[1,2,3],&#34;abr&#34;:true,&#34;abb&#34;:123,&#34;abn&#34;:null}&#39;</span><span class=p>));</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>Query</span><span class=w> </span><span class=n>OK</span><span class=p>,</span><span class=w> </span><span class=mi>1</span><span class=w> </span><span class=k>row</span><span class=w> </span><span class=n>affected</span><span class=w> </span><span class=p>(</span><span class=mi>0</span><span class=p>.</span><span class=mi>12</span><span class=w> </span><span class=n>sec</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=err>{</span><span class=s1>&#39;label&#39;</span><span class=p>:</span><span class=s1>&#39;insert_e2b25886-a265-11ef-93ed-02427b1a17fc&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;status&#39;</span><span class=p>:</span><span class=s1>&#39;VISIBLE&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;txnId&#39;</span><span class=p>:</span><span class=s1>&#39;13&#39;</span><span class=err>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=err>查看对应</span><span class=w> </span><span class=k>FROM</span><span class=w> </span><span class=n>t1</span><span class=p>[</span><span class=n>_META_</span><span class=p>];</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>[]</span><span class=w> 
+</span></span></span></code></pre></td></tr></table></div></div><ul><li>当数据无法被推算的时候，使用 json 行为作为兜底策略<ul><li>clickhouse 使用 Variant 作为数据列推算</li><li>当 select 返回数据的时候，explain verbose 里看到数据列为 json</li></ul></li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=n>mysql</span><span class=o>&gt;</span><span class=w> </span><span class=k>SELECT</span><span class=w> </span><span class=n>flat_json_meta</span><span class=p>(</span><span class=n>k2</span><span class=p>)</span><span class=w> </span><span class=k>FROM</span><span class=w> </span><span class=n>t1</span><span class=p>[</span><span class=n>_META_</span><span class=p>];</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>--------------------------------------------------------------------------------------------------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=n>flat_json_meta</span><span class=p>(</span><span class=n>k2</span><span class=p>)</span><span class=w>                                                                                           </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>--------------------------------------------------------------------------------------------------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=p>[</span><span class=s2>&#34;nulls(TINYINT)&#34;</span><span class=p>,</span><span class=s2>&#34;abb(JSON)&#34;</span><span class=p>,</span><span class=s2>&#34;abc(VARCHAR)&#34;</span><span class=p>,</span><span class=s2>&#34;abd(JSON)&#34;</span><span class=p>,</span><span class=s2>&#34;abf(JSON)&#34;</span><span class=p>,</span><span class=s2>&#34;abn(JSON)&#34;</span><span class=p>,</span><span class=s2>&#34;abr(JSON)&#34;</span><span class=p>,</span><span class=s2>&#34;remain(JSON)&#34;</span><span class=p>]</span><span class=w> </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>--------------------------------------------------------------------------------------------------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=mi>1</span><span class=w> </span><span class=k>row</span><span class=w> </span><span class=k>in</span><span class=w> </span><span class=k>set</span><span class=w> </span><span class=p>(</span><span class=mi>0</span><span class=p>.</span><span class=mi>05</span><span class=w> </span><span class=n>sec</span><span class=p>)</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><blockquote><p><code>select from t1[_META_]</code> 语法边界</p></blockquote><ul><li><code>FROM t1[_META_];</code> 本身是把指定列的 json meta 信息打印，正常为 1 条（相同 kv 格式化使用同一套）<ul><li>不支持 where 条件选择</li><li>不支持 order by</li><li>支持 limit 1 返回行数</li></ul></li><li>刚导入了数据后，<code>FROM t1[_META_];</code> 可能会返回多行信息<ul><li>快速执行手动 compact 后，会留下一条信息</li><li><code>ALTER TABLE t1 COMPACT;</code></li><li><code>ALTER TABLE t1 BASE COMPACT;</code></li></ul></li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=c1>-- 验证 where 是否参与过滤行为
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=n>mysql</span><span class=o>&gt;</span><span class=w> </span><span class=k>SELECT</span><span class=w> </span><span class=n>flat_json_meta</span><span class=p>(</span><span class=n>k2</span><span class=p>)</span><span class=w> </span><span class=k>FROM</span><span class=w> </span><span class=n>t1</span><span class=p>[</span><span class=n>_META_</span><span class=p>]</span><span class=w> </span><span class=k>where</span><span class=w> </span><span class=n>k1</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=mi>15</span><span class=w> </span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>--------------------------------------------------------------------------------------------------------------------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=n>flat_json_meta</span><span class=p>(</span><span class=n>k2</span><span class=p>)</span><span class=w>                                                                                                             </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>--------------------------------------------------------------------------------------------------------------------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=p>[</span><span class=s2>&#34;nulls(TINYINT)&#34;</span><span class=p>,</span><span class=s2>&#34;abb(JSON)&#34;</span><span class=p>,</span><span class=s2>&#34;abc(VARCHAR)&#34;</span><span class=p>,</span><span class=s2>&#34;abd(BIGINT)&#34;</span><span class=p>,</span><span class=s2>&#34;abf(DOUBLE)&#34;</span><span class=p>,</span><span class=s2>&#34;abh.a(VARCHAR)&#34;</span><span class=p>,</span><span class=s2>&#34;abn(JSON)&#34;</span><span class=p>,</span><span class=s2>&#34;abr(JSON)&#34;</span><span class=p>]</span><span class=w>             </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w> </span><span class=p>[]</span><span class=w>                                                                                                                             </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w> </span><span class=p>[</span><span class=s2>&#34;nulls(TINYINT)&#34;</span><span class=p>,</span><span class=s2>&#34;Bool(JSON)&#34;</span><span class=p>,</span><span class=s2>&#34;Double(DOUBLE)&#34;</span><span class=p>,</span><span class=s2>&#34;Integer(BIGINT)&#34;</span><span class=p>,</span><span class=s2>&#34;Object.a(VARCHAR)&#34;</span><span class=p>,</span><span class=s2>&#34;arr(JSON)&#34;</span><span class=p>,</span><span class=s2>&#34;null(JSON)&#34;</span><span class=p>,</span><span class=s2>&#34;str(VARCHAR)&#34;</span><span class=p>]</span><span class=w> </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>--------------------------------------------------------------------------------------------------------------------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=mi>3</span><span class=w> </span><span class=k>rows</span><span class=w> </span><span class=k>in</span><span class=w> </span><span class=k>set</span><span class=w> </span><span class=p>(</span><span class=mi>0</span><span class=p>.</span><span class=mi>05</span><span class=w> </span><span class=n>sec</span><span class=p>)</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><ul><li>默认返回 3 条数据，使用 limit 1 语法返回 1 条数据</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=n>mysql</span><span class=o>&gt;</span><span class=w> </span><span class=k>SELECT</span><span class=w> </span><span class=n>flat_json_meta</span><span class=p>(</span><span class=n>k2</span><span class=p>)</span><span class=w> </span><span class=k>FROM</span><span class=w> </span><span class=n>t1</span><span class=p>[</span><span class=n>_META_</span><span class=p>]</span><span class=w> </span><span class=k>limit</span><span class=w> </span><span class=mi>1</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>--------------------------------------------------------------------------------------------------------------------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=n>flat_json_meta</span><span class=p>(</span><span class=n>k2</span><span class=p>)</span><span class=w>                                                                                                             </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>--------------------------------------------------------------------------------------------------------------------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=p>[</span><span class=s2>&#34;nulls(TINYINT)&#34;</span><span class=p>,</span><span class=s2>&#34;Bool(JSON)&#34;</span><span class=p>,</span><span class=s2>&#34;Double(DOUBLE)&#34;</span><span class=p>,</span><span class=s2>&#34;Integer(BIGINT)&#34;</span><span class=p>,</span><span class=s2>&#34;Object.a(VARCHAR)&#34;</span><span class=p>,</span><span class=s2>&#34;arr(JSON)&#34;</span><span class=p>,</span><span class=s2>&#34;null(JSON)&#34;</span><span class=p>,</span><span class=s2>&#34;str(VARCHAR)&#34;</span><span class=p>]</span><span class=w> </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>--------------------------------------------------------------------------------------------------------------------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=mi>1</span><span class=w> </span><span class=k>row</span><span class=w> </span><span class=k>in</span><span class=w> </span><span class=k>set</span><span class=w> </span><span class=p>(</span><span class=mi>0</span><span class=p>.</span><span class=mi>04</span><span class=w> </span><span class=n>sec</span><span class=p>)</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><h3 id=flat-json-相关参数>flat json 相关参数</h3><ul><li>控制 flat json 按什么范围的数据生产 meta 信息</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>enable_json_flat
+</span></span><span class=line><span class=cl>默认值：false
+</span></span><span class=line><span class=cl>类型：Boolean
+</span></span><span class=line><span class=cl>是否动态：是
+</span></span><span class=line><span class=cl>描述：是否开启 Flat JSON 特性。开启后新导入的 JSON 数据会自动打平，提升 JSON 数据查询性能。
+</span></span><span class=line><span class=cl>引入版本：v3.3.0
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>json_flat_null_factor
+</span></span><span class=line><span class=cl>默认值：0.3
+</span></span><span class=line><span class=cl>类型：Double
+</span></span><span class=line><span class=cl>是否动态：是
+</span></span><span class=line><span class=cl>描述：控制 Flat JSON 时，提取列的 NULL 值占比阈值，高于该比例不对该列进行提取，默认为 0.3。该参数仅在 enable_json_flat 为 true 时生效。
+</span></span><span class=line><span class=cl>引入版本：v3.3.0
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>json_flat_sparsity_factor
+</span></span><span class=line><span class=cl>默认值：0.9
+</span></span><span class=line><span class=cl>类型：Double
+</span></span><span class=line><span class=cl>是否动态：是
+</span></span><span class=line><span class=cl>描述：控制 Flat JSON 时，同名列的占比阈值，当同名列占比低于该值时不进行提取，默认为 0.9。该参数仅在 enable_json_flat 为 true 时生效。
+</span></span><span class=line><span class=cl>引入版本：v3.3.0
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>json_flat_column_max
+</span></span><span class=line><span class=cl>默认值：100
+</span></span><span class=line><span class=cl>类型：Int
+</span></span><span class=line><span class=cl>是否动态：是
+</span></span><span class=line><span class=cl>描述：控制 Flat JSON 时，最多提取的子列数量。该参数仅在 enable_json_flat 为 true 时生效。
+</span></span><span class=line><span class=cl>引入版本：v3.3.0
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>enable_compaction_flat_json
+</span></span><span class=line><span class=cl>默认值：True
+</span></span><span class=line><span class=cl>类型：Bool
+</span></span><span class=line><span class=cl>是否动态：是
+</span></span><span class=line><span class=cl>描述：控制是否为 Flat Json 数据进行 Compaction。
+</span></span><span class=line><span class=cl>引入版本：v3.3.3
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>enable_lazy_dynamic_flat_json
+</span></span><span class=line><span class=cl>默认值：True
+</span></span><span class=line><span class=cl>类型：Bool
+</span></span><span class=line><span class=cl>是否动态：是
+</span></span><span class=line><span class=cl>描述：当查询在读过程中未命中 Flat JSON Schema 时，是否启用 Lazy Dynamic Flat JSON。当此项设置为 true 时，StarRocks 将把 Flat JSON 操作推迟到计算流程，而不是读取流程。
+</span></span><span class=line><span class=cl>引入版本：v3.3.3
+</span></span></code></pre></td></tr></table></div></div><h2 id=starrocks-查询验证>StarRocks 查询验证</h2><blockquote><p>flat json 在物化 key / values 时，数据是通过 cast 函数将 json kv 转为 int、varchar、decimal 等行为存储到 BE 节点，当单个 column 有多种数据格式会使用 json 行为存储（保底行为）<br>需要注意数据写入、查询 后行为的一致性，针对 bool、tinyint、38 位以上的 浮点数、None / NULL 等数据边界一定要注意写入和查询时的一致性（建议自行验证是否符合业务逻辑）</p></blockquote><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=n>mysql</span><span class=o>&gt;</span><span class=w> </span><span class=k>SELECT</span><span class=w> </span><span class=n>get_json_string</span><span class=p>(</span><span class=n>k2</span><span class=p>,</span><span class=s1>&#39;\$.abf&#39;</span><span class=p>)</span><span class=w> </span><span class=k>FROM</span><span class=w> </span><span class=n>t1</span><span class=w> </span><span class=k>WHERE</span><span class=w> </span><span class=n>k2</span><span class=o>-&gt;</span><span class=s1>&#39;abb&#39;</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=mi>123</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>------------------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=n>get_json_string</span><span class=p>(</span><span class=n>k2</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;$.abf&#39;</span><span class=p>)</span><span class=w> </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>------------------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=n>happy</span><span class=w>                        </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>------------------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=mi>1</span><span class=w> </span><span class=k>row</span><span class=w> </span><span class=k>in</span><span class=w> </span><span class=k>set</span><span class=w> </span><span class=p>(</span><span class=mi>0</span><span class=p>.</span><span class=mi>04</span><span class=w> </span><span class=n>sec</span><span class=p>)</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><h3 id=profile-分析是否命中-flat-json>Profile 分析是否命中 flat json</h3><blockquote><p>从 profile 上可以看到 json kv 在字段谓词过滤时 hit / unhit 的行为</p></blockquote><ul><li>AccessPathHits<ul><li>Hit：命中 meta 后加速的数据</li><li>HitMerge：数据存在多个版本（比如导入数据后，没有 compaction）</li><li>hit 和 HitMerge 在查询 1 个 column 时二选一；目前从测试上未见同时出现常见</li></ul></li><li>AccessPathUnhits<ul><li>Unhit：未命中 meta 列的查询数据</li></ul></li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-yaml data-lang=yaml><span class=line><span class=cl><span class=nt>UniqueMetrics</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span>- <span class=nt>MorselQueueType</span><span class=p>:</span><span class=w> </span><span class=l>fixed_morsel_queue</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span>- <span class=nt>Predicates: json_query(2</span><span class=p>:</span><span class=w> </span><span class=l>k2, &#39;Double&#39;) = CAST(3.14 AS JSON)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span>- <span class=nt>Rollup</span><span class=p>:</span><span class=w> </span><span class=l>t1</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span>- <span class=nt>SharedScan</span><span class=p>:</span><span class=w> </span><span class=kc>False</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span>- <span class=nt>Table</span><span class=p>:</span><span class=w> </span><span class=l>t1</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span>- <span class=nt>AccessPathHits</span><span class=p>:</span><span class=w> </span><span class=m>3</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=nt>[Hit]Double</span><span class=p>:</span><span class=w> </span><span class=m>1</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=nt>[Hit]Object.a</span><span class=p>:</span><span class=w> </span><span class=m>1</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=nt>[Hit]remain</span><span class=p>:</span><span class=w> </span><span class=m>1</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span>- <span class=nt>AccessPathUnhits</span><span class=p>:</span><span class=w> </span><span class=m>2</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=nt>[Unhit]Double</span><span class=p>:</span><span class=w> </span><span class=m>1</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=nt>[Unhit]Object</span><span class=p>:</span><span class=w> </span><span class=m>1</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span>- <span class=nt>PushdownAccessPaths</span><span class=p>:</span><span class=w> </span><span class=m>2</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span>- <span class=nt>PushdownPredicates</span><span class=p>:</span><span class=w> </span><span class=m>1</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><blockquote><p>当大量数据写入后未 compaction 时，会有 HitMerge 的信息</p></blockquote><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-yaml data-lang=yaml><span class=line><span class=cl><span class=nt>UniqueMetrics</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span>- <span class=nt>MorselQueueType</span><span class=p>:</span><span class=w> </span><span class=l>fixed_morsel_queue</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span>- <span class=nt>Predicates: json_query(2</span><span class=p>:</span><span class=w> </span><span class=l>k2, &#39;Double&#39;) = CAST(3.14 AS JSON)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span>- <span class=nt>Rollup</span><span class=p>:</span><span class=w> </span><span class=l>t1</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span>- <span class=nt>SharedScan</span><span class=p>:</span><span class=w> </span><span class=kc>False</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span>- <span class=nt>Table</span><span class=p>:</span><span class=w> </span><span class=l>t1</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span>- <span class=nt>AccessPathHits</span><span class=p>:</span><span class=w> </span><span class=m>7</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=nt>[HitMerge]abb</span><span class=p>:</span><span class=w> </span><span class=m>1</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=nt>[HitMerge]abc</span><span class=p>:</span><span class=w> </span><span class=m>1</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=nt>[HitMerge]abd</span><span class=p>:</span><span class=w> </span><span class=m>1</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=nt>[HitMerge]abf</span><span class=p>:</span><span class=w> </span><span class=m>1</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=nt>[HitMerge]abh.a</span><span class=p>:</span><span class=w> </span><span class=m>1</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=nt>[HitMerge]abn</span><span class=p>:</span><span class=w> </span><span class=m>1</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span>- <span class=nt>[HitMerge]abr</span><span class=p>:</span><span class=w> </span><span class=m>1</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span>- <span class=nt>AccessPathUnhits</span><span class=p>:</span><span class=w> </span><span class=m>0</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><h3 id=json-中的-none-与-字符串-null-sql-null>Json 中的 None 与 字符串 null 、SQL NULL</h3><ul><li>通过 explain verbose 检查列属性</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=k>explain</span><span class=w> </span><span class=k>verbose</span><span class=w> </span><span class=k>SELECT</span><span class=w> </span><span class=n>get_json_string</span><span class=p>(</span><span class=n>k2</span><span class=p>,</span><span class=s1>&#39;\$.abf&#39;</span><span class=p>)</span><span class=w> </span><span class=k>FROM</span><span class=w> </span><span class=n>t1</span><span class=w> </span><span class=k>WHERE</span><span class=w> </span><span class=n>k2</span><span class=o>-&gt;</span><span class=s1>&#39;null&#39;</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s2>&#34;null&#34;</span><span class=p>;</span><span class=w>   
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=c1>-- 截取重要信息列如下
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=mi>5</span><span class=w> </span><span class=o>&lt;-&gt;</span><span class=w> </span><span class=n>get_json_string</span><span class=p>[([</span><span class=mi>2</span><span class=p>:</span><span class=w> </span><span class=n>k2</span><span class=p>,</span><span class=w> </span><span class=n>JSON</span><span class=p>,</span><span class=w> </span><span class=k>true</span><span class=p>],</span><span class=w> </span><span class=s1>&#39;$.abf&#39;</span><span class=p>);</span><span class=w> </span><span class=n>args</span><span class=p>:</span><span class=w> </span><span class=n>JSON</span><span class=p>,</span><span class=nb>VARCHAR</span><span class=p>;</span><span class=w> </span><span class=k>result</span><span class=p>:</span><span class=w> </span><span class=nb>VARCHAR</span><span class=p>;</span><span class=w> </span><span class=n>args</span><span class=w> </span><span class=k>nullable</span><span class=p>:</span><span class=w> </span><span class=k>true</span><span class=p>;</span><span class=w> </span><span class=k>result</span><span class=w> </span><span class=k>nullable</span><span class=p>:</span><span class=w> </span><span class=k>true</span><span class=p>]</span><span class=w> 
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>Predicates</span><span class=p>:</span><span class=w> </span><span class=n>json_query</span><span class=p>[([</span><span class=mi>2</span><span class=p>:</span><span class=w> </span><span class=n>k2</span><span class=p>,</span><span class=w> </span><span class=n>JSON</span><span class=p>,</span><span class=w> </span><span class=k>true</span><span class=p>],</span><span class=w> </span><span class=s1>&#39;null&#39;</span><span class=p>);</span><span class=w> </span><span class=n>args</span><span class=p>:</span><span class=w> </span><span class=n>JSON</span><span class=p>,</span><span class=nb>VARCHAR</span><span class=p>;</span><span class=w> </span><span class=k>result</span><span class=p>:</span><span class=w> </span><span class=n>JSON</span><span class=p>;</span><span class=w> </span><span class=n>args</span><span class=w> </span><span class=k>nullable</span><span class=p>:</span><span class=w> </span><span class=k>true</span><span class=p>;</span><span class=w> </span><span class=k>result</span><span class=w> </span><span class=k>nullable</span><span class=p>:</span><span class=w> </span><span class=k>true</span><span class=p>]</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>cast</span><span class=p>(</span><span class=s1>&#39;null&#39;</span><span class=w> </span><span class=k>as</span><span class=w> </span><span class=n>JSON</span><span class=p>)</span><span class=w> 
+</span></span></span></code></pre></td></tr></table></div></div><ul><li>测试如下三种场景<ul><li>key 信息，value 为 SQL NULL</li><li>不存在的 key 信息，json 库自动转为 null</li><li>获取存在的 key 信息，value 为 null （等效一个 string 字符）</li></ul></li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=o>//</span><span class=w> </span><span class=err>获取存在的</span><span class=w> </span><span class=k>key</span><span class=w> </span><span class=err>信息，</span><span class=n>value</span><span class=w> </span><span class=err>为</span><span class=w> </span><span class=k>null</span><span class=err>（</span><span class=w> </span><span class=err>等效</span><span class=w> </span><span class=n>MySQL</span><span class=w> </span><span class=k>NULL</span><span class=err>）</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>mysql</span><span class=o>&gt;</span><span class=w> </span><span class=k>select</span><span class=w> </span><span class=n>parse_json</span><span class=p>(</span><span class=s1>&#39;{&#34;a&#34;: null}&#39;</span><span class=p>)</span><span class=o>-&gt;</span><span class=s2>&#34;a&#34;</span><span class=p>,</span><span class=w> </span><span class=n>parse_json</span><span class=p>(</span><span class=s1>&#39;{&#34;a&#34;: null}&#39;</span><span class=p>)</span><span class=o>-&gt;</span><span class=s2>&#34;b&#34;</span><span class=w> </span><span class=k>is</span><span class=w> </span><span class=k>null</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>--------------------------------+------------------------------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=n>parse_json</span><span class=p>(</span><span class=s1>&#39;{&#34;a&#34;: null}&#39;</span><span class=p>)</span><span class=o>-&gt;</span><span class=s1>&#39;a&#39;</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=p>(</span><span class=n>parse_json</span><span class=p>(</span><span class=s1>&#39;{&#34;a&#34;: null}&#39;</span><span class=p>)</span><span class=o>-&gt;</span><span class=s1>&#39;b&#39;</span><span class=p>)</span><span class=w> </span><span class=k>IS</span><span class=w> </span><span class=k>NULL</span><span class=w> </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>--------------------------------+------------------------------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=k>null</span><span class=w>                           </span><span class=o>|</span><span class=w>                                        </span><span class=mi>1</span><span class=w> </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>--------------------------------+------------------------------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=mi>1</span><span class=w> </span><span class=k>row</span><span class=w> </span><span class=k>in</span><span class=w> </span><span class=k>set</span><span class=w> </span><span class=p>(</span><span class=mi>0</span><span class=p>.</span><span class=mi>01</span><span class=w> </span><span class=n>sec</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>//</span><span class=w> </span><span class=err>获取不存在的</span><span class=w> </span><span class=k>key</span><span class=w> </span><span class=err>信息，</span><span class=n>json</span><span class=w> </span><span class=err>库自动转为</span><span class=w> </span><span class=k>null</span><span class=w> 
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>mysql</span><span class=o>&gt;</span><span class=w> </span><span class=k>select</span><span class=w> </span><span class=n>parse_json</span><span class=p>(</span><span class=s1>&#39;{&#34;a&#34;: null}&#39;</span><span class=p>)</span><span class=o>-&gt;</span><span class=s2>&#34;b&#34;</span><span class=p>,</span><span class=w> </span><span class=n>parse_json</span><span class=p>(</span><span class=s1>&#39;{&#34;a&#34;: null}&#39;</span><span class=p>)</span><span class=o>-&gt;</span><span class=s2>&#34;b&#34;</span><span class=w> </span><span class=k>is</span><span class=w> </span><span class=k>null</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>--------------------------------+------------------------------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=n>parse_json</span><span class=p>(</span><span class=s1>&#39;{&#34;a&#34;: null}&#39;</span><span class=p>)</span><span class=o>-&gt;</span><span class=s1>&#39;b&#39;</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=p>(</span><span class=n>parse_json</span><span class=p>(</span><span class=s1>&#39;{&#34;a&#34;: null}&#39;</span><span class=p>)</span><span class=o>-&gt;</span><span class=s1>&#39;b&#39;</span><span class=p>)</span><span class=w> </span><span class=k>IS</span><span class=w> </span><span class=k>NULL</span><span class=w> </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>--------------------------------+------------------------------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=k>NULL</span><span class=w>                           </span><span class=o>|</span><span class=w>                                        </span><span class=mi>1</span><span class=w> </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>--------------------------------+------------------------------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=mi>1</span><span class=w> </span><span class=k>row</span><span class=w> </span><span class=k>in</span><span class=w> </span><span class=k>set</span><span class=w> </span><span class=p>(</span><span class=mi>0</span><span class=p>.</span><span class=mi>02</span><span class=w> </span><span class=n>sec</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>//</span><span class=w> </span><span class=err>获取存在的</span><span class=w> </span><span class=k>key</span><span class=w> </span><span class=err>信息，</span><span class=n>value</span><span class=w> </span><span class=err>为</span><span class=w> </span><span class=k>null</span><span class=w> </span><span class=err>（等效一个</span><span class=w> </span><span class=n>string</span><span class=w> </span><span class=err>字符）</span><span class=w> 
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>mysql</span><span class=o>&gt;</span><span class=w> </span><span class=k>select</span><span class=w> </span><span class=n>parse_json</span><span class=p>(</span><span class=s1>&#39;{&#34;a&#34;: &#34;null&#34;}&#39;</span><span class=p>)</span><span class=o>-&gt;</span><span class=s2>&#34;a&#34;</span><span class=p>,</span><span class=w> </span><span class=n>parse_json</span><span class=p>(</span><span class=s1>&#39;{&#34;a&#34;: &#34;null&#34;}&#39;</span><span class=p>)</span><span class=o>-&gt;</span><span class=s2>&#34;a&#34;</span><span class=w> </span><span class=k>is</span><span class=w> </span><span class=k>null</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>----------------------------------+--------------------------------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=n>parse_json</span><span class=p>(</span><span class=s1>&#39;{&#34;a&#34;: &#34;null&#34;}&#39;</span><span class=p>)</span><span class=o>-&gt;</span><span class=s1>&#39;a&#39;</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=p>(</span><span class=n>parse_json</span><span class=p>(</span><span class=s1>&#39;{&#34;a&#34;: &#34;null&#34;}&#39;</span><span class=p>)</span><span class=o>-&gt;</span><span class=s1>&#39;a&#39;</span><span class=p>)</span><span class=w> </span><span class=k>IS</span><span class=w> </span><span class=k>NULL</span><span class=w> </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>----------------------------------+--------------------------------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=s2>&#34;null&#34;</span><span class=w>                           </span><span class=o>|</span><span class=w>                                          </span><span class=mi>0</span><span class=w> </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>----------------------------------+--------------------------------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=mi>1</span><span class=w> </span><span class=k>row</span><span class=w> </span><span class=k>in</span><span class=w> </span><span class=k>set</span><span class=w> </span><span class=p>(</span><span class=mi>0</span><span class=p>.</span><span class=mi>02</span><span class=w> </span><span class=n>sec</span><span class=p>)</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><blockquote><p>Tips：使用 <code>explain verbose SELECT</code> 检查 SQL 语句在执行过程中使用的 column type；方便判断数据在 cast 转换后是否符合预期中的数学加工逻辑</p></blockquote><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=n>mysql</span><span class=o>&gt;</span><span class=w> </span><span class=k>explain</span><span class=w> </span><span class=k>verbose</span><span class=w> </span><span class=k>select</span><span class=w>  </span><span class=n>k2</span><span class=o>-&gt;</span><span class=s1>&#39;null&#39;</span><span class=w> </span><span class=k>from</span><span class=w> </span><span class=n>t1</span><span class=p>;</span><span class=w>                                                                                           
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>------------------------------------------------------------------------------------------------------------------------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=k>Explain</span><span class=w> </span><span class=n>String</span><span class=w>                                                                                                                     </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>------------------------------------------------------------------------------------------------------------------------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=n>RESOURCE</span><span class=w> </span><span class=k>GROUP</span><span class=p>:</span><span class=w> </span><span class=n>default_wg</span><span class=w>                                                                                                         </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>                                                                                                                                    </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w> </span><span class=n>PLAN</span><span class=w> </span><span class=n>COST</span><span class=w>                                                                                                                          </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=n>CPU</span><span class=p>:</span><span class=w> </span><span class=mi>57344</span><span class=p>.</span><span class=mi>0</span><span class=w>                                                                                                                     </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=n>Memory</span><span class=p>:</span><span class=w> </span><span class=mi>0</span><span class=p>.</span><span class=mi>0</span><span class=w>                                                                                                                      </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>                                                                                                                                    </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w> </span><span class=n>PLAN</span><span class=w> </span><span class=n>FRAGMENT</span><span class=w> </span><span class=mi>0</span><span class=p>(</span><span class=n>F00</span><span class=p>)</span><span class=w>                                                                                                               </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=n>Fragment</span><span class=w> </span><span class=n>Cost</span><span class=p>:</span><span class=w> </span><span class=mi>28672</span><span class=p>.</span><span class=mi>0</span><span class=w>                                                                                                           </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=k>Output</span><span class=w> </span><span class=n>Exprs</span><span class=p>:</span><span class=mi>5</span><span class=p>:</span><span class=w> </span><span class=n>expr</span><span class=w>                                                                                                             </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=k>Input</span><span class=w> </span><span class=n>Partition</span><span class=p>:</span><span class=w> </span><span class=n>RANDOM</span><span class=w>                                                                                                          </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=k>RESULT</span><span class=w> </span><span class=n>SINK</span><span class=w>                                                                                                                      </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>                                                                                                                                    </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=mi>1</span><span class=p>:</span><span class=n>Project</span><span class=w>                                                                                                                        </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=o>|</span><span class=w>  </span><span class=k>output</span><span class=w> </span><span class=n>columns</span><span class=p>:</span><span class=w>                                                                                                               </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=o>|</span><span class=w>  </span><span class=mi>5</span><span class=w> </span><span class=o>&lt;-&gt;</span><span class=w> </span><span class=n>json_query</span><span class=p>[([</span><span class=mi>2</span><span class=p>:</span><span class=w> </span><span class=n>k2</span><span class=p>,</span><span class=w> </span><span class=n>JSON</span><span class=p>,</span><span class=w> </span><span class=k>true</span><span class=p>],</span><span class=w> </span><span class=s1>&#39;null&#39;</span><span class=p>);</span><span class=w> </span><span class=n>args</span><span class=p>:</span><span class=w> </span><span class=n>JSON</span><span class=p>,</span><span class=nb>VARCHAR</span><span class=p>;</span><span class=w> </span><span class=k>result</span><span class=p>:</span><span class=w> </span><span class=n>JSON</span><span class=p>;</span><span class=w> </span><span class=n>args</span><span class=w> </span><span class=k>nullable</span><span class=p>:</span><span class=w> </span><span class=k>true</span><span class=p>;</span><span class=w> </span><span class=k>result</span><span class=w> </span><span class=k>nullable</span><span class=p>:</span><span class=w> </span><span class=k>true</span><span class=p>]</span><span class=w> </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=o>|</span><span class=w>  </span><span class=k>cardinality</span><span class=p>:</span><span class=w> </span><span class=mi>28</span><span class=w>                                                                                                               </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=o>|</span><span class=w>                                                                                                                                </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>   </span><span class=mi>0</span><span class=p>:</span><span class=n>OlapScanNode</span><span class=w>                                                                                                                   </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>      </span><span class=k>table</span><span class=p>:</span><span class=w> </span><span class=n>t1</span><span class=p>,</span><span class=w> </span><span class=k>rollup</span><span class=p>:</span><span class=w> </span><span class=n>t1</span><span class=w>                                                                                                         </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>      </span><span class=n>preAggregation</span><span class=p>:</span><span class=w> </span><span class=k>on</span><span class=w>                                                                                                            </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>      </span><span class=n>partitionsRatio</span><span class=o>=</span><span class=mi>1</span><span class=o>/</span><span class=mi>1</span><span class=p>,</span><span class=w> </span><span class=n>tabletsRatio</span><span class=o>=</span><span class=mi>1</span><span class=o>/</span><span class=mi>1</span><span class=w>                                                                                         </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>      </span><span class=n>tabletList</span><span class=o>=</span><span class=mi>10165</span><span class=w>                                                                                                              </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>      </span><span class=n>actualRows</span><span class=o>=</span><span class=mi>28</span><span class=p>,</span><span class=w> </span><span class=n>avgRowSize</span><span class=o>=</span><span class=mi>1025</span><span class=p>.</span><span class=mi>0</span><span class=w>                                                                                              </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>      </span><span class=n>ColumnAccessPath</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=o>/</span><span class=n>k2</span><span class=o>/</span><span class=k>null</span><span class=p>(</span><span class=n>json</span><span class=p>)]</span><span class=w>                                                                                            </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>      </span><span class=k>cardinality</span><span class=p>:</span><span class=w> </span><span class=mi>28</span><span class=w>                                                                                                               </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>------------------------------------------------------------------------------------------------------------------------------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=mi>25</span><span class=w> </span><span class=k>rows</span><span class=w> </span><span class=k>in</span><span class=w> </span><span class=k>set</span><span class=w> </span><span class=p>(</span><span class=mi>0</span><span class=p>.</span><span class=mi>03</span><span class=w> </span><span class=n>sec</span><span class=p>)</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div></div><div class=post-copyright><p class=copyright-item><span class=item-title>Author</span>
+<span class=item-content>Atman</span></p><p class=copyright-item><span class=item-title>LastMod</span>
+<span class=item-content>2024-11-14</span></p><p class=copyright-item><span class=item-title>License</span>
+<span class=item-content><a rel="license noopener" href=https://creativecommons.org/licenses/by-nc-nd/4.0/ target=_blank>CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span></p></div><footer class=post-footer><div class=post-tags><a href=/tags/starrocks/>StarRocks</a>
+<a href=/tags/json/>Json</a></div><nav class=post-nav><a class=next href=/post/20241031-shard-data-fe-tf/><span class="next-text nav-default">纸上谈兵-存算分离 FE 灾难恢复</span>
+<span class="next-text nav-mobile">Next</span>
+<i class="iconfont icon-right"></i></a></nav></footer></article></div></div></main><footer id=footer class=footer><div class=social-links><a href=https://github.com/BigerCAP/TiDB-AirPlan/issues class="iconfont icon-github" title=github></a>
+<a href=https://biger.cc/index.xml type=application/rss+xml class="iconfont icon-rss" title=rss></a></div><div class=copyright><span class=power-by>Powered by <a class=hexo-link href=https://gohugo.io>Hugo</a></span>
+<span class=division>|</span>
+<span class=theme-info>Theme -
+<a class=theme-link href=https://github.com/olOwOlo/hugo-theme-even>Even</a></span>
+<span class=copyright-year>&copy;
+2014 -
+2024
+<span class=heart><i class="iconfont icon-heart"></i></span>
+<span class=author>DataBase - biger.cc</span></span></div></footer><div class=back-to-top id=back-to-top><i class="iconfont icon-up"></i></div></div><script src=https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin=anonymous></script>
+<script>var languageCode="en".replace(/-/g,"_").replace(/_(.*)/,function(e,t){return e.replace(t,t.toUpperCase())});timeago().render(document.querySelectorAll(".timeago"),languageCode),timeago.cancel()</script><script type=text/javascript src=/dist/even.26188efa.min.js></script></body></html>
