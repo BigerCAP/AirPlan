@@ -18,7 +18,7 @@ hasCJKLanguage = true     # has chinese/japanese/korean ? # 自动检测是否�
 paginate = 15                                              # 首页每页显示的文章数
 disqusShortname = ""      # disqus_shortname
 googleAnalytics = ""      # UA-XXXXXXXX-X
-copyright = "DB - AirPlan"            # default: author.name ↓        # 默认为下面配置的author.name ↓
+copyright = "DataBase - biger.cc"            # default: author.name ↓        # 默认为下面配置的author.name ↓
 
 [author]                  # essential                     # 必需
   name = "Atman"
@@ -59,9 +59,9 @@ copyright = "DB - AirPlan"            # default: author.name ↓        # 默认
   gitRepo = ""
 
   # site info (optional)                                  # 站点信息（可选，不需要的可以直接注释掉）
-  logoTitle = "AirPlan"        # default: the title value    # 默认值: 上面设置的title值
+  logoTitle = "@man"        # default: the title value    # 默认值: 上面设置的title值
   keywords = ["TiDB", "AirPlan","TiDB OPS","tidb-operator","2pc","raft","databases","mysql","htap","StarRocks","OLAP","OLTP","HTAP"]
-  description = "A biger solution -- AirPlan"
+  description = "A biger solution -- @man"
 
   # paginate of archives, tags and categories             # 归档、标签、分类每页显示的文章数目，建议修改为一个较大的值
   archivePaginate = 35
