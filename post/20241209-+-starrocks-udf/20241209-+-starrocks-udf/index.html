@@ -1,0 +1,1263 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge,chrome=1"><title>StarRocks UDF 开发并测试 - AirPlan - A biger solution</title><meta name=renderer content="webkit"><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta http-equiv=cache-control content="no-transform"><meta http-equiv=cache-control content="no-siteapp"><meta name=theme-color content="#f8f5ec"><meta name=msapplication-navbutton-color content="#f8f5ec"><meta name=apple-mobile-web-app-capable content="yes"><meta name=apple-mobile-web-app-status-bar-style content="#f8f5ec"><meta name=author content="Atman"><meta name=description content="在线 Java 代码编译验证 文章内 Java 使用 chatgpt 开发 业务需求 starrocks 支持 udf 函数，可以参考 Github StarRocks/udf 参考该官方 UDF 文档 重构上述 StarRocks UDF 实现如下业务要求： transactions 表至少包含三列（uid"><meta name=keywords content="TiDB,AirPlan,TiDB OPS,tidb-operator,2pc,raft,databases,mysql,htap,StarRocks,OLAP,OLTP,HTAP"><meta name=generator content="Hugo 0.110.0 with theme even"><link rel=canonical href=https://biger.cc/post/20241209-+-starrocks-udf/20241209-+-starrocks-udf/><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/manifest.json><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link href=/dist/even.04bd84cd.min.css rel=stylesheet><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin=anonymous><meta property="og:title" content="StarRocks UDF 开发并测试"><meta property="og:description" content="在线 Java 代码编译验证 文章内 Java 使用 chatgpt 开发 业务需求 starrocks 支持 udf 函数，可以参考 Github StarRocks/udf 参考该官方 UDF 文档 重构上述 StarRocks UDF 实现如下业务要求： transactions 表至少包含三列（uid"><meta property="og:type" content="article"><meta property="og:url" content="https://biger.cc/post/20241209-+-starrocks-udf/20241209-+-starrocks-udf/"><meta property="article:section" content="post"><meta property="article:published_time" content="2024-12-09T00:00:00+08:00"><meta property="article:modified_time" content="2024-12-09T00:00:00+08:00"><meta itemprop=name content="StarRocks UDF 开发并测试"><meta itemprop=description content="在线 Java 代码编译验证 文章内 Java 使用 chatgpt 开发 业务需求 starrocks 支持 udf 函数，可以参考 Github StarRocks/udf 参考该官方 UDF 文档 重构上述 StarRocks UDF 实现如下业务要求： transactions 表至少包含三列（uid"><meta itemprop=datePublished content="2024-12-09T00:00:00+08:00"><meta itemprop=dateModified content="2024-12-09T00:00:00+08:00"><meta itemprop=wordCount content="4817"><meta itemprop=keywords content="StarRocks,udf,"><meta name=twitter:card content="summary"><meta name=twitter:title content="StarRocks UDF 开发并测试"><meta name=twitter:description content="在线 Java 代码编译验证 文章内 Java 使用 chatgpt 开发 业务需求 starrocks 支持 udf 函数，可以参考 Github StarRocks/udf 参考该官方 UDF 文档 重构上述 StarRocks UDF 实现如下业务要求： transactions 表至少包含三列（uid"><!--[if lte IE 9]><script src=https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js></script><![endif]--><!--[if lt IE 9]><script src=https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js></script>
+<script src=https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js></script><![endif]--></head><body><div id=mobile-navbar class=mobile-navbar><div class=mobile-header-logo><a href=/ class=logo>@man</a></div><div class=mobile-navbar-icon><span></span>
+<span></span>
+<span></span></div></div><nav id=mobile-menu class="mobile-menu slideout-menu"><ul class=mobile-menu-list><a href=/post/><li class=mobile-menu-item>Archive</li></a><a href=/look/><li class=mobile-menu-item>Look</li></a><a href=/tags/><li class=mobile-menu-item>Tags</li></a><a href=/categories/><li class=mobile-menu-item>Categories</li></a><a href=/about/><li class=mobile-menu-item>About</li></a></ul></nav><div class=container id=mobile-panel><header id=header class=header><div class=logo-wrapper><a href=/ class=logo>@man</a></div><nav class=site-navbar><ul id=menu class=menu><li class=menu-item><a class=menu-item-link href=/post/>Archive</a></li><li class=menu-item><a class=menu-item-link href=/look/>Look</a></li><li class=menu-item><a class=menu-item-link href=/tags/>Tags</a></li><li class=menu-item><a class=menu-item-link href=/categories/>Categories</a></li><li class=menu-item><a class=menu-item-link href=/about/>About</a></li></ul></nav></header><main id=main class=main><div class=content-wrapper><div id=content class=content><article class=post><header class=post-header><h1 class=post-title>StarRocks UDF 开发并测试</h1><div class=post-meta><span class=post-time>2024-12-09</span><div class=post-category><a href=/categories/starrocks/>StarRocks</a></div><span class=more-meta>4817 words</span>
+<span class=more-meta>10 mins read</span></div></header><div class=post-toc id=post-toc><h2 class=post-toc-title>Contents</h2><div class=post-toc-content><nav id=TableOfContents><ul><li><a href=#业务需求>业务需求</a></li><li><a href=#udf-实现>UDF 实现</a><ul><li><a href=#udf-编译>UDF 编译</a></li><li><a href=#java-代码>Java 代码</a></li></ul></li><li><a href=#业务验证>业务验证</a></li><li><a href=#简单性能验证>简单性能验证</a><ul><li><a href=#udf-性能验证>UDF 性能验证</a></li><li><a href=#sql-语句执行效果>SQL 语句执行效果</a></li></ul></li><li><a href=#优化-udf-内存>优化 UDF 内存</a><ul><li><a href=#函数代码>函数代码</a></li><li><a href=#注册函数并测试>注册函数并测试</a></li><li><a href=#udf-isolation-属性>UDF isolation 属性</a></li></ul></li><li><a href=#附录>附录</a><ul><li><a href=#udf-example-2-未打包成功>udf example 2 （未打包成功）</a></li><li><a href=#其他问题>其他问题</a></li></ul></li></ul></nav></div></div><div class=post-content><blockquote><p>在线 <a href=https://onecompiler.com/java/432mabfyh>Java 代码编译验证</a><br>文章内 Java 使用 chatgpt 开发</p></blockquote><h2 id=业务需求>业务需求</h2><p>starrocks 支持 udf 函数，可以参考 Github <a href=https://github.com/StarRocks/starrocks/blob/main/java-extensions/udf-examples/src/main/java/com/starrocks/example/udf/JsonAgg.java>StarRocks/udf</a><br>参考该<a href=https://docs.starrocks.io/docs/sql-reference/sql-functions/JAVA_UDF/>官方 UDF 文档</a></p><p>重构上述 StarRocks UDF 实现如下业务要求：</p><ol><li>transactions 表至少包含三列（uid、交易时间、国际时区），按照不同用户所在的国际时区，在交易时间上前推 5 个工作日并打印改天的信息；</li><li>Calendar 表记录全球各地的公共节假日信息，在判断工作日的时候需要同时判断所在国际时区的节假日；工作日不包含周六日和公共节假日</li><li>该业务不使用 CTE 递归能力，使用 StarRocks UDF 函数实现</li><li>仅需要 StarRocks udf 函数处理工作日判断，具体判断 5 个工作日 或者更多工作日，由 where 条件输入</li></ol><ul><li>假设 transactions example：</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=k>CREATE</span><span class=w> </span><span class=k>TABLE</span><span class=w> </span><span class=o>`</span><span class=n>transactions</span><span class=o>`</span><span class=w> </span><span class=p>(</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=o>`</span><span class=n>uid</span><span class=o>`</span><span class=w> </span><span class=nb>int</span><span class=p>(</span><span class=mi>11</span><span class=p>)</span><span class=w> </span><span class=k>NULL</span><span class=w> </span><span class=k>COMMENT</span><span class=w> </span><span class=s2>&#34;&#34;</span><span class=p>,</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=o>`</span><span class=n>region</span><span class=o>`</span><span class=w> </span><span class=nb>varchar</span><span class=p>(</span><span class=mi>50</span><span class=p>)</span><span class=w> </span><span class=k>NULL</span><span class=w> </span><span class=k>COMMENT</span><span class=w> </span><span class=s2>&#34;&#34;</span><span class=p>,</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=o>`</span><span class=n>transaction_time</span><span class=o>`</span><span class=w> </span><span class=nb>date</span><span class=w> </span><span class=k>NULL</span><span class=w> </span><span class=k>COMMENT</span><span class=w> </span><span class=s2>&#34;&#34;</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>)</span><span class=w> </span><span class=n>ENGINE</span><span class=o>=</span><span class=n>OLAP</span><span class=w>   
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>DUPLICATE</span><span class=w> </span><span class=k>KEY</span><span class=p>(</span><span class=o>`</span><span class=n>uid</span><span class=o>`</span><span class=p>)</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>DISTRIBUTED</span><span class=w> </span><span class=k>BY</span><span class=w> </span><span class=n>HASH</span><span class=p>(</span><span class=o>`</span><span class=n>uid</span><span class=o>`</span><span class=p>)</span><span class=w> </span><span class=n>BUCKETS</span><span class=w> </span><span class=mi>3</span><span class=w>   
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>PROPERTIES</span><span class=w> </span><span class=p>(</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=s2>&#34;compression&#34;</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s2>&#34;LZ4&#34;</span><span class=p>,</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=s2>&#34;fast_schema_evolution&#34;</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s2>&#34;true&#34;</span><span class=p>,</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=s2>&#34;replicated_storage&#34;</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s2>&#34;true&#34;</span><span class=p>,</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=s2>&#34;replication_num&#34;</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s2>&#34;1&#34;</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>);</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>INSERT</span><span class=w> </span><span class=k>INTO</span><span class=w> </span><span class=n>transactions</span><span class=w> </span><span class=p>(</span><span class=n>uid</span><span class=p>,</span><span class=w> </span><span class=n>region</span><span class=p>,</span><span class=w> </span><span class=n>transaction_time</span><span class=p>)</span><span class=w> </span><span class=k>VALUES</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>   </span><span class=p>(</span><span class=mi>1</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;China&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;2024-01-01&#39;</span><span class=p>),</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>   </span><span class=p>(</span><span class=mi>2</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;Europe&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;2024-01-02&#39;</span><span class=p>),</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>   </span><span class=p>(</span><span class=mi>3</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;China&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;2024-01-03&#39;</span><span class=p>),</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>   </span><span class=p>(</span><span class=mi>4</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;Europe&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;2024-01-04&#39;</span><span class=p>);</span><span class=w>  
+</span></span></span></code></pre></td></tr></table></div></div><ul><li>假设 Calendar example：</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=k>CREATE</span><span class=w> </span><span class=k>TABLE</span><span class=w> </span><span class=n>Calendar</span><span class=w> </span><span class=p>(</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nb>date</span><span class=w> </span><span class=nb>DATE</span><span class=p>,</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>is_workday</span><span class=w> </span><span class=nb>BOOLEAN</span><span class=p>,</span><span class=w>  </span><span class=c1>-- TRUE 表示工作日，FALSE 表示非工作日  
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=w>    </span><span class=n>is_china_holiday</span><span class=w> </span><span class=nb>BOOLEAN</span><span class=p>,</span><span class=w>  </span><span class=c1>-- TRUE 表示中国节假日  
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=w>    </span><span class=n>is_europe_holiday</span><span class=w> </span><span class=nb>BOOLEAN</span><span class=w>  </span><span class=c1>-- TRUE 表示欧洲节假日  
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>)</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>ENGINE</span><span class=o>=</span><span class=n>OLAP</span><span class=w>   
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>DUPLICATE</span><span class=w> </span><span class=k>KEY</span><span class=p>(</span><span class=o>`</span><span class=nb>date</span><span class=o>`</span><span class=p>)</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>DISTRIBUTED</span><span class=w> </span><span class=k>BY</span><span class=w> </span><span class=n>HASH</span><span class=p>(</span><span class=o>`</span><span class=nb>date</span><span class=o>`</span><span class=p>)</span><span class=w> </span><span class=n>BUCKETS</span><span class=w> </span><span class=mi>1</span><span class=w>   
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>PROPERTIES</span><span class=w> </span><span class=p>(</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=s2>&#34;compression&#34;</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s2>&#34;LZ4&#34;</span><span class=p>,</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=s2>&#34;fast_schema_evolution&#34;</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s2>&#34;true&#34;</span><span class=p>,</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=s2>&#34;replicated_storage&#34;</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s2>&#34;true&#34;</span><span class=p>,</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=s2>&#34;replication_num&#34;</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s2>&#34;1&#34;</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>);</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=c1>-- 示例数据填充  
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>INSERT</span><span class=w> </span><span class=k>INTO</span><span class=w> </span><span class=n>Calendar</span><span class=w> </span><span class=p>(</span><span class=nb>date</span><span class=p>,</span><span class=w> </span><span class=n>is_workday</span><span class=p>,</span><span class=w> </span><span class=n>is_china_holiday</span><span class=p>,</span><span class=w> </span><span class=n>is_europe_holiday</span><span class=p>)</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>VALUES</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>(</span><span class=s1>&#39;2024-01-01&#39;</span><span class=p>,</span><span class=w> </span><span class=k>FALSE</span><span class=p>,</span><span class=w> </span><span class=k>TRUE</span><span class=p>,</span><span class=w> </span><span class=k>FALSE</span><span class=p>),</span><span class=w>  </span><span class=c1>-- 中国节假日  
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>(</span><span class=s1>&#39;2024-01-02&#39;</span><span class=p>,</span><span class=w> </span><span class=k>TRUE</span><span class=p>,</span><span class=w> </span><span class=k>FALSE</span><span class=p>,</span><span class=w> </span><span class=k>FALSE</span><span class=p>),</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>(</span><span class=s1>&#39;2024-01-03&#39;</span><span class=p>,</span><span class=w> </span><span class=k>TRUE</span><span class=p>,</span><span class=w> </span><span class=k>FALSE</span><span class=p>,</span><span class=w> </span><span class=k>FALSE</span><span class=p>),</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=c1>-- ...继续插入更多日期和标识...  
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>(</span><span class=s1>&#39;2024-12-31&#39;</span><span class=p>,</span><span class=w> </span><span class=k>TRUE</span><span class=p>,</span><span class=w> </span><span class=k>FALSE</span><span class=p>,</span><span class=w> </span><span class=k>FALSE</span><span class=p>);</span><span class=w>  
+</span></span></span></code></pre></td></tr></table></div></div><ul><li>假设业务 SQL 如下</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=k>SELECT</span><span class=w>   
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>a</span><span class=p>.</span><span class=n>uid</span><span class=p>,</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>a</span><span class=p>.</span><span class=n>region</span><span class=p>,</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>a</span><span class=p>.</span><span class=n>transaction_time</span><span class=p>,</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>c</span><span class=p>.</span><span class=nb>date</span><span class=w> </span><span class=k>AS</span><span class=w> </span><span class=err>调整后日期</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>FROM</span><span class=w>   
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>transactions</span><span class=w> </span><span class=n>a</span><span class=p>,</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>Calendar</span><span class=w> </span><span class=k>c</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>WHERE</span><span class=w>   
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>c</span><span class=p>.</span><span class=nb>date</span><span class=w> </span><span class=o>&lt;=</span><span class=w> </span><span class=n>a</span><span class=p>.</span><span class=n>transaction_time</span><span class=w> </span><span class=k>and</span><span class=w>   
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>c</span><span class=p>.</span><span class=n>is_workday</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>TRUE</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>AND</span><span class=w> </span><span class=p>(</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>(</span><span class=n>a</span><span class=p>.</span><span class=n>region</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s1>&#39;China&#39;</span><span class=w> </span><span class=k>AND</span><span class=w> </span><span class=k>c</span><span class=p>.</span><span class=n>is_china_holiday</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>FALSE</span><span class=p>)</span><span class=w> </span><span class=k>OR</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>(</span><span class=n>a</span><span class=p>.</span><span class=n>region</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s1>&#39;Europe&#39;</span><span class=w> </span><span class=k>AND</span><span class=w> </span><span class=k>c</span><span class=p>.</span><span class=n>is_europe_holiday</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>FALSE</span><span class=p>)</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>)</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>AND</span><span class=w> </span><span class=p>(</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>SELECT</span><span class=w> </span><span class=k>COUNT</span><span class=p>(</span><span class=o>*</span><span class=p>)</span><span class=w>   
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>FROM</span><span class=w> </span><span class=n>Calendar</span><span class=w> </span><span class=n>c2</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>WHERE</span><span class=w> </span><span class=n>c2</span><span class=p>.</span><span class=nb>date</span><span class=w> </span><span class=o>&lt;=</span><span class=w> </span><span class=k>c</span><span class=p>.</span><span class=nb>date</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>AND</span><span class=w> </span><span class=n>c2</span><span class=p>.</span><span class=nb>date</span><span class=w> </span><span class=o>&lt;</span><span class=w> </span><span class=n>a</span><span class=p>.</span><span class=n>transaction_time</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>AND</span><span class=w> </span><span class=n>c2</span><span class=p>.</span><span class=n>is_workday</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>TRUE</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>AND</span><span class=w> </span><span class=p>(</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>(</span><span class=n>a</span><span class=p>.</span><span class=n>region</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s1>&#39;China&#39;</span><span class=w> </span><span class=k>AND</span><span class=w> </span><span class=n>c2</span><span class=p>.</span><span class=n>is_china_holiday</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>FALSE</span><span class=p>)</span><span class=w> </span><span class=k>OR</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>(</span><span class=n>a</span><span class=p>.</span><span class=n>region</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s1>&#39;Europe&#39;</span><span class=w> </span><span class=k>AND</span><span class=w> </span><span class=n>c2</span><span class=p>.</span><span class=n>is_europe_holiday</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>FALSE</span><span class=p>)</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>)</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>)</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=mi>5</span><span class=p>;</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span></code></pre></td></tr></table></div></div><ul><li>可优化为 with 方式，降低 SQL 复杂度</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=k>WITH</span><span class=w> </span><span class=n>WorkdayCount</span><span class=w> </span><span class=k>AS</span><span class=w> </span><span class=p>(</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>SELECT</span><span class=w> 
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>c</span><span class=p>.</span><span class=nb>date</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>a</span><span class=p>.</span><span class=n>uid</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>a</span><span class=p>.</span><span class=n>region</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>a</span><span class=p>.</span><span class=n>transaction_time</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>c</span><span class=p>.</span><span class=n>is_china_holiday</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>c</span><span class=p>.</span><span class=n>is_europe_holiday</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>SUM</span><span class=p>(</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>CASE</span><span class=w> 
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=k>WHEN</span><span class=w> </span><span class=k>c</span><span class=p>.</span><span class=n>is_workday</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>TRUE</span><span class=w> </span><span class=k>AND</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                     </span><span class=p>((</span><span class=n>a</span><span class=p>.</span><span class=n>region</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s1>&#39;China&#39;</span><span class=w> </span><span class=k>AND</span><span class=w> </span><span class=k>c</span><span class=p>.</span><span class=n>is_china_holiday</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>FALSE</span><span class=p>)</span><span class=w> </span><span class=k>OR</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                      </span><span class=p>(</span><span class=n>a</span><span class=p>.</span><span class=n>region</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s1>&#39;Europe&#39;</span><span class=w> </span><span class=k>AND</span><span class=w> </span><span class=k>c</span><span class=p>.</span><span class=n>is_europe_holiday</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>FALSE</span><span class=p>))</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=k>THEN</span><span class=w> </span><span class=mi>1</span><span class=w> 
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=k>ELSE</span><span class=w> </span><span class=mi>0</span><span class=w> 
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>END</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>)</span><span class=w> </span><span class=n>OVER</span><span class=w> </span><span class=p>(</span><span class=n>PARTITION</span><span class=w> </span><span class=k>BY</span><span class=w> </span><span class=n>a</span><span class=p>.</span><span class=n>uid</span><span class=w> </span><span class=k>ORDER</span><span class=w> </span><span class=k>BY</span><span class=w> </span><span class=k>c</span><span class=p>.</span><span class=nb>date</span><span class=p>)</span><span class=w> </span><span class=k>AS</span><span class=w> </span><span class=n>workday_count</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>FROM</span><span class=w> 
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>transactions</span><span class=w> </span><span class=n>a</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>JOIN</span><span class=w> 
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Calendar</span><span class=w> </span><span class=k>c</span><span class=w> </span><span class=k>ON</span><span class=w> </span><span class=k>c</span><span class=p>.</span><span class=nb>date</span><span class=w> </span><span class=o>&lt;</span><span class=w> </span><span class=n>a</span><span class=p>.</span><span class=n>transaction_time</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>SELECT</span><span class=w> 
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>uid</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>region</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>transaction_time</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nb>date</span><span class=w> </span><span class=k>AS</span><span class=w> </span><span class=err>调整后日期</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>FROM</span><span class=w> 
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>WorkdayCount</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>WHERE</span><span class=w> 
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>workday_count</span><span class=w> </span><span class=o>&gt;=</span><span class=w> </span><span class=mi>1</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>AND</span><span class=w> </span><span class=p>(</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>(</span><span class=n>region</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s1>&#39;China&#39;</span><span class=w> </span><span class=k>AND</span><span class=w> </span><span class=n>is_china_holiday</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>FALSE</span><span class=p>)</span><span class=w> </span><span class=k>OR</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>(</span><span class=n>region</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s1>&#39;Europe&#39;</span><span class=w> </span><span class=k>AND</span><span class=w> </span><span class=n>is_europe_holiday</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>FALSE</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>);</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><h2 id=udf-实现>UDF 实现</h2><h3 id=udf-编译>UDF 编译</h3><ol><li>linux 机器配置 java 11 环境变量</li><li>创建如下目录结构</li><li>放入如下两个 java 文件<ol><li>打包 class 并通过 main 函数验证可行性</li><li><code>javac com/starrocks/udf/sample/IsWorkday.java</code></li><li><code>javac com/starrocks/udf/sample/Main.java</code></li><li><code>java -cp . com.starrocks.udf.sample.Main</code></li></ol></li><li>打包为 jar 包<ol><li><code>jar cvf IsWorkday.jar -C . com/starrocks/udf/sample/IsWorkday.class</code></li></ol></li></ol><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>mkdir -p src/com/starrocks/udf/sample/  
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>.  
+</span></span><span class=line><span class=cl>└── src  
+</span></span><span class=line><span class=cl>    ├── com  
+</span></span><span class=line><span class=cl>    │   └── starrocks  
+</span></span><span class=line><span class=cl>    │       └── udf  
+</span></span><span class=line><span class=cl>    │           └── sample  
+</span></span><span class=line><span class=cl>    │               ├── IsWorkday.class  
+</span></span><span class=line><span class=cl>    │               ├── IsWorkday.java  
+</span></span><span class=line><span class=cl>    │               ├── Main.class  
+</span></span><span class=line><span class=cl>    │               └── Main.java  
+</span></span><span class=line><span class=cl>    └── IsWorkday.jar  
+</span></span><span class=line><span class=cl>  
+</span></span></code></pre></td></tr></table></div></div><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=o>[</span>root@node220 src<span class=o>]</span><span class=c1># java -cp . com.starrocks.udf.sample.Main  </span>
+</span></span><span class=line><span class=cl>日期 2024-10-09 在 中国 的5个工作日前的日期是: 2024-09-25  
+</span></span></code></pre></td></tr></table></div></div><h3 id=java-代码>Java 代码</h3><ul><li>Main.java</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kn>package</span> <span class=nn>com.starrocks.udf.sample</span><span class=o>;</span>  
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl><span class=kd>public</span> <span class=kd>class</span> <span class=nc>Main</span> <span class=o>{</span>  
+</span></span><span class=line><span class=cl>    <span class=kd>public</span> <span class=kd>static</span> <span class=kt>void</span> <span class=nf>main</span><span class=o>(</span><span class=n>String</span><span class=o>[]</span> <span class=n>args</span><span class=o>)</span> <span class=o>{</span>  
+</span></span><span class=line><span class=cl>        <span class=n>IsWorkday</span> <span class=n>isWorkday</span> <span class=o>=</span> <span class=k>new</span> <span class=n>IsWorkday</span><span class=o>();</span>  
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=c1>// 测试用例  
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=n>String</span> <span class=n>testDate</span> <span class=o>=</span> <span class=s>&#34;2024-12-31&#34;</span><span class=o>;</span>  
+</span></span><span class=line><span class=cl>        <span class=n>String</span> <span class=n>region</span> <span class=o>=</span> <span class=s>&#34;中国&#34;</span><span class=o>;</span>  
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=n>String</span> <span class=n>result</span> <span class=o>=</span> <span class=n>isWorkday</span><span class=o>.</span><span class=na>evaluate</span><span class=o>(</span><span class=n>testDate</span><span class=o>,</span> <span class=n>region</span><span class=o>);</span>  
+</span></span><span class=line><span class=cl>        <span class=n>System</span><span class=o>.</span><span class=na>out</span><span class=o>.</span><span class=na>println</span><span class=o>(</span><span class=s>&#34;日期 &#34;</span> <span class=o>+</span> <span class=n>testDate</span> <span class=o>+</span> <span class=s>&#34; 在 &#34;</span> <span class=o>+</span> <span class=n>region</span> <span class=o>+</span> <span class=s>&#34; 的5个工作日前的日期是: &#34;</span> <span class=o>+</span> <span class=n>result</span><span class=o>);</span>  
+</span></span><span class=line><span class=cl>    <span class=o>}</span>  
+</span></span><span class=line><span class=cl><span class=o>}</span>  
+</span></span></code></pre></td></tr></table></div></div><ul><li>IsWorkday.java</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span><span class=lnt>56
+</span><span class=lnt>57
+</span><span class=lnt>58
+</span><span class=lnt>59
+</span><span class=lnt>60
+</span><span class=lnt>61
+</span><span class=lnt>62
+</span><span class=lnt>63
+</span><span class=lnt>64
+</span><span class=lnt>65
+</span><span class=lnt>66
+</span><span class=lnt>67
+</span><span class=lnt>68
+</span><span class=lnt>69
+</span><span class=lnt>70
+</span><span class=lnt>71
+</span><span class=lnt>72
+</span><span class=lnt>73
+</span><span class=lnt>74
+</span><span class=lnt>75
+</span><span class=lnt>76
+</span><span class=lnt>77
+</span><span class=lnt>78
+</span><span class=lnt>79
+</span><span class=lnt>80
+</span><span class=lnt>81
+</span><span class=lnt>82
+</span><span class=lnt>83
+</span><span class=lnt>84
+</span><span class=lnt>85
+</span><span class=lnt>86
+</span><span class=lnt>87
+</span><span class=lnt>88
+</span><span class=lnt>89
+</span><span class=lnt>90
+</span><span class=lnt>91
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kn>package</span> <span class=nn>com.starrocks.udf.sample</span><span class=o>;</span>  
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>java.text.ParseException</span><span class=o>;</span>  
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>java.text.SimpleDateFormat</span><span class=o>;</span>  
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>java.util.*</span><span class=o>;</span>  
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl><span class=kd>public</span> <span class=kd>class</span> <span class=nc>IsWorkday</span> <span class=o>{</span>  
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>    <span class=kd>private</span> <span class=kd>static</span> <span class=kd>final</span> <span class=n>Map</span><span class=o>&lt;</span><span class=n>String</span><span class=o>,</span> <span class=n>Set</span><span class=o>&lt;</span><span class=n>String</span><span class=o>&gt;&gt;</span> <span class=n>holidaysMap</span> <span class=o>=</span> <span class=k>new</span> <span class=n>HashMap</span><span class=o>&lt;&gt;();</span>  
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>    <span class=kd>static</span> <span class=o>{</span>  
+</span></span><span class=line><span class=cl>        <span class=n>holidaysMap</span><span class=o>.</span><span class=na>put</span><span class=o>(</span><span class=s>&#34;中国&#34;</span><span class=o>,</span> <span class=n>generateChinaHolidays</span><span class=o>(</span><span class=mi>2024</span><span class=o>));</span>  
+</span></span><span class=line><span class=cl>        <span class=n>holidaysMap</span><span class=o>.</span><span class=na>put</span><span class=o>(</span><span class=s>&#34;欧洲&#34;</span><span class=o>,</span> <span class=k>new</span> <span class=n>HashSet</span><span class=o>&lt;&gt;(</span><span class=n>Arrays</span><span class=o>.</span><span class=na>asList</span><span class=o>(</span><span class=s>&#34;2024-12-25&#34;</span><span class=o>)));</span> <span class=c1>// 示例：圣诞节  
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=n>holidaysMap</span><span class=o>.</span><span class=na>put</span><span class=o>(</span><span class=s>&#34;美国&#34;</span><span class=o>,</span> <span class=k>new</span> <span class=n>HashSet</span><span class=o>&lt;&gt;(</span><span class=n>Arrays</span><span class=o>.</span><span class=na>asList</span><span class=o>(</span><span class=s>&#34;2024-07-04&#34;</span><span class=o>)));</span> <span class=c1>// 示例：独立日  
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=o>}</span>  
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>    <span class=kd>private</span> <span class=kd>static</span> <span class=n>Set</span><span class=o>&lt;</span><span class=n>String</span><span class=o>&gt;</span> <span class=nf>generateChinaHolidays</span><span class=o>(</span><span class=kt>int</span> <span class=n>year</span><span class=o>)</span> <span class=o>{</span>  
+</span></span><span class=line><span class=cl>        <span class=n>Set</span><span class=o>&lt;</span><span class=n>String</span><span class=o>&gt;</span> <span class=n>holidays</span> <span class=o>=</span> <span class=k>new</span> <span class=n>HashSet</span><span class=o>&lt;&gt;();</span>  
+</span></span><span class=line><span class=cl>        <span class=n>SimpleDateFormat</span> <span class=n>sdf</span> <span class=o>=</span> <span class=k>new</span> <span class=n>SimpleDateFormat</span><span class=o>(</span><span class=s>&#34;yyyy-MM-dd&#34;</span><span class=o>);</span>  
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>        <span class=k>try</span> <span class=o>{</span>  
+</span></span><span class=line><span class=cl>            <span class=c1>// 元旦  
+</span></span></span><span class=line><span class=cl><span class=c1></span>            <span class=n>holidays</span><span class=o>.</span><span class=na>add</span><span class=o>(</span><span class=n>sdf</span><span class=o>.</span><span class=na>format</span><span class=o>(</span><span class=n>sdf</span><span class=o>.</span><span class=na>parse</span><span class=o>(</span><span class=n>year</span> <span class=o>+</span> <span class=s>&#34;-01-01&#34;</span><span class=o>)));</span>  
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>            <span class=c1>// 春节（假设2024年春节为2月10日，实际日期需根据农历计算）  
+</span></span></span><span class=line><span class=cl><span class=c1></span>            <span class=n>holidays</span><span class=o>.</span><span class=na>add</span><span class=o>(</span><span class=n>sdf</span><span class=o>.</span><span class=na>format</span><span class=o>(</span><span class=n>sdf</span><span class=o>.</span><span class=na>parse</span><span class=o>(</span><span class=n>year</span> <span class=o>+</span> <span class=s>&#34;-02-10&#34;</span><span class=o>)));</span>  
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>            <span class=c1>// 清明节（通常是4月4日或5日，这里假设为4月5日）  
+</span></span></span><span class=line><span class=cl><span class=c1></span>            <span class=n>holidays</span><span class=o>.</span><span class=na>add</span><span class=o>(</span><span class=n>sdf</span><span class=o>.</span><span class=na>format</span><span class=o>(</span><span class=n>sdf</span><span class=o>.</span><span class=na>parse</span><span class=o>(</span><span class=n>year</span> <span class=o>+</span> <span class=s>&#34;-04-05&#34;</span><span class=o>)));</span>  
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>            <span class=c1>// 劳动节  
+</span></span></span><span class=line><span class=cl><span class=c1></span>            <span class=n>holidays</span><span class=o>.</span><span class=na>add</span><span class=o>(</span><span class=n>sdf</span><span class=o>.</span><span class=na>format</span><span class=o>(</span><span class=n>sdf</span><span class=o>.</span><span class=na>parse</span><span class=o>(</span><span class=n>year</span> <span class=o>+</span> <span class=s>&#34;-05-01&#34;</span><span class=o>)));</span>  
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>            <span class=c1>// 端午节（假设2024年为6月10日，实际日期需根据农历计算）  
+</span></span></span><span class=line><span class=cl><span class=c1></span>            <span class=n>holidays</span><span class=o>.</span><span class=na>add</span><span class=o>(</span><span class=n>sdf</span><span class=o>.</span><span class=na>format</span><span class=o>(</span><span class=n>sdf</span><span class=o>.</span><span class=na>parse</span><span class=o>(</span><span class=n>year</span> <span class=o>+</span> <span class=s>&#34;-06-10&#34;</span><span class=o>)));</span>  
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>            <span class=c1>// 中秋节（假设2024年为9月21日，实际日期需根据农历计算）  
+</span></span></span><span class=line><span class=cl><span class=c1></span>            <span class=n>holidays</span><span class=o>.</span><span class=na>add</span><span class=o>(</span><span class=n>sdf</span><span class=o>.</span><span class=na>format</span><span class=o>(</span><span class=n>sdf</span><span class=o>.</span><span class=na>parse</span><span class=o>(</span><span class=n>year</span> <span class=o>+</span> <span class=s>&#34;-09-21&#34;</span><span class=o>)));</span>  
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>            <span class=c1>// 国庆节  
+</span></span></span><span class=line><span class=cl><span class=c1></span>            <span class=n>holidays</span><span class=o>.</span><span class=na>add</span><span class=o>(</span><span class=n>sdf</span><span class=o>.</span><span class=na>format</span><span class=o>(</span><span class=n>sdf</span><span class=o>.</span><span class=na>parse</span><span class=o>(</span><span class=n>year</span> <span class=o>+</span> <span class=s>&#34;-10-01&#34;</span><span class=o>)));</span>  
+</span></span><span class=line><span class=cl>            <span class=n>holidays</span><span class=o>.</span><span class=na>add</span><span class=o>(</span><span class=n>sdf</span><span class=o>.</span><span class=na>format</span><span class=o>(</span><span class=n>sdf</span><span class=o>.</span><span class=na>parse</span><span class=o>(</span><span class=n>year</span> <span class=o>+</span> <span class=s>&#34;-10-02&#34;</span><span class=o>)));</span>  
+</span></span><span class=line><span class=cl>            <span class=n>holidays</span><span class=o>.</span><span class=na>add</span><span class=o>(</span><span class=n>sdf</span><span class=o>.</span><span class=na>format</span><span class=o>(</span><span class=n>sdf</span><span class=o>.</span><span class=na>parse</span><span class=o>(</span><span class=n>year</span> <span class=o>+</span> <span class=s>&#34;-10-03&#34;</span><span class=o>)));</span>  
+</span></span><span class=line><span class=cl>            <span class=n>holidays</span><span class=o>.</span><span class=na>add</span><span class=o>(</span><span class=n>sdf</span><span class=o>.</span><span class=na>format</span><span class=o>(</span><span class=n>sdf</span><span class=o>.</span><span class=na>parse</span><span class=o>(</span><span class=n>year</span> <span class=o>+</span> <span class=s>&#34;-10-04&#34;</span><span class=o>)));</span>  
+</span></span><span class=line><span class=cl>            <span class=n>holidays</span><span class=o>.</span><span class=na>add</span><span class=o>(</span><span class=n>sdf</span><span class=o>.</span><span class=na>format</span><span class=o>(</span><span class=n>sdf</span><span class=o>.</span><span class=na>parse</span><span class=o>(</span><span class=n>year</span> <span class=o>+</span> <span class=s>&#34;-10-05&#34;</span><span class=o>)));</span>  
+</span></span><span class=line><span class=cl>            <span class=n>holidays</span><span class=o>.</span><span class=na>add</span><span class=o>(</span><span class=n>sdf</span><span class=o>.</span><span class=na>format</span><span class=o>(</span><span class=n>sdf</span><span class=o>.</span><span class=na>parse</span><span class=o>(</span><span class=n>year</span> <span class=o>+</span> <span class=s>&#34;-10-06&#34;</span><span class=o>)));</span>  
+</span></span><span class=line><span class=cl>            <span class=n>holidays</span><span class=o>.</span><span class=na>add</span><span class=o>(</span><span class=n>sdf</span><span class=o>.</span><span class=na>format</span><span class=o>(</span><span class=n>sdf</span><span class=o>.</span><span class=na>parse</span><span class=o>(</span><span class=n>year</span> <span class=o>+</span> <span class=s>&#34;-10-07&#34;</span><span class=o>)));</span>  
+</span></span><span class=line><span class=cl>        <span class=o>}</span> <span class=k>catch</span> <span class=o>(</span><span class=n>ParseException</span> <span class=n>e</span><span class=o>)</span> <span class=o>{</span>  
+</span></span><span class=line><span class=cl>            <span class=n>e</span><span class=o>.</span><span class=na>printStackTrace</span><span class=o>();</span>  
+</span></span><span class=line><span class=cl>        <span class=o>}</span>  
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>holidays</span><span class=o>;</span>  
+</span></span><span class=line><span class=cl>    <span class=o>}</span>  
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>    <span class=kd>public</span> <span class=n>String</span> <span class=nf>evaluate</span><span class=o>(</span><span class=n>String</span> <span class=n>dateStr</span><span class=o>,</span> <span class=n>String</span> <span class=n>region</span><span class=o>)</span> <span class=o>{</span>  
+</span></span><span class=line><span class=cl>        <span class=n>SimpleDateFormat</span> <span class=n>sdf</span> <span class=o>=</span> <span class=k>new</span> <span class=n>SimpleDateFormat</span><span class=o>(</span><span class=s>&#34;yyyy-MM-dd&#34;</span><span class=o>);</span>  
+</span></span><span class=line><span class=cl>        <span class=n>Calendar</span> <span class=n>calendar</span> <span class=o>=</span> <span class=n>Calendar</span><span class=o>.</span><span class=na>getInstance</span><span class=o>();</span>  
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>        <span class=k>try</span> <span class=o>{</span>  
+</span></span><span class=line><span class=cl>            <span class=n>Date</span> <span class=n>date</span> <span class=o>=</span> <span class=n>sdf</span><span class=o>.</span><span class=na>parse</span><span class=o>(</span><span class=n>dateStr</span><span class=o>);</span>  
+</span></span><span class=line><span class=cl>            <span class=n>calendar</span><span class=o>.</span><span class=na>setTime</span><span class=o>(</span><span class=n>date</span><span class=o>);</span>  
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>            <span class=kt>int</span> <span class=n>workdaysCount</span> <span class=o>=</span> <span class=mi>0</span><span class=o>;</span>  
+</span></span><span class=line><span class=cl>            <span class=k>while</span> <span class=o>(</span><span class=n>workdaysCount</span> <span class=o>&lt;</span> <span class=mi>5</span><span class=o>)</span> <span class=o>{</span>  
+</span></span><span class=line><span class=cl>                <span class=n>calendar</span><span class=o>.</span><span class=na>add</span><span class=o>(</span><span class=n>Calendar</span><span class=o>.</span><span class=na>DAY_OF_MONTH</span><span class=o>,</span> <span class=o>-</span><span class=mi>1</span><span class=o>);</span>  
+</span></span><span class=line><span class=cl>                <span class=k>if</span> <span class=o>(</span><span class=n>isWorkday</span><span class=o>(</span><span class=n>calendar</span><span class=o>,</span> <span class=n>region</span><span class=o>))</span> <span class=o>{</span>  
+</span></span><span class=line><span class=cl>                    <span class=n>workdaysCount</span><span class=o>++;</span>  
+</span></span><span class=line><span class=cl>                <span class=o>}</span>  
+</span></span><span class=line><span class=cl>            <span class=o>}</span>  
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>            <span class=k>return</span> <span class=n>sdf</span><span class=o>.</span><span class=na>format</span><span class=o>(</span><span class=n>calendar</span><span class=o>.</span><span class=na>getTime</span><span class=o>());</span>  
+</span></span><span class=line><span class=cl>        <span class=o>}</span> <span class=k>catch</span> <span class=o>(</span><span class=n>ParseException</span> <span class=n>e</span><span class=o>)</span> <span class=o>{</span>  
+</span></span><span class=line><span class=cl>            <span class=n>e</span><span class=o>.</span><span class=na>printStackTrace</span><span class=o>();</span>  
+</span></span><span class=line><span class=cl>            <span class=k>return</span> <span class=kc>null</span><span class=o>;</span> <span class=c1>// 或者抛出异常  
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=o>}</span>  
+</span></span><span class=line><span class=cl>    <span class=o>}</span>  
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>    <span class=kd>private</span> <span class=kt>boolean</span> <span class=nf>isWorkday</span><span class=o>(</span><span class=n>Calendar</span> <span class=n>calendar</span><span class=o>,</span> <span class=n>String</span> <span class=n>region</span><span class=o>)</span> <span class=o>{</span>  
+</span></span><span class=line><span class=cl>        <span class=kt>int</span> <span class=n>dayOfWeek</span> <span class=o>=</span> <span class=n>calendar</span><span class=o>.</span><span class=na>get</span><span class=o>(</span><span class=n>Calendar</span><span class=o>.</span><span class=na>DAY_OF_WEEK</span><span class=o>);</span>  
+</span></span><span class=line><span class=cl>        <span class=n>String</span> <span class=n>dateStr</span> <span class=o>=</span> <span class=k>new</span> <span class=n>SimpleDateFormat</span><span class=o>(</span><span class=s>&#34;yyyy-MM-dd&#34;</span><span class=o>).</span><span class=na>format</span><span class=o>(</span><span class=n>calendar</span><span class=o>.</span><span class=na>getTime</span><span class=o>());</span>  
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>        <span class=c1>// 检查是否是周末  
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=k>if</span> <span class=o>(</span><span class=n>dayOfWeek</span> <span class=o>==</span> <span class=n>Calendar</span><span class=o>.</span><span class=na>SATURDAY</span> <span class=o>||</span> <span class=n>dayOfWeek</span> <span class=o>==</span> <span class=n>Calendar</span><span class=o>.</span><span class=na>SUNDAY</span><span class=o>)</span> <span class=o>{</span>  
+</span></span><span class=line><span class=cl>            <span class=k>return</span> <span class=kc>false</span><span class=o>;</span>  
+</span></span><span class=line><span class=cl>        <span class=o>}</span>  
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>        <span class=c1>// 检查是否是节假日  
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=n>Set</span><span class=o>&lt;</span><span class=n>String</span><span class=o>&gt;</span> <span class=n>holidays</span> <span class=o>=</span> <span class=n>holidaysMap</span><span class=o>.</span><span class=na>get</span><span class=o>(</span><span class=n>region</span><span class=o>);</span>  
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>holidays</span> <span class=o>==</span> <span class=kc>null</span> <span class=o>||</span> <span class=o>!</span><span class=n>holidays</span><span class=o>.</span><span class=na>contains</span><span class=o>(</span><span class=n>dateStr</span><span class=o>);</span>  
+</span></span><span class=line><span class=cl>    <span class=o>}</span>  
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl><span class=o>}</span>  
+</span></span></code></pre></td></tr></table></div></div><h2 id=业务验证>业务验证</h2><ul><li>需要 FE 添加如下参数开启 udf 能力，重启后生效；不支持动态开启<ul><li><code>enable_udf=true</code></li></ul></li><li>【注意事项】UDF 注册到 be 后使用的 jvm 内存<ul><li>UDF 内存在单个 BE 资源预估：使用 <code>行大小 x 4096 行 x cpu核数 x 单个条目大小 x 2</code>；单个条目大小 可参考 字段属性 大小</li><li>be c++ 是无法管理这部分 udf 内存的，当 jvm oom 时会导致 be panic 退出</li><li>udf 内存默认为 256mb，通过 be 配置文件中的 JAVA_OPTS 参数控制</li></ul></li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=cp># JVM options for be  
+</span></span></span><span class=line><span class=cl><span class=cp># eg:  
+</span></span></span><span class=line><span class=cl><span class=cp></span><span class=n>JAVA_OPTS</span><span class=o>=</span><span class=s>&#34;-Xmx8192m -XX:+UseMemba&#34;</span>  
+</span></span><span class=line><span class=cl><span class=cp># For jdk 9+, this JAVA_OPTS will be used as default JVM options  
+</span></span></span><span class=line><span class=cl><span class=cp></span><span class=n>JAVA_OPTS_FOR_JDK_9_AND_LATER</span><span class=o>=</span><span class=s>&#34;-Xmx8192m -XX:+UseMemba&#34;</span>  
+</span></span></code></pre></td></tr></table></div></div><p><img src=953d137e6e84cc9e3e6b796101214210_MD5.png alt=500></p><ul><li>UDF 函数权限<ul><li>在 3.1 之后，udf 支持 集群内全局、单个 database 内注册以及使用</li><li>UDF 权限可以指定 user 、role 信息</li><li>UDF 函数的创建、删除可以看 <a href=https://docs.starrocks.io/zh/docs/sql-reference/sql-statements/Function/CREATE_FUNCTION/>官网文档</a></li><li>UDF 函数更新需要删除、重新创建，目前不支持原地更新</li></ul></li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=k>GRANT</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=err>{</span><span class=w> </span><span class=k>USAGE</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=k>DROP</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=k>ALL</span><span class=w> </span><span class=p>[</span><span class=k>PRIVILEGES</span><span class=p>]</span><span class=err>}</span><span class=w>   
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>ON</span><span class=w> </span><span class=err>{</span><span class=w> </span><span class=k>GLOBAL</span><span class=w> </span><span class=k>FUNCTION</span><span class=w> </span><span class=o>&lt;</span><span class=n>function_name</span><span class=o>&gt;</span><span class=p>(</span><span class=n>input_data_type</span><span class=p>)</span><span class=w> </span><span class=p>[,</span><span class=w> </span><span class=o>&lt;</span><span class=w> </span><span class=n>function_name</span><span class=o>&gt;</span><span class=p>(</span><span class=n>input_data_type</span><span class=p>),...]</span><span class=w>    
+</span></span></span><span class=line><span class=cl><span class=w>       </span><span class=o>|</span><span class=w> </span><span class=k>ALL</span><span class=w> </span><span class=k>GLOBAL</span><span class=w> </span><span class=n>FUNCTIONS</span><span class=w> </span><span class=err>}</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>TO</span><span class=w> </span><span class=err>{</span><span class=w> </span><span class=k>ROLE</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=k>USER</span><span class=err>}</span><span class=w> </span><span class=err>{</span><span class=o>&lt;</span><span class=n>role_name</span><span class=o>&gt;|&lt;</span><span class=n>user_identity</span><span class=o>&gt;</span><span class=err>}</span><span class=w> </span><span class=p>[</span><span class=w> </span><span class=k>WITH</span><span class=w> </span><span class=k>GRANT</span><span class=w> </span><span class=k>OPTION</span><span class=w> </span><span class=p>]</span><span class=w>  
+</span></span></span></code></pre></td></tr></table></div></div><ul><li>创建 udf 函数<ul><li>StarRocks 调用 java udf 函数时，约等于 JNI 计算加工时间（逐行加工输入的内容）</li><li>调用 udf 函数无法使用 c++ avx2 向量化计算能力</li></ul></li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=k>CREATE</span><span class=w> </span><span class=k>FUNCTION</span><span class=w> </span><span class=n>IsWorkday</span><span class=p>(</span><span class=n>string</span><span class=p>,</span><span class=n>string</span><span class=p>)</span><span class=w> </span><span class=k>RETURNS</span><span class=w> </span><span class=n>string</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>PROPERTIES</span><span class=w> </span><span class=p>(</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=s2>&#34;file&#34;</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s2>&#34;file:///opt/20241209-jar/src/IsWorkday.jar&#34;</span><span class=p>,</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=s2>&#34;type&#34;</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s2>&#34;StarrocksJar&#34;</span><span class=p>,</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=s2>&#34;symbol&#34;</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s2>&#34;com.starrocks.udf.sample.IsWorkday&#34;</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>);</span><span class=w>  
+</span></span></span></code></pre></td></tr></table></div></div><ul><li>输入相同时间，判断 region 是否工作<ul><li>2024-07-04 在美国日历应变吗为假期</li><li>当输入美国区域比中国区域提前一天</li></ul></li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=n>mysql</span><span class=o>&gt;</span><span class=w> </span><span class=k>select</span><span class=w> </span><span class=n>IsWorkday</span><span class=p>(</span><span class=s2>&#34;2024-07-10&#34;</span><span class=p>,</span><span class=s2>&#34;美国&#34;</span><span class=p>);</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>-----------------------------------+  
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=n>isworkday</span><span class=p>(</span><span class=s1>&#39;2024-07-10&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;美国&#39;</span><span class=p>)</span><span class=w>   </span><span class=o>|</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>-----------------------------------+  
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=mi>2024</span><span class=o>-</span><span class=mi>07</span><span class=o>-</span><span class=mi>02</span><span class=w>                        </span><span class=o>|</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>-----------------------------------+  
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=mi>1</span><span class=w> </span><span class=k>row</span><span class=w> </span><span class=k>in</span><span class=w> </span><span class=k>set</span><span class=w> </span><span class=p>(</span><span class=mi>0</span><span class=p>.</span><span class=mi>03</span><span class=w> </span><span class=n>sec</span><span class=p>)</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>mysql</span><span class=o>&gt;</span><span class=w> </span><span class=k>select</span><span class=w> </span><span class=n>IsWorkday</span><span class=p>(</span><span class=s2>&#34;2024-07-10&#34;</span><span class=p>,</span><span class=s2>&#34;中国&#34;</span><span class=p>);</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>-----------------------------------+  
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=n>isworkday</span><span class=p>(</span><span class=s1>&#39;2024-07-10&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;中国&#39;</span><span class=p>)</span><span class=w>   </span><span class=o>|</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>-----------------------------------+  
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=mi>2024</span><span class=o>-</span><span class=mi>07</span><span class=o>-</span><span class=mi>03</span><span class=w>                        </span><span class=o>|</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>-----------------------------------+  
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=mi>1</span><span class=w> </span><span class=k>row</span><span class=w> </span><span class=k>in</span><span class=w> </span><span class=k>set</span><span class=w> </span><span class=p>(</span><span class=mi>0</span><span class=p>.</span><span class=mi>03</span><span class=w> </span><span class=n>sec</span><span class=p>)</span><span class=w>  
+</span></span></span></code></pre></td></tr></table></div></div><ul><li>输入格式必须日期 + 区域，不能反向输入为 区域 + 日期</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>mysql</span><span class=o>&gt;</span><span class=w> </span><span class=k>select</span><span class=w> </span><span class=n>IsWorkday</span><span class=p>(</span><span class=s2>&#34;2024-10-09&#34;</span><span class=p>,</span><span class=s2>&#34;中国&#34;</span><span class=p>);</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>-----------------------------------+  
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=n>isworkday</span><span class=p>(</span><span class=s1>&#39;2024-10-09&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;中国&#39;</span><span class=p>)</span><span class=w>   </span><span class=o>|</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>-----------------------------------+  
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=mi>2024</span><span class=o>-</span><span class=mi>09</span><span class=o>-</span><span class=mi>25</span><span class=w>                        </span><span class=o>|</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>-----------------------------------+  
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=mi>1</span><span class=w> </span><span class=k>row</span><span class=w> </span><span class=k>in</span><span class=w> </span><span class=k>set</span><span class=w> </span><span class=p>(</span><span class=mi>0</span><span class=p>.</span><span class=mi>05</span><span class=w> </span><span class=n>sec</span><span class=p>)</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>mysql</span><span class=o>&gt;</span><span class=w> </span><span class=k>select</span><span class=w> </span><span class=n>IsWorkday</span><span class=p>(</span><span class=s2>&#34;中国&#34;</span><span class=p>,</span><span class=s2>&#34;2024-10-09&#34;</span><span class=p>);</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>-----------------------------------+  
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=n>isworkday</span><span class=p>(</span><span class=s1>&#39;中国&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;2024-10-09&#39;</span><span class=p>)</span><span class=w>   </span><span class=o>|</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>-----------------------------------+  
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=k>NULL</span><span class=w>                              </span><span class=o>|</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>-----------------------------------+  
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=mi>1</span><span class=w> </span><span class=k>row</span><span class=w> </span><span class=k>in</span><span class=w> </span><span class=k>set</span><span class=w> </span><span class=p>(</span><span class=mi>0</span><span class=p>.</span><span class=mi>04</span><span class=w> </span><span class=n>sec</span><span class=p>)</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span></code></pre></td></tr></table></div></div><ul><li>udf 函数仅为 demo，输入不存在的区域也可以运行返回结果 (这部分逻辑未处理)</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=n>mysql</span><span class=o>&gt;</span><span class=w> </span><span class=k>select</span><span class=w> </span><span class=n>IsWorkday</span><span class=p>(</span><span class=s2>&#34;2024-10-09&#34;</span><span class=p>,</span><span class=s2>&#34;阿拉伯&#34;</span><span class=p>);</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>--------------------------------------+  
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=n>isworkday</span><span class=p>(</span><span class=s1>&#39;2024-10-09&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;阿拉伯&#39;</span><span class=p>)</span><span class=w>    </span><span class=o>|</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>--------------------------------------+  
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=mi>2024</span><span class=o>-</span><span class=mi>10</span><span class=o>-</span><span class=mi>02</span><span class=w>                           </span><span class=o>|</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>--------------------------------------+  
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=mi>1</span><span class=w> </span><span class=k>row</span><span class=w> </span><span class=k>in</span><span class=w> </span><span class=k>set</span><span class=w> </span><span class=p>(</span><span class=mi>0</span><span class=p>.</span><span class=mi>05</span><span class=w> </span><span class=n>sec</span><span class=p>)</span><span class=w>  
+</span></span></span></code></pre></td></tr></table></div></div><h2 id=简单性能验证>简单性能验证</h2><ul><li>结论：<ul><li>在大量数据计算场景下：同等资源情况下 BE 自带的多表关联 + 向量化能力是 UDF 计算加工性能的 5 -10 倍或更高（取决 udf 的计算逻辑）</li><li>在少量数据场景下：UDF 函数可大大降低 SQL 语句书写复杂度</li></ul></li></ul><h3 id=udf-性能验证>UDF 性能验证</h3><ul><li>最终计算量为 【输入行数 x 地区 x 节假日数量 x 周末(1)】<ul><li>比如 1000 万输入 X 中国地区(1) X 节假日(代码定义了 13 天) X 1 个周末判断</li></ul></li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=n>mysql</span><span class=o>&gt;</span><span class=w> </span><span class=k>select</span><span class=w> </span><span class=o>*</span><span class=w> </span><span class=k>from</span><span class=w> </span><span class=n>transactions</span><span class=p>;</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>------+--------+------------------+  
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=n>uid</span><span class=w>  </span><span class=o>|</span><span class=w> </span><span class=n>region</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=n>transaction_time</span><span class=w> </span><span class=o>|</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>------+--------+------------------+  
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w>    </span><span class=mi>2</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=n>Europe</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>2024</span><span class=o>-</span><span class=mi>01</span><span class=o>-</span><span class=mi>02</span><span class=w>       </span><span class=o>|</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>    </span><span class=mi>1</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=n>China</span><span class=w>  </span><span class=o>|</span><span class=w> </span><span class=mi>2024</span><span class=o>-</span><span class=mi>01</span><span class=o>-</span><span class=mi>01</span><span class=w>       </span><span class=o>|</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>    </span><span class=mi>3</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=n>China</span><span class=w>  </span><span class=o>|</span><span class=w> </span><span class=mi>2024</span><span class=o>-</span><span class=mi>01</span><span class=o>-</span><span class=mi>03</span><span class=w>       </span><span class=o>|</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>    </span><span class=mi>4</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=n>Europe</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=mi>2024</span><span class=o>-</span><span class=mi>01</span><span class=o>-</span><span class=mi>04</span><span class=w>       </span><span class=o>|</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>|</span><span class=w>    </span><span class=mi>5</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=err>中国</span><span class=w>   </span><span class=o>|</span><span class=w> </span><span class=mi>2024</span><span class=o>-</span><span class=mi>10</span><span class=o>-</span><span class=mi>09</span><span class=w>       </span><span class=o>|</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>------+--------+------------------+  
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=mi>5</span><span class=w> </span><span class=k>rows</span><span class=w> </span><span class=k>in</span><span class=w> </span><span class=k>set</span><span class=w> </span><span class=p>(</span><span class=mi>0</span><span class=p>.</span><span class=mi>03</span><span class=w> </span><span class=n>sec</span><span class=p>)</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>mysql</span><span class=o>&gt;</span><span class=w> </span><span class=k>insert</span><span class=w> </span><span class=k>into</span><span class=w> </span><span class=n>transactions</span><span class=w> </span><span class=k>select</span><span class=w> </span><span class=o>*</span><span class=w> </span><span class=k>from</span><span class=w> </span><span class=n>transactions</span><span class=p>;</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>Query</span><span class=w> </span><span class=n>OK</span><span class=p>,</span><span class=w> </span><span class=mi>25165824</span><span class=w> </span><span class=k>rows</span><span class=w> </span><span class=n>affected</span><span class=w> </span><span class=p>(</span><span class=mi>7</span><span class=p>.</span><span class=mi>02</span><span class=w> </span><span class=n>sec</span><span class=p>)</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=err>{</span><span class=s1>&#39;label&#39;</span><span class=p>:</span><span class=s1>&#39;insert_386818af-b6d5-11ef-b242-5a0507c05987&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;status&#39;</span><span class=p>:</span><span class=s1>&#39;VISIBLE&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;txnId&#39;</span><span class=p>:</span><span class=s1>&#39;4049&#39;</span><span class=err>}</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>mysql</span><span class=o>&gt;</span><span class=w> </span><span class=k>select</span><span class=w> </span><span class=k>count</span><span class=p>(</span><span class=o>*</span><span class=p>)</span><span class=w> </span><span class=k>from</span><span class=w> </span><span class=n>transactions</span><span class=p>;</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>----------+  
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=k>count</span><span class=p>(</span><span class=o>*</span><span class=p>)</span><span class=w> </span><span class=o>|</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>----------+  
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=mi>50331648</span><span class=w> </span><span class=o>|</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>----------+  
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=mi>1</span><span class=w> </span><span class=k>row</span><span class=w> </span><span class=k>in</span><span class=w> </span><span class=k>set</span><span class=w> </span><span class=p>(</span><span class=mi>0</span><span class=p>.</span><span class=mi>11</span><span class=w> </span><span class=n>sec</span><span class=p>)</span><span class=w>  
+</span></span></span></code></pre></td></tr></table></div></div><ul><li>单台 16c、16g 的虚拟机部署 fe x 1 、be x 1</li><li>数据副本为 1</li><li>数据量最大为 5 千万</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=c1>-- 单节点 be 集群测试的时候，调整建表时副本大小
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=n>mysql</span><span class=o>&gt;</span><span class=w> </span><span class=k>ADMIN</span><span class=w> </span><span class=k>SET</span><span class=w> </span><span class=n>FRONTEND</span><span class=w> </span><span class=n>CONFIG</span><span class=w> </span><span class=p>(</span><span class=s2>&#34;default_replication_num&#34;</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s2>&#34;1&#34;</span><span class=p>);</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>Query</span><span class=w> </span><span class=n>OK</span><span class=p>,</span><span class=w> </span><span class=mi>0</span><span class=w> </span><span class=k>rows</span><span class=w> </span><span class=n>affected</span><span class=w> </span><span class=p>(</span><span class=mi>0</span><span class=p>.</span><span class=mi>02</span><span class=w> </span><span class=n>sec</span><span class=p>)</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=c1>-- 开启 profile 分析查询
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=n>mysql</span><span class=o>&gt;</span><span class=w> </span><span class=k>set</span><span class=w> </span><span class=n>enable_profile</span><span class=o>=</span><span class=mi>1</span><span class=p>;</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>Query</span><span class=w> </span><span class=n>OK</span><span class=p>,</span><span class=w> </span><span class=mi>0</span><span class=w> </span><span class=k>rows</span><span class=w> </span><span class=n>affected</span><span class=w> </span><span class=p>(</span><span class=mi>0</span><span class=p>.</span><span class=mi>02</span><span class=w> </span><span class=n>sec</span><span class=p>)</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>mysql</span><span class=o>&gt;</span><span class=w> </span><span class=k>create</span><span class=w> </span><span class=k>table</span><span class=w> </span><span class=n>testudf</span><span class=w> </span><span class=k>as</span><span class=w> </span><span class=k>select</span><span class=w> </span><span class=n>IsWorkday</span><span class=p>(</span><span class=n>transaction_time</span><span class=p>,</span><span class=n>region</span><span class=p>)</span><span class=w> </span><span class=k>from</span><span class=w> </span><span class=n>transactions</span><span class=w> </span><span class=k>limit</span><span class=w> </span><span class=mi>1000000</span><span class=p>;</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>Query</span><span class=w> </span><span class=n>OK</span><span class=p>,</span><span class=w> </span><span class=mi>1000000</span><span class=w> </span><span class=k>rows</span><span class=w> </span><span class=n>affected</span><span class=w> </span><span class=p>(</span><span class=mi>2</span><span class=p>.</span><span class=mi>59</span><span class=w> </span><span class=n>sec</span><span class=p>)</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=err>{</span><span class=s1>&#39;label&#39;</span><span class=p>:</span><span class=s1>&#39;insert_64ac6249-b6d6-11ef-b242-5a0507c05987&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;status&#39;</span><span class=p>:</span><span class=s1>&#39;VISIBLE&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;txnId&#39;</span><span class=p>:</span><span class=s1>&#39;4055&#39;</span><span class=err>}</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>mysql</span><span class=o>&gt;</span><span class=w> </span><span class=k>create</span><span class=w> </span><span class=k>table</span><span class=w> </span><span class=n>testudf5</span><span class=w> </span><span class=k>as</span><span class=w> </span><span class=k>select</span><span class=w> </span><span class=n>IsWorkday</span><span class=p>(</span><span class=n>transaction_time</span><span class=p>,</span><span class=n>region</span><span class=p>)</span><span class=w> </span><span class=k>from</span><span class=w> </span><span class=n>transactions</span><span class=w> </span><span class=k>limit</span><span class=w> </span><span class=mi>5000000</span><span class=p>;</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>Query</span><span class=w> </span><span class=n>OK</span><span class=p>,</span><span class=w> </span><span class=mi>5000000</span><span class=w> </span><span class=k>rows</span><span class=w> </span><span class=n>affected</span><span class=w> </span><span class=p>(</span><span class=mi>18</span><span class=p>.</span><span class=mi>39</span><span class=w> </span><span class=n>sec</span><span class=p>)</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=err>{</span><span class=s1>&#39;label&#39;</span><span class=p>:</span><span class=s1>&#39;insert_8b3e09a2-b6d6-11ef-b242-5a0507c05987&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;status&#39;</span><span class=p>:</span><span class=s1>&#39;VISIBLE&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;txnId&#39;</span><span class=p>:</span><span class=s1>&#39;4069&#39;</span><span class=err>}</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>mysql</span><span class=o>&gt;</span><span class=w> </span><span class=k>create</span><span class=w> </span><span class=k>table</span><span class=w> </span><span class=n>testudf10b</span><span class=w> </span><span class=k>as</span><span class=w> </span><span class=k>select</span><span class=w> </span><span class=n>IsWorkday</span><span class=p>(</span><span class=n>transaction_time</span><span class=p>,</span><span class=n>region</span><span class=p>)</span><span class=w> </span><span class=k>from</span><span class=w> </span><span class=n>transactions</span><span class=w> </span><span class=k>limit</span><span class=w> </span><span class=mi>10000000</span><span class=p>;</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>Query</span><span class=w> </span><span class=n>OK</span><span class=p>,</span><span class=w> </span><span class=mi>10000000</span><span class=w> </span><span class=k>rows</span><span class=w> </span><span class=n>affected</span><span class=w> </span><span class=p>(</span><span class=mi>21</span><span class=p>.</span><span class=mi>00</span><span class=w> </span><span class=n>sec</span><span class=p>)</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=err>{</span><span class=s1>&#39;label&#39;</span><span class=p>:</span><span class=s1>&#39;insert_a8e37455-b6d6-11ef-b242-5a0507c05987&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;status&#39;</span><span class=p>:</span><span class=s1>&#39;VISIBLE&#39;</span><span class=p>,</span><span class=w> </span><span class=s1>&#39;txnId&#39;</span><span class=p>:</span><span class=s1>&#39;4071&#39;</span><span class=err>}</span><span class=w>  
+</span></span></span></code></pre></td></tr></table></div></div><ul><li>执行时 CPU 压力</li></ul><p><img src=87188d188a0b4f815238ef2adcf0cd88_MD5.png alt=500></p><ul><li>profile 分析 100万、500 万、1000 万 三种规模查询耗时<ul><li>时间消耗主要在 project 算子计算（udf 函数加工）</li></ul></li></ul><p><img src=b2d655134ba69ca21a5acf8300cd7425_MD5.png alt=1000><br><img src=560682392eed73a516cdf5f6597f9287_MD5.png alt=1000></p><h3 id=sql-语句执行效果>SQL 语句执行效果</h3><ul><li>5000 万行数据输入</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-SQL data-lang=SQL><span class=line><span class=cl><span class=n>mysql</span><span class=o>&gt;</span><span class=w> </span><span class=k>WITH</span><span class=w> </span><span class=n>WorkdayCount</span><span class=w> </span><span class=k>AS</span><span class=w> </span><span class=p>(</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>-&gt;</span><span class=w>     </span><span class=k>SELECT</span><span class=w> 
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>-&gt;</span><span class=w>         </span><span class=k>c</span><span class=p>.</span><span class=nb>date</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>-&gt;</span><span class=w>         </span><span class=n>a</span><span class=p>.</span><span class=n>uid</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>-&gt;</span><span class=w>         </span><span class=n>a</span><span class=p>.</span><span class=n>region</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>-&gt;</span><span class=w>         </span><span class=n>a</span><span class=p>.</span><span class=n>transaction_time</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>-&gt;</span><span class=w>         </span><span class=k>c</span><span class=p>.</span><span class=n>is_china_holiday</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>-&gt;</span><span class=w>         </span><span class=k>c</span><span class=p>.</span><span class=n>is_europe_holiday</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>-&gt;</span><span class=w>         </span><span class=k>SUM</span><span class=p>(</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>-&gt;</span><span class=w>             </span><span class=k>CASE</span><span class=w> 
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>-&gt;</span><span class=w>                 </span><span class=k>WHEN</span><span class=w> </span><span class=k>c</span><span class=p>.</span><span class=n>is_workday</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>TRUE</span><span class=w> </span><span class=k>AND</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>-&gt;</span><span class=w>                      </span><span class=p>((</span><span class=n>a</span><span class=p>.</span><span class=n>region</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s1>&#39;China&#39;</span><span class=w> </span><span class=k>AND</span><span class=w> </span><span class=k>c</span><span class=p>.</span><span class=n>is_china_holiday</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>FALSE</span><span class=p>)</span><span class=w> </span><span class=k>OR</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>-&gt;</span><span class=w>                       </span><span class=p>(</span><span class=n>a</span><span class=p>.</span><span class=n>region</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s1>&#39;Europe&#39;</span><span class=w> </span><span class=k>AND</span><span class=w> </span><span class=k>c</span><span class=p>.</span><span class=n>is_europe_holiday</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>FALSE</span><span class=p>))</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>-&gt;</span><span class=w>                 </span><span class=k>THEN</span><span class=w> </span><span class=mi>1</span><span class=w> 
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>-&gt;</span><span class=w>                 </span><span class=k>ELSE</span><span class=w> </span><span class=mi>0</span><span class=w> 
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>-&gt;</span><span class=w>             </span><span class=k>END</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>-&gt;</span><span class=w>         </span><span class=p>)</span><span class=w> </span><span class=n>OVER</span><span class=w> </span><span class=p>(</span><span class=n>PARTITION</span><span class=w> </span><span class=k>BY</span><span class=w> </span><span class=n>a</span><span class=p>.</span><span class=n>uid</span><span class=w> </span><span class=k>ORDER</span><span class=w> </span><span class=k>BY</span><span class=w> </span><span class=k>c</span><span class=p>.</span><span class=nb>date</span><span class=p>)</span><span class=w> </span><span class=k>AS</span><span class=w> </span><span class=n>workday_count</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>-&gt;</span><span class=w>     </span><span class=k>FROM</span><span class=w> 
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>-&gt;</span><span class=w>         </span><span class=n>transactions</span><span class=w> </span><span class=n>a</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>-&gt;</span><span class=w>     </span><span class=k>JOIN</span><span class=w> 
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>-&gt;</span><span class=w>         </span><span class=n>Calendar</span><span class=w> </span><span class=k>c</span><span class=w> </span><span class=k>ON</span><span class=w> </span><span class=k>c</span><span class=p>.</span><span class=nb>date</span><span class=w> </span><span class=o>&lt;</span><span class=w> </span><span class=n>a</span><span class=p>.</span><span class=n>transaction_time</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>-&gt;</span><span class=w> </span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>-&gt;</span><span class=w> </span><span class=k>SELECT</span><span class=w> 
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>-&gt;</span><span class=w>    </span><span class=k>count</span><span class=p>(</span><span class=mi>1</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>-&gt;</span><span class=w> </span><span class=k>FROM</span><span class=w> 
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>-&gt;</span><span class=w>     </span><span class=n>WorkdayCount</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>-&gt;</span><span class=w> </span><span class=k>WHERE</span><span class=w> 
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>-&gt;</span><span class=w>     </span><span class=n>workday_count</span><span class=w> </span><span class=o>&gt;=</span><span class=w> </span><span class=mi>1</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>-&gt;</span><span class=w>     </span><span class=k>AND</span><span class=w> </span><span class=p>(</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>-&gt;</span><span class=w>         </span><span class=p>(</span><span class=n>region</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s1>&#39;China&#39;</span><span class=w> </span><span class=k>AND</span><span class=w> </span><span class=n>is_china_holiday</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>FALSE</span><span class=p>)</span><span class=w> </span><span class=k>OR</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>-&gt;</span><span class=w>         </span><span class=p>(</span><span class=n>region</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s1>&#39;Europe&#39;</span><span class=w> </span><span class=k>AND</span><span class=w> </span><span class=n>is_europe_holiday</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>FALSE</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=o>-&gt;</span><span class=w>     </span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>----------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=k>count</span><span class=p>(</span><span class=mi>1</span><span class=p>)</span><span class=w> </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>----------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=mi>25165824</span><span class=w> </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>----------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=mi>1</span><span class=w> </span><span class=k>row</span><span class=w> </span><span class=k>in</span><span class=w> </span><span class=k>set</span><span class=w> </span><span class=p>(</span><span class=mi>21</span><span class=p>.</span><span class=mi>24</span><span class=w> </span><span class=n>sec</span><span class=p>)</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p><img src=8aac61997df72358b5da63098d583bc5_MD5.png alt=500></p><h2 id=优化-udf-内存>优化 UDF 内存</h2><blockquote><p>降低 udf 占用的 jvm 内存，在多并发调用 udf 函数，让 udf static 部分只加载一次测试<br>参考内容：https://forum.mirrorship.cn/t/topic/6863</p></blockquote><h3 id=函数代码>函数代码</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=o>[</span>root@node220 loadtime<span class=o>]</span><span class=c1># tree .</span>
+</span></span><span class=line><span class=cl>.
+</span></span><span class=line><span class=cl>├── Caller.class
+</span></span><span class=line><span class=cl>├── Caller.jar
+</span></span><span class=line><span class=cl>├── Caller.java
+</span></span><span class=line><span class=cl>├── LoadTest.class
+</span></span><span class=line><span class=cl>└── LoadTest.java
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=m>0</span> directories, <span class=m>5</span> files
+</span></span></code></pre></td></tr></table></div></div><ul><li>LoadTest 打包后扔到 <code>$STARROCKS_HOME/be/lib/hadoop/common/lib/</code><ul><li>等同注册成 BE 下的 java 函数（性能不等同 be 自带的向量化函数）</li><li>为了方便外部 udf 函数调用，以及 jvm 内存共享</li><li>内存默认不释放，重启 BE 后释放</li><li>内存数据可以被 schedule 策略刷新</li></ul></li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kn>import</span> <span class=nn>java.util.concurrent.Executors</span><span class=o>;</span>
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>java.util.concurrent.ScheduledExecutorService</span><span class=o>;</span>
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>java.util.concurrent.TimeUnit</span><span class=o>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kd>public</span> <span class=kd>class</span> <span class=nc>LoadTest</span> <span class=o>{</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// 定义一个静态变量来存储 Unix 时间戳
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=kd>private</span> <span class=kd>static</span> <span class=kt>long</span> <span class=n>lastExecutionTime</span> <span class=o>=</span> <span class=mi>0</span><span class=o>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kd>static</span> <span class=o>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>System</span><span class=o>.</span><span class=na>out</span><span class=o>.</span><span class=na>println</span><span class=o>(</span><span class=s>&#34;load UDF&#34;</span><span class=o>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=c1>// 创建一个调度执行器服务
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=n>ScheduledExecutorService</span> <span class=n>scheduler</span> <span class=o>=</span> <span class=n>Executors</span><span class=o>.</span><span class=na>newScheduledThreadPool</span><span class=o>(</span><span class=mi>1</span><span class=o>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=c1>// 设置一个每隔3分钟执行一次的任务
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=n>scheduler</span><span class=o>.</span><span class=na>scheduleAtFixedRate</span><span class=o>(()</span> <span class=o>-&gt;</span> <span class=o>{</span>
+</span></span><span class=line><span class=cl>            <span class=k>try</span> <span class=o>{</span>
+</span></span><span class=line><span class=cl>                <span class=n>performScheduledTask</span><span class=o>();</span>
+</span></span><span class=line><span class=cl>            <span class=o>}</span> <span class=k>catch</span> <span class=o>(</span><span class=n>Exception</span> <span class=n>e</span><span class=o>)</span> <span class=o>{</span>
+</span></span><span class=line><span class=cl>                <span class=n>e</span><span class=o>.</span><span class=na>printStackTrace</span><span class=o>();</span>
+</span></span><span class=line><span class=cl>            <span class=o>}</span>
+</span></span><span class=line><span class=cl>        <span class=o>},</span> <span class=mi>0</span><span class=o>,</span> <span class=mi>3</span><span class=o>,</span> <span class=n>TimeUnit</span><span class=o>.</span><span class=na>MINUTES</span><span class=o>);</span>  <span class=c1>// 修改为3分钟
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=o>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kd>public</span> <span class=n>String</span> <span class=nf>evaluate</span><span class=o>(</span><span class=n>String</span> <span class=n>a</span><span class=o>,</span> <span class=n>Integer</span> <span class=n>b</span><span class=o>)</span> <span class=o>{</span>
+</span></span><span class=line><span class=cl>        <span class=c1>// 在此处引用 lastExecutionTime 变量
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=k>return</span> <span class=n>a</span> <span class=o>+</span> <span class=n>b</span> <span class=o>+</span> <span class=n>lastExecutionTime</span><span class=o>;</span>
+</span></span><span class=line><span class=cl>    <span class=o>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// 定时任务要执行的操作
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=kd>private</span> <span class=kd>static</span> <span class=kt>void</span> <span class=nf>performScheduledTask</span><span class=o>()</span> <span class=o>{</span>
+</span></span><span class=line><span class=cl>        <span class=c1>// 更新 lastExecutionTime 变量为当前的 Unix 时间戳（秒级）
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=n>lastExecutionTime</span> <span class=o>=</span> <span class=n>System</span><span class=o>.</span><span class=na>currentTimeMillis</span><span class=o>()</span> <span class=o>/</span> <span class=mi>1000</span><span class=o>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=c1>// 模拟任务执行的结果
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=n>String</span> <span class=n>taskResult</span> <span class=o>=</span> <span class=s>&#34;Scheduled task executed at &#34;</span> <span class=o>+</span> <span class=n>lastExecutionTime</span><span class=o>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=c1>// 打印任务结果
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=n>System</span><span class=o>.</span><span class=na>out</span><span class=o>.</span><span class=na>println</span><span class=o>(</span><span class=n>taskResult</span><span class=o>);</span>
+</span></span><span class=line><span class=cl>    <span class=o>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kd>public</span> <span class=kd>static</span> <span class=kt>void</span> <span class=nf>main</span><span class=o>(</span><span class=n>String</span><span class=o>[]</span> <span class=n>args</span><span class=o>)</span> <span class=o>{</span>
+</span></span><span class=line><span class=cl>        <span class=c1>// 为了保持程序运行，以便观察定时任务的效果
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=k>try</span> <span class=o>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>Thread</span><span class=o>.</span><span class=na>sleep</span><span class=o>(</span><span class=n>Long</span><span class=o>.</span><span class=na>MAX_VALUE</span><span class=o>);</span>
+</span></span><span class=line><span class=cl>        <span class=o>}</span> <span class=k>catch</span> <span class=o>(</span><span class=n>InterruptedException</span> <span class=n>e</span><span class=o>)</span> <span class=o>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>e</span><span class=o>.</span><span class=na>printStackTrace</span><span class=o>();</span>
+</span></span><span class=line><span class=cl>        <span class=o>}</span>
+</span></span><span class=line><span class=cl>    <span class=o>}</span>
+</span></span><span class=line><span class=cl><span class=o>}</span>
+</span></span></code></pre></td></tr></table></div></div><ul><li>Caller 打包后，注册为 UDF 函数</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kd>public</span> <span class=kd>class</span> <span class=nc>Caller</span> <span class=o>{</span>
+</span></span><span class=line><span class=cl>    <span class=kd>static</span> <span class=o>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>System</span><span class=o>.</span><span class=na>out</span><span class=o>.</span><span class=na>println</span><span class=o>(</span><span class=s>&#34;load Caller&#34;</span><span class=o>);</span>
+</span></span><span class=line><span class=cl>    <span class=o>}</span>
+</span></span><span class=line><span class=cl>    <span class=kd>public</span> <span class=n>String</span> <span class=nf>evaluate</span><span class=o>(</span><span class=n>String</span> <span class=n>a</span><span class=o>,</span> <span class=n>Integer</span> <span class=n>b</span><span class=o>)</span> <span class=o>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=k>new</span> <span class=n>LoadTest</span><span class=o>().</span><span class=na>evaluate</span><span class=o>(</span><span class=n>a</span><span class=o>,</span> <span class=n>b</span><span class=o>);</span>
+</span></span><span class=line><span class=cl>    <span class=o>}</span>
+</span></span><span class=line><span class=cl><span class=o>}</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=注册函数并测试>注册函数并测试</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=k>CREATE</span><span class=w> </span><span class=k>FUNCTION</span><span class=w> </span><span class=n>Caller</span><span class=p>(</span><span class=n>string</span><span class=p>,</span><span class=nb>int</span><span class=p>)</span><span class=w> </span><span class=k>RETURNS</span><span class=w> </span><span class=n>string</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>PROPERTIES</span><span class=w> </span><span class=p>(</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=s2>&#34;file&#34;</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s2>&#34;file:///opt/20241209-jar/src/loadtime/Caller.jar&#34;</span><span class=p>,</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=s2>&#34;symbol&#34;</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s2>&#34;Caller&#34;</span><span class=p>,</span><span class=w> 
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=s2>&#34;type&#34;</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s2>&#34;StarrocksJar&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>);</span><span class=w> 
+</span></span></span></code></pre></td></tr></table></div></div><ul><li>测试验证<ul><li>loadtest 函数在输入 string、int 两个数字后，<ul><li>字符串拼接后输出 <code>string + int + schedule 刷新时间</code>（年月日时分秒转 unixtime）</li><li>输入相同数据，在刷新后，结果得到预期的变化</li></ul></li><li>注意事项：<ul><li>如果 SQL 执行外部 caller udf 早于 loadtest（实际逻辑函数）加载，结果返回（但是不符合预期）</li><li>loadtest 函数注册变量有问题，被 load 后加载内容和第一次刷新的加载内容相同，第二次刷新符合预期</li></ul></li></ul></li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=c1>-- caller udf 早于 loadtest 逻辑函数调用和运行
+</span></span></span><span class=line><span class=cl><span class=c1>-- 输入 1，2 ，loadtest 未刷新所以返回 lastExecutionTime = 0;
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=n>mysql</span><span class=o>&gt;</span><span class=w> </span><span class=k>select</span><span class=w> </span><span class=n>caller</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span><span class=mi>2</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>--------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=n>caller</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span><span class=w> </span><span class=mi>2</span><span class=p>)</span><span class=w> </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>--------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=mi>120</span><span class=w>          </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>--------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=mi>1</span><span class=w> </span><span class=k>row</span><span class=w> </span><span class=k>in</span><span class=w> </span><span class=k>set</span><span class=w> </span><span class=p>(</span><span class=mi>1</span><span class=p>.</span><span class=mi>17</span><span class=w> </span><span class=n>sec</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=c1>-- 初始化加载的内容
+</span></span></span><span class=line><span class=cl><span class=c1>-- 对应 be out 日志为 Scheduled task executed at 1733886426
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=n>mysql</span><span class=o>&gt;</span><span class=w> </span><span class=k>select</span><span class=w> </span><span class=n>caller</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span><span class=mi>2</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>--------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=n>caller</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span><span class=w> </span><span class=mi>2</span><span class=p>)</span><span class=w> </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>--------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=mi>121733886246</span><span class=w> </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>--------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=mi>1</span><span class=w> </span><span class=k>row</span><span class=w> </span><span class=k>in</span><span class=w> </span><span class=k>set</span><span class=w> </span><span class=p>(</span><span class=mi>0</span><span class=p>.</span><span class=mi>02</span><span class=w> </span><span class=n>sec</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=c1>-- 第二次刷新加载的内容
+</span></span></span><span class=line><span class=cl><span class=c1>-- 对应 be out 日志为 Scheduled task executed at 1733886606
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=n>mysql</span><span class=o>&gt;</span><span class=w> </span><span class=k>select</span><span class=w> </span><span class=n>caller</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span><span class=mi>2</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>--------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=n>caller</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span><span class=w> </span><span class=mi>2</span><span class=p>)</span><span class=w> </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>--------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=o>|</span><span class=w> </span><span class=mi>121733886606</span><span class=w> </span><span class=o>|</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=o>+</span><span class=c1>--------------+
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=mi>1</span><span class=w> </span><span class=k>row</span><span class=w> </span><span class=k>in</span><span class=w> </span><span class=k>set</span><span class=w> </span><span class=p>(</span><span class=mi>0</span><span class=p>.</span><span class=mi>05</span><span class=w> </span><span class=n>sec</span><span class=p>)</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>load Caller
+</span></span><span class=line><span class=cl>load UDF
+</span></span><span class=line><span class=cl>Scheduled task executed at 1733886246
+</span></span><span class=line><span class=cl>load Caller
+</span></span><span class=line><span class=cl>Scheduled task executed at 1733886426
+</span></span><span class=line><span class=cl>load Caller
+</span></span><span class=line><span class=cl>Scheduled task executed at 1733886606
+</span></span><span class=line><span class=cl>load Caller
+</span></span></code></pre></td></tr></table></div></div><h3 id=udf-isolation-属性>UDF isolation 属性</h3><p>或者基于 StarRocks 3.1+ 创建 UDF 的时候加个 isolation 属性，该属性支持多查询贡献内存</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=k>CREATE</span><span class=w> </span><span class=k>FUNCTION</span><span class=w> </span><span class=n>test_shared</span><span class=p>(</span><span class=n>string</span><span class=p>)</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>RETURNS</span><span class=w> </span><span class=n>string</span><span class=w> </span><span class=n>properties</span><span class=w>  </span><span class=p>(</span><span class=w> 
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=s2>&#34;symbol&#34;</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s2>&#34;SharedUDF&#34;</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=s2>&#34;type&#34;</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s2>&#34;StarrocksJar&#34;</span><span class=p>,</span><span class=w> 
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=s2>&#34;file&#34;</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s2>&#34;http://XXXXX/create_file.jar&#34;</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=s2>&#34;isolation&#34;</span><span class=o>=</span><span class=s2>&#34;shared&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>);</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><h2 id=附录>附录</h2><h3 id=udf-example-2-未打包成功>udf example 2 （未打包成功）</h3><blockquote><p>该函数不符合 starrocks udf 输入、输出的格式，未打包成功</p></blockquote><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>  1
+</span><span class=lnt>  2
+</span><span class=lnt>  3
+</span><span class=lnt>  4
+</span><span class=lnt>  5
+</span><span class=lnt>  6
+</span><span class=lnt>  7
+</span><span class=lnt>  8
+</span><span class=lnt>  9
+</span><span class=lnt> 10
+</span><span class=lnt> 11
+</span><span class=lnt> 12
+</span><span class=lnt> 13
+</span><span class=lnt> 14
+</span><span class=lnt> 15
+</span><span class=lnt> 16
+</span><span class=lnt> 17
+</span><span class=lnt> 18
+</span><span class=lnt> 19
+</span><span class=lnt> 20
+</span><span class=lnt> 21
+</span><span class=lnt> 22
+</span><span class=lnt> 23
+</span><span class=lnt> 24
+</span><span class=lnt> 25
+</span><span class=lnt> 26
+</span><span class=lnt> 27
+</span><span class=lnt> 28
+</span><span class=lnt> 29
+</span><span class=lnt> 30
+</span><span class=lnt> 31
+</span><span class=lnt> 32
+</span><span class=lnt> 33
+</span><span class=lnt> 34
+</span><span class=lnt> 35
+</span><span class=lnt> 36
+</span><span class=lnt> 37
+</span><span class=lnt> 38
+</span><span class=lnt> 39
+</span><span class=lnt> 40
+</span><span class=lnt> 41
+</span><span class=lnt> 42
+</span><span class=lnt> 43
+</span><span class=lnt> 44
+</span><span class=lnt> 45
+</span><span class=lnt> 46
+</span><span class=lnt> 47
+</span><span class=lnt> 48
+</span><span class=lnt> 49
+</span><span class=lnt> 50
+</span><span class=lnt> 51
+</span><span class=lnt> 52
+</span><span class=lnt> 53
+</span><span class=lnt> 54
+</span><span class=lnt> 55
+</span><span class=lnt> 56
+</span><span class=lnt> 57
+</span><span class=lnt> 58
+</span><span class=lnt> 59
+</span><span class=lnt> 60
+</span><span class=lnt> 61
+</span><span class=lnt> 62
+</span><span class=lnt> 63
+</span><span class=lnt> 64
+</span><span class=lnt> 65
+</span><span class=lnt> 66
+</span><span class=lnt> 67
+</span><span class=lnt> 68
+</span><span class=lnt> 69
+</span><span class=lnt> 70
+</span><span class=lnt> 71
+</span><span class=lnt> 72
+</span><span class=lnt> 73
+</span><span class=lnt> 74
+</span><span class=lnt> 75
+</span><span class=lnt> 76
+</span><span class=lnt> 77
+</span><span class=lnt> 78
+</span><span class=lnt> 79
+</span><span class=lnt> 80
+</span><span class=lnt> 81
+</span><span class=lnt> 82
+</span><span class=lnt> 83
+</span><span class=lnt> 84
+</span><span class=lnt> 85
+</span><span class=lnt> 86
+</span><span class=lnt> 87
+</span><span class=lnt> 88
+</span><span class=lnt> 89
+</span><span class=lnt> 90
+</span><span class=lnt> 91
+</span><span class=lnt> 92
+</span><span class=lnt> 93
+</span><span class=lnt> 94
+</span><span class=lnt> 95
+</span><span class=lnt> 96
+</span><span class=lnt> 97
+</span><span class=lnt> 98
+</span><span class=lnt> 99
+</span><span class=lnt>100
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kn>import</span> <span class=nn>com.starrocks.udf.Udf</span><span class=o>;</span>  
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>com.starrocks.udf.annotation.UdfDescription</span><span class=o>;</span>  
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>com.starrocks.udf.annotation.UdfParameter</span><span class=o>;</span>  
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>java.sql.Connection</span><span class=o>;</span>  
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>java.sql.DriverManager</span><span class=o>;</span>  
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>java.sql.PreparedStatement</span><span class=o>;</span>  
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>java.sql.ResultSet</span><span class=o>;</span>  
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>java.text.SimpleDateFormat</span><span class=o>;</span>  
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>java.util.Calendar</span><span class=o>;</span>  
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>java.util.Date</span><span class=o>;</span>  
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>java.util.HashMap</span><span class=o>;</span>  
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>java.util.Map</span><span class=o>;</span>  
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>java.util.TimeZone</span><span class=o>;</span>  
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>java.util.logging.Level</span><span class=o>;</span>  
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>java.util.logging.Logger</span><span class=o>;</span>  
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl><span class=nd>@UdfDescription</span><span class=o>(</span><span class=n>name</span> <span class=o>=</span> <span class=s>&#34;calculate_previous_workday&#34;</span><span class=o>,</span>  
+</span></span><span class=line><span class=cl>        <span class=n>description</span> <span class=o>=</span> <span class=s>&#34;Calculate the date 5 workdays before the given date considering holidays and weekends&#34;</span><span class=o>)</span>  
+</span></span><span class=line><span class=cl><span class=kd>public</span> <span class=kd>class</span> <span class=nc>CalculatePreviousWorkday</span> <span class=kd>implements</span> <span class=n>Udf</span> <span class=o>{</span>  
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>    <span class=kd>private</span> <span class=kd>static</span> <span class=kd>final</span> <span class=n>Logger</span> <span class=n>logger</span> <span class=o>=</span> <span class=n>Logger</span><span class=o>.</span><span class=na>getLogger</span><span class=o>(</span><span class=n>CalculatePreviousWorkday</span><span class=o>.</span><span class=na>class</span><span class=o>.</span><span class=na>getName</span><span class=o>());</span>  
+</span></span><span class=line><span class=cl>    <span class=kd>private</span> <span class=kd>static</span> <span class=kd>final</span> <span class=n>Map</span><span class=o>&lt;</span><span class=n>String</span><span class=o>,</span> <span class=n>Boolean</span><span class=o>&gt;</span> <span class=n>chinaHolidays</span> <span class=o>=</span> <span class=k>new</span> <span class=n>HashMap</span><span class=o>&lt;&gt;();</span>  
+</span></span><span class=line><span class=cl>    <span class=kd>private</span> <span class=kd>static</span> <span class=kd>final</span> <span class=n>Map</span><span class=o>&lt;</span><span class=n>String</span><span class=o>,</span> <span class=n>Boolean</span><span class=o>&gt;</span> <span class=n>europeHolidays</span> <span class=o>=</span> <span class=k>new</span> <span class=n>HashMap</span><span class=o>&lt;&gt;();</span>  
+</span></span><span class=line><span class=cl>    <span class=kd>private</span> <span class=kd>static</span> <span class=kd>final</span> <span class=n>Map</span><span class=o>&lt;</span><span class=n>String</span><span class=o>,</span> <span class=n>Boolean</span><span class=o>&gt;</span> <span class=n>workdays</span> <span class=o>=</span> <span class=k>new</span> <span class=n>HashMap</span><span class=o>&lt;&gt;();</span>  
+</span></span><span class=line><span class=cl>    <span class=kd>private</span> <span class=kd>static</span> <span class=kd>final</span> <span class=n>String</span> <span class=n>JDBC_URL</span> <span class=o>=</span> <span class=s>&#34;jdbc:mysql://your_starrocks_host:port/db_name&#34;</span><span class=o>;</span>  
+</span></span><span class=line><span class=cl>    <span class=kd>private</span> <span class=kd>static</span> <span class=kd>final</span> <span class=n>String</span> <span class=n>JDBC_USER</span> <span class=o>=</span> <span class=s>&#34;user&#34;</span><span class=o>;</span>  
+</span></span><span class=line><span class=cl>    <span class=kd>private</span> <span class=kd>static</span> <span class=kd>final</span> <span class=n>String</span> <span class=n>JDBC_PASSWORD</span> <span class=o>=</span> <span class=s>&#34;password&#34;</span><span class=o>;</span>  
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>    <span class=c1>// 静态块用于初始化数据  
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=kd>static</span> <span class=o>{</span>  
+</span></span><span class=line><span class=cl>        <span class=n>loadCalendarData</span><span class=o>();</span>  
+</span></span><span class=line><span class=cl>    <span class=o>}</span>  
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>    <span class=kd>private</span> <span class=kd>static</span> <span class=kt>void</span> <span class=nf>loadCalendarData</span><span class=o>()</span> <span class=o>{</span>  
+</span></span><span class=line><span class=cl>        <span class=n>logger</span><span class=o>.</span><span class=na>info</span><span class=o>(</span><span class=s>&#34;Loading calendar data into memory...&#34;</span><span class=o>);</span>  
+</span></span><span class=line><span class=cl>        <span class=k>try</span> <span class=o>(</span><span class=n>Connection</span> <span class=n>conn</span> <span class=o>=</span> <span class=n>DriverManager</span><span class=o>.</span><span class=na>getConnection</span><span class=o>(</span><span class=n>JDBC_URL</span><span class=o>,</span> <span class=n>JDBC_USER</span><span class=o>,</span> <span class=n>JDBC_PASSWORD</span><span class=o>))</span> <span class=o>{</span>  
+</span></span><span class=line><span class=cl>            <span class=n>String</span> <span class=n>query</span> <span class=o>=</span> <span class=s>&#34;SELECT date, is_workday, is_china_holiday, is_europe_holiday FROM Calendar&#34;</span><span class=o>;</span>  
+</span></span><span class=line><span class=cl>            <span class=k>try</span> <span class=o>(</span><span class=n>PreparedStatement</span> <span class=n>stmt</span> <span class=o>=</span> <span class=n>conn</span><span class=o>.</span><span class=na>prepareStatement</span><span class=o>(</span><span class=n>query</span><span class=o>);</span>  
+</span></span><span class=line><span class=cl>                 <span class=n>ResultSet</span> <span class=n>rs</span> <span class=o>=</span> <span class=n>stmt</span><span class=o>.</span><span class=na>executeQuery</span><span class=o>())</span> <span class=o>{</span>  
+</span></span><span class=line><span class=cl>                <span class=k>while</span> <span class=o>(</span><span class=n>rs</span><span class=o>.</span><span class=na>next</span><span class=o>())</span> <span class=o>{</span>  
+</span></span><span class=line><span class=cl>                    <span class=n>String</span> <span class=n>date</span> <span class=o>=</span> <span class=n>rs</span><span class=o>.</span><span class=na>getString</span><span class=o>(</span><span class=s>&#34;date&#34;</span><span class=o>);</span>  
+</span></span><span class=line><span class=cl>                    <span class=n>workdays</span><span class=o>.</span><span class=na>put</span><span class=o>(</span><span class=n>date</span><span class=o>,</span> <span class=n>rs</span><span class=o>.</span><span class=na>getBoolean</span><span class=o>(</span><span class=s>&#34;is_workday&#34;</span><span class=o>));</span>  
+</span></span><span class=line><span class=cl>                    <span class=n>chinaHolidays</span><span class=o>.</span><span class=na>put</span><span class=o>(</span><span class=n>date</span><span class=o>,</span> <span class=n>rs</span><span class=o>.</span><span class=na>getBoolean</span><span class=o>(</span><span class=s>&#34;is_china_holiday&#34;</span><span class=o>));</span>  
+</span></span><span class=line><span class=cl>                    <span class=n>europeHolidays</span><span class=o>.</span><span class=na>put</span><span class=o>(</span><span class=n>date</span><span class=o>,</span> <span class=n>rs</span><span class=o>.</span><span class=na>getBoolean</span><span class=o>(</span><span class=s>&#34;is_europe_holiday&#34;</span><span class=o>));</span>  
+</span></span><span class=line><span class=cl>                <span class=o>}</span>  
+</span></span><span class=line><span class=cl>                <span class=n>logger</span><span class=o>.</span><span class=na>info</span><span class=o>(</span><span class=s>&#34;Calendar data loaded successfully.&#34;</span><span class=o>);</span>  
+</span></span><span class=line><span class=cl>            <span class=o>}</span>  
+</span></span><span class=line><span class=cl>        <span class=o>}</span> <span class=k>catch</span> <span class=o>(</span><span class=n>Exception</span> <span class=n>e</span><span class=o>)</span> <span class=o>{</span>  
+</span></span><span class=line><span class=cl>            <span class=n>logger</span><span class=o>.</span><span class=na>log</span><span class=o>(</span><span class=n>Level</span><span class=o>.</span><span class=na>SEVERE</span><span class=o>,</span> <span class=s>&#34;Failed to load calendar data: &#34;</span><span class=o>,</span> <span class=n>e</span><span class=o>);</span>  
+</span></span><span class=line><span class=cl>            <span class=c1>// 处理异常，可能需要重试机制或备用数据加载方式  
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=o>}</span>  
+</span></span><span class=line><span class=cl>    <span class=o>}</span>  
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>    <span class=kd>public</span> <span class=n>String</span> <span class=nf>evaluate</span><span class=o>(</span><span class=nd>@UdfParameter</span><span class=o>(</span><span class=n>name</span> <span class=o>=</span> <span class=s>&#34;transaction_date&#34;</span><span class=o>)</span> <span class=n>String</span> <span class=n>transactionDate</span><span class=o>,</span>  
+</span></span><span class=line><span class=cl>                           <span class=nd>@UdfParameter</span><span class=o>(</span><span class=n>name</span> <span class=o>=</span> <span class=s>&#34;timezone&#34;</span><span class=o>)</span> <span class=n>String</span> <span class=n>timezone</span><span class=o>,</span>  
+</span></span><span class=line><span class=cl>                           <span class=nd>@UdfParameter</span><span class=o>(</span><span class=n>name</span> <span class=o>=</span> <span class=s>&#34;region&#34;</span><span class=o>)</span> <span class=n>String</span> <span class=n>region</span><span class=o>)</span> <span class=o>{</span>  
+</span></span><span class=line><span class=cl>        <span class=k>try</span> <span class=o>{</span>  
+</span></span><span class=line><span class=cl>            <span class=n>SimpleDateFormat</span> <span class=n>sdf</span> <span class=o>=</span> <span class=k>new</span> <span class=n>SimpleDateFormat</span><span class=o>(</span><span class=s>&#34;yyyy-MM-dd&#34;</span><span class=o>);</span>  
+</span></span><span class=line><span class=cl>            <span class=n>sdf</span><span class=o>.</span><span class=na>setTimeZone</span><span class=o>(</span><span class=n>TimeZone</span><span class=o>.</span><span class=na>getTimeZone</span><span class=o>(</span><span class=n>timezone</span><span class=o>));</span>  
+</span></span><span class=line><span class=cl>            <span class=n>Date</span> <span class=n>date</span> <span class=o>=</span> <span class=n>sdf</span><span class=o>.</span><span class=na>parse</span><span class=o>(</span><span class=n>transactionDate</span><span class=o>);</span>  
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>            <span class=n>Calendar</span> <span class=n>calendar</span> <span class=o>=</span> <span class=n>Calendar</span><span class=o>.</span><span class=na>getInstance</span><span class=o>();</span>  
+</span></span><span class=line><span class=cl>            <span class=n>calendar</span><span class=o>.</span><span class=na>setTime</span><span class=o>(</span><span class=n>date</span><span class=o>);</span>  
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>            <span class=kt>int</span> <span class=n>workdaysCount</span> <span class=o>=</span> <span class=mi>0</span><span class=o>;</span>  
+</span></span><span class=line><span class=cl>            <span class=k>while</span> <span class=o>(</span><span class=n>workdaysCount</span> <span class=o>&lt;</span> <span class=mi>5</span><span class=o>)</span> <span class=o>{</span>  
+</span></span><span class=line><span class=cl>                <span class=n>calendar</span><span class=o>.</span><span class=na>add</span><span class=o>(</span><span class=n>Calendar</span><span class=o>.</span><span class=na>DAY_OF_MONTH</span><span class=o>,</span> <span class=o>-</span><span class=mi>1</span><span class=o>);</span>  
+</span></span><span class=line><span class=cl>                <span class=n>String</span> <span class=n>currentDateStr</span> <span class=o>=</span> <span class=n>sdf</span><span class=o>.</span><span class=na>format</span><span class=o>(</span><span class=n>calendar</span><span class=o>.</span><span class=na>getTime</span><span class=o>());</span>  
+</span></span><span class=line><span class=cl>                <span class=k>if</span> <span class=o>(</span><span class=n>isWorkday</span><span class=o>(</span><span class=n>currentDateStr</span><span class=o>,</span> <span class=n>region</span><span class=o>))</span> <span class=o>{</span>  
+</span></span><span class=line><span class=cl>                    <span class=n>workdaysCount</span><span class=o>++;</span>  
+</span></span><span class=line><span class=cl>                <span class=o>}</span>  
+</span></span><span class=line><span class=cl>            <span class=o>}</span>  
+</span></span><span class=line><span class=cl>            <span class=k>return</span> <span class=n>sdf</span><span class=o>.</span><span class=na>format</span><span class=o>(</span><span class=n>calendar</span><span class=o>.</span><span class=na>getTime</span><span class=o>());</span>  
+</span></span><span class=line><span class=cl>        <span class=o>}</span> <span class=k>catch</span> <span class=o>(</span><span class=n>Exception</span> <span class=n>e</span><span class=o>)</span> <span class=o>{</span>  
+</span></span><span class=line><span class=cl>            <span class=n>logger</span><span class=o>.</span><span class=na>log</span><span class=o>(</span><span class=n>Level</span><span class=o>.</span><span class=na>SEVERE</span><span class=o>,</span> <span class=s>&#34;Error calculating previous workday: &#34;</span><span class=o>,</span> <span class=n>e</span><span class=o>);</span>  
+</span></span><span class=line><span class=cl>            <span class=k>return</span> <span class=kc>null</span><span class=o>;</span>  
+</span></span><span class=line><span class=cl>        <span class=o>}</span>  
+</span></span><span class=line><span class=cl>    <span class=o>}</span>  
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>    <span class=kd>private</span> <span class=kt>boolean</span> <span class=nf>isWorkday</span><span class=o>(</span><span class=n>String</span> <span class=n>date</span><span class=o>,</span> <span class=n>String</span> <span class=n>region</span><span class=o>)</span> <span class=o>{</span>  
+</span></span><span class=line><span class=cl>        <span class=n>Boolean</span> <span class=n>isWorkday</span> <span class=o>=</span> <span class=n>workdays</span><span class=o>.</span><span class=na>getOrDefault</span><span class=o>(</span><span class=n>date</span><span class=o>,</span> <span class=kc>false</span><span class=o>);</span>  
+</span></span><span class=line><span class=cl>        <span class=n>Boolean</span> <span class=n>isHoliday</span> <span class=o>=</span> <span class=n>region</span><span class=o>.</span><span class=na>equals</span><span class=o>(</span><span class=s>&#34;China&#34;</span><span class=o>)</span> <span class=o>?</span> <span class=n>chinaHolidays</span><span class=o>.</span><span class=na>getOrDefault</span><span class=o>(</span><span class=n>date</span><span class=o>,</span> <span class=kc>false</span><span class=o>)</span>  
+</span></span><span class=line><span class=cl>                                                   <span class=o>:</span> <span class=n>europeHolidays</span><span class=o>.</span><span class=na>getOrDefault</span><span class=o>(</span><span class=n>date</span><span class=o>,</span> <span class=kc>false</span><span class=o>);</span>  
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>isWorkday</span> <span class=o>&amp;&amp;</span> <span class=o>!</span><span class=n>isHoliday</span><span class=o>;</span>  
+</span></span><span class=line><span class=cl>    <span class=o>}</span>  
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>    <span class=c1>// Method to update calendar data if needed  
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=kd>public</span> <span class=kd>static</span> <span class=kt>void</span> <span class=nf>updateCalendarData</span><span class=o>()</span> <span class=o>{</span>  
+</span></span><span class=line><span class=cl>        <span class=kd>synchronized</span> <span class=o>(</span><span class=n>CalculatePreviousWorkday</span><span class=o>.</span><span class=na>class</span><span class=o>)</span> <span class=o>{</span>  
+</span></span><span class=line><span class=cl>            <span class=n>logger</span><span class=o>.</span><span class=na>info</span><span class=o>(</span><span class=s>&#34;Updating calendar data...&#34;</span><span class=o>);</span>  
+</span></span><span class=line><span class=cl>            <span class=n>chinaHolidays</span><span class=o>.</span><span class=na>clear</span><span class=o>();</span>  
+</span></span><span class=line><span class=cl>            <span class=n>europeHolidays</span><span class=o>.</span><span class=na>clear</span><span class=o>();</span>  
+</span></span><span class=line><span class=cl>            <span class=n>workdays</span><span class=o>.</span><span class=na>clear</span><span class=o>();</span>  
+</span></span><span class=line><span class=cl>            <span class=n>loadCalendarData</span><span class=o>();</span>  
+</span></span><span class=line><span class=cl>            <span class=n>logger</span><span class=o>.</span><span class=na>info</span><span class=o>(</span><span class=s>&#34;Calendar data updated.&#34;</span><span class=o>);</span>  
+</span></span><span class=line><span class=cl>        <span class=o>}</span>  
+</span></span><span class=line><span class=cl>    <span class=o>}</span>  
+</span></span><span class=line><span class=cl><span class=o>}</span>  
+</span></span><span class=line><span class=cl>  
+</span></span></code></pre></td></tr></table></div></div><h3 id=其他问题>其他问题</h3><ul><li>假设业务 SQL 如下，在 StarRocks 运行时报错（ subquery 嵌套时不支持 不等式 关联查询 ）</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=n>ERROR</span><span class=w> </span><span class=mi>1064</span><span class=w> </span><span class=p>(</span><span class=n>HY000</span><span class=p>):</span><span class=w> </span><span class=n>Getting</span><span class=w> </span><span class=n>analyzing</span><span class=w> </span><span class=n>error</span><span class=p>.</span><span class=w> </span><span class=n>Detail</span><span class=w> </span><span class=n>message</span><span class=p>:</span><span class=w> </span><span class=k>Not</span><span class=w> </span><span class=n>support</span><span class=w> </span><span class=n>Non</span><span class=o>-</span><span class=n>EQ</span><span class=w> </span><span class=n>correlated</span><span class=w> </span><span class=n>predicate</span><span class=w> </span><span class=k>in</span><span class=w> </span><span class=n>correlated</span><span class=w> </span><span class=n>subquery</span><span class=p>.</span><span class=w>  
+</span></span></span></code></pre></td></tr></table></div></div><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=k>WITH</span><span class=w> </span><span class=n>WorkdayCount</span><span class=w> </span><span class=k>AS</span><span class=w> </span><span class=p>(</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>SELECT</span><span class=w>   
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>c</span><span class=p>.</span><span class=nb>date</span><span class=p>,</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>a</span><span class=p>.</span><span class=n>uid</span><span class=p>,</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>a</span><span class=p>.</span><span class=n>region</span><span class=p>,</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>a</span><span class=p>.</span><span class=n>transaction_time</span><span class=p>,</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>c</span><span class=p>.</span><span class=n>is_china_holiday</span><span class=p>,</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>c</span><span class=p>.</span><span class=n>is_europe_holiday</span><span class=p>,</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>SUM</span><span class=p>(</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>CASE</span><span class=w>   
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=k>WHEN</span><span class=w> </span><span class=k>c</span><span class=p>.</span><span class=n>is_workday</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>TRUE</span><span class=w> </span><span class=k>AND</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>                     </span><span class=p>((</span><span class=n>a</span><span class=p>.</span><span class=n>region</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s1>&#39;China&#39;</span><span class=w> </span><span class=k>AND</span><span class=w> </span><span class=k>c</span><span class=p>.</span><span class=n>is_china_holiday</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>FALSE</span><span class=p>)</span><span class=w> </span><span class=k>OR</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>                      </span><span class=p>(</span><span class=n>a</span><span class=p>.</span><span class=n>region</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s1>&#39;Europe&#39;</span><span class=w> </span><span class=k>AND</span><span class=w> </span><span class=k>c</span><span class=p>.</span><span class=n>is_europe_holiday</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>FALSE</span><span class=p>))</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=k>THEN</span><span class=w> </span><span class=mi>1</span><span class=w>   
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=k>ELSE</span><span class=w> </span><span class=mi>0</span><span class=w>   
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>END</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>)</span><span class=w> </span><span class=n>OVER</span><span class=w> </span><span class=p>(</span><span class=n>PARTITION</span><span class=w> </span><span class=k>BY</span><span class=w> </span><span class=n>a</span><span class=p>.</span><span class=n>uid</span><span class=w> </span><span class=k>ORDER</span><span class=w> </span><span class=k>BY</span><span class=w> </span><span class=k>c</span><span class=p>.</span><span class=nb>date</span><span class=p>)</span><span class=w> </span><span class=k>AS</span><span class=w> </span><span class=n>workday_count</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>FROM</span><span class=w>   
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>transactions</span><span class=w> </span><span class=n>a</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>JOIN</span><span class=w>   
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Calendar</span><span class=w> </span><span class=k>c</span><span class=w> </span><span class=k>ON</span><span class=w> </span><span class=k>c</span><span class=p>.</span><span class=nb>date</span><span class=w> </span><span class=o>&lt;</span><span class=w> </span><span class=n>a</span><span class=p>.</span><span class=n>transaction_time</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>)</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>SELECT</span><span class=w>   
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>uid</span><span class=p>,</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>region</span><span class=p>,</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>transaction_time</span><span class=p>,</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nb>date</span><span class=w> </span><span class=k>AS</span><span class=w> </span><span class=err>调整后日期</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>FROM</span><span class=w>   
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>WorkdayCount</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>WHERE</span><span class=w>   
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>workday_count</span><span class=w> </span><span class=o>&gt;=</span><span class=w> </span><span class=mi>1</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>AND</span><span class=w> </span><span class=p>(</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>(</span><span class=n>region</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s1>&#39;China&#39;</span><span class=w> </span><span class=k>AND</span><span class=w> </span><span class=n>is_china_holiday</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>FALSE</span><span class=p>)</span><span class=w> </span><span class=k>OR</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>(</span><span class=n>region</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s1>&#39;Europe&#39;</span><span class=w> </span><span class=k>AND</span><span class=w> </span><span class=n>is_europe_holiday</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>FALSE</span><span class=p>)</span><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>);</span><span class=w>  
+</span></span></span></code></pre></td></tr></table></div></div></div><div class=post-copyright><p class=copyright-item><span class=item-title>Author</span>
+<span class=item-content>Atman</span></p><p class=copyright-item><span class=item-title>LastMod</span>
+<span class=item-content>2024-12-09</span></p><p class=copyright-item><span class=item-title>License</span>
+<span class=item-content><a rel="license noopener" href=https://creativecommons.org/licenses/by-nc-nd/4.0/ target=_blank>CC BY-NC-ND 4.0</a> ｜ 本文不带任何官方色彩，最终解释权归本站所有</span></p></div><footer class=post-footer><div class=post-tags><a href=/tags/starrocks/>StarRocks</a>
+<a href=/tags/udf/>udf</a></div><nav class=post-nav><a class=next href=/post/20241114-starrocks-flat-json/><span class="next-text nav-default">StarRocks Flat Json 物化列验证</span>
+<span class="next-text nav-mobile">Next</span>
+<i class="iconfont icon-right"></i></a></nav></footer></article></div></div></main><footer id=footer class=footer><div class=social-links><a href=https://github.com/BigerCAP/TiDB-AirPlan/issues class="iconfont icon-github" title=github></a>
+<a href=https://biger.cc/index.xml type=application/rss+xml class="iconfont icon-rss" title=rss></a></div><div class=copyright><span class=power-by>Powered by <a class=hexo-link href=https://gohugo.io>Hugo</a></span>
+<span class=division>|</span>
+<span class=theme-info>Theme -
+<a class=theme-link href=https://github.com/olOwOlo/hugo-theme-even>Even</a></span>
+<span class=copyright-year>&copy;
+2014 -
+2024
+<span class=heart><i class="iconfont icon-heart"></i></span>
+<span class=author>DataBase - biger.cc</span></span></div></footer><div class=back-to-top id=back-to-top><i class="iconfont icon-up"></i></div></div><script src=https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin=anonymous></script>
+<script>var languageCode="en".replace(/-/g,"_").replace(/_(.*)/,function(e,t){return e.replace(t,t.toUpperCase())});timeago().render(document.querySelectorAll(".timeago"),languageCode),timeago.cancel()</script><script type=text/javascript src=/dist/even.26188efa.min.js></script></body></html>
