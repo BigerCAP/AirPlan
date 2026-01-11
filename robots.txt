@@ -1,2 +1,2 @@
 User-agent: *
-Sitemap: https://biger.cc/sitemap.xml
+Sitemap: https://atman.ihx.cc/sitemap.xml
