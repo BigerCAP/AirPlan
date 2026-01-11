@@ -1,4 +1,4 @@
-baseURL = "https://biger.cc/"
+baseURL = "https://atman.ihx.cc/"
 languageCode = "en"
 defaultContentLanguage = "en"                             # en / zh-cn / ... (This field determines which i18n file to use)
 title = "AirPlan - A biger solution"
